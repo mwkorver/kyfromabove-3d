@@ -16,7 +16,7 @@ step 2, piece     (Lambda, 25 buildings a call)   run_piece_step.py
   pieces/<gers>/ ... piece.json last              LiDAR clip, frames as pointers
                                    │
 step 3, building  (EC2 Spot, 16 at once)          run_spot_build.py
-  buildings/<gers>/ ... building.json last        meshes, check, audit
+  buildings/<version>/<gers>/: 5 objects         meshes, check, audit
                                    │
 step 4, publish   (a Spot machine, or a laptop)   publish_step.py
   kentucky/, tiles/*/3dtiles/, terrain/, viewer/ ──> CloudFront ──> the viewer
@@ -252,7 +252,7 @@ cd deploy && npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@exampl
 ```
 
 The limit is $20 a month unless `budget_usd` says otherwise; raise it before
-a statewide run (about $620 for the building step). Two steps the stacks
+a statewide run (about $430 for the building step). Two steps the stacks
 cannot do, once per account:
 
 - **Tag the bucket.** It was made by hand, so no stack tags it, and its
@@ -272,6 +272,67 @@ cannot do, once per account:
   ```
 
   Costs count from that moment, not before.
+
+## What a building leaves behind
+
+The building step stores each building as five objects, under a folder for
+the version of the code that built it (`building.pack_building`):
+
+```
+buildings/<version>/<gers>/
+  3dtiles_mesh.zip       the measured product: tileset.json, building.glb, textures/*.png
+  3dtiles_complete.zip   the completed product: the same
+  review.zip             the audit and its picture, the texture check, classification,
+                         wall planes and profiles, the mirror and coverage reports,
+                         the tinted copy, the fill test's data, the build log
+  levels.json            the building's traced levels
+  building.json          what it was built from and how long each stage took; written last
+```
+
+Why these five and not one or twenty:
+
+- **Every upload is charged** (half a cent per 1,000), and most of a
+  building's files are a few KB. About 20 uploads a building became 5;
+  statewide, S3 requests go from about $262 to $81.
+- **Step 4 reads only the mesh products**, so each is its own zip: publishing
+  the measured view downloads one small zip a building, not the review files.
+- **`building.json` stays separate and last**: a rerun reads it to skip a
+  building already built from the same piece by the same code.
+- **`levels.json` stays separate**: it is small, and a neighbour's levels are
+  the known fix for a tower drawn as its whole outline (see "What the
+  building step costs" above), which would read them one building at a time.
+- **The zips are deterministic** (`archive.zip_bytes`: sorted members, one
+  fixed timestamp), so the same files always give the same bytes. A
+  building rebuilt from scratch and the same building repacked by the
+  migration below give identical mesh zips.
+
+**Each version keeps its own folder.** `building.BUILDING_CODE_VERSION`
+names it (today `stage3-2`). A new method means a new version: its buildings
+land beside the old ones, so the two can be compared building by building,
+and step 4 publishes whichever is asked for
+(`publish_step.py --building-version`).
+
+**A rebuild does not read any of this.** It starts again from:
+
+- the building's piece, `pieces/<gers>/` (step 2: the LiDAR clip, the frames
+  chosen, the local frame);
+- the tile's `tiles/<tile>/buildings.json` and its neighbours' (the
+  neighbouring buildings, standing as prisms);
+- the LiDAR within 250 m and the aerial frames themselves, read again from
+  KyFromAbove's bucket. Crops are never stored (806 MB for the largest
+  warehouse), so a rebuild depends on that bucket staying where it is.
+
+So `pieces/` and `tiles/` are the project's real inputs and must be kept. If
+lifecycle rules are ever added to clean up scratch folders, they must not
+touch those two.
+
+**Buildings stored the old way** (about 20 files under `buildings/<gers>/`,
+as the pilot's 9,252 were) are moved by `deploy/migrate_buildings.py`: it
+counts by default, `--copy` repacks each under the version its own
+`building.json` names, and `--delete-old`, run after, removes an old
+building's files only where its copy lists every one of them. On the
+README's one-tile example (5 buildings, 109 files), the copies published
+exactly the same 29 files, byte for byte, as the originals.
 
 ## What a piece is
 
@@ -474,9 +535,12 @@ time, the same image as the Lambda:
 
 The 40-building sample, 16 at a time: 298 s with the code as it was, 170 s
 with the coordinate converter and the shared occlusion maps, 94 s with
-uncompressed crops as well. One statewide run on EC2 Spot is now about $620
-(`deploy/ec2_cost.py`), about 22 hours on 1,000 processors; the account allows
-32 Spot processors today. The three Spot runs cost about $0.16 in all.
+uncompressed crops as well. One statewide run on EC2 Spot was then about $612
+at that day's Spot price ($0.2541 an hour), about 22 hours on 1,000
+processors; the account allows 32 Spot processors today. Of that, $262 was S3
+requests: about 20 uploads a building. Storing each building as five objects
+(see "What a building leaves behind") brings the same run to about $430
+(`deploy/ec2_cost.py`: computing $345, disks $4, S3 requests $81). The three Spot runs cost about $0.16 in all.
 
 ## The pilot: four areas in a browser (September 2026)
 

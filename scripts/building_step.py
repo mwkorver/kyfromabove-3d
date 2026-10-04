@@ -5,7 +5,7 @@ AWS and checking it after.
 
 Each building: its piece from ``pieces/<gers>/``, the frame crops, the
 colourise, the mesh and the completed product, the texture check and the
-audit; the results to ``buildings/<gers>/`` of ``--store`` with
+audit; the results to ``buildings/<version>/<gers>/`` of ``--store`` (five objects) with
 ``building.json`` last (the seconds and peak memory of every stage, the size
 of every file). One line per building also goes to ``--results``.
 
@@ -82,7 +82,7 @@ def main() -> int:
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--inputs", required=True, help="where the pieces and the tile step's results are")
-    ap.add_argument("--store", required=True, help="where to write buildings/<gers>/: a folder, or s3://bucket")
+    ap.add_argument("--store", required=True, help="where to write buildings/<version>/<gers>/: a folder, or s3://bucket")
     ap.add_argument("--gers", nargs="*", default=[])
     ap.add_argument("--gers-file", type=Path, default=None, help="more buildings, whitespace-separated")
     ap.add_argument("--tiles", nargs="*", default=[])

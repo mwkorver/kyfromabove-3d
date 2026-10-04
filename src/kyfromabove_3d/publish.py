@@ -604,49 +604,59 @@ def boxes_glb(boxes: Sequence[Tuple[np.ndarray, np.ndarray, np.ndarray]], featur
     return out.to_bytes(extras, node_matrix=node_matrix), lo, hi
 
 
-def built_buildings(store, prefix: str = "buildings") -> Dict[str, set]:
-    """{gers: the mesh folders it has} from one listing of ``prefix`` --
-    instead of asking the store about each of a tile's buildings (a million
-    requests for the pilot's 316,000, most of which have no mesh)."""
+def built_buildings(store, prefix: Optional[str] = None) -> Dict[str, set]:
+    """{gers: the mesh products it has} from one listing of ``prefix``
+    (default: this version's buildings) -- instead of asking the store about
+    each of a tile's buildings (a million requests for the pilot's 316,000,
+    most of which have no mesh). A product is there when its zip is."""
+    from .building import buildings_prefix
+
+    prefix = (prefix or buildings_prefix()).rstrip("/")
     subs = {s for v in PRODUCTS.values() for s in v}
     out: Dict[str, set] = {}
     for k in store.list(f"{prefix}/"):
-        parts = k.split("/")
-        if len(parts) == 4 and parts[2] in subs and parts[3] == "tileset.json":
-            out.setdefault(parts[1], set()).add(parts[2])
+        parts = k[len(prefix) + 1:].split("/")
+        if len(parts) == 2 and parts[1].endswith(".zip") and parts[1][:-4] in subs:
+            out.setdefault(parts[0], set()).add(parts[1][:-4])
     return out
 
 
-def load_building(store, gers: str, product: str, prefix: str = "buildings",
+def load_building(store, gers: str, product: str, prefix: Optional[str] = None,
                   available: Optional[Dict[str, set]] = None) -> Optional[dict]:
     """A built building's glb, its tileset (placement) and its lossless
     pages, for ``product`` (the completed one falls back to the measured
-    one where it was not made); None if it has no mesh. ``available``
-    (:func:`built_buildings`) spares asking the store."""
+    one where it was not made), from that product's zip; None if it has no
+    mesh. ``available`` (:func:`built_buildings`) spares asking the store."""
     from PIL import Image
 
+    from .archive import read_zip
+    from .building import buildings_prefix
+
+    prefix = prefix or buildings_prefix()
     for sub in PRODUCTS[product]:
-        key = f"{prefix}/{gers}/{sub}/tileset.json"
+        key = f"{prefix}/{gers}/{sub}.zip"
         if available is not None:
             if sub not in available.get(gers, ()):
                 continue
         elif not store.exists(key):
             continue
-        ts = store.read_json(key)
-        glb = store.get_bytes(f"{prefix}/{gers}/{sub}/{ts['root']['content']['uri']}")
+        z = read_zip(store, key)
+        names = set(z.namelist())
+        ts = json.loads(z.read("tileset.json"))
+        glb = z.read(ts["root"]["content"]["uri"])
         js, _ = read_glb(glb)
         pages = {}
         for mat in js.get("materials", []):
             if "baseColorTexture" in mat.get("pbrMetallicRoughness", {}):
-                k = f"{prefix}/{gers}/{sub}/textures/{mat['name']}.png"
-                if store.exists(k):
-                    pages[mat["name"]] = np.asarray(Image.open(io.BytesIO(store.get_bytes(k))).convert("RGB"))
+                k = f"textures/{mat['name']}.png"
+                if k in names:
+                    pages[mat["name"]] = np.asarray(Image.open(io.BytesIO(z.read(k))).convert("RGB"))
         return {"tileset": ts, "glb": glb, "pages": pages, "source": sub}
     return None
 
 
 def publish_tile(tile: str, store, grid, product: str = "measured", tiles_prefix: str = "tiles",
-                 buildings_prefix: str = "buildings", out_store=None, max_buildings: int = MAX_BUILDINGS,
+                 buildings_prefix: Optional[str] = None, out_store=None, max_buildings: int = MAX_BUILDINGS,
                  max_bytes: int = MAX_BYTES, texture_format: str = "ktx2", log: Callable = print,
                  available: Optional[Dict[str, set]] = None) -> dict:
     """Step 4 for one tile and one product. Reads the tile step's

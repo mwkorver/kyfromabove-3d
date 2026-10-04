@@ -103,7 +103,7 @@ class PieceStepStack(Stack):
 class BuildingStepStack(Stack):
     """Step 3 alone: one Lambda, invoked directly with a few nearby
     buildings, reading their pieces and writing their meshes, check and
-    audit to ``buildings/<gers>/``. No queue, no event rule."""
+    audit to ``buildings/<version>/<gers>/``. No queue, no event rule."""
 
     FUNCTION_NAME = "kyfromabove-3d-building-step"
 

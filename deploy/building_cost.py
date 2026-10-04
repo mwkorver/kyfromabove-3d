@@ -65,7 +65,9 @@ def load_sample(path: Path):
         rows.append({"gers": r["gers"], "area_m2": r.get("area_m2"), "height_m": r.get("height_m"),
                      "seconds": {k: float(sec.get(k, 0.0)) for k in STAGES},
                      "peak_mb": max((b.get("peak_mb") or {}).values() or [0.0]),
-                     "bytes": b.get("bytes", 0), "files": len(b.get("files", {})) + 1})
+                     "bytes": b.get("bytes", 0),
+                     # uploads: the objects stored (zips and all) where recorded, else each file
+                     "files": len(b.get("objects") or b.get("files", {})) + 1})
     return rows
 
 

@@ -41,6 +41,9 @@ class Store:
     def list(self, prefix: str) -> Iterator[str]:
         raise NotImplementedError
 
+    def delete(self, key: str) -> None:
+        raise NotImplementedError
+
     def get_file(self, key: str, path: Path) -> Path:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -86,6 +89,16 @@ class LocalStore(Store):
 
     def exists(self, key: str) -> bool:
         return self._path(key).is_file()
+
+    def delete(self, key: str) -> None:
+        """Remove ``key``, and the folders it leaves empty (a bucket has none)."""
+        p = self._path(key)
+        p.unlink(missing_ok=True)
+        root = self.root.resolve()
+        for d in p.parents:
+            if d == root or root not in d.parents or any(d.iterdir()):
+                break
+            d.rmdir()
 
     def list(self, prefix: str) -> Iterator[str]:
         base = self._path(prefix) if prefix else self.root
@@ -148,6 +161,9 @@ class S3Store(Store):
             if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
                 return False
             raise
+
+    def delete(self, key: str) -> None:
+        self.s3.delete_object(Bucket=self.bucket, Key=self._key(key))
 
     def list(self, prefix: str) -> Iterator[str]:
         cut = len(self.prefix) + 1 if self.prefix else 0

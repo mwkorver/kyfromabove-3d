@@ -6,7 +6,7 @@
   a batch of one tile's buildings cut into pieces, written to the bucket.
 * :func:`building_step` -- step 3, invoked directly with ``{"gers": [...]}``:
   a few nearby buildings from their pieces to their meshes, the check and
-  the audit, written to ``buildings/<gers>/``.
+  the audit, written to ``buildings/<version>/<gers>/``.
 * :func:`make_pieces` -- stage 1. Each SQS message is one LiDAR tile,
   ``{"tile": "N076E228"}``; its pieces are cut in /tmp and published to the
   bucket, each marker (``pieces/<gers>/piece.json``) last. A marker's arrival
@@ -156,7 +156,7 @@ def building_step(event, context):
     """Step 3 for a few nearby buildings, invoked directly:
     ``{"gers": [...], "force": false}``. Each building's piece is read from
     ``pieces/<gers>/``; its crops are cut in /tmp; its meshes, check and
-    audit are written to ``buildings/<gers>/``, ``building.json`` last. A
+    audit are written to ``buildings/<version>/<gers>/``, ``building.json`` last. A
     building already built from the same piece by the same code is skipped
     unless ``force``. Returns each building's seconds, peak memory and size."""
     from kyfromabove_3d.building import building_step as run_building_step

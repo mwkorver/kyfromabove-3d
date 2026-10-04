@@ -305,14 +305,40 @@ def test_the_group_levels_keep_buildings_by_their_largest_dimension():
 def test_the_built_buildings_come_from_one_listing(tmp_path):
     from kyfromabove_3d.store import LocalStore
     st = LocalStore(tmp_path)
-    st.put_json("buildings/g1/3dtiles_mesh/tileset.json", {})
-    st.put_json("buildings/g1/3dtiles_complete/tileset.json", {})
-    st.put_json("buildings/g2/3dtiles_mesh/tileset.json", {})
-    st.put_json("buildings/g3/audit.json", {})                                  # no mesh
-    st.put_json("buildings/g4/3dtiles_mesh/textures/tileset.json", {})         # deeper: not a mesh folder
-    got = P.built_buildings(st)
+    v = "buildings/v1"
+    st.put_bytes(f"{v}/g1/3dtiles_mesh.zip", b"z")
+    st.put_bytes(f"{v}/g1/3dtiles_complete.zip", b"z")
+    st.put_bytes(f"{v}/g2/3dtiles_mesh.zip", b"z")
+    st.put_bytes(f"{v}/g3/review.zip", b"z")                                     # no mesh
+    st.put_json(f"{v}/g3/building.json", {})
+    st.put_bytes(f"{v}/g4/deeper/3dtiles_mesh.zip", b"z")                        # deeper: not a building's
+    st.put_bytes("buildings/v2/g5/3dtiles_mesh.zip", b"z")                       # another version
+    got = P.built_buildings(st, v)
     assert got == {"g1": {"3dtiles_mesh", "3dtiles_complete"}, "g2": {"3dtiles_mesh"}}
-    assert P.load_building(st, "g3", "measured", available=got) is None       # asks nothing of the store
+    assert P.load_building(st, "g3", "measured", v, available=got) is None    # asks nothing of the store
+
+
+def test_a_building_comes_back_from_its_zip_with_its_texture_pages(tmp_path):
+    """What the building step stores (building.pack_building) is what step 4
+    reads: the glb, its placement and its lossless pages, per product, and
+    the completed product falls back to the measured one."""
+    from kyfromabove_3d import building as B
+    from kyfromabove_3d.store import LocalStore
+
+    glb, pages = _building_glb((200, 20, 40), "g1")
+    b = tmp_path / "work" / "g1"
+    (b / "3dtiles_mesh" / "textures").mkdir(parents=True)
+    ts = {"root": {"content": {"uri": "building.glb"}, "transform": list(np.eye(4).ravel())}}
+    (b / "3dtiles_mesh" / "tileset.json").write_text(json.dumps(ts))
+    (b / "3dtiles_mesh" / "building.glb").write_bytes(glb)
+    from PIL import Image
+    Image.fromarray(pages["walls_0"]).save(b / "3dtiles_mesh" / "textures" / "walls_0.png")
+    st = LocalStore(tmp_path / "bucket")
+    B.publish_building(b, {"gers": "g1"}, st, "buildings/v1")
+    got = P.load_building(st, "g1", "complete", "buildings/v1")          # no completed mesh: the measured one
+    assert got["source"] == "3dtiles_mesh" and got["glb"] == glb and got["tileset"] == ts
+    assert np.array_equal(got["pages"]["walls_0"], pages["walls_0"])
+    assert P.built_buildings(st, "buildings/v1") == {"g1": {"3dtiles_mesh"}}
 
 
 # ------------------------------------------------------------- the views

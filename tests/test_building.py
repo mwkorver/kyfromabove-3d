@@ -85,42 +85,80 @@ def test_a_script_is_timed_and_its_own_peak_memory_read(tmp_path):
 
 
 def _built(folder: Path, gers="g1"):
+    """A built building's folder as the scripts leave it, crops and all."""
     b = folder / gers
-    for d in ("3dtiles_mesh", "3dtiles_complete", "images", "validity_masks"):
+    for d in ("3dtiles_mesh/textures", "3dtiles_complete/textures", "images", "validity_masks"):
         (b / d).mkdir(parents=True, exist_ok=True)
+    ts = json.dumps({"root": {"content": {"uri": "building.glb"}}})
     (b / "3dtiles_mesh" / "building.glb").write_bytes(b"x" * 100)
-    (b / "3dtiles_mesh" / "tileset.json").write_text("{}")
+    (b / "3dtiles_mesh" / "tileset.json").write_text(ts)
+    (b / "3dtiles_mesh" / "textures" / "walls_0.png").write_bytes(b"p" * 30)
     (b / "3dtiles_complete" / "building.glb").write_bytes(b"y" * 50)
+    (b / "3dtiles_complete" / "tileset.json").write_text(ts)
+    (b / "3dtiles_complete" / "textures" / "walls_0.png").write_bytes(b"q" * 20)
+    (b / "3dtiles_complete" / "building_tint.glb").write_bytes(b"t" * 40)          # for review
+    (b / "3dtiles_complete" / "fill_faces.npz").write_bytes(b"f" * 10)            # for review
     (b / "images" / "frame_000.png").write_bytes(b"crop")
     (b / "audit.json").write_text("{}")
+    (b / "levels.json").write_text('{"levels": []}')
     (b / "lidar_local.laz").write_bytes(b"clip")
     (b / "log.txt").write_text("log")
     return b
 
 
-def test_a_building_is_published_summary_last_without_its_crops(tmp_path):
+def test_a_building_is_five_objects_summary_last_without_its_crops(tmp_path):
+    import zipfile
+
     b = _built(tmp_path / "work")
     store = LocalStore(tmp_path / "bucket")
     order = []
-    real = store.put_file
-    store.put_file = lambda k, p: (order.append(k), real(k, p))[1]
-    real_json = store.put_json
-    store.put_json = lambda k, o: (order.append(k), real_json(k, o))[1]
+    real = store.put_bytes
+    store.put_bytes = lambda k, d, *a, **kw: (order.append(k), real(k, d, *a, **kw))[1]
     s = B.publish_building(b, {"gers": "g1", "piece_hash": "h", "code_version": B.BUILDING_CODE_VERSION}, store)
-    assert order[-1] == "buildings/g1/building.json"
-    assert "buildings/g1/3dtiles_mesh/building.glb" in order and "buildings/g1/3dtiles_complete/building.glb" in order
-    assert not any("images" in k or "lidar_local" in k for k in order)    # crops and the clip stay behind
-    assert s["files"]["3dtiles_mesh/building.glb"] == 100 and s["bytes"] == 100 + 2 + 50 + 2 + 3
+    base = f"buildings/{B.BUILDING_CODE_VERSION}/g1"
+    assert order[-1] == f"{base}/building.json"                           # the marker last
+    assert sorted(order) == sorted(f"{base}/{n}" for n in (
+        "3dtiles_mesh.zip", "3dtiles_complete.zip", "review.zip", "levels.json", "building.json"))
+    mesh = zipfile.ZipFile(tmp_path / "bucket" / base / "3dtiles_mesh.zip")
+    assert sorted(mesh.namelist()) == ["building.glb", "textures/walls_0.png", "tileset.json"]
+    complete = zipfile.ZipFile(tmp_path / "bucket" / base / "3dtiles_complete.zip")
+    assert sorted(complete.namelist()) == ["building.glb", "textures/walls_0.png", "tileset.json"]
+    review = sorted(zipfile.ZipFile(tmp_path / "bucket" / base / "review.zip").namelist())
+    assert review == ["3dtiles_complete/building_tint.glb", "3dtiles_complete/fill_faces.npz", "audit.json", "log.txt"]
+    every = "".join(order) + "".join(review)
+    assert "images" not in every and "lidar_local" not in every             # crops and the clip stay behind
+    assert s["files"]["3dtiles_mesh/building.glb"] == 100 and s["bytes"] == sum(s["files"].values())
+    assert set(s["objects"]) == {"3dtiles_mesh.zip", "3dtiles_complete.zip", "review.zip", "levels.json"}
+
+
+def test_the_same_files_pack_into_the_same_bytes(tmp_path):
+    """Deterministic zips: the same files, written at another moment, give the
+    same objects (so an unchanged rebuild uploads identical bytes)."""
+    import os
+    import time
+
+    b1 = _built(tmp_path / "one")
+    one, _ = B.pack_building(b1)
+    time.sleep(1.1)
+    b2 = _built(tmp_path / "two")
+    for p in b2.rglob("*"):
+        os.utime(p, (1e9, 1e9))
+    two, _ = B.pack_building(b2)
+    assert one == two
 
 
 def test_a_building_built_from_the_same_piece_by_the_same_code_is_up_to_date(tmp_path):
     store = LocalStore(tmp_path)
+    key = f"buildings/{B.BUILDING_CODE_VERSION}/g1/building.json"
     assert not B.up_to_date("g1", {"inputs_hash": "h"}, store)
-    store.put_json("buildings/g1/building.json", {"piece_hash": "h", "code_version": B.BUILDING_CODE_VERSION})
+    store.put_json(key, {"piece_hash": "h", "code_version": B.BUILDING_CODE_VERSION})
     assert B.up_to_date("g1", {"inputs_hash": "h"}, store)
     assert not B.up_to_date("g1", {"inputs_hash": "changed"}, store)
-    store.put_json("buildings/g1/building.json", {"piece_hash": "h", "code_version": "older"})
+    store.put_json(key, {"piece_hash": "h", "code_version": "older"})
     assert not B.up_to_date("g1", {"inputs_hash": "h"}, store)
+    # another version's folder does not count as built by this code
+    store.put_json("buildings/older/g2/building.json", {"piece_hash": "h", "code_version": "older"})
+    assert not B.up_to_date("g2", {"inputs_hash": "h"}, store)
 
 
 def test_the_building_step_skips_an_up_to_date_building_and_reports_a_missing_piece(tmp_path):
@@ -128,8 +166,8 @@ def test_the_building_step_skips_an_up_to_date_building_and_reports_a_missing_pi
     for f in PIECE.iterdir():
         store.put_file(f"pieces/g1/{f.name}", f)
     marker = json.loads((PIECE / "piece.json").read_text())
-    store.put_json("buildings/g1/building.json", {"piece_hash": marker["inputs_hash"],
-                                                  "code_version": B.BUILDING_CODE_VERSION})
+    store.put_json(f"buildings/{B.BUILDING_CODE_VERSION}/g1/building.json",
+                   {"piece_hash": marker["inputs_hash"], "code_version": B.BUILDING_CODE_VERSION})
     res = B.building_step(["g1", "nope"], store, tmp_path / "work", index=None, log=lambda m: None)
     assert res["skipped"] == ["g1"] and res["built"] == [] and list(res["failed"]) == ["nope"]
     assert np.isclose(res["seconds"]["scene"], 0.0, atol=0.5)             # nothing to build: no LiDAR read

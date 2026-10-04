@@ -15,9 +15,12 @@ worker does on the laptop:
    the tile's ``buildings.json`` and its neighbouring tiles');
 3. **the texture check** and **the audit** (``check_building.py``,
    ``audit_building.py``);
-4. the results to ``buildings/<gers>/``, and ``building.json`` last: the
-   piece it was built from (its ``inputs_hash``), the seconds and peak memory
-   of each stage, the size of each file.
+4. the results to ``buildings/<version>/<gers>/`` as five objects
+   (:func:`pack_building`: a zip per mesh product, ``review.zip``,
+   ``levels.json``) and ``building.json`` last: the piece it was built from
+   (its ``inputs_hash``), the seconds and peak memory of each stage, the
+   size of each file. A rebuild reads none of them: it starts again from
+   the piece.
 
 Each script runs in its own process, as on the laptop (GDAL and curl are not
 fork-safe, and a crashed colourise must not take the batch with it); each
@@ -42,7 +45,9 @@ import numpy as np
 from .coordinates import METERS_PER_US_SURVEY_FOOT, LocalCoordinateFrame
 from .pieces import PIECE_FILES
 
-#: Bump to rebuild every building (``building.json`` records it).
+#: Bump when the building step's method changes. Each version's buildings
+#: are kept in their own folder, ``buildings/<version>/<gers>/``, so a new
+#: method's results sit beside the old ones (``building.json`` records it).
 BUILDING_CODE_VERSION = "stage3-2"          # 3-2: lossless texture pages kept, for step 4
 
 #: The LiDAR within this of a building occludes its frames (the colourise's default).
@@ -53,6 +58,13 @@ SCENE_RADIUS_M = 250.0
 OUTPUT_FILES = ("audit.json", "audit.png", "texture_check.json", "classification.json", "levels.json",
                 "wall_planes.json", "wall_profiles.json", "mirror_report.json", "colorized_aerial_coverage.json")
 OUTPUT_DIRS = ("3dtiles_mesh", "3dtiles_complete")
+#: Kept as its own object: small, and a neighbour will read it one by one.
+LOOSE_FILES = ("levels.json",)
+#: Everything else that is not a mesh product's tileset, glb or texture pages
+#: (the reports, the tinted copy, the fill test's data, the log) goes here.
+REVIEW_ZIP = "review.zip"
+#: What ``building.json`` says about how the building is stored.
+LAYOUT = "zips-1"
 
 SCRIPTS = Path(os.environ.get("SCRIPTS_DIR", Path(__file__).resolve().parents[2] / "scripts"))
 
@@ -274,6 +286,11 @@ def build_one(gers: str, store, work: Path, neighbours_path: Path, scene_path: O
     return s
 
 
+def buildings_prefix(version: str = BUILDING_CODE_VERSION) -> str:
+    """Where one version of the building step keeps its buildings."""
+    return f"buildings/{version}"
+
+
 def output_files(b: Path) -> List[Path]:
     """The files of building folder ``b`` that are published."""
     b = Path(b)
@@ -286,23 +303,61 @@ def output_files(b: Path) -> List[Path]:
     return out
 
 
-def publish_building(b: Path, summary: Dict[str, Any], store, prefix: str = "buildings") -> Dict[str, Any]:
-    """The building's outputs to ``<prefix>/<gers>/``, ``building.json``
-    last; the summary gains each file's size."""
+def pack_building(b: Path) -> Tuple[Dict[str, bytes], Dict[str, int]]:
+    """Building folder ``b``'s published files as the few objects stored for
+    it, and each file's size: ``<product>.zip`` per mesh product (its
+    tileset, the glb it names and its texture pages: what step 4 reads),
+    ``levels.json`` as it is, and ``review.zip`` for the rest."""
+    from .archive import zip_bytes
+
     b = Path(b)
     files = output_files(b)
-    summary["files"] = {str(p.relative_to(b)): p.stat().st_size for p in files}
-    summary["bytes"] = int(sum(summary["files"].values()))
-    for p in files:
-        store.put_file(f"{prefix}/{summary['gers']}/{p.relative_to(b).as_posix()}", p)
+    groups: Dict[str, Dict[str, Path]] = {}
+    for d in OUTPUT_DIRS:
+        ts = b / d / "tileset.json"
+        uri = (json.loads(ts.read_text(encoding="utf-8")).get("root", {}).get("content", {}).get("uri")
+               if ts.exists() else None)
+        groups[d] = {}
+        for p in files:
+            rel = p.relative_to(b).as_posix()
+            if rel.startswith(f"{d}/"):
+                inner = rel[len(d) + 1:]
+                if inner in ("tileset.json", uri) or inner.startswith("textures/"):
+                    groups[d][inner] = p
+    in_products = {p for g in groups.values() for p in g.values()}
+    review = {p.relative_to(b).as_posix(): p for p in files
+              if p not in in_products and p.relative_to(b).as_posix() not in LOOSE_FILES}
+    objects: Dict[str, bytes] = {f"{d}.zip": zip_bytes(g) for d, g in groups.items() if g}
+    if review:
+        objects[REVIEW_ZIP] = zip_bytes(review)
+    for name in LOOSE_FILES:
+        if (b / name).exists():
+            objects[name] = (b / name).read_bytes()
+    return objects, {p.relative_to(b).as_posix(): p.stat().st_size for p in files}
+
+
+def publish_building(b: Path, summary: Dict[str, Any], store, prefix: Optional[str] = None) -> Dict[str, Any]:
+    """The building's outputs to ``<prefix>/<gers>/`` (default: this
+    version's folder) as a few objects (:func:`pack_building`),
+    ``building.json`` last; the summary gains each file's size and each
+    object's."""
+    prefix = prefix or buildings_prefix()
+    objects, files = pack_building(b)
+    summary["files"] = files
+    summary["bytes"] = int(sum(files.values()))
+    summary["objects"] = {k: len(v) for k, v in sorted(objects.items())}
+    summary["layout"] = LAYOUT
+    for name in sorted(objects):
+        store.put_bytes(f"{prefix}/{summary['gers']}/{name}", objects[name],
+                        "application/zip" if name.endswith(".zip") else "application/json")
     store.put_json(f"{prefix}/{summary['gers']}/building.json", summary)
     return summary
 
 
-def up_to_date(gers: str, marker: Dict[str, Any], store, prefix: str = "buildings") -> bool:
-    """Whether ``buildings/<gers>/building.json`` was built from this very
-    piece by this code."""
-    key = f"{prefix}/{gers}/building.json"
+def up_to_date(gers: str, marker: Dict[str, Any], store, prefix: Optional[str] = None) -> bool:
+    """Whether ``<prefix>/<gers>/building.json`` (default: this version's
+    folder) was built from this very piece by this code."""
+    key = f"{prefix or buildings_prefix()}/{gers}/building.json"
     if not store.exists(key):
         return False
     try:
@@ -314,7 +369,7 @@ def up_to_date(gers: str, marker: Dict[str, Any], store, prefix: str = "building
 
 
 def building_step(gers: Sequence[str], store, work: Path, index, tiles_prefix: str = "tiles",
-                  pieces_prefix: str = "pieces", out_prefix: str = "buildings", force: bool = False,
+                  pieces_prefix: str = "pieces", out_prefix: Optional[str] = None, force: bool = False,
                   timeout_s: float = 840.0, check: bool = True, audit: bool = True, publish: bool = True,
                   keep: bool = False, out_store=None, log: Callable = print) -> Dict[str, Any]:
     """Step 3 for a batch of nearby buildings (one tile's, from the piece
@@ -325,6 +380,7 @@ def building_step(gers: Sequence[str], store, work: Path, index, tiles_prefix: s
     work = Path(work).resolve()                 # the scripts run from the repository root
     work.mkdir(parents=True, exist_ok=True)
     out_store = out_store or store
+    out_prefix = out_prefix or buildings_prefix()
     t0 = time.time()
     built, skipped, failed = [], [], {}
     markers = {}

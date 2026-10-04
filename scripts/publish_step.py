@@ -30,7 +30,8 @@ TITLES = {"overture": "Overture", "boxes": "LiDAR heights", "measured": "Measure
 DEFAULT_VIEW = "measured"
 
 
-def one_tile(tile: str, inputs: str, store: str, raw: str, products, available=None) -> list:
+def one_tile(tile: str, inputs: str, store: str, raw: str, products, available=None,
+             buildings_prefix: str | None = None) -> list:
     """Step 4 for one tile, in a worker process."""
     from kyfromabove_3d.pieces import phase2_grid
     from kyfromabove_3d.publish import publish_tile
@@ -40,7 +41,8 @@ def one_tile(tile: str, inputs: str, store: str, raw: str, products, available=N
     src, out = store_from(inputs), store_from(store)
     res = []
     for p in products:
-        res.append(publish_tile(tile, src, grid, p, out_store=out, log=lambda m: None, available=available))
+        res.append(publish_tile(tile, src, grid, p, buildings_prefix=buildings_prefix, out_store=out,
+                                log=lambda m: None, available=available))
     if inputs != store:                         # the tree reads each tile's records from the output store
         out.put_json(f"tiles/{tile}/buildings.json", src.read_json(f"tiles/{tile}/buildings.json"))
     return res
@@ -99,7 +101,10 @@ def main() -> int:
     from kyfromabove_3d.store import store_from
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--inputs", required=True, help="the tiles' buildings.json and ground.npz, and buildings/<gers>/")
+    ap.add_argument("--inputs", required=True,
+                    help="the tiles' buildings.json and ground.npz, and buildings/<version>/<gers>/")
+    ap.add_argument("--building-version", default=None,
+                    help="which version of the building step's results to publish (default: the current code's)")
     ap.add_argument("--store", default=None, help="where to write (default: --inputs)")
     ap.add_argument("--tiles", nargs="*", default=[])
     ap.add_argument("--tiles-file", type=Path, default=None)
@@ -119,13 +124,15 @@ def main() -> int:
     grid = phase2_grid(args.raw)
     t0 = time.time()
     if tiles and not args.no_tiles:
+        from kyfromabove_3d.building import BUILDING_CODE_VERSION, buildings_prefix
         from kyfromabove_3d.publish import built_buildings
 
-        available = built_buildings(src)                          # one listing, not a question per building
-        print(f"{len(available):,} built building(s) in {args.inputs}", flush=True)
+        bprefix = buildings_prefix(args.building_version or BUILDING_CODE_VERSION)
+        available = built_buildings(src, bprefix)                 # one listing, not a question per building
+        print(f"{len(available):,} built building(s) in {args.inputs}/{bprefix}", flush=True)
         done = 0
         with ProcessPoolExecutor(max_workers=args.workers) as ex:
-            futs = {ex.submit(one_tile, t, args.inputs, store, str(args.raw), args.products, available): t
+            futs = {ex.submit(one_tile, t, args.inputs, store, str(args.raw), args.products, available, bprefix): t
                     for t in tiles}
             for f in as_completed(futs):
                 done += 1

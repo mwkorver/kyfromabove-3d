@@ -90,7 +90,7 @@ What it showed:
   The textured files are the next to slim down.
 
 For all of Kentucky (2.79 million Overture buildings), the building step,
-the expensive one, is estimated at about $620 on Spot machines. Overture
+the expensive one, is estimated at about $430 on Spot machines. Overture
 lists about 5.3 million buildings in a rectangle drawn around Kentucky, but
 that rectangle takes in parts of the neighbouring states; the 2.79 million
 are the ones on Kentucky's own LiDAR tiles.

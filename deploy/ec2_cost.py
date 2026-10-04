@@ -46,7 +46,9 @@ from cost_model import PRICE                                                  # 
 
 LAMBDA_MB = 3008
 LAMBDA_VCPU = LAMBDA_MB / 1769.0          # Lambda gives one full vCPU at 1,769 MB
-FILES_PER_BUILDING = 18
+#: Objects uploaded a building: three zips, levels.json and building.json
+#: (kyfromabove_3d.building.pack_building; about 20 single files before).
+FILES_PER_BUILDING = 5
 EBS_GB, EBS_GB_MONTH = 30, 0.08           # gp3
 
 

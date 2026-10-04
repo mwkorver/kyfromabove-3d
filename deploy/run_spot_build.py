@@ -5,7 +5,7 @@ the statewide tree and the terrain on the first machine.
 
 Each machine gets a share of the tiles (whole tiles, so neighbours share
 frames and LiDAR) and runs ``scripts/building_step.py --workers 16`` inside
-the pipeline's image, reading pieces from and writing ``buildings/<gers>/``
+the pipeline's image, reading pieces from and writing ``buildings/<version>/<gers>/``
 to ``s3://kyfromabove-3d``. Every few minutes the spend is tallied -- the
 machines' hours at their zones' Spot prices, their disks, and an estimate of
 the S3 writes so far -- with ``--already`` (the pilot's spend before this),
@@ -31,7 +31,7 @@ from run_ec2_bench import EBS_GB, EBS_GB_MONTH, ssm_run                         
 
 BUCKET = "kyfromabove-3d"
 PUT_USD = 0.005 / 1000
-FILES_PER_BUILDING = 22
+FILES_PER_BUILDING = 5           # objects a building: three zips, levels.json, building.json
 STALL_MIN = 8
 ATTEMPTS = 6
 

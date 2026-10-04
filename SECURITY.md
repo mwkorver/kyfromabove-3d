@@ -9,8 +9,9 @@ cost real money on your account:
 
 - **The Spot build runner spends your money.** `deploy/run_spot_build.py`
   starts EC2 Spot machines and stops them before a spending cap you give it,
-  but the cap is a check the script makes, not an AWS budget. Set an AWS
-  Budget alarm as well.
+  but the cap is a check the script makes, not an AWS budget. Deploy the
+  budget stack as well (`docs/CLOUD.md`, "Watching the spend"); it emails,
+  it does not stop anything.
 - **A deployed CloudFront viewer is public** unless you switch the password on
   (`-c viewer_password=on`). Every request to a public viewer is billed to you.
 - **The viewer password is a demo gate, not authentication.** It is HTTP basic

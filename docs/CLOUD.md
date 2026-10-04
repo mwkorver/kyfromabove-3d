@@ -1,24 +1,50 @@
-# Stage 1 in the cloud: LiDAR tiles into per-building pieces
+# The pipeline in AWS
 
-The goal is all of Kentucky. The first stage cuts the LiDAR into one
-*piece* per building; when a piece lands in S3, its arrival is an event
-that EventBridge routes to the next step.
+The goal is all of Kentucky. What runs today is simple: a laptop starts each
+step over a list of LiDAR tiles and watches it, and every step reads from and
+writes to one private bucket, `s3://kyfromabove-3d` (us-west-2, beside the
+KyFromAbove and Overture buckets).
 
 ```
-stage 0 (once per Overture release)       stage 1 (a Lambda per LiDAR tile)
-  Overture footprints ──> inputs/footprints/tile=<name>.json ──> make_pieces
-  grouped by owning tile  (owned + a 30 m halo)                      │
-                                                                     ▼
-                         pieces/<gers>/  coordinates.json, footprint.json,
-                                         lidar_local.laz, clip.json, check_features.json,
-                                         frame_coverage.csv, ... and piece.json LAST
-                                                                     │  S3 "Object Created"
-                                                                     ▼
-                         EventBridge rule: key matches pieces/*/piece.json
-                                                                     │
-                                                                     ▼
-                         pieces queue (+ dead-letter) ──> record_piece ──> DynamoDB "pieces"
-                                                          (next round: the building step)
+stage 0 (laptop, once per Overture release)
+  Overture footprints ──> inputs/footprints/tile=<name>.json
+                                   │
+step 1, tile      (Lambda, one per tile)          run_tile_step.py
+  tiles/<name>/buildings.json, frames.gpkg        product 1 heights, frames listed
+                                   │
+step 2, piece     (Lambda, 25 buildings a call)   run_piece_step.py
+  pieces/<gers>/ ... piece.json last              LiDAR clip, frames as pointers
+                                   │
+step 3, building  (EC2 Spot, 16 at once)          run_spot_build.py
+  buildings/<gers>/ ... building.json last        meshes, check, audit
+                                   │
+step 4, publish   (a Spot machine, or a laptop)   publish_step.py
+  kentucky/, tiles/*/3dtiles/, terrain/, viewer/ ──> CloudFront ──> the viewer
+```
+
+Each runner (`deploy/run_*.py`) is started from the laptop and invokes its
+step directly; there are no queues or events between the steps yet. Every
+step can be rerun safely: a step skips work whose inputs have not changed
+(the marker files written last carry a hash of their inputs).
+
+### Designed but not deployed: an event chain
+
+`PiecesStack` in `deploy/stack.py` is a different way to join the steps,
+tested locally but **never deployed**: a piece's marker landing in S3 is an
+event that EventBridge routes, through a queue with a dead-letter queue, to
+the next step. Its tests run the whole chain against moto, a local stand-in
+for AWS (`tests/test_event_chain.py`, `tests/test_stack.py`). It is kept for
+a statewide run, where a laptop starting and watching every step would be
+the weak point.
+
+```
+make_pieces (Lambda, from a tiles queue) ──> pieces/<gers>/ ... piece.json last
+                                                       │  S3 "Object Created"
+                                                       ▼
+                     EventBridge rule: key matches pieces/*/piece.json
+                                                       │
+                                                       ▼
+                     pieces queue (+ dead-letter) ──> record_piece ──> DynamoDB "pieces"
 ```
 
 ## Built so far, step by step (September 2026)
@@ -74,7 +100,8 @@ building — also 0.61 -> 0.48 s a building), transient errors are retried
 with back-off (`lidar.with_retries`), and a tile's batches are capped at 20
 at once.
 
-**Step 3, the building step, is built but has not run in AWS.**
+**Step 3, the building step, as first built for Lambda.** (It later ran on
+Lambda for a calibration and then moved to EC2 Spot; both are below.)
 `kyfromabove-3d-building-step` (ARM, 3,008 MB, 10 GB of /tmp) is defined
 (`BuildingStepStack`) and not deployed. It is invoked with a few nearby
 buildings (`{"gers": [...]}`). For each one it reads the piece, rebuilds the
@@ -211,6 +238,41 @@ ceiling: 32 GB is shared by 16 buildings. Running it needs:
 The bench cost about $0.34: 45 minutes of the Spot machine plus the Lambda
 calibration.
 
+## Watching the spend
+
+Every stack, and what it makes (the Lambdas, the Spot machines and their
+disks, the CloudFront distribution), carries the tag `project=kyfromabove-3d`,
+so the bill can be split by it. `BudgetStack` adds a monthly AWS Budget on
+that tag: an email when 80% of the limit is actually spent, and another when
+the month is forecast to pass it. It warns; it stops nothing, so the Spot
+runner's own cap stays. It is deployed only when an address is given:
+
+```bash
+cd deploy && npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@example.com -c budget_usd=20
+```
+
+The limit is $20 a month unless `budget_usd` says otherwise; raise it before
+a statewide run (about $620 for the building step). Two steps the stacks
+cannot do, once per account:
+
+- **Tag the bucket.** It was made by hand, so no stack tags it, and its
+  storage and requests are a large share of the bill. This replaces any tags
+  the bucket already has:
+
+  ```bash
+  aws s3api put-bucket-tagging --bucket kyfromabove-3d --tagging 'TagSet=[{Key=project,Value=kyfromabove-3d}]'
+  ```
+
+- **Switch the tag on for billing.** A budget can filter only on a cost
+  allocation tag. The tag appears in Billing up to a day after something
+  first carries it; then:
+
+  ```bash
+  aws ce update-cost-allocation-tags-status --cost-allocation-tags-status TagKey=project,Status=Active
+  ```
+
+  Costs count from that moment, not before.
+
 ## What a piece is
 
 Everything the building step needs that comes from the LiDAR and the frame
@@ -264,13 +326,20 @@ python scripts/stage0_index.py --overture data/derived/louisville_downtown_overt
 python scripts/make_pieces.py --store outputs/cloud --all --frames-cache outputs/downtown/frames_2024s1.gpkg
 ```
 
-In AWS (after `aws login`; the CDK CLI runs through `npx`):
+In AWS (after `aws login`; the CDK CLI runs through `npx`), the steps as
+the pilot ran them, on downtown's 2x2 block:
 
 ```bash
-cd deploy && npx aws-cdk bootstrap && npx aws-cdk deploy
-python scripts/stage0_index.py --overture data/derived/louisville_downtown_overture.json --store s3://<BucketName>
-python deploy/start_tiles.py --all
+cd deploy && npx aws-cdk bootstrap && npx aws-cdk deploy kyfromabove-3d-tile-step kyfromabove-3d-piece-step && cd ..
+python scripts/stage0_index.py --bbox -85.773 38.238 -85.735 38.269 --store s3://kyfromabove-3d --tiles N076E228 N076E229 N077E228 N077E229
+python deploy/run_tile_step.py --tiles N076E228 N076E229 N077E228 N077E229
+python deploy/run_piece_step.py --tiles N076E228 N076E229 N077E228 N077E229 --batch 25
 ```
+
+The building step then runs on Spot machines (`kyfromabove-3d-ec2-bench`,
+deployed with `-c bench_count=N`) through `deploy/run_spot_build.py`; see
+the pilot below. `deploy/start_tiles.py` starts the event chain instead, and
+needs `PiecesStack` deployed, which it never has been.
 
 ## What has been checked
 
@@ -295,7 +364,8 @@ python deploy/start_tiles.py --all
 
 ## What it costs
 
-`deploy/cost_model.py`, from measured inputs: 2.79 million Overture
+Stage 1 (steps 1 and 2) on Lambda, priced by `deploy/cost_model.py` from
+measured inputs: 2.79 million Overture
 buildings on 41,566 of the 46,167 Phase 2 tiles (median 28 a tile, the
 busiest 4,647; `deploy/ky_buildings_per_tile.npy`); 0.8 s a building and
 30 s a tile (laptop and Lambda image, downtown); 0.6 GB peak memory for
@@ -305,7 +375,7 @@ downtown's densest tile; 0.15 MB a piece for buildings under 12 m.
 
 | | one statewide run | then, a month |
 |---|---|---|
-| as built now (6 GB, 7 files a piece) | about $385 | $9 storage |
+| the event chain's Lambda as designed (6 GB, 7 files a piece) | about $385 | $9 storage |
 | right-sized (2 GB) and bundled (2 files a piece) | about $128 | $9 storage |
 | the same, if Lambda runs twice as slow as measured | about $188 | $9 storage |
 | the downtown pilot (4 tiles) | about 2 cents | — |
@@ -320,13 +390,10 @@ past Lambda's 15 minutes; they are split into chunks of about 800 buildings.
 
 ## Not yet
 
-- **The pilot in AWS**: waiting on `aws login`. LocalStack, the other local
-  stand-in, now needs an auth token (`localstack auth set-token`); moto did
-  the job instead.
-- **Cost and time for the state**: from the pilot's Lambda metrics. The
-  laptop and the container suggest about a second a building plus some 15 s
-  a tile (the frame index read); the building count comes from stage 0 over
-  the whole state.
+- **A statewide run.** The pilot (below) ran every step for four areas. All
+  of Kentucky needs a larger Spot quota (the account allows 32 Spot
+  processors) and a way to hand out work that does not depend on a laptop:
+  AWS Batch on Spot, or machines taking batches from a queue.
 - **The frame index as a stage 0 file**: each tile reads the 1 GB remote
   frames index by bounding box (range requests); a per-tile extract in the
   bucket would take that off every tile.

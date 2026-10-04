@@ -197,3 +197,40 @@ def test_the_viewer_policy_adds_its_statement_and_keeps_the_rest():
     assert once["Statement"] == [https, read]
     again = merged(once, dict(read, Resource=["newer"]))                         # a redeploy replaces, never duplicates
     assert again["Statement"] == [https, dict(read, Resource=["newer"])]
+
+
+def test_the_budget_counts_the_project_tag_and_warns_before_and_at_the_limit():
+    from stack import BudgetStack
+
+    t = assertions.Template.from_stack(BudgetStack(cdk.App(), "Budget", email="someone@example.com", limit_usd=700))
+    t.resource_count_is("AWS::Budgets::Budget", 1)
+    t.has_resource_properties("AWS::Budgets::Budget", {
+        "Budget": assertions.Match.object_like({
+            "BudgetType": "COST", "TimeUnit": "MONTHLY", "BudgetLimit": {"Amount": 700, "Unit": "USD"},
+            "CostFilters": {"TagKeyValue": ["user:project$kyfromabove-3d"]}}),
+        "NotificationsWithSubscribers": [
+            {"Notification": assertions.Match.object_like({"NotificationType": "ACTUAL", "Threshold": 80}),
+             "Subscribers": [{"SubscriptionType": "EMAIL", "Address": "someone@example.com"}]},
+            {"Notification": assertions.Match.object_like({"NotificationType": "FORECASTED", "Threshold": 100}),
+             "Subscribers": [{"SubscriptionType": "EMAIL", "Address": "someone@example.com"}]}]})
+
+
+def test_the_project_tag_reaches_the_spot_machines_and_their_disks(tmp_path_factory):
+    """The tag is set once on the app (deploy/app.py); the Spot machines are
+    the bill's largest part, so they and their disks must carry it."""
+    from aws_cdk import aws_ec2 as ec2
+    from aws_cdk.aws_ecr_assets import DockerImageAsset
+    from stack import PROJECT_TAG, Ec2BenchStack
+
+    tiny = tmp_path_factory.mktemp("image5")
+    (tiny / "Dockerfile").write_text("FROM public.ecr.aws/lambda/python:3.12\n")
+    app = cdk.App()
+    st = Ec2BenchStack(app, "Bench", vpc_factory=lambda s: ec2.Vpc(s, "Vpc", max_azs=1, nat_gateways=0),
+                       image_factory=lambda s: DockerImageAsset(s, "Image", directory=str(tiny)))
+    cdk.Tags.of(app).add(*PROJECT_TAG)
+    t = assertions.Template.from_stack(st)
+    tag = {"Key": PROJECT_TAG[0], "Value": PROJECT_TAG[1]}
+    t.has_resource_properties("AWS::EC2::Instance", {"Tags": assertions.Match.array_with([tag])})
+    lt = next(iter(t.find_resources("AWS::EC2::LaunchTemplate").values()))["Properties"]["LaunchTemplateData"]
+    tagged = {s["ResourceType"] for s in lt.get("TagSpecifications", []) if tag in s["Tags"]}
+    assert {"instance", "volume"} <= tagged, tagged

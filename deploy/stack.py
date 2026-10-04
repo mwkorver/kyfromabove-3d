@@ -1,4 +1,12 @@
-"""The stage-1 stack: tiles in, pieces out, each piece announced.
+"""The AWS stacks. What is deployed and runs: one Lambda each for the tile
+and piece steps (``TileStepStack``, ``PieceStepStack``), the building step's
+Lambda used for calibration (``BuildingStepStack``), the Spot machines the
+building step runs on (``Ec2BenchStack``), the CloudFront viewer
+(``ViewerStack``) and the monthly budget (``BudgetStack``). A laptop's
+runners (``deploy/run_*.py``) invoke each step directly.
+
+Designed, tested against moto and never deployed: ``PiecesStack``, an event
+chain that would join the steps without the laptop --
 
     tiles queue --> make_pieces (Lambda, container) --> S3 pieces/<gers>/..., piece.json last
                                                          |
@@ -128,6 +136,9 @@ class TileStepStack(Stack):
 
 
 class PiecesStack(Stack):
+    """The event chain in the module's docstring. Not deployed: the pilot
+    invoked each step directly. Kept, with its tests, for a statewide run."""
+
     def __init__(self, scope: Construct, cid: str, *, tile_concurrency: int = 50, keep_data: bool = True,
                  image: Optional[Callable[[str], lambda_.DockerImageCode]] = None, **kw):
         super().__init__(scope, cid, **kw)
@@ -209,7 +220,6 @@ class Ec2BenchStack(Stack):
         """``count`` machines, one per public subnet (zone) in turn from
         ``first_subnet``: a zone out of Spot capacity is skipped by moving it."""
         super().__init__(scope, cid, **kw)
-        from aws_cdk import Tags
         from aws_cdk import aws_ec2 as ec2
         from aws_cdk import aws_iam as iam
 
@@ -262,7 +272,6 @@ class Ec2BenchStack(Stack):
                                        launch_template_id=lt.launch_template_id,
                                        version=lt.latest_version_number))
             ids.append(inst.ref)
-        Tags.of(self).add("project", "kyfromabove-3d")
         CfnOutput(self, "InstanceId", value=ids[0])
         CfnOutput(self, "InstanceIds", value=",".join(ids) if count == 1 else Fn.join(",", ids))
         CfnOutput(self, "ImageUri", value=image.image_uri)
@@ -350,3 +359,38 @@ class ViewerStack(Stack):
         CfnOutput(self, "BucketPolicyStatement", value=Fn.to_json_string(read.to_statement_json()))
         CfnOutput(self, "ViewerUrl", value=f"https://{dist.distribution_domain_name}/viewer/index.html")
         CfnOutput(self, "PasswordOn", value="yes" if password else "no")
+
+
+#: Every stack is tagged with this (deploy/app.py), and the budget counts
+#: only what carries it. AWS adds "user:" to tags people set.
+PROJECT_TAG = ("project", "kyfromabove-3d")
+
+
+class BudgetStack(Stack):
+    """A monthly AWS Budget on what carries the project's tag: an email at 80%
+    of ``limit_usd`` actually spent, and another when the month is forecast
+    to pass it. It warns; it does not stop anything.
+
+    Two things it cannot do for itself, once per account: the bucket was made
+    by hand, so it needs the tag added to it (its storage and requests are a
+    large share of the bill), and the tag must be switched on as a cost
+    allocation tag in Billing before a budget can filter on it."""
+
+    def __init__(self, scope: Construct, cid: str, *, email: str, limit_usd: float = 20.0, **kw):
+        super().__init__(scope, cid, **kw)
+        from aws_cdk import aws_budgets as budgets
+
+        key, value = PROJECT_TAG
+
+        def alert(kind: str, percent: float):
+            return budgets.CfnBudget.NotificationWithSubscribersProperty(
+                notification=budgets.CfnBudget.NotificationProperty(
+                    notification_type=kind, comparison_operator="GREATER_THAN", threshold=percent,
+                    threshold_type="PERCENTAGE"),
+                subscribers=[budgets.CfnBudget.SubscriberProperty(subscription_type="EMAIL", address=email)])
+
+        budgets.CfnBudget(self, "Monthly", budget=budgets.CfnBudget.BudgetDataProperty(
+            budget_name="kyfromabove-3d-monthly", budget_type="COST", time_unit="MONTHLY",
+            budget_limit=budgets.CfnBudget.SpendProperty(amount=limit_usd, unit="USD"),
+            cost_filters={"TagKeyValue": [f"user:{key}${value}"]}),
+            notifications_with_subscribers=[alert("ACTUAL", 80), alert("FORECASTED", 100)])

@@ -12,7 +12,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import aws_cdk as cdk                                                     # noqa: E402
 
-from stack import BuildingStepStack, Ec2BenchStack, PieceStepStack, TileStepStack, ViewerStack  # noqa: E402
+from stack import (PROJECT_TAG, BudgetStack, BuildingStepStack, Ec2BenchStack, PieceStepStack,  # noqa: E402
+                   TileStepStack, ViewerStack)
 
 # step by step: steps 1, 2 and 3, each its own Lambda, invoked directly
 # (PiecesStack, the event-driven chain, stays in stack.py for a later step)
@@ -30,4 +31,12 @@ _pw = Path(__file__).with_name("viewer_password.txt")
 ViewerStack(app, "kyfromabove-3d-viewer", env=env,
             password=_pw.read_text().strip() if app.node.try_get_context("viewer_password") == "on" and _pw.exists()
             else None)
+# a monthly budget on the project's tag, only when an address is given:
+# npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@example.com [-c budget_usd=700]
+if app.node.try_get_context("budget_email"):
+    BudgetStack(app, "kyfromabove-3d-budget", env=env, email=app.node.try_get_context("budget_email"),
+                limit_usd=float(app.node.try_get_context("budget_usd") or 20))
+# every stack, and what it makes, carries the project's tag (Billing can then
+# split the bill by it, and the budget counts it)
+cdk.Tags.of(app).add(*PROJECT_TAG)
 app.synth()

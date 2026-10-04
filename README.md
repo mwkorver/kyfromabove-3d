@@ -50,7 +50,7 @@ they were taken, and where its height came from. More in
 ![The pipeline: stage 0 and four steps, each writing to one store](docs/figures/pipeline.png)
 
 The unit of work is one LiDAR tile, a square about 1.5 km across; Kentucky
-has 46,167 of them, 41,581 with buildings on them. Every step reads from and
+has 46,167 of them, 41,566 with buildings on them. Every step reads from and
 writes to one *store*: a bucket in AWS for real runs, or a folder on a laptop
 for testing. The same code runs in both; the tile step was checked to give
 byte-identical results in each.
@@ -89,8 +89,11 @@ What it showed:
   almost all of it grey boxes. The box files are now 13 to 32 times smaller.
   The textured files are the next to slim down.
 
-For all of Kentucky (about 5.3 million Overture buildings), the building
-step, the expensive one, is estimated at about $620 on Spot machines.
+For all of Kentucky (2.79 million Overture buildings), the building step,
+the expensive one, is estimated at about $620 on Spot machines. Overture
+lists about 5.3 million buildings in a rectangle drawn around Kentucky, but
+that rectangle takes in parts of the neighbouring states; the 2.79 million
+are the ones on Kentucky's own LiDAR tiles.
 
 ## Status and limits
 
@@ -198,8 +201,8 @@ walks through a full run.
 
 Before deploying your own copy: the bucket name `kyfromabove-3d` in the code
 and docs is the author's and bucket names are global, so change it; the Spot
-runner's cap is a check in the script, not an AWS Budget, so set a Budget alarm
-too; and a deployed viewer is public unless the password is switched on. See
+runner's cap is a check in the script, so deploy the budget stack too
+(`docs/CLOUD.md`, "Watching the spend"); and a deployed viewer is public unless the password is switched on. See
 [SECURITY.md](SECURITY.md).
 
 ### Checking a change

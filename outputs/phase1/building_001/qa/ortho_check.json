@@ -1,0 +1,25 @@
+{
+  "verdict": "standard_ortho",
+  "reason": "roofs displaced +161.5 cm relative to the ground, so a segmented roof is not a footprint",
+  "control_passed": true,
+  "usable_for_footprints": false,
+  "n_ground": 226,
+  "n_roof": 50,
+  "ground_displacement_m": 0.0565685424949238,
+  "roof_displacement_m": 1.6714065932620943,
+  "ground_scatter_m": 0.08,
+  "roof_scatter_m": 0.8972950351547682,
+  "roof_minus_ground_m": 1.6148380507671705,
+  "building_height_m": 5.611379222758435,
+  "implied_off_nadir_deg": 16.054716259729428,
+  "rejections": {
+    "outside_ortho_tile": 45,
+    "low_ncc": 118,
+    "low_texture": 7,
+    "peak_at_search_edge": 1
+  },
+  "collection": "imagery/orthos/Phase3/KY_KYAPED_2022_Season2_3IN",
+  "tile": "N067E390",
+  "reference_frame": "KY_KYAPED_2022_Season2_3IN/Color_2034_201831",
+  "url": "https://kyfromabove.s3.amazonaws.com/imagery/orthos/Phase3/KY_KYAPED_2022_Season2_3IN/N067E390_2022_Season2_3IN_cog.tif"
+}

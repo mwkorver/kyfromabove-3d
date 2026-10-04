@@ -1,0 +1,1314 @@
+{
+ "b7daf154-da79-4a42-b938-a973aa1111b5": {
+  "name": "Omni Louisville Hotel",
+  "hole_m2": 1480.0,
+  "by_face": {
+   "1": 923.2,
+   "0": 261.2,
+   "6": 259.2,
+   "1001": 150.8,
+   "corner": 139.2,
+   "1006": 108.8,
+   "4": 108.2,
+   "1005": 90.8,
+   "1013": 88.0,
+   "5": 69.5,
+   "1000": 44.8,
+   "1012": 42.2,
+   "1003": 39.8,
+   "1011": 37.5,
+   "2": 18.5,
+   "roof": 15.2
+  },
+  "roof_wall_m2": 36.4,
+  "mesh_minus_lidar_m": 1.1,
+  "blank_share": 0.0746,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 88.0,
+  "min_width_m": 111.1,
+  "views": {
+   "from S": 752.0,
+   "from SW": 352.5,
+   "from W": 153.0,
+   "from NW": 692.2,
+   "from N": 1480.0,
+   "from NE": 1101.2,
+   "from E": 929.2,
+   "from SE": 709.0,
+   "from above": 86.5
+  },
+  "faces_in_view": {
+   "from S": [
+    "1001",
+    "1013",
+    "4",
+    "5",
+    "corner"
+   ],
+   "from SW": [
+    "1000",
+    "1012",
+    "1013",
+    "2",
+    "4",
+    "5"
+   ],
+   "from W": [
+    "1012",
+    "2",
+    "corner"
+   ],
+   "from NW": [
+    "1",
+    "1012",
+    "2"
+   ],
+   "from N": [
+    "1",
+    "1011",
+    "corner"
+   ],
+   "from NE": [
+    "0",
+    "1",
+    "1003",
+    "1005",
+    "1006",
+    "6"
+   ],
+   "from E": [
+    "0",
+    "1003",
+    "1006",
+    "6",
+    "corner"
+   ],
+   "from SE": [
+    "0",
+    "1001",
+    "1003",
+    "1005",
+    "4",
+    "5",
+    "6",
+    "corner"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "building_002": {
+  "name": "400 West Market",
+  "hole_m2": 172.2,
+  "by_face": {
+   "2": 75.0,
+   "corner": 35.8,
+   "1": 23.2,
+   "0": 17.5
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": -0.1,
+  "blank_share": 0.0341,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.9,
+  "min_width_m": 42.9,
+  "views": {
+   "from S": 172.2,
+   "from SW": 107.0,
+   "from W": 79.2,
+   "from NW": 46.8,
+   "from N": 58.0,
+   "from NE": 29.5,
+   "from E": 9.0,
+   "from SE": 79.5,
+   "from above": 0.0
+  },
+  "faces_in_view": {
+   "from S": [
+    "2",
+    "corner"
+   ],
+   "from SW": [
+    "1",
+    "2"
+   ],
+   "from W": [
+    "1",
+    "corner"
+   ],
+   "from NW": [
+    "0",
+    "1"
+   ],
+   "from N": [
+    "0",
+    "corner"
+   ],
+   "from NE": [
+    "0"
+   ],
+   "from E": [
+    "corner"
+   ],
+   "from SE": [
+    "2"
+   ],
+   "from above": []
+  }
+ },
+ "pnc_tower": {
+  "name": "PNC Tower",
+  "hole_m2": 67.5,
+  "by_face": {
+   "3": 67.5,
+   "2": 33.8,
+   "0": 32.2,
+   "corner": 8.8
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 1.4,
+  "blank_share": 0.0298,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.9,
+  "min_width_m": 27.8,
+  "views": {
+   "from S": 27.0,
+   "from SW": 21.2,
+   "from W": 8.8,
+   "from NW": 40.5,
+   "from N": 67.5,
+   "from NE": 60.8,
+   "from E": 33.8,
+   "from SE": 49.5,
+   "from above": 0.0
+  },
+  "faces_in_view": {
+   "from S": [
+    "0"
+   ],
+   "from SW": [
+    "0"
+   ],
+   "from W": [
+    "corner"
+   ],
+   "from NW": [
+    "3"
+   ],
+   "from N": [
+    "3"
+   ],
+   "from NE": [
+    "3"
+   ],
+   "from E": [
+    "2"
+   ],
+   "from SE": [
+    "0",
+    "2"
+   ],
+   "from above": []
+  }
+ },
+ "bf3923af-34d6-4fdb-b867-2a9f533bef4e": {
+  "name": "Kentucky Home Life Building",
+  "hole_m2": 304.0,
+  "by_face": {
+   "5": 304.0,
+   "2": 186.5,
+   "0": 82.2,
+   "1": 75.0,
+   "3": 58.0,
+   "corner": 8.5
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": -3.0,
+  "blank_share": 0.2128,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.6,
+  "min_width_m": 19.5,
+  "views": {
+   "from S": 186.5,
+   "from SW": 184.0,
+   "from W": 117.8,
+   "from NW": 111.5,
+   "from N": 82.8,
+   "from NE": 82.2,
+   "from E": 304.0,
+   "from SE": 167.8,
+   "from above": 0.0
+  },
+  "faces_in_view": {
+   "from S": [
+    "2"
+   ],
+   "from SW": [
+    "1",
+    "2"
+   ],
+   "from W": [
+    "1"
+   ],
+   "from NW": [
+    "0",
+    "1"
+   ],
+   "from N": [
+    "0",
+    "corner"
+   ],
+   "from NE": [
+    "0"
+   ],
+   "from E": [
+    "5"
+   ],
+   "from SE": [
+    "2",
+    "3"
+   ],
+   "from above": []
+  }
+ },
+ "c5fe3ad2-ffa0-4800-9240-410277f7b332": {
+  "name": "The Seelbach Hilton Hotel",
+  "hole_m2": 736.8,
+  "by_face": {
+   "2": 388.5,
+   "1": 371.0,
+   "corner": 97.8,
+   "3": 62.0,
+   "5": 30.5,
+   "4": 26.2,
+   "0": 20.5,
+   "8": 8.5
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 0.0,
+  "blank_share": 0.3879,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.9,
+  "min_width_m": 32.1,
+  "views": {
+   "from S": 736.8,
+   "from SW": 591.0,
+   "from W": 175.5,
+   "from NW": 61.2,
+   "from N": 83.0,
+   "from NE": 212.2,
+   "from E": 428.0,
+   "from SE": 605.2,
+   "from above": 0.0
+  },
+  "faces_in_view": {
+   "from S": [
+    "1"
+   ],
+   "from SW": [
+    "0",
+    "1",
+    "4"
+   ],
+   "from W": [
+    "0",
+    "4",
+    "5",
+    "8",
+    "corner"
+   ],
+   "from NW": [
+    "3"
+   ],
+   "from N": [
+    "3",
+    "corner"
+   ],
+   "from NE": [
+    "2"
+   ],
+   "from E": [
+    "2"
+   ],
+   "from SE": [
+    "1",
+    "2"
+   ],
+   "from above": []
+  }
+ },
+ "39a33bd6-59b1-4edc-bd76-ffe26f85a868-a": {
+  "name": "39a33bd6-59b1-4edc-bd76-ffe26f85a868-a",
+  "hole_m2": 0.0,
+  "by_face": {},
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 0.5,
+  "blank_share": 0.0336,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.0,
+  "min_width_m": 7.7,
+  "views": {
+   "from S": 0.0,
+   "from SW": 0.0,
+   "from W": 0.0,
+   "from NW": 0.0,
+   "from N": 0.0,
+   "from NE": 0.0,
+   "from E": 0.0,
+   "from SE": 0.0,
+   "from above": 0.0
+  },
+  "faces_in_view": {
+   "from S": [],
+   "from SW": [],
+   "from W": [],
+   "from NW": [],
+   "from N": [],
+   "from NE": [],
+   "from E": [],
+   "from SE": [],
+   "from above": []
+  }
+ },
+ "39a33bd6-59b1-4edc-bd76-ffe26f85a868-b": {
+  "name": "39a33bd6-59b1-4edc-bd76-ffe26f85a868-b",
+  "hole_m2": 0.0,
+  "by_face": {},
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 1.1,
+  "blank_share": 0.0023,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 88.9,
+  "min_width_m": 6.0,
+  "views": {
+   "from S": 0.0,
+   "from SW": 0.0,
+   "from W": 0.0,
+   "from NW": 0.0,
+   "from N": 0.0,
+   "from NE": 0.0,
+   "from E": 0.0,
+   "from SE": 0.0,
+   "from above": 0.0
+  },
+  "faces_in_view": {
+   "from S": [],
+   "from SW": [],
+   "from W": [],
+   "from NW": [],
+   "from N": [],
+   "from NE": [],
+   "from E": [],
+   "from SE": [],
+   "from above": []
+  }
+ },
+ "39a33bd6-59b1-4edc-bd76-ffe26f85a868-c": {
+  "name": "39a33bd6-59b1-4edc-bd76-ffe26f85a868-c",
+  "hole_m2": 0.0,
+  "by_face": {},
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 3.7,
+  "blank_share": 0.127,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.4,
+  "min_width_m": 8.4,
+  "views": {
+   "from S": 0.0,
+   "from SW": 0.0,
+   "from W": 0.0,
+   "from NW": 0.0,
+   "from N": 0.0,
+   "from NE": 0.0,
+   "from E": 0.0,
+   "from SE": 0.0,
+   "from above": 0.0
+  },
+  "faces_in_view": {
+   "from S": [],
+   "from SW": [],
+   "from W": [],
+   "from NW": [],
+   "from N": [],
+   "from NE": [],
+   "from E": [],
+   "from SE": [],
+   "from above": []
+  }
+ },
+ "9947f2b0-4b1e-41af-b68c-af6ae665b1a8": {
+  "name": "9947f2b0-4b1e-41af-b68c-af6ae665b1a8",
+  "hole_m2": 374.5,
+  "by_face": {
+   "1": 260.0,
+   "8": 137.8,
+   "2": 111.2,
+   "corner": 102.2,
+   "4": 23.5,
+   "3": 14.2,
+   "0": 7.2
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 25.4,
+  "blank_share": 0.4401,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.9,
+  "min_width_m": 43.3,
+  "views": {
+   "from S": 240.0,
+   "from SW": 136.0,
+   "from W": 56.5,
+   "from NW": 125.2,
+   "from N": 134.0,
+   "from NE": 374.5,
+   "from E": 35.8,
+   "from SE": 296.8,
+   "from above": 0.0
+  },
+  "faces_in_view": {
+   "from S": [
+    "8",
+    "corner"
+   ],
+   "from SW": [
+    "4",
+    "8",
+    "corner"
+   ],
+   "from W": [
+    "3",
+    "corner"
+   ],
+   "from NW": [
+    "2",
+    "3",
+    "corner"
+   ],
+   "from N": [
+    "2"
+   ],
+   "from NE": [
+    "0",
+    "1",
+    "2"
+   ],
+   "from E": [
+    "1",
+    "corner"
+   ],
+   "from SE": [
+    "1",
+    "8"
+   ],
+   "from above": []
+  }
+ },
+ "bcbc0005-cfe4-4719-8b90-7e9c69dc9782": {
+  "name": "Marmaduke Building",
+  "hole_m2": 879.0,
+  "by_face": {
+   "2": 792.8,
+   "corner": 195.0,
+   "0": 165.2,
+   "3": 5.2,
+   "1": 4.0,
+   "roof": 4.0
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 23.5,
+  "blank_share": 0.4661,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.9,
+  "min_width_m": 15.3,
+  "views": {
+   "from S": 228.8,
+   "from SW": 162.0,
+   "from W": 31.0,
+   "from NW": 483.2,
+   "from N": 879.0,
+   "from NE": 683.5,
+   "from E": 195.0,
+   "from SE": 118.8,
+   "from above": 4.0
+  },
+  "faces_in_view": {
+   "from S": [
+    "0",
+    "corner"
+   ],
+   "from SW": [
+    "0",
+    "3",
+    "corner"
+   ],
+   "from W": [
+    "3",
+    "corner"
+   ],
+   "from NW": [
+    "2"
+   ],
+   "from N": [
+    "2"
+   ],
+   "from NE": [
+    "2"
+   ],
+   "from E": [
+    "corner"
+   ],
+   "from SE": [
+    "0",
+    "1",
+    "corner"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "ec790737-7929-4a57-8ba7-ad8843bbef4f": {
+  "name": "Chase Bank Plaza",
+  "hole_m2": 326.2,
+  "by_face": {
+   "1005": 249.8,
+   "1007": 116.2,
+   "1004": 102.8,
+   "corner": 90.5,
+   "1001": 67.8,
+   "1009": 40.0,
+   "1010": 30.2,
+   "1008": 11.5,
+   "roof": 8.2
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 5.2,
+  "blank_share": 0.2081,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.9,
+  "min_width_m": 54.3,
+  "views": {
+   "from S": 317.5,
+   "from SW": 326.2,
+   "from W": 154.5,
+   "from NW": 146.2,
+   "from N": 207.8,
+   "from NE": 144.8,
+   "from E": 90.5,
+   "from SE": 156.2,
+   "from above": 8.2
+  },
+  "faces_in_view": {
+   "from S": [
+    "1001",
+    "1005"
+   ],
+   "from SW": [
+    "1001",
+    "1004",
+    "1005",
+    "corner"
+   ],
+   "from W": [
+    "1004",
+    "1010",
+    "corner"
+   ],
+   "from NW": [
+    "1007",
+    "1008",
+    "1009"
+   ],
+   "from N": [
+    "1007",
+    "1009",
+    "1010"
+   ],
+   "from NE": [
+    "1007",
+    "1009"
+   ],
+   "from E": [
+    "corner"
+   ],
+   "from SE": [
+    "1005"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "9e9df280-ccae-46bd-b450-354e7d5e2fcf": {
+  "name": "Hyatt Regency Louisville",
+  "hole_m2": 411.2,
+  "by_face": {
+   "1006": 173.5,
+   "1007": 88.5,
+   "corner": 87.0,
+   "1003": 67.8,
+   "1012": 33.0,
+   "1008": 33.0,
+   "1011": 27.0,
+   "7": 17.8,
+   "18": 17.0,
+   "10": 14.8,
+   "1009": 14.5,
+   "17": 13.8,
+   "20": 13.0,
+   "1005": 11.8,
+   "19": 11.0,
+   "roof": 10.2,
+   "1002": 10.0,
+   "9": 8.0,
+   "1014": 8.0,
+   "8": 4.0
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 0.6,
+  "blank_share": 0.0952,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 86.0,
+  "min_width_m": 62.4,
+  "views": {
+   "from S": 411.2,
+   "from SW": 284.2,
+   "from W": 105.8,
+   "from NW": 145.2,
+   "from N": 71.8,
+   "from NE": 31.0,
+   "from E": 139.5,
+   "from SE": 362.2,
+   "from above": 35.0
+  },
+  "faces_in_view": {
+   "from S": [
+    "1003",
+    "1006",
+    "1007",
+    "20"
+   ],
+   "from SW": [
+    "10",
+    "1003",
+    "1005",
+    "1007",
+    "18",
+    "19",
+    "9",
+    "corner"
+   ],
+   "from W": [
+    "10",
+    "1002",
+    "1012",
+    "17",
+    "corner"
+   ],
+   "from NW": [
+    "1009",
+    "1011",
+    "1012",
+    "1014",
+    "17",
+    "18",
+    "9",
+    "corner"
+   ],
+   "from N": [
+    "1009",
+    "1011",
+    "7",
+    "8",
+    "corner"
+   ],
+   "from NE": [
+    "1008",
+    "1011",
+    "7"
+   ],
+   "from E": [
+    "1006",
+    "1008"
+   ],
+   "from SE": [
+    "1006",
+    "1007",
+    "1008",
+    "20"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "d683e785-f8c8-475c-a0a3-c3b476924098": {
+  "name": "Louisville Marriott Downtown",
+  "hole_m2": 1021.8,
+  "by_face": {
+   "1004": 556.2,
+   "12": 164.8,
+   "8": 157.0,
+   "corner": 148.8,
+   "1009": 143.0,
+   "9": 83.8,
+   "roof": 56.2,
+   "1001": 51.8,
+   "3": 26.5,
+   "16": 18.2,
+   "21": 15.0,
+   "17": 9.0,
+   "2": 8.0
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 0.0,
+  "blank_share": 0.1352,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.7,
+  "min_width_m": 61.7,
+  "views": {
+   "from S": 304.5,
+   "from SW": 134.0,
+   "from W": 21.8,
+   "from NW": 551.8,
+   "from N": 1021.8,
+   "from NE": 794.8,
+   "from E": 182.2,
+   "from SE": 87.5,
+   "from above": 156.2
+  },
+  "faces_in_view": {
+   "from S": [
+    "1009",
+    "8"
+   ],
+   "from SW": [
+    "1009",
+    "8"
+   ],
+   "from W": [
+    "corner"
+   ],
+   "from NW": [
+    "1001",
+    "1004",
+    "12",
+    "17",
+    "21",
+    "3"
+   ],
+   "from N": [
+    "1001",
+    "1004",
+    "12",
+    "16",
+    "21",
+    "3",
+    "corner"
+   ],
+   "from NE": [
+    "1001",
+    "1004",
+    "12",
+    "2",
+    "21",
+    "3",
+    "9"
+   ],
+   "from E": [
+    "corner"
+   ],
+   "from SE": [
+    "1009"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "a1f393cc-05c9-43cb-a726-34aa92a2016a": {
+  "name": "RIVUE Tower",
+  "hole_m2": 566.5,
+  "by_face": {
+   "1002": 452.2,
+   "corner": 322.2,
+   "1003": 144.5,
+   "1008": 138.8,
+   "1009": 126.5,
+   "1001": 119.5,
+   "0": 105.8,
+   "3": 66.8,
+   "2": 59.0,
+   "1010": 22.5,
+   "1006": 20.5,
+   "4": 18.8,
+   "5": 11.2,
+   "roof": 6.8
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 2.0,
+  "blank_share": 0.0979,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.9,
+  "min_width_m": 61.7,
+  "views": {
+   "from S": 566.5,
+   "from SW": 175.0,
+   "from W": 162.5,
+   "from NW": 194.5,
+   "from N": 407.8,
+   "from NE": 277.0,
+   "from E": 406.8,
+   "from SE": 367.0,
+   "from above": 31.8
+  },
+  "faces_in_view": {
+   "from S": [
+    "0",
+    "1002",
+    "corner"
+   ],
+   "from SW": [
+    "0",
+    "1008",
+    "1009",
+    "1010",
+    "5"
+   ],
+   "from W": [
+    "1009",
+    "5"
+   ],
+   "from NW": [
+    "1006",
+    "1008",
+    "1009",
+    "3",
+    "5"
+   ],
+   "from N": [
+    "3",
+    "4",
+    "corner"
+   ],
+   "from NE": [
+    "1002",
+    "1003",
+    "2"
+   ],
+   "from E": [
+    "1002",
+    "1003",
+    "2"
+   ],
+   "from SE": [
+    "0",
+    "1001",
+    "1002",
+    "1003"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "3158c676-4406-43e9-8a71-183312badbb5": {
+  "name": "Truist Tower - One Riverfront Plaza",
+  "hole_m2": 996.2,
+  "by_face": {
+   "1008": 873.5,
+   "1001": 599.5,
+   "corner": 250.2,
+   "1006": 201.5,
+   "1004": 116.0,
+   "1000": 76.0,
+   "1003": 75.2,
+   "1002": 63.5,
+   "roof": 62.5,
+   "1007": 22.5,
+   "1005": 11.2,
+   "1009": 4.0
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 0.1,
+  "blank_share": 0.0402,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 90.0,
+  "min_width_m": 39.0,
+  "views": {
+   "from S": 859.8,
+   "from SW": 770.0,
+   "from W": 996.2,
+   "from NW": 876.8,
+   "from N": 644.5,
+   "from NE": 433.5,
+   "from E": 382.8,
+   "from SE": 530.2,
+   "from above": 170.8
+  },
+  "faces_in_view": {
+   "from S": [
+    "1001",
+    "1009",
+    "corner"
+   ],
+   "from SW": [
+    "1000",
+    "1001",
+    "1002",
+    "1008"
+   ],
+   "from W": [
+    "1007",
+    "1008",
+    "corner"
+   ],
+   "from NW": [
+    "1006",
+    "1008"
+   ],
+   "from N": [
+    "1005",
+    "1006",
+    "corner"
+   ],
+   "from NE": [
+    "1003",
+    "1004",
+    "1005",
+    "1006"
+   ],
+   "from E": [
+    "1003",
+    "1004",
+    "corner"
+   ],
+   "from SE": [
+    "1001",
+    "1002",
+    "1003",
+    "1004"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "40ead71b-7947-4e87-ab44-b3f11d755957": {
+  "name": "Hampton Inn Louisville Downtown",
+  "hole_m2": 29.2,
+  "by_face": {
+   "1006": 22.2,
+   "roof": 15.5,
+   "corner": 12.0,
+   "3": 6.0,
+   "1": 4.5
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": 0.0,
+  "blank_share": 0.1652,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.8,
+  "min_width_m": 35.9,
+  "views": {
+   "from S": 0.0,
+   "from SW": 4.2,
+   "from W": 29.2,
+   "from NW": 22.2,
+   "from N": 0.0,
+   "from NE": 0.0,
+   "from E": 12.0,
+   "from SE": 10.5,
+   "from above": 23.2
+  },
+  "faces_in_view": {
+   "from S": [],
+   "from SW": [
+    "3"
+   ],
+   "from W": [
+    "1006",
+    "corner"
+   ],
+   "from NW": [
+    "1006"
+   ],
+   "from N": [],
+   "from NE": [],
+   "from E": [
+    "corner"
+   ],
+   "from SE": [
+    "1",
+    "3"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "8ab5c0ec-896c-4cb3-aece-2a5510b34a88": {
+  "name": "Louisville Gas & Electric",
+  "hole_m2": 395.5,
+  "by_face": {
+   "1004": 152.5,
+   "13": 147.2,
+   "1007": 115.0,
+   "1010": 86.0,
+   "18": 82.2,
+   "1000": 73.5,
+   "1008": 63.2,
+   "1001": 35.2,
+   "1006": 30.2,
+   "1009": 28.2,
+   "corner": 18.5,
+   "1002": 18.2,
+   "1005": 4.5,
+   "roof": 4.5
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": -0.1,
+  "blank_share": 0.0981,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.9,
+  "min_width_m": 42.7,
+  "views": {
+   "from S": 54.2,
+   "from SW": 93.0,
+   "from W": 228.5,
+   "from NW": 193.5,
+   "from N": 178.0,
+   "from NE": 276.5,
+   "from E": 395.5,
+   "from SE": 292.8,
+   "from above": 26.0
+  },
+  "faces_in_view": {
+   "from S": [
+    "1001",
+    "corner"
+   ],
+   "from SW": [
+    "1000",
+    "1008",
+    "corner"
+   ],
+   "from W": [
+    "1000",
+    "1008",
+    "1010",
+    "corner"
+   ],
+   "from NW": [
+    "1000",
+    "1007",
+    "1008",
+    "1010"
+   ],
+   "from N": [
+    "1007",
+    "1009",
+    "corner"
+   ],
+   "from NE": [
+    "1005",
+    "1006",
+    "1007",
+    "13",
+    "18",
+    "corner"
+   ],
+   "from E": [
+    "1002",
+    "1004",
+    "1006",
+    "13",
+    "18",
+    "corner"
+   ],
+   "from SE": [
+    "1002",
+    "1004",
+    "1006",
+    "18",
+    "corner"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a": {
+  "name": "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a",
+  "hole_m2": 540.5,
+  "by_face": {
+   "1005": 540.5,
+   "1001": 158.8,
+   "1004": 129.8,
+   "1006": 102.8,
+   "1010": 39.8,
+   "corner": 35.5,
+   "1008": 20.0,
+   "roof": 4.5
+  },
+  "roof_wall_m2": 66.5,
+  "mesh_minus_lidar_m": -0.0,
+  "blank_share": 0.1179,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 65.2,
+  "min_width_m": 32.3,
+  "views": {
+   "from S": 158.8,
+   "from SW": 213.5,
+   "from W": 227.5,
+   "from NW": 442.5,
+   "from N": 540.5,
+   "from NE": 436.5,
+   "from E": 129.8,
+   "from SE": 122.2,
+   "from above": 4.5
+  },
+  "faces_in_view": {
+   "from S": [
+    "1001"
+   ],
+   "from SW": [
+    "1001",
+    "1006",
+    "1008",
+    "1010"
+   ],
+   "from W": [
+    "1006",
+    "1008",
+    "1010",
+    "corner"
+   ],
+   "from NW": [
+    "1005",
+    "1006",
+    "1008",
+    "1010"
+   ],
+   "from N": [
+    "1005"
+   ],
+   "from NE": [
+    "1005"
+   ],
+   "from E": [
+    "1004"
+   ],
+   "from SE": [
+    "1001",
+    "1004",
+    "corner"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ },
+ "cfb7194a-2889-4b49-942f-7beaabbd2cf4": {
+  "name": "cfb7194a-2889-4b49-942f-7beaabbd2cf4",
+  "hole_m2": 206.8,
+  "by_face": {
+   "1006": 112.5,
+   "corner": 71.0,
+   "1001": 55.8,
+   "1009": 53.5,
+   "1002": 53.2,
+   "1008": 41.0,
+   "1005": 35.0,
+   "1004": 35.0,
+   "1007": 34.5,
+   "5": 29.5,
+   "roof": 19.0,
+   "2": 10.5,
+   "1000": 8.2
+  },
+  "roof_wall_m2": 0.0,
+  "mesh_minus_lidar_m": -0.1,
+  "blank_share": 0.1782,
+  "dots": 0,
+  "lines": 0,
+  "min_corner_deg": 89.6,
+  "min_width_m": 33.9,
+  "views": {
+   "from S": 38.8,
+   "from SW": 202.8,
+   "from W": 119.2,
+   "from NW": 96.2,
+   "from N": 206.8,
+   "from NE": 110.0,
+   "from E": 110.2,
+   "from SE": 94.5,
+   "from above": 31.2
+  },
+  "faces_in_view": {
+   "from S": [
+    "1001",
+    "corner"
+   ],
+   "from SW": [
+    "1000",
+    "1001",
+    "1005",
+    "1007",
+    "1009",
+    "2"
+   ],
+   "from W": [
+    "1007",
+    "1009"
+   ],
+   "from NW": [
+    "1007",
+    "1008",
+    "1009"
+   ],
+   "from N": [
+    "1006",
+    "1008",
+    "corner"
+   ],
+   "from NE": [
+    "1002",
+    "1004",
+    "5"
+   ],
+   "from E": [
+    "1002",
+    "5"
+   ],
+   "from SE": [
+    "1002",
+    "2",
+    "5",
+    "corner"
+   ],
+   "from above": [
+    "roof"
+   ]
+  }
+ }
+}

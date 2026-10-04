@@ -1,0 +1,28 @@
+{
+  "project_name": "kyfromabove-3d",
+  "created_at": "2026-09-09T06:27:34.952678+00:00",
+  "assets": {},
+  "metadata_notes": {
+    "collection": "KY_KYAPED_2024_Season1_3IN",
+    "sensor_family": "434S82525X818326-f120_v2",
+    "camera_heads": [
+      "Fwd",
+      "Left",
+      "Right",
+      "Bwd",
+      "Color"
+    ],
+    "pixel_pitch_um": 3.76,
+    "read_in_place_not_downloaded": [
+      "https://kyfromabove.s3.amazonaws.com/imagery/obliques/Phase3/FlightInformationData_GPKG/KY_KYAPED_2024_Season1_3IN_ImageFrameEO.gpkg",
+      "https://kyfromabove.s3.amazonaws.com/imagery/obliques/Phase3/FlightInformationData_GPKG/KY_KYAPED_2024_Season1_3IN_ImageFrames.gpkg",
+      "https://kyfromabove.s3.us-west-2.amazonaws.com/elevation/PointCloud/Phase2/N076E228_LAS_Phase2.copc.laz"
+    ],
+    "lidar_tiles": [
+      "phase2/N076E228 (COPC)"
+    ],
+    "distortion_model": "none supplied by the EO table; imagery assumed vendor-rectified",
+    "rotation_convention": "R_cw = diag(1,-1,-1) @ (Rx(omega) Ry(phi) Rz(kappa)).T",
+    "principal_point_convention": "cx = w/2 + CamPpxMm/pitch; cy = h/2 - CamPpyMm/pitch"
+  }
+}

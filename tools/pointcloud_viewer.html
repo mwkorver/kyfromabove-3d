@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PNC Tower 3D Point Cloud Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      overflow: hidden;
+      background: #0f1115;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #e0e6ed;
+      user-select: none;
+    }
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+    #header {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    #header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #header .badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(0, 229, 255, 0.15);
+      color: #00e5ff;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
+    #header p {
+      font-size: 12px;
+      color: #8a99ad;
+      margin-top: 4px;
+    }
+    #panel {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      width: 310px;
+      background: rgba(22, 27, 34, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 13px;
+      z-index: 10;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+      color: #7b8c9e;
+      margin-bottom: 8px;
+      margin-top: 14px;
+    }
+    .section-title:first-child { margin-top: 0; }
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .btn-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      padding: 6px 8px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: #c9d1d9;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .btn.active {
+      background: #0070f3;
+      border-color: #0070f3;
+      color: #fff;
+    }
+    .camera-btns {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+    .camera-btns .btn {
+      font-size: 11px;
+      padding: 5px 2px;
+    }
+    input[type="range"] {
+      width: 130px;
+      accent-color: #00e5ff;
+      cursor: pointer;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .checkbox-row input {
+      accent-color: #00e5ff;
+      cursor: pointer;
+    }
+    .stat-legend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    #loading-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #0f1115;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.4s ease;
+    }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(0, 229, 255, 0.15);
+      border-top-color: #00e5ff;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-text {
+      font-size: 14px;
+      color: #8a99ad;
+      letter-spacing: 0.3px;
+    }
+    #stats-hud {
+      position: absolute;
+      bottom: 18px;
+      left: 20px;
+      z-index: 10;
+      font-size: 11.5px;
+      color: #6a7b8e;
+      pointer-events: none;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loading-text">Loading PNC Tower (823,510 points)...</div>
+  </div>
+
+  <div id="header">
+    <h1>PNC Tower <span class="badge">159 m</span></h1>
+    <p>Louisville, KY • Planar Extruded Glass Curtain Wall</p>
+  </div>
+
+  <div id="panel">
+    <div class="section-title">Color Mode</div>
+    <div class="btn-group">
+      <button class="btn active" id="btn-color-rgb" onclick="setColorMode(0)">Photo RGB</button>
+      <button class="btn" id="btn-color-surf" onclick="setColorMode(1)">Surfaces</button>
+      <button class="btn" id="btn-color-src" onclick="setColorMode(2)">Sources</button>
+    </div>
+
+    <div class="section-title">Layers</div>
+    <label class="checkbox-row">
+      <input type="checkbox" id="layer-lidar" checked onchange="updateLayers()">
+      <div class="stat-legend">
+        <span class="legend-dot" style="background:#a0aab2;"></span>
+        <span>LiDAR Returns (51k)</span>
+      </div>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" id="layer-tiles" checked onchange="updateLayers()">
+      <div class="stat-legend">
+        <span class="legend-dot" style="background:#00e5ff;"></span>
+        <span>Fitted Tiles (83k)</span>
+      </div>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" id="layer-extruded" checked onchange="updateLayers()">
+      <div class="stat-legend">
+        <span class="legend-dot" style="background:#ffb300;"></span>
+        <span>Extruded Walls (689k)</span>
+      </div>
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" id="layer-photos-only" onchange="updateLayers()">
+      <div class="stat-legend">
+        <span class="legend-dot" style="background:#00e676;"></span>
+        <span>Highlight Photos Only (292k)</span>
+      </div>
+    </label>
+
+    <div class="section-title">Display Settings</div>
+    <div class="control-row">
+      <span>Point Size</span>
+      <input type="range" id="size-slider" min="0.8" max="6.0" step="0.2" value="2.0" oninput="updateSize(this.value)">
+    </div>
+    <div class="control-row">
+      <span>Brightness</span>
+      <input type="range" id="bright-slider" min="0.5" max="2.0" step="0.05" value="1.05" oninput="updateBrightness(this.value)">
+    </div>
+    <div class="control-row">
+      <span>Auto-Rotate</span>
+      <input type="checkbox" id="rotate-toggle" onchange="toggleAutoRotate(this.checked)">
+    </div>
+
+    <div class="section-title">Viewpoints</div>
+    <div class="camera-btns">
+      <button class="btn" onclick="setView('east')">East (Photo)</button>
+      <button class="btn" onclick="setView('west')">West</button>
+      <button class="btn" onclick="setView('south')">South</button>
+      <button class="btn" onclick="setView('north')">North</button>
+      <button class="btn" onclick="setView('aerial')">Aerial</button>
+    </div>
+  </div>
+
+  <div id="stats-hud">823,510 Points • 60 FPS • Left Drag: Orbit • Right Drag: Pan • Scroll: Zoom</div>
+  <div id="canvas-container"></div>
+
+  <script>
+    const plyPath = "outputs/pnc_tower/pnc_tower/colorized.ply";
+
+    const container = document.getElementById("canvas-container");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0e1014);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 2000);
+    camera.up.set(0, 0, 1); // Z is Up
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 0, 80); // Mid-height of tower
+
+    // Ground Grid
+    const grid = new THREE.GridHelper(300, 30, 0x232936, 0x181c24);
+    grid.rotation.x = Math.PI / 2;
+    grid.position.set(0, 0, 0);
+    scene.add(grid);
+
+    // Custom Shader Material
+    const pointShader = {
+      vertexShader: `
+        attribute vec3 color;
+        attribute float surface;
+        attribute float source;
+
+        uniform float pointSize;
+        uniform int colorMode;
+        uniform float showLidar;
+        uniform float showTiles;
+        uniform float showExtruded;
+        uniform float showPhotosOnly;
+        uniform float brightness;
+
+        varying vec3 vColor;
+        varying float vVisible;
+
+        void main() {
+          float vis = 1.0;
+          if (surface == 0.0 && showLidar < 0.5) vis = 0.0;
+          if (surface == 1.0 && showTiles < 0.5) vis = 0.0;
+          if (surface == 3.0 && showExtruded < 0.5) vis = 0.0;
+          if (showPhotosOnly > 0.5 && source != 2.0) vis = 0.0;
+          vVisible = vis;
+
+          if (colorMode == 0) {
+            vColor = color * brightness;
+          } else if (colorMode == 1) {
+            // Surface classification
+            if (surface == 0.0) vColor = vec3(0.65, 0.70, 0.75);       // LiDAR return
+            else if (surface == 1.0) vColor = vec3(0.0, 0.90, 1.0);     // Fitted Tile
+            else if (surface == 3.0) vColor = vec3(1.0, 0.70, 0.0);     // Extruded Plane
+            else vColor = vec3(1.0);
+          } else if (colorMode == 2) {
+            // Source tracking
+            if (source == 0.0) vColor = vec3(0.48, 0.53, 0.58);       // LiDAR
+            else if (source == 1.0) vColor = vec3(0.16, 0.71, 0.96);    // Aerial Obliques
+            else if (source == 2.0) vColor = vec3(0.0, 0.95, 0.45);     // Admitted Photo
+            else vColor = vec3(1.0);
+          }
+
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+          gl_PointSize = pointSize * (400.0 / -mvPosition.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 32.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vVisible;
+
+        void main() {
+          if (vVisible < 0.5) discard;
+          vec2 coord = gl_PointCoord - vec2(0.5);
+          float dist = length(coord);
+          if (dist > 0.5) discard;
+          float alpha = smoothstep(0.5, 0.42, dist);
+          gl_FragColor = vec4(vColor, alpha);
+        }
+      `
+    };
+
+    const uniforms = {
+      pointSize: { value: 2.0 },
+      colorMode: { value: 0 },
+      showLidar: { value: 1.0 },
+      showTiles: { value: 1.0 },
+      showExtruded: { value: 1.0 },
+      showPhotosOnly: { value: 0.0 },
+      brightness: { value: 1.05 }
+    };
+
+    const material = new THREE.ShaderMaterial({
+      vertexShader: pointShader.vertexShader,
+      fragmentShader: pointShader.fragmentShader,
+      uniforms: uniforms,
+      transparent: true,
+      depthWrite: true,
+      depthTest: true
+    });
+
+    // Fast Binary PLY Parser
+    async function loadPLY(url) {
+      const response = await fetch(url);
+      const buffer = await response.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+
+      const target = new TextEncoder().encode("end_header");
+      let headerEnd = -1;
+      for (let i = 0; i < Math.min(bytes.length - 12, 4096); i++) {
+        let match = true;
+        for (let j = 0; j < target.length; j++) {
+          if (bytes[i + j] !== target[j]) { match = false; break; }
+        }
+        if (match) {
+          let nl = i + target.length;
+          while (nl < bytes.length && (bytes[nl] === 10 || bytes[nl] === 13 || bytes[nl] === 32)) nl++;
+          headerEnd = nl;
+          break;
+        }
+      }
+
+      const headerText = new TextDecoder().decode(bytes.subarray(0, headerEnd));
+      const vertCountMatch = headerText.match(/element vertex (\d+)/);
+      const numVertices = vertCountMatch ? parseInt(vertCountMatch[1]) : 0;
+
+      const stride = 17; // float x,y,z (12) + uchar r,g,b (3) + uchar source (1) + uchar surface (1)
+      const positions = new Float32Array(numVertices * 3);
+      const colors = new Float32Array(numVertices * 3);
+      const surfaces = new Float32Array(numVertices);
+      const sources = new Float32Array(numVertices);
+
+      const view = new DataView(buffer, headerEnd);
+      for (let i = 0; i < numVertices; i++) {
+        const off = i * stride;
+        const i3 = i * 3;
+        positions[i3] = view.getFloat32(off, true);
+        positions[i3 + 1] = view.getFloat32(off + 4, true);
+        positions[i3 + 2] = view.getFloat32(off + 8, true);
+
+        colors[i3] = view.getUint8(off + 12) / 255.0;
+        colors[i3 + 1] = view.getUint8(off + 13) / 255.0;
+        colors[i3 + 2] = view.getUint8(off + 14) / 255.0;
+
+        sources[i] = view.getUint8(off + 15);
+        surfaces[i] = view.getUint8(off + 16);
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      geometry.setAttribute("surface", new THREE.BufferAttribute(surfaces, 1));
+      geometry.setAttribute("source", new THREE.BufferAttribute(sources, 1));
+
+      const pointCloud = new THREE.Points(geometry, material);
+      scene.add(pointCloud);
+
+      // Default camera view: looking at South-East face (admitted photo angle)
+      setView('east');
+
+      document.getElementById("stats-hud").textContent =
+        `${numVertices.toLocaleString()} Points • 60 FPS • Left Drag: Orbit • Right Drag: Pan • Scroll: Zoom`;
+      document.getElementById("loading-overlay").style.opacity = "0";
+      setTimeout(() => document.getElementById("loading-overlay").style.display = "none", 400);
+    }
+
+    loadPLY(plyPath).catch(err => {
+      document.getElementById("loading-text").innerText = "Error loading PLY: " + err.message;
+    });
+
+    // Control Functions
+    function setColorMode(mode) {
+      uniforms.colorMode.value = mode;
+      document.getElementById("btn-color-rgb").classList.toggle("active", mode === 0);
+      document.getElementById("btn-color-surf").classList.toggle("active", mode === 1);
+      document.getElementById("btn-color-src").classList.toggle("active", mode === 2);
+    }
+
+    function updateLayers() {
+      uniforms.showLidar.value = document.getElementById("layer-lidar").checked ? 1.0 : 0.0;
+      uniforms.showTiles.value = document.getElementById("layer-tiles").checked ? 1.0 : 0.0;
+      uniforms.showExtruded.value = document.getElementById("layer-extruded").checked ? 1.0 : 0.0;
+      uniforms.showPhotosOnly.value = document.getElementById("layer-photos-only").checked ? 1.0 : 0.0;
+    }
+
+    function updateSize(val) { uniforms.pointSize.value = parseFloat(val); }
+    function updateBrightness(val) { uniforms.brightness.value = parseFloat(val); }
+    function toggleAutoRotate(val) { controls.autoRotate = val; controls.autoRotateSpeed = 1.2; }
+
+    function setView(dir) {
+      controls.target.set(0, 0, 80);
+      const dist = 220;
+      if (dir === 'east') {
+        // Looking from ESE (photo viewpoint)
+        camera.position.set(180, -110, 120);
+      } else if (dir === 'west') {
+        // Looking from WNW towards West face
+        camera.position.set(-200, 50, 90);
+      } else if (dir === 'south') {
+        // Looking from South
+        camera.position.set(0, -220, 80);
+      } else if (dir === 'north') {
+        // Looking from North
+        camera.position.set(0, 220, 80);
+      } else if (dir === 'aerial') {
+        // High angle overview
+        camera.position.set(160, -160, 240);
+      }
+      controls.update();
+    }
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

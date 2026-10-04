@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kyfromabove-3d"
+version = "0.1.0"
+description = "Kentucky in 3D from KyFromAbove: building meshes from the LiDAR and aerial frames, on Overture footprints"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "geopandas",
+    "shapely",
+    "pyproj",
+    "rasterio",
+    # laspy reads and writes compressed LAZ only with a backend; lazrs is the one
+    # the tests and the cloud steps use
+    "laspy[lazrs]",
+    "opencv-python",
+    "pillow",
+    "boto3",
+    "pyyaml",
+    # kyfromabove_3d.plots is part of the package and imports it at module
+    # level; it was in use long before it was declared.
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+
+# duckdb queries Overture's GeoParquet on S3 with predicate pushdown. The
+# buildings theme is 257 GiB, so a bbox query against the remote files is the
+# only practical route. Nothing in src/ imports it; this extra exists so the
+# Kentucky attribute-coverage measurement can be reproduced:
+#
+#   Overture 2026-08-19.0, Kentucky bbox, 5,294,866 buildings
+#     height 71.8%  class 10.2%  num_floors 2.7%  roof_shape 0.1%
+#
+#   ...and roof_shape only reaches 0.4% on buildings over 5,000 m2, so it is
+#   not a routing signal at any size.
+overture = ["duckdb"]
+
+# the cloud stages: the CDK stack (needs Node for its CLI) and the tests'
+# mocked AWS (moto, with its server for the container test)
+cloud = ["aws-cdk-lib>=2.150", "constructs>=10", "moto[s3,sqs,dynamodb,events,server]>=5"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-m 'not data'"
+markers = [
+    "data: needs the downtown outputs on disk (scripts/audit_reference.py rebuild); run with pytest -m data",
+]

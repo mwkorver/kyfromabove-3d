@@ -1,0 +1,32 @@
+{
+  "building_001": {
+    "gers": "63e05b9a-1f9b-41d1-b58a-81b67f569fa0",
+    "overture_name": "Tractor Supply",
+    "height_m": 5.289966583251953,
+    "num_floors": null,
+    "class": null,
+    "roof_shape": null,
+    "wkt": "POLYGON ((-82.9462962 38.3457444, -82.9466756 38.3455741, -82.9464049 38.3452031, -82.9460255 38.3453735, -82.9462962 38.3457444))",
+    "release": "2026-08-19.0"
+  },
+  "building_002": {
+    "gers": "df2fccca-d6bd-4d4d-b4bc-673cfb5245aa",
+    "overture_name": "400 West Market",
+    "height_m": 167.0,
+    "num_floors": 35,
+    "class": null,
+    "roof_shape": null,
+    "wkt": "POLYGON ((-85.7569211 38.255091, -85.7574062 38.2551446, -85.7574751 38.2547607, -85.7569899 38.254707, -85.7569211 38.255091))",
+    "release": "2026-08-19.0"
+  },
+  "pnc_tower": {
+    "gers": "1614a997-3d6f-475f-9bc5-bb5a9dbc878d",
+    "overture_name": "PNC Tower",
+    "height_m": 156.0,
+    "num_floors": 40,
+    "class": null,
+    "roof_shape": null,
+    "wkt": "POLYGON ((-85.758149 38.2559526, -85.7578342 38.2559183, -85.7577518 38.2563853, -85.7577366 38.2564713, -85.7580514 38.2565056, -85.758149 38.2559526))",
+    "release": "2026-08-19.0"
+  }
+}

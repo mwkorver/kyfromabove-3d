@@ -1,0 +1,125 @@
+{
+  "building": "outputs/urban/building_002",
+  "target_id": "df2fccca-d6bd-4d4d-b4bc-673cfb5245aa",
+  "name": "400 West Market",
+  "rounds": [
+    {
+      "round": 1,
+      "radius_m": 300.0,
+      "needed_cones": [
+        [
+          7.9810763820170365,
+          50.0
+        ],
+        [
+          278.0595719917526,
+          50.0
+        ],
+        [
+          187.99414066392575,
+          50.0
+        ],
+        [
+          98.0456750316866,
+          50.0
+        ]
+      ],
+      "candidates_found": 27,
+      "new_admitted": [],
+      "total_admitted": [],
+      "fillable_cells_remaining": 192,
+      "uniform_facade_check": {
+        "stop": true,
+        "n_found": 4,
+        "best_ratio": 0.12637362637362637,
+        "reason": "uniform facade: the matcher found the building in 4 photographs (>= 40 matches in one frame), none was admitted, and the best turned only 13% of its matches into inliers (limit 20%). A wider search will not change this"
+      }
+    }
+  ],
+  "admitted_photos": [],
+  "tried_candidate_ids": [
+    "commons_107072149",
+    "commons_92160557",
+    "commons_5412022",
+    "commons_171532269",
+    "commons_5412069",
+    "commons_5411991",
+    "commons_5851006",
+    "commons_3906632"
+  ],
+  "attempts": {
+    "1280px-400_West_Market_Building.jpg": {
+      "filename": "1280px-400_West_Market_Building.jpg",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/400_West_Market_Building.jpg/1280px-400_West_Market_Building.jpg",
+      "outcome": "solved",
+      "n_candidates": 534,
+      "max_frame_candidates": 84,
+      "n_inliers": 52,
+      "reason": "holdout FAIL, per-direction INSUFFICIENT"
+    },
+    "1280px-AEGON_Center.JPG": {
+      "filename": "1280px-AEGON_Center.JPG",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/AEGON_Center.JPG/1280px-AEGON_Center.JPG",
+      "outcome": "unplaced",
+      "n_candidates": 8,
+      "max_frame_candidates": 6,
+      "n_inliers": 0,
+      "reason": "triage: at most 6 matches in one frame"
+    },
+    "1280px-99E050_-_Looking_WSW_from_near_Waterfront_Park_playground_(near_foot_of_Preston_Street),_Louisville,_Kentucky,_Ohio_River_mile_603,_May_21,_1999_-_Flickr_-_Bill_Alden.jpg": {
+      "filename": "1280px-99E050_-_Looking_WSW_from_near_Waterfront_Park_playground_(near_foot_of_Preston_Street),_Louisville,_Kentucky,_Ohio_River_mile_603,_May_21,_1999_-_Flickr_-_Bill_Alden.jpg",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/99E050_-_Looking_WSW_from_near_Waterfront_Park_playground_%28near_foot_of_Preston_Street%29%2C_Louisville%2C_Kentucky%2C_Ohio_River_mile_603%2C_May_21%2C_1999_-_Flickr_-_Bill_Alden.jpg/1280px-99E050_-_Looking_WSW_from_near_Waterfront_Park_playground_%28near_foot_of_Preston_Street%29%2C_Louisville%2C_Kentucky%2C_Ohio_River_mile_603%2C_May_21%2C_1999_-_Flickr_-_Bill_Alden.jpg",
+      "outcome": "unplaced",
+      "n_candidates": 18,
+      "max_frame_candidates": 8,
+      "n_inliers": 0,
+      "reason": "triage: at most 8 matches in one frame"
+    },
+    "1280px-Downtown_Louisville_-_Flickr_-_flickrized.jpg": {
+      "filename": "1280px-Downtown_Louisville_-_Flickr_-_flickrized.jpg",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Downtown_Louisville_-_Flickr_-_flickrized.jpg/1280px-Downtown_Louisville_-_Flickr_-_flickrized.jpg",
+      "outcome": "solved",
+      "n_candidates": 182,
+      "max_frame_candidates": 49,
+      "n_inliers": 23,
+      "reason": "holdout FAIL, per-direction INSUFFICIENT"
+    },
+    "1280px-AegonCtr2029.JPG": {
+      "filename": "1280px-AegonCtr2029.JPG",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/AegonCtr2029.JPG/1280px-AegonCtr2029.JPG",
+      "outcome": "unplaced",
+      "n_candidates": 56,
+      "max_frame_candidates": 18,
+      "n_inliers": 0,
+      "reason": "triage: at most 18 matches in one frame"
+    },
+    "1280px-AegonCtr2033.JPG": {
+      "filename": "1280px-AegonCtr2033.JPG",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/AegonCtr2033.JPG/1280px-AegonCtr2033.JPG",
+      "outcome": "refused",
+      "n_candidates": 1179,
+      "max_frame_candidates": 132,
+      "n_inliers": 70,
+      "reason": "physical: 115 m below ground"
+    },
+    "AegonCtr2030.JPG": {
+      "filename": "AegonCtr2030.JPG",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c6/AegonCtr2030.JPG",
+      "outcome": "refused",
+      "n_candidates": 694,
+      "max_frame_candidates": 107,
+      "n_inliers": 51,
+      "reason": "physical: 15 m below ground"
+    },
+    "1280px-Jefferson_County_KY_Courthouse_2.jpg": {
+      "filename": "1280px-Jefferson_County_KY_Courthouse_2.jpg",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Jefferson_County_KY_Courthouse_2.jpg/1280px-Jefferson_County_KY_Courthouse_2.jpg",
+      "outcome": "unplaced",
+      "n_candidates": 37,
+      "max_frame_candidates": 11,
+      "n_inliers": 0,
+      "reason": "triage: at most 11 matches in one frame"
+    }
+  },
+  "stop_reason": "uniform facade: the matcher found the building in 4 photographs (>= 40 matches in one frame), none was admitted, and the best turned only 13% of its matches into inliers (limit 20%). A wider search will not change this"
+}

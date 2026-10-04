@@ -1,0 +1,136 @@
+{
+ "corners": [
+  {
+   "corner": 0,
+   "status": "measured",
+   "before": [
+    -18.346,
+    -28.736
+   ],
+   "after": [
+    -18.346,
+    -28.736
+   ],
+   "gap_before_m": 0.0,
+   "gap_after_m": 0.0,
+   "note": ""
+  },
+  {
+   "corner": 1,
+   "status": "no-observation",
+   "before": [
+    9.594,
+    -32.599
+   ],
+   "after": [
+    9.594,
+    -32.599
+   ],
+   "gap_before_m": null,
+   "gap_after_m": null,
+   "note": ""
+  },
+  {
+   "corner": 2,
+   "status": "no-observation",
+   "before": [
+    16.644,
+    19.257
+   ],
+   "after": [
+    16.644,
+    19.257
+   ],
+   "gap_before_m": null,
+   "gap_after_m": null,
+   "note": ""
+  },
+  {
+   "corner": 3,
+   "status": "measured",
+   "before": [
+    17.975,
+    28.802
+   ],
+   "after": [
+    17.975,
+    28.802
+   ],
+   "gap_before_m": 0.2,
+   "gap_after_m": 0.2,
+   "note": ""
+  },
+  {
+   "corner": 4,
+   "status": "no-observation",
+   "before": [
+    -9.678,
+    32.626
+   ],
+   "after": [
+    -9.678,
+    32.626
+   ],
+   "gap_before_m": null,
+   "gap_after_m": null,
+   "note": ""
+  }
+ ],
+ "observations": {
+  "0:start": {
+   "along_m": null,
+   "n_votes": 1,
+   "why": "1 vote(s), none agreeing"
+  },
+  "0:end": {
+   "along_m": null,
+   "n_votes": 1,
+   "why": "1 vote(s), none agreeing"
+  },
+  "1:start": {
+   "along_m": null,
+   "n_votes": 0,
+   "why": "no frame sees the corner"
+  },
+  "1:end": {
+   "along_m": null,
+   "n_votes": 0,
+   "why": "no frame sees the corner"
+  },
+  "2:start": {
+   "along_m": null,
+   "n_votes": 0,
+   "why": "no frame sees the corner"
+  },
+  "2:end": {
+   "along_m": 9.44,
+   "n_votes": 3,
+   "why": "3 frames, 1 line(s)"
+  },
+  "3:start": {
+   "along_m": null,
+   "n_votes": 0,
+   "why": "no frame sees the corner"
+  },
+  "3:end": {
+   "along_m": null,
+   "n_votes": 3,
+   "why": "3 vote(s), none agreeing"
+  },
+  "4:start": {
+   "along_m": null,
+   "n_votes": 0,
+   "why": "no frame sees the corner"
+  },
+  "4:end": {
+   "along_m": 61.97,
+   "n_votes": 5,
+   "why": "3 frames, 2 line(s)"
+  }
+ },
+ "strip_z_m": [
+  3.38,
+  15.38
+ ],
+ "n_frames": 19
+}

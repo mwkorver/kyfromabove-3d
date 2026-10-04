@@ -1,0 +1,65 @@
+# A shared, on-disk cache of KyFromAbove's oblique frames (COGs), between
+# GDAL and S3, for every building process on one machine.
+#
+# GDAL reads /vsicurl/http://127.0.0.1:8001/imagery/obliques/...tif instead
+# of https://kyfromabove.s3.amazonaws.com/... (kyfromabove_3d.imagery.cog_url,
+# switched on by COG_CACHE_URL). Each process keeps its own small GDAL cache;
+# this one is shared, so a frame's header, which every building in its
+# footprint needs, is fetched once per machine, not once per building.
+#
+# After mwkorver/mapserver-docker-cloudnative (etc/nginx), with two changes:
+#   - the bucket is public: no signing proxy, straight to S3 over HTTPS;
+#   - the cache key is an aligned slice (ngx_http_slice_module), not the
+#     client's exact Range: neighbouring buildings ask for overlapping but
+#     different runs of tiles, and would each miss on an exact-range key.
+#
+# ${SLICE} is the slice size (e.g. 1m); ${CACHE_MAX} the disk cap.
+
+proxy_cache_path /var/cache/nginx/cog levels=1:2 keys_zone=cog:64m
+                 max_size=${CACHE_MAX} inactive=7d use_temp_path=off;
+
+log_format cog '$msec $request_method $uri "$http_range" $status $upstream_cache_status '
+               '$body_bytes_sent $upstream_bytes_received $request_time';
+
+# Connections to S3 are kept open and reused: a new HTTPS connection costs
+# a TLS handshake, about half of a small range request's time (measured
+# from the laptop: 105 ms a request on new connections, 48 ms on a reused
+# one). The name is resolved when nginx starts; restart it (it is cheap,
+# the cache is on disk) if a machine runs for days.
+upstream kyfromabove_s3 {
+    server kyfromabove.s3.us-west-2.amazonaws.com:443;
+    keepalive 64;
+    keepalive_timeout 60s;
+}
+
+server {
+    listen 8001;
+    access_log /var/log/nginx/cog.log cog;
+
+    location / {
+        slice              ${SLICE};
+        proxy_cache        cog;
+        proxy_cache_key    "$request_method|$uri|$slice_range";   # a HEAD never answers a GET
+        proxy_set_header   Range $slice_range;
+        proxy_cache_valid  200 206 7d;       # an S3 object's bytes never change under the same key
+        proxy_cache_valid  404 1m;           # a missing frame is not asked for again at once
+        proxy_cache_lock   on;                # many processes missing one slice: one fetch
+        proxy_cache_lock_timeout 30s;
+        # A HEAD stays a HEAD upstream (a GET without a range would pull a
+        # whole ~100 MB frame into the cache)
+        proxy_cache_convert_head off;
+
+        proxy_http_version 1.1;
+        proxy_set_header   Connection "";
+        proxy_set_header   Host kyfromabove.s3.us-west-2.amazonaws.com;
+        proxy_ssl_server_name on;
+        proxy_ssl_name     kyfromabove.s3.us-west-2.amazonaws.com;
+        proxy_ssl_session_reuse on;
+        proxy_pass         https://kyfromabove_s3;
+        proxy_read_timeout 60s;
+        # if S3 errors or times out, a slice already on disk is still served
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+
+        add_header X-Cache-Status $upstream_cache_status always;
+    }
+}

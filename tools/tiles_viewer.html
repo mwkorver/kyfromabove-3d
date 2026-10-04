@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>__NAME__ — 3D Tiles</title>
+  <script>window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/";</script>
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Cesium.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Widgets/widgets.css">
+  <style>
+    html, body, #cesium { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #000; }
+    #hud { position: absolute; top: 10px; left: 10px; z-index: 5; font: 13px system-ui, sans-serif; color: #fff;
+           background: rgba(0,0,0,.6); padding: 8px 12px; border-radius: 6px; max-width: 420px; }
+    #hud b { font-size: 15px; }
+    #hud .muted { color: #bbb; }
+  </style>
+</head>
+<body>
+  <div id="hud"><b>__NAME__</b> · OGC 3D Tiles<br>
+    <span class="muted" id="info">loading tileset…</span><br>
+    <span class="muted">left drag orbit · right drag pan · scroll zoom · imagery © OpenStreetMap</span></div>
+  <div id="cesium"></div>
+  <script>
+    Cesium.Ion.defaultAccessToken = "";
+    const viewer = new Cesium.Viewer("cesium", {
+      baseLayer: new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider({ url: "https://tile.openstreetmap.org/", maximumLevel: 19 })),
+      // the LiDAR ground as terrain (/terrain, scripts/ground_dem.py); the bare ellipsoid otherwise
+      terrainProvider: __TERRAIN__ ? new Cesium.CustomHeightmapTerrainProvider({
+        width: 32, height: 32,
+        callback: async (x, y, level) => {
+          const r = await fetch(`/terrain?x=${x}&y=${y}&level=${level}&w=32&h=32`);
+          if (!r.ok) throw new Error(`terrain tile ${level}/${x}/${y}: ${r.status}`);
+          const buf = await r.arrayBuffer();
+          if (buf.byteLength !== 32 * 32 * 4) throw new Error(`terrain tile ${level}/${x}/${y}: ${buf.byteLength} bytes`);
+          return new Float32Array(buf);
+        },
+      }) : new Cesium.EllipsoidTerrainProvider(),
+      geocoder: false, baseLayerPicker: false, sceneModePicker: false, navigationHelpButton: false,
+      animation: false, timeline: false, homeButton: false, infoBox: false, selectionIndicator: false,
+      contextOptions: { webgl: { preserveDrawingBuffer: true } },   // so a view can be saved
+    });
+    // Save the current view as a JPEG under outputs/snapshots/<name>.jpg.
+    async function snapshot(name) {
+      viewer.render();
+      const r = await fetch(`/snapshot?name=${encodeURIComponent(name)}`,
+        { method: "POST", body: viewer.canvas.toDataURL("image/jpeg", 0.9) });
+      return r.json();
+    }
+    viewer.scene.globe.depthTestAgainstTerrain = false;
+    (async () => {
+      try {
+        const urls = __TILESETS__;            // one building, or several
+        const loaded = [];
+        let points = 0, triangles = 0;
+        for (const url of urls) {
+          const tileset = await Cesium.Cesium3DTileset.fromUrl(url, { maximumScreenSpaceError: 4 });
+          tileset.style = new Cesium.Cesium3DTileStyle({ pointSize: "3" });
+          tileset.pointCloudShading.attenuation = true;
+          viewer.scene.primitives.add(tileset);
+          points += (tileset.extras && tileset.extras.points) || 0;
+          triangles += (tileset.extras && tileset.extras.triangles) || 0;
+          loaded.push(tileset);
+        }
+        document.getElementById("info").textContent = triangles
+          ? `${loaded.length} building(s) · ${triangles.toLocaleString()} textured triangles · glTF mesh`
+          : `${loaded.length} building(s) · ${points.toLocaleString()} points · root + 8 children each, refine ADD`;
+        // Frame them all: the union of the bounding spheres.
+        const centers = loaded.map((t) => t.boundingSphere.center);
+        const center = centers.reduce((a, c) => Cesium.Cartesian3.add(a, c, a), new Cesium.Cartesian3());
+        Cesium.Cartesian3.divideByScalar(center, centers.length, center);
+        const radius = Math.max(...loaded.map((t) => Cesium.Cartesian3.distance(center, t.boundingSphere.center) + t.boundingSphere.radius));
+        const range = loaded.length > 1 ? radius * 2.6 : 420;
+        viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(Cesium.Math.toRadians(35), Cesium.Math.toRadians(-18), range));
+        viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+      } catch (e) {
+        document.getElementById("info").textContent = "failed: " + e.message;
+      }
+    })();
+  </script>
+</body>
+</html>

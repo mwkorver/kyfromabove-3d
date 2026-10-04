@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>LiDAR Mesh vs Overture — S3 Standalone Viewer</title>
+  <script>window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/";</script>
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Cesium.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Widgets/widgets.css">
+  <script src="https://cdn.jsdelivr.net/npm/geotiff/dist-browser/geotiff.js"></script>
+  <style>
+    html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #000; font-family: system-ui, -apple-system, sans-serif; }
+    #row { display: flex; width: 100%; height: 100%; }
+    .pane { position: relative; flex: 1 1 50%; height: 100%; }
+    .pane + .pane { border-left: 2px solid #fff; }
+    .cesium { width: 100%; height: 100%; }
+    .hud { position: absolute; top: 10px; left: 10px; z-index: 5; font-size: 13px; color: #fff;
+           background: rgba(0,0,0,.68); padding: 8px 12px; border-radius: 6px; max-width: 46%; pointer-events: auto; }
+    .hud b { font-size: 15px; }
+    .hud .muted { color: #bbb; }
+    .cesium-viewer-bottom { display: none; }
+    
+    /* Layer Selector Buttons */
+    .layer-btn { background: #222; color: #bbb; border: 1px solid #555; border-radius: 4px; padding: 3px 8px;
+                 font: 11px system-ui, sans-serif; cursor: pointer; transition: all 0.15s ease; }
+    .layer-btn:hover { color: #fff; border-color: #888; }
+    .layer-btn.active { background: #ffd23f; color: #111; font-weight: 600; border-color: #ffd23f; }
+
+    /* Interactive North Arrow */
+    .north-arrow { position: absolute; top: 10px; right: 10px; z-index: 10; width: 44px; height: 44px; cursor: pointer;
+                   user-select: none; background: rgba(0, 0, 0, 0.68); border: 1px solid rgba(255, 255, 255, 0.3);
+                   border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
+    .north-arrow:hover { background: rgba(20, 20, 20, 0.9); border-color: #ffd23f; transform: scale(1.06); }
+    .north-arrow:active { transform: scale(0.95); }
+    .north-needle { transform-origin: 20px 20px; transition: transform 0.05s linear; }
+
+    /* Oblique Inspector Modal */
+    #panel { position: absolute; left: 10px; bottom: 10px; z-index: 6; width: min(46vw, 640px);
+             font-size: 13px; color: #fff; background: rgba(0,0,0,.8); border-radius: 8px;
+             padding: 10px 12px; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.6); }
+    #panel.open { display: block; }
+    #panel .title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    #panel .title b { font-size: 15px; }
+    #panel .muted { color: #bbb; }
+    #panel button { background: #333; color: #fff; border: 1px solid #666; border-radius: 4px; padding: 2px 8px; cursor: pointer; }
+    #panel button:hover { background: #444; }
+    #main { position: relative; margin-top: 8px; background: #111; border-radius: 4px; overflow: hidden;
+            display: inline-block; max-width: 100%; min-height: 120px; }
+    #main img { display: block; max-width: 100%; max-height: 42vh; width: auto; height: auto; }
+    #main canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+    #caption { margin-top: 6px; font-size: 12px; }
+    #strip { display: flex; gap: 6px; overflow-x: auto; margin-top: 8px; padding-bottom: 4px; }
+    #strip .thumb { flex: 0 0 auto; width: 88px; cursor: pointer; text-align: center; font-size: 11px; color: #ccc; }
+    #strip .thumb img, #strip .thumb .thumb-canvas { width: 88px; height: 88px; object-fit: cover; border-radius: 3px; border: 2px solid transparent; display: block; background: #222; }
+    #strip .thumb.current img, #strip .thumb.current .thumb-canvas { border-color: #ffd23f; }
+    #panel label { color: #ccc; font-size: 12px; margin-left: 8px; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #ffd23f; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="row">
+    <!-- Left Pane: LiDAR Mesh -->
+    <div class="pane">
+      <div class="hud">
+        <b id="left-title">Downtown Louisville: LiDAR + Aerial Frames</b><br>
+        <span class="muted" id="left-info">loading…</span><br>
+        <div class="product-row" data-pane="left" style="margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <span class="muted" style="font-size: 11px;">Product:</span>
+          <button class="layer-btn product-btn" data-key="1" title="Overture footprints at their LiDAR heights (measured)">1 · footprints</button>
+          <button class="layer-btn product-btn" data-key="2" title="LiDAR geometry, colour only where a frame saw it (measured)">2 · measured</button>
+          <button class="layer-btn product-btn" data-key="3" title="Product 2 with unseen texels invented from each building's own frames">3 · completed</button>
+          <button class="layer-btn product-btn" data-key="3t" title="Product 3 with every invented texel tinted magenta">3 · invented shown</button>
+        </div>
+        <span class="muted">click a building to slice S3 aerial obliques live</span>
+        <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <span class="muted" style="font-size: 11px;">Basemap:</span>
+          <button id="btn-osm" class="layer-btn active" title="OpenStreetMap vector basemap">OpenStreetMap</button>
+          <button id="btn-naip" class="layer-btn" title="USGS National Map NAIP Imagery (WMS)">USGS NAIP</button>
+          <span class="muted" style="font-size: 11px; margin-left: 6px;">Mesh:</span>
+          <button id="btn-mesh-solid" class="layer-btn active" title="Textured solid 3D mesh">Solid</button>
+          <button id="btn-mesh-wireframe" class="layer-btn" title="Wireframe mode">Wireframe</button>
+        </div>
+      </div>
+      <div class="north-arrow" title="Click to face North (reset heading)" onclick="resetNorth()">
+        <svg viewBox="0 0 40 40" width="34" height="34" style="overflow: visible;">
+          <g class="north-needle">
+            <polygon points="20,4 25,20 20,17" fill="#ff4444"/>
+            <polygon points="20,4 15,20 20,17" fill="#ff7878"/>
+            <polygon points="20,36 25,20 20,23" fill="#aaaaaa"/>
+            <polygon points="20,36 15,20 20,23" fill="#ffffff"/>
+            <circle cx="20" cy="20" r="2.5" fill="#ffffff" stroke="#333333" stroke-width="0.8"/>
+            <text x="20" y="2" font-size="7" font-weight="bold" fill="#ff4444" text-anchor="middle" font-family="system-ui, sans-serif">N</text>
+          </g>
+        </svg>
+      </div>
+      <div id="left" class="cesium"></div>
+
+      <!-- Oblique Inspector Panel -->
+      <div id="panel">
+        <div class="title">
+          <span><b id="p-name"></b> <span class="muted" id="p-meta"></span></span>
+          <span><label><input type="checkbox" id="p-follow" checked> follow camera</label> <button id="p-close">close</button></span>
+        </div>
+        <div id="main"><img id="p-img" alt=""><canvas id="p-canvas"></canvas></div>
+        <div id="caption" class="muted"></div>
+        <div id="strip"></div>
+      </div>
+    </div>
+
+    <!-- Right Pane: Overture Footprints -->
+    <div class="pane">
+      <div class="hud">
+        <b id="right-title">Overture footprints at the LiDAR's heights</b><br>
+        <span class="muted" id="right-info">loading…</span>
+        <div class="product-row" data-pane="right" style="margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <span class="muted" style="font-size: 11px;">Product:</span>
+          <button class="layer-btn product-btn" data-key="1" title="Overture footprints at their LiDAR heights (measured)">1 · footprints</button>
+          <button class="layer-btn product-btn" data-key="2" title="LiDAR geometry, colour only where a frame saw it (measured)">2 · measured</button>
+          <button class="layer-btn product-btn" data-key="3" title="Product 2 with unseen texels invented from each building's own frames">3 · completed</button>
+          <button class="layer-btn product-btn" data-key="3t" title="Product 3 with every invented texel tinted magenta">3 · invented shown</button>
+        </div>
+        <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+          <span class="muted" style="font-size: 11px;">Heights:</span>
+          <label style="font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            <input type="radio" name="heights" value="lidar" checked style="cursor: pointer; margin: 0; accent-color: #ffd23f;">
+            LiDAR derived heights
+          </label>
+          <label style="font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            <input type="radio" name="heights" value="overture" style="cursor: pointer; margin: 0; accent-color: #ffd23f;">
+            Overture building heights
+          </label>
+        </div>
+      </div>
+      <div class="north-arrow" title="Click to face North (reset heading)" onclick="resetNorth()">
+        <svg viewBox="0 0 40 40" width="34" height="34" style="overflow: visible;">
+          <g class="north-needle">
+            <polygon points="20,4 25,20 20,17" fill="#ff4444"/>
+            <polygon points="20,4 15,20 20,17" fill="#ff7878"/>
+            <polygon points="20,36 25,20 20,23" fill="#aaaaaa"/>
+            <polygon points="20,36 15,20 20,23" fill="#ffffff"/>
+            <circle cx="20" cy="20" r="2.5" fill="#ffffff" stroke="#333333" stroke-width="0.8"/>
+            <text x="20" y="2" font-size="7" font-weight="bold" fill="#ff4444" text-anchor="middle" font-family="system-ui, sans-serif">N</text>
+          </g>
+        </svg>
+      </div>
+      <div id="right" class="cesium"></div>
+    </div>
+  </div>
+
+  <script>
+    Cesium.Ion.defaultAccessToken = "";
+
+    // 100% Static Ground DEM Terrain
+    function makeTerrain() {
+      return new Cesium.CustomHeightmapTerrainProvider({
+        width: 32, height: 32,
+        callback: async (x, y, level) => {
+          try {
+            const r = await fetch(`data/terrain/${level}_${x}_${y}.bin`);
+            if (!r.ok) {
+              const flat = new Float32Array(32 * 32);
+              flat.fill(106.9);
+              return flat;
+            }
+            const buf = await r.arrayBuffer();
+            if (buf.byteLength !== 32 * 32 * 4) {
+              const flat = new Float32Array(32 * 32);
+              flat.fill(106.9);
+              return flat;
+            }
+            return new Float32Array(buf);
+          } catch (err) {
+            const flat = new Float32Array(32 * 32);
+            flat.fill(106.9);
+            return flat;
+          }
+        },
+      });
+    }
+
+    function makeViewer(id) {
+      const osmLayer = new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider({
+        url: "https://tile.openstreetmap.org/",
+        maximumLevel: 19
+      }));
+      const naipLayer = new Cesium.ImageryLayer(new Cesium.WebMapServiceImageryProvider({
+        url: "https://imagery.nationalmap.gov/arcgis/services/USGSNAIPImagery/ImageServer/WMSServer",
+        layers: "USGSNAIPImagery:NaturalColor",
+        parameters: { format: "image/jpeg", transparent: false },
+        tilingScheme: new Cesium.WebMercatorTilingScheme(),
+        maximumLevel: 20
+      }));
+      naipLayer.show = false;
+
+      const v = new Cesium.Viewer(id, {
+        baseLayer: osmLayer,
+        terrainProvider: makeTerrain(),
+        geocoder: false, baseLayerPicker: false, sceneModePicker: false, navigationHelpButton: false,
+        animation: false, timeline: false, homeButton: false, infoBox: false, selectionIndicator: false,
+        fullscreenButton: false, contextOptions: { webgl: { preserveDrawingBuffer: true } },
+      });
+      v.imageryLayers.add(naipLayer);
+      v._osmLayer = osmLayer;
+      v._naipLayer = naipLayer;
+      v.scene.globe.depthTestAgainstTerrain = false;
+      return v;
+    }
+
+    const left = makeViewer("left"), right = makeViewer("right");
+    window.viewer = left;
+
+    // Basemap toggle
+    function setBasemap(type) {
+      const isNaip = (type === "naip");
+      for (const v of [left, right]) {
+        if (v._osmLayer) v._osmLayer.show = !isNaip;
+        if (v._naipLayer) v._naipLayer.show = isNaip;
+      }
+      document.getElementById("btn-osm").classList.toggle("active", !isNaip);
+      document.getElementById("btn-naip").classList.toggle("active", isNaip);
+    }
+    document.getElementById("btn-osm").addEventListener("click", () => setBasemap("osm"));
+    document.getElementById("btn-naip").addEventListener("click", () => setBasemap("naip"));
+
+    // Left Mesh Mode (Solid vs Wireframe)
+    let leftTilesets = [];
+    let isWireframe = false;
+
+    function setMeshMode(mode) {
+      isWireframe = (mode === "wireframe");
+      for (const t of leftTilesets) {
+        t.debugWireframe = isWireframe;
+      }
+      document.getElementById("btn-mesh-solid").classList.toggle("active", !isWireframe);
+      document.getElementById("btn-mesh-wireframe").classList.toggle("active", isWireframe);
+      left.scene.requestRender();
+
+      const u = new URL(window.location.href);
+      if (isWireframe) u.searchParams.set("wireframe", "1");
+      else u.searchParams.delete("wireframe");
+      window.history.replaceState({}, "", u);
+    }
+    document.getElementById("btn-mesh-solid").addEventListener("click", () => setMeshMode("solid"));
+    document.getElementById("btn-mesh-wireframe").addEventListener("click", () => setMeshMode("wireframe"));
+
+    // Interactive North Arrow
+    function updateNorthArrows() {
+      const v = leader || left;
+      const heading = v.camera.heading;
+      const deg = -Cesium.Math.toDegrees(heading);
+      for (const el of document.querySelectorAll(".north-needle")) {
+        el.style.transform = `rotate(${deg}deg)`;
+      }
+    }
+
+    function resetNorth() {
+      const v = leader || left;
+      const canvas = v.canvas;
+      const centerScreen = new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2);
+      const ray = v.camera.getPickRay(centerScreen);
+      let target = v.scene.pickPositionSupported ? v.scene.pickPosition(centerScreen) : null;
+      if (!target) target = v.scene.globe.pick(ray, v.scene);
+      if (!target) target = v.camera.pickEllipsoid(centerScreen, v.scene.globe.ellipsoid);
+
+      const pitch = v.camera.pitch;
+      if (target) {
+        const range = Cesium.Cartesian3.distance(v.camera.positionWC, target);
+        const sphere = new Cesium.BoundingSphere(target, 1.0);
+        v.camera.flyToBoundingSphere(sphere, {
+          offset: new Cesium.HeadingPitchRange(0.0, pitch, range),
+          duration: 0.5
+        });
+      } else {
+        v.camera.flyTo({
+          destination: v.camera.positionWC.clone(),
+          orientation: { heading: 0.0, pitch: pitch, roll: 0.0 },
+          duration: 0.5
+        });
+      }
+    }
+    window.resetNorth = resetNorth;
+
+    // Camera Synchronization
+    let leader = left;
+    left.canvas.addEventListener("pointerdown", () => { leader = left; });
+    right.canvas.addEventListener("pointerdown", () => { leader = right; });
+    left.canvas.addEventListener("wheel", () => { leader = left; }, { passive: true });
+    right.canvas.addEventListener("wheel", () => { leader = right; }, { passive: true });
+    function copyCamera(from, to) {
+      to.camera.setView({ destination: from.camera.positionWC,
+                          orientation: { direction: from.camera.directionWC, up: from.camera.upWC } });
+    }
+    left.scene.preRender.addEventListener(() => {
+      if (leader === left) copyCamera(left, right);
+      updateNorthArrows();
+    });
+    right.scene.preRender.addEventListener(() => {
+      if (leader === right) copyCamera(right, left);
+      updateNorthArrows();
+    });
+
+    // 3D Tileset Loader
+    async function load(viewer, urls, infoId, isLeft = false) {
+      const loaded = [];
+      let triangles = 0, points = 0, buildings = 0;
+      for (const url of urls) {
+        const t = await Cesium.Cesium3DTileset.fromUrl(url, {
+          maximumScreenSpaceError: 4,
+          enableDebugWireframe: true,
+        });
+        if (isLeft && isWireframe) {
+          t.debugWireframe = true;
+        }
+        t.style = new Cesium.Cesium3DTileStyle({ pointSize: "3" });
+        viewer.scene.primitives.add(t);
+        triangles += (t.extras && t.extras.triangles) || 0;
+        points += (t.extras && t.extras.points) || 0;
+        buildings += (t.extras && t.extras.buildings) || 1;
+        loaded.push(t);
+      }
+      const bits = [];
+      if (triangles) bits.push(`${triangles.toLocaleString()} textured triangles`);
+      if (points) bits.push(`${points.toLocaleString()} points`);
+      const h = loaded[0] && loaded[0].extras && loaded[0].extras.heights;
+      if (h) bits.push(h.lidar
+        ? `${buildings} boxes: ${h.lidar} at the LiDAR's height, ${h.height + h.floors + h.default} without enough returns (Overture's height or a guess)`
+        : `${buildings} boxes: ${h.height} with a height, ${h.floors} from a floor count, ${h.default} guessed`);
+      document.getElementById(infoId).textContent = bits.join(" · ") || `${loaded.length} tileset(s)`;
+      return loaded;
+    }
+
+    // The three products (docs/PRODUCTS.md), each pane showing any one
+    const PRODUCTS = {
+      "1": { url: "tilesets/overture_boxes/downtown_lidar/tileset.json", title: "Product 1: Overture footprints at their LiDAR heights (measured)" },
+      "1o": { url: "tilesets/overture_boxes/downtown/tileset.json", title: "Overture buildings at Overture's own heights (for comparison)" },
+      "2": { url: "tilesets/downtown/tileset.json", title: "Product 2: LiDAR geometry, colour only where a frame saw it (measured)" },
+      "3": { url: "tilesets/downtown_complete/tileset.json", title: "Product 3: product 2 with unseen texels invented from each building's own frames" },
+      "3t": { url: "tilesets/downtown_complete_tint/tileset.json", title: "Product 3, invented texels tinted magenta" },
+    };
+    const qs = new URLSearchParams(window.location.search);
+    const paneProduct = { left: qs.get("left_product") || (qs.get("left") ? null : "2"),
+                          right: qs.get("right_product") || (qs.get("right") ? null : "1") };
+    function markProducts() {
+      for (const row of document.querySelectorAll(".product-row")) {
+        for (const b of row.querySelectorAll(".product-btn")) b.classList.toggle("active", paneProduct[row.dataset.pane] === b.dataset.key);
+      }
+    }
+    async function showProduct(pane, key) {
+      const p = PRODUCTS[key];
+      const viewer = pane === "left" ? left : right;
+      const current = pane === "left" ? leftTilesets : rightTilesets;
+      for (const t of current) viewer.scene.primitives.remove(t);
+      document.getElementById(`${pane}-info`).textContent = "loading…";
+      document.getElementById(`${pane}-title`).textContent = p.title;
+      let loaded = [];
+      try {
+        loaded = await load(viewer, [p.url], `${pane}-info`, pane === "left");
+      } catch (e) {
+        document.getElementById(`${pane}-info`).textContent = "not available here: " + e.message;
+      }
+      if (pane === "left") leftTilesets = loaded; else rightTilesets = loaded;
+      paneProduct[pane] = key;
+      markProducts();
+      const u = new URL(window.location);
+      u.searchParams.set(`${pane}_product`, key);
+      window.history.replaceState({}, "", u);
+    }
+    for (const b of document.querySelectorAll(".product-btn")) {
+      b.addEventListener("click", () => showProduct(b.closest(".product-row").dataset.pane, b.dataset.key));
+    }
+
+    // Dynamic Overture Heights Toggle
+    let rightTilesets = [];
+    const heightUrls = {
+      lidar: "tilesets/overture_boxes/downtown_lidar/tileset.json",
+      overture: "tilesets/overture_boxes/downtown/tileset.json"
+    };
+    const heightTitles = {
+      lidar: "Overture footprints at the LiDAR's heights",
+      overture: "Overture buildings, extruded to their height"
+    };
+
+    async function switchHeights(type) {
+      const url = heightUrls[type] || heightUrls.lidar;
+      const title = heightTitles[type] || heightTitles.lidar;
+
+      for (const t of rightTilesets) right.scene.primitives.remove(t);
+      rightTilesets = [];
+      document.getElementById("right-info").textContent = "loading…";
+      const titleEl = document.getElementById("right-title");
+      if (titleEl) titleEl.textContent = title;
+
+      try {
+        rightTilesets = await load(right, [url], "right-info");
+      } catch (e) {
+        document.getElementById("right-info").textContent = "failed to load: " + e.message;
+      }
+
+      const u = new URL(window.location);
+      u.searchParams.set("heights", type);
+      window.history.replaceState({}, "", u);
+    }
+
+    const currentHeights = new URLSearchParams(window.location.search).get("heights") || "lidar";
+    const initialRadio = document.querySelector(`input[name="heights"][value="${currentHeights}"]`);
+    if (initialRadio) initialRadio.checked = true;
+
+    document.querySelectorAll('input[name="heights"]').forEach((el) => {
+      el.addEventListener("change", (e) => {
+        if (e.target.checked) switchHeights(e.target.value);
+      });
+    });
+
+    // ---------------------------------------------------------------- Oblique In-Browser Real-Time Slicing
+    const panel = document.getElementById("panel");
+    let current = null;
+    let currentIndex = -1;
+    let outline = [];
+    let buildingIndex = null;
+
+    async function loadBuildingIndex() {
+      if (!buildingIndex) {
+        try {
+          buildingIndex = await fetch("data/buildings_index.json").then(r => r.json());
+        } catch (e) {
+          buildingIndex = {};
+        }
+      }
+      return buildingIndex;
+    }
+
+    function armClicks(v) {
+      const h = new Cesium.ScreenSpaceEventHandler(v.canvas);
+      h.setInputAction(async (click) => {
+        const pos = click.position;
+        const p = v.scene.pick(pos);
+        const tile = p && p.content && p.content.tile;
+        if (tile && tile.extras && tile.extras.gers) return showBuilding(tile.extras.gers, v);
+        
+        let cart = v.scene.pickPositionSupported ? v.scene.pickPosition(pos) : undefined;
+        if (!cart) cart = v.camera.pickEllipsoid(pos, v.scene.globe.ellipsoid);
+        if (!cart) return;
+        const c = Cesium.Cartographic.fromCartesian(cart);
+        const lon = Cesium.Math.toDegrees(c.longitude), lat = Cesium.Math.toDegrees(c.latitude);
+        
+        // Match building from local index
+        const idx = await loadBuildingIndex();
+        for (const [gers, b] of Object.entries(idx)) {
+          if (b.ring_lonlat && pointInPolygon(lon, lat, b.ring_lonlat)) {
+            return showBuilding(gers, v);
+          }
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    }
+    armClicks(left); armClicks(right);
+
+    function pointInPolygon(x, y, ring) {
+      let inside = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function lookENU(v, ring) {
+      const [lon, lat] = ring[0];
+      const enu = Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(lon, lat));
+      const inv = Cesium.Matrix4.inverseTransformation(enu, new Cesium.Matrix4());
+      const d = Cesium.Matrix4.multiplyByPointAsVector(inv, v.camera.directionWC, new Cesium.Cartesian3());
+      return [d.x, d.y, d.z];
+    }
+
+    function scored(rec, v) {
+      const d = lookENU(v, rec.ring_lonlat);
+      return rec.frames.map((f) => {
+        const dot = d[0] * f.look_enu[0] + d[1] * f.look_enu[1] + d[2] * f.look_enu[2];
+        return { f, off: Cesium.Math.toDegrees(Math.acos(Math.max(-1, Math.min(1, dot)))) };
+      }).sort((a, b) => a.off - b.off);
+    }
+
+    // ---------------------------------------------------------------- Oblique Slicing & Caching
+    const cropCache = new Map();     // cacheKey -> dataUrl
+    const tiffCache = new Map();     // url -> Promise<GeoTIFF>
+    const tiffInfoCache = new Map(); // url -> Promise<{ tiff, count, baseW, baseH, levels: [...] }>
+    let currentThumbQueueId = 0;
+
+    async function getTiff(url) {
+      if (tiffCache.has(url)) return tiffCache.get(url);
+      const p = GeoTIFF.fromUrl(url).catch(err => {
+        tiffCache.delete(url);
+        throw err;
+      });
+      tiffCache.set(url, p);
+      return p;
+    }
+
+    async function getTiffInfo(url) {
+      if (tiffInfoCache.has(url)) return tiffInfoCache.get(url);
+      const p = (async () => {
+        const tiff = await getTiff(url);
+        const count = await tiff.getImageCount();
+        const baseImg = await tiff.getImage(0);
+        const baseW = baseImg.getWidth();
+        const baseH = baseImg.getHeight();
+
+        const levels = [{ index: 0, image: baseImg, width: baseW, height: baseH, factor: 1.0 }];
+        for (let i = 1; i < count; i++) {
+          try {
+            const img = await tiff.getImage(i);
+            const w = img.getWidth();
+            const h = img.getHeight();
+            if (w > 0 && w < baseW) {
+              levels.push({ index: i, image: img, width: w, height: h, factor: baseW / w });
+            }
+          } catch (e) {
+            console.warn("Failed to load overview", i, e);
+          }
+        }
+        levels.sort((a, b) => a.factor - b.factor);
+        return { tiff, count, baseW, baseH, levels };
+      })().catch(err => {
+        tiffInfoCache.delete(url);
+        throw err;
+      });
+      tiffInfoCache.set(url, p);
+      return p;
+    }
+
+    // In-browser high-performance S3 COG slicing using internal overviews
+    async function sliceCrop(f, maxPx = 1600) {
+      const key = `${f.frame_id}_${f.x0_px}_${f.y0_px}_${maxPx}`;
+      if (cropCache.has(key)) return cropCache.get(key);
+
+      const info = await getTiffInfo(f.s3_url);
+      const maxDim = Math.max(f.width_px, f.height_px);
+      const targetScale = Math.min(1.0, maxPx / maxDim);
+
+      // Select overview: choose smallest overview providing at least 65% of target resolution
+      let chosen = info.levels[0];
+      for (let i = info.levels.length - 1; i >= 0; i--) {
+        const lvl = info.levels[i];
+        if ((1.0 / lvl.factor) >= targetScale * 0.65) {
+          chosen = lvl;
+          break;
+        }
+      }
+
+      const sx = chosen.width / info.baseW;
+      const sy = chosen.height / info.baseH;
+
+      const winX0 = Math.max(0, Math.floor(f.x0_px * sx));
+      const winY0 = Math.max(0, Math.floor(f.y0_px * sy));
+      const winX1 = Math.min(chosen.width, Math.ceil((f.x0_px + f.width_px) * sx));
+      const winY1 = Math.min(chosen.height, Math.ceil((f.y0_px + f.height_px) * sy));
+
+      const cropW = winX1 - winX0;
+      const cropH = winY1 - winY0;
+
+      // Read RGB directly with color space decoding (e.g. YCbCr -> RGB)
+      let rgb;
+      try {
+        rgb = await chosen.image.readRGB({
+          window: [winX0, winY0, winX1, winY1]
+        });
+      } catch (e) {
+        console.warn("readRGB failed, falling back to readRasters with YCbCr conversion:", e);
+        const rasters = await chosen.image.readRasters({
+          window: [winX0, winY0, winX1, winY1]
+        });
+        const y = rasters[0], cb = rasters[1] || y, cr = rasters[2] || y;
+        const r = new Uint8Array(y.length), g = new Uint8Array(y.length), b = new Uint8Array(y.length);
+        for (let i = 0; i < y.length; i++) {
+          r[i] = Math.min(255, Math.max(0, Math.round(y[i] + 1.402 * (cr[i] - 128))));
+          g[i] = Math.min(255, Math.max(0, Math.round(y[i] - 0.344136 * (cb[i] - 128) - 0.714136 * (cr[i] - 128))));
+          b[i] = Math.min(255, Math.max(0, Math.round(y[i] + 1.772 * (cb[i] - 128))));
+        }
+        rgb = [r, g, b];
+      }
+
+      // Save sub-pixel offset for wireframe alignment
+      f._lastCropOffset = {
+        s: sx,
+        dx: (f.x0_px * sx) - winX0,
+        dy: (f.y0_px * sy) - winY0
+      };
+
+      const cv = document.createElement("canvas");
+      cv.width = cropW;
+      cv.height = cropH;
+      const ctx = cv.getContext("2d");
+      const imgData = ctx.createImageData(cropW, cropH);
+      const data = imgData.data;
+      const r = rgb[0];
+      const g = rgb[1] || r;
+      const b = rgb[2] || r;
+
+      for (let i = 0, j = 0; i < r.length; i++, j += 4) {
+        data[j]     = r[i];
+        data[j + 1] = g[i];
+        data[j + 2] = b[i];
+        data[j + 3] = 255;
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      const quality = maxPx <= 300 ? 0.80 : 0.88;
+      const url = cv.toDataURL("image/jpeg", quality);
+      cropCache.set(key, url);
+      return url;
+    }
+
+    function drawOutline(f) {
+      const img = document.getElementById("p-img"), cv = document.getElementById("p-canvas");
+      if (!img.naturalWidth) return;
+      cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+      const g = cv.getContext("2d");
+      g.clearRect(0, 0, cv.width, cv.height);
+
+      const s = f._lastCropOffset ? f._lastCropOffset.s : (img.naturalWidth / f.width_px);
+      const dx = f._lastCropOffset ? f._lastCropOffset.dx : 0;
+      const dy = f._lastCropOffset ? f._lastCropOffset.dy : 0;
+
+      g.lineWidth = Math.max(2, 3 * s);
+      const ring = (pts, colour) => {
+        g.strokeStyle = colour; g.beginPath();
+        pts.forEach(([u, vv], i) => (i ? g.lineTo(u * s + dx, vv * s + dy) : g.moveTo(u * s + dx, vv * s + dy)));
+        g.closePath(); g.stroke();
+      };
+      g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = Math.max(1, 1.5 * s);
+      f.base_px.forEach((b, i) => {
+        const r = f.roof_px[i];
+        if (r) {
+          g.beginPath();
+          g.moveTo(b[0] * s + dx, b[1] * s + dy);
+          g.lineTo(r[0] * s + dx, r[1] * s + dy);
+          g.stroke();
+        }
+      });
+      ring(f.base_px, "#ffd23f"); ring(f.roof_px, "#3fd6ff");
+    }
+
+    async function showFrame(i, off) {
+      const f = current.frames[i];
+      currentIndex = i;
+      const img = document.getElementById("p-img");
+      const caption = document.getElementById("caption");
+      caption.innerHTML = `<span class="spinner"></span> Loading aerial oblique…`;
+
+      const updateCaptionAndOutline = (source) => {
+        drawOutline(f);
+        const where = f.nadir ? "straight down" : `looks ${Math.round(f.azimuth_deg)}°, ${Math.round(f.elevation_deg)}° down`;
+        const tag = source ? `[${source}] ` : "";
+        caption.textContent = `${tag}${f.head} head · ${f.frame_id.split("/").pop()} · ${where} · ${Math.round(off)}° off your view · crop ${f.width_px} px`;
+      };
+
+      for (const el of document.querySelectorAll("#strip .thumb")) {
+        el.classList.toggle("current", +el.dataset.index === i);
+      }
+
+      // Try static pre-cut image first if building has pre-cut crops
+      if (current.has_crops) {
+        const precutUrl = `data/crops/${current.gers}/${String(i).padStart(3, "0")}_1600.jpg`;
+        f._lastCropOffset = null; // direct pre-cut image has 0 subpixel offset
+        img.onload = () => updateCaptionAndOutline("cached");
+        img.onerror = async () => {
+          img.onerror = null;
+          try {
+            caption.innerHTML = `<span class="spinner"></span> Slicing Cloud-Optimized GeoTIFF live from S3…`;
+            const dataUrl = await sliceCrop(f, 1600);
+            img.onload = () => updateCaptionAndOutline("live COG");
+            img.src = dataUrl;
+          } catch (err) {
+            caption.textContent = `Error slicing frame: ${err.message}`;
+          }
+        };
+        img.src = precutUrl;
+        return;
+      }
+
+      // Live S3 COG slicing
+      try {
+        caption.innerHTML = `<span class="spinner"></span> Slicing Cloud-Optimized GeoTIFF live from S3…`;
+        const dataUrl = await sliceCrop(f, 1600);
+        img.onload = () => updateCaptionAndOutline("live COG");
+        img.src = dataUrl;
+        if (img.complete && img.naturalWidth) img.onload();
+      } catch (err) {
+        caption.textContent = `Error slicing frame from S3: ${err.message}`;
+      }
+    }
+
+    function refreshBest(v) {
+      if (!current || !document.getElementById("p-follow").checked) return;
+      const s = scored(current, v || left);
+      if (s[0].f.index !== currentIndex) showFrame(s[0].f.index, s[0].off);
+      else document.querySelectorAll("#strip .thumb").forEach((el) => {
+        const e = s.find((x) => x.f.index === +el.dataset.index);
+        if (e) el.querySelector("span").textContent = `${e.f.head} · ${Math.round(e.off)}°`;
+      });
+    }
+
+    async function showBuilding(gers, v) {
+      const rec = await fetch(`data/frames/${gers}.json`).then(r => r.ok ? r.json() : null);
+      if (!rec) return;
+      current = rec; currentIndex = -1;
+      document.getElementById("p-name").textContent = rec.name || gers.slice(0, 8);
+      const arch = rec.archetype || rec.path || "profile";
+      const tri = rec.triangles != null ? ` · ${rec.triangles.toLocaleString()} \u25b3` : "";
+      document.getElementById("p-meta").textContent =
+        `${rec.gers.slice(0, 8)} · ${rec.frames.length} frames · ${arch}${tri} · ${Math.round(rec.height_m)} m`;
+      
+      const s = scored(rec, v || left);
+      const strip = document.getElementById("strip");
+      strip.innerHTML = "";
+
+      for (const { f, off } of s) {
+        const el = document.createElement("div"); el.className = "thumb"; el.dataset.index = f.index;
+        el.innerHTML = `<img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='88' height='88'><rect fill='%23222' width='88' height='88'/></svg>" alt=""><span>${f.head} · ${Math.round(off)}°</span>`;
+        el.onclick = () => { document.getElementById("p-follow").checked = false; showFrame(f.index, off); };
+        strip.appendChild(el);
+      }
+
+      panel.classList.add("open");
+
+      // Prioritize loading the best main frame first!
+      showFrame(s[0].f.index, s[0].off);
+
+      // Render footprint outline on both globes
+      outline.forEach((e) => e.owner.entities.remove(e.entity)); outline = [];
+      const flat = rec.ring_lonlat.flat();
+      for (const vw of [left, right]) {
+        const entity = vw.entities.add({ polyline: { positions: Cesium.Cartesian3.fromDegreesArray(flat), clampToGround: true,
+                                                      classificationType: Cesium.ClassificationType.TERRAIN,
+                                                      width: 3, material: Cesium.Color.fromCssColorString("#ffd23f") } });
+        outline.push({ owner: vw, entity });
+      }
+
+      // Background thumbnail queue with cancellation
+      const queueId = ++currentThumbQueueId;
+      (async () => {
+        for (const { f } of s) {
+          if (queueId !== currentThumbQueueId) break;
+          const thumbEl = strip.querySelector(`.thumb[data-index="${f.index}"] img`);
+          if (!thumbEl) continue;
+
+          if (rec.has_crops) {
+            const precutThumb = `data/crops/${rec.gers}/${String(f.index).padStart(3, "0")}_320.jpg`;
+            thumbEl.onerror = async () => {
+              thumbEl.onerror = null;
+              if (queueId !== currentThumbQueueId) return;
+              try {
+                const u = await sliceCrop(f, 200);
+                if (queueId === currentThumbQueueId) thumbEl.src = u;
+              } catch (e) {}
+            };
+            thumbEl.src = precutThumb;
+          } else {
+            try {
+              const u = await sliceCrop(f, 200);
+              if (queueId !== currentThumbQueueId) break;
+              thumbEl.src = u;
+            } catch (e) {
+              console.warn("Thumbnail slice error:", e);
+            }
+          }
+        }
+      })();
+    }
+
+    document.getElementById("p-close").onclick = () => {
+      panel.classList.remove("open"); current = null;
+      ++currentThumbQueueId; // Cancel pending thumbnail loads
+      outline.forEach((e) => e.owner.entities.remove(e.entity)); outline = [];
+    };
+
+    left.camera.moveEnd.addEventListener(() => refreshBest(left));
+    right.camera.moveEnd.addEventListener(() => refreshBest(right));
+    window.showBuilding = showBuilding;
+
+    // Camera Framing
+    function frame(target, headingDeg, pitchDeg, range) {
+      left.camera.lookAt(target, new Cesium.HeadingPitchRange(Cesium.Math.toRadians(headingDeg), Cesium.Math.toRadians(pitchDeg), range));
+      left.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+      left.camera.setView({ destination: left.camera.positionWC.clone(),
+                            orientation: { direction: left.camera.directionWC.clone(), up: left.camera.upWC.clone() } });
+    }
+
+    // Startup
+    (async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const rightType = params.get("heights") || "lidar";
+        const leftUrl = paneProduct.left ? PRODUCTS[paneProduct.left].url : (params.get("left") || PRODUCTS["2"].url);
+        const rightUrl = paneProduct.right && paneProduct.right !== "1" ? PRODUCTS[paneProduct.right].url
+                         : (params.get("right") || heightUrls[rightType] || heightUrls.lidar);
+        if (paneProduct.left) document.getElementById("left-title").textContent = PRODUCTS[paneProduct.left].title;
+        if (paneProduct.right && paneProduct.right !== "1") document.getElementById("right-title").textContent = PRODUCTS[paneProduct.right].title;
+        markProducts();
+
+        leftTilesets = await load(left, [leftUrl], "left-info", true);
+        rightTilesets = await load(right, [rightUrl], "right-info", false);
+
+        if (params.get("wireframe") === "1" || params.get("wireframe") === "true") {
+          setMeshMode("wireframe");
+        }
+
+        const centers = leftTilesets.map((t) => t.boundingSphere.center);
+        const center = centers.reduce((a, c) => Cesium.Cartesian3.add(a, c, a), new Cesium.Cartesian3());
+        Cesium.Cartesian3.divideByScalar(center, centers.length, center);
+        const radius = Math.max(...leftTilesets.map((t) => Cesium.Cartesian3.distance(center, t.boundingSphere.center) + t.boundingSphere.radius));
+        window.center = center;
+        frame(center, 225, -20, radius * 2.4);
+      } catch (e) {
+        document.getElementById("left-info").textContent = "failed: " + e.message;
+      }
+    })();
+  </script>
+</body>
+</html>

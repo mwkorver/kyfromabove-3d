@@ -1,0 +1,60 @@
+{
+ "asset": {
+  "version": "1.1",
+  "generator": "kyfromabove-3d overture_boxes.py"
+ },
+ "geometricError": 500.0,
+ "root": {
+  "transform": [
+   0.9972613773552923,
+   0.07395772600225901,
+   0.0,
+   0.0,
+   -0.04579336195014889,
+   0.6174872279163911,
+   0.7852467709971392,
+   0.0,
+   0.058075065533565055,
+   -0.7830962764084028,
+   0.6191829363270329,
+   0.0,
+   370893.02577234386,
+   -5001198.789182644,
+   3927904.1208268036,
+   1.0
+  ],
+  "boundingVolume": {
+   "sphere": [
+    194.43829345703125,
+    -176.810791015625,
+    85.02709978818893,
+    859.7650235349508
+   ]
+  },
+  "geometricError": 0.0,
+  "refine": "REPLACE",
+  "content": {
+   "uri": "boxes.glb"
+  }
+ },
+ "extras": {
+  "name": "Overture 2026-08-19.0 buildings",
+  "kind": "boxes",
+  "buildings": 378,
+  "heights": {
+   "height": 100,
+   "floors": 50,
+   "default": 228
+  },
+  "height_sources": {
+   "none": 278,
+   "Microsoft ML Buildings": 86,
+   "OpenStreetMap": 14
+  },
+  "origin_lon_lat_h": [
+   -85.75866192216158,
+   38.25649267585314,
+   104.12894861306995
+  ]
+ }
+}

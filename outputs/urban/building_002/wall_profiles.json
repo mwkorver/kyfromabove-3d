@@ -1,0 +1,2082 @@
+{
+ "0": [
+  {
+   "z_lo": 0.5090000033378601,
+   "z_hi": 5.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.2,
+   "n_returns": 90,
+   "spread_m": 0.27,
+   "along_lo": 2.3,
+   "along_hi": 33.2,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 5.50900000333786,
+   "z_hi": 10.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.07,
+   "n_returns": 50,
+   "spread_m": 0.28,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "extended"
+  },
+  {
+   "z_lo": 10.50900000333786,
+   "z_hi": 15.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.41,
+   "n_returns": 54,
+   "spread_m": 0.25,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 15.50900000333786,
+   "z_hi": 20.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.41,
+   "n_returns": 98,
+   "spread_m": 0.0,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "bridged"
+  },
+  {
+   "z_lo": 20.50900000333786,
+   "z_hi": 25.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.78,
+   "n_returns": 57,
+   "spread_m": 0.31,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 25.50900000333786,
+   "z_hi": 30.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.78,
+   "n_returns": 46,
+   "spread_m": 0.0,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "bridged"
+  },
+  {
+   "z_lo": 30.50900000333786,
+   "z_hi": 35.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.73,
+   "n_returns": 45,
+   "spread_m": 0.0,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "bridged"
+  },
+  {
+   "z_lo": 35.50900000333786,
+   "z_hi": 40.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.69,
+   "n_returns": 48,
+   "spread_m": 0.0,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "bridged"
+  },
+  {
+   "z_lo": 40.50900000333786,
+   "z_hi": 45.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.64,
+   "n_returns": 55,
+   "spread_m": 0.27,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 45.50900000333786,
+   "z_hi": 50.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.88,
+   "n_returns": 47,
+   "spread_m": 0.27,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 50.50900000333786,
+   "z_hi": 55.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.81,
+   "n_returns": 58,
+   "spread_m": 0.24,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 55.50900000333786,
+   "z_hi": 60.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.78,
+   "n_returns": 53,
+   "spread_m": 0.28,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 60.50900000333786,
+   "z_hi": 65.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.8,
+   "n_returns": 61,
+   "spread_m": 0.28,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 65.50900000333786,
+   "z_hi": 70.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.84,
+   "n_returns": 54,
+   "spread_m": 0.3,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 70.50900000333786,
+   "z_hi": 75.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.7,
+   "n_returns": 54,
+   "spread_m": 0.29,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 75.50900000333786,
+   "z_hi": 80.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.46,
+   "n_returns": 37,
+   "spread_m": 0.06,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 80.50900000333786,
+   "z_hi": 85.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -1.09,
+   "n_returns": 35,
+   "spread_m": 0.12,
+   "along_lo": 3.3,
+   "along_hi": 38.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 85.50900000333786,
+   "z_hi": 90.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.8,
+   "n_returns": 61,
+   "spread_m": 0.31,
+   "along_lo": 3.3,
+   "along_hi": 37.4,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 90.50900000333786,
+   "z_hi": 95.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.89,
+   "n_returns": 51,
+   "spread_m": 0.26,
+   "along_lo": 3.3,
+   "along_hi": 37.4,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 95.50900000333786,
+   "z_hi": 100.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.84,
+   "n_returns": 63,
+   "spread_m": 0.22,
+   "along_lo": 3.3,
+   "along_hi": 37.4,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 100.50900000333786,
+   "z_hi": 105.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.79,
+   "n_returns": 61,
+   "spread_m": 0.27,
+   "along_lo": 3.3,
+   "along_hi": 37.4,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 105.50900000333786,
+   "z_hi": 110.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.41,
+   "n_returns": 30,
+   "spread_m": 0.09,
+   "along_lo": 4.1,
+   "along_hi": 37.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 110.50900000333786,
+   "z_hi": 115.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.85,
+   "n_returns": 67,
+   "spread_m": 0.3,
+   "along_lo": 3.3,
+   "along_hi": 37.0,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 115.50900000333786,
+   "z_hi": 120.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -0.44,
+   "n_returns": 38,
+   "spread_m": 0.07,
+   "along_lo": 3.3,
+   "along_hi": 36.9,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 120.50900000333786,
+   "z_hi": 125.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 604,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 125.50900000333786,
+   "z_hi": 130.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -4.63,
+   "n_returns": 32,
+   "spread_m": 0.15,
+   "along_lo": 2.0,
+   "along_hi": 38.4,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 130.50900000333786,
+   "z_hi": 135.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 305,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 135.50900000333786,
+   "z_hi": 140.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 437,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 140.50900000333786,
+   "z_hi": 145.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 161,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 145.50900000333786,
+   "z_hi": 150.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -6.86,
+   "n_returns": 69,
+   "spread_m": 0.27,
+   "along_lo": 12.0,
+   "along_hi": 29.0,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 150.50900000333786,
+   "z_hi": 155.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 71,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 155.50900000333786,
+   "z_hi": 160.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 0,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 160.50900000333786,
+   "z_hi": 164.09860229492188,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 0,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  }
+ ],
+ "1": [
+  {
+   "z_lo": 0.5090000033378601,
+   "z_hi": 5.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.05,
+   "n_returns": 8,
+   "spread_m": 0.19,
+   "along_lo": 1.6,
+   "along_hi": 39.5,
+   "segments": [],
+   "status": "mirrored"
+  },
+  {
+   "z_lo": 5.50900000333786,
+   "z_hi": 10.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.97,
+   "n_returns": 76,
+   "spread_m": 0.16,
+   "along_lo": 1.6,
+   "along_hi": 39.5,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.25
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 10.50900000333786,
+   "z_hi": 15.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.04,
+   "n_returns": 145,
+   "spread_m": 0.17,
+   "along_lo": 1.6,
+   "along_hi": 39.5,
+   "segments": [
+    [
+     6.0,
+     15.0,
+     2.15
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 15.50900000333786,
+   "z_hi": 20.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.08,
+   "n_returns": 143,
+   "spread_m": 0.18,
+   "along_lo": 1.6,
+   "along_hi": 39.5,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.26
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 20.50900000333786,
+   "z_hi": 25.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.97,
+   "n_returns": 139,
+   "spread_m": 0.17,
+   "along_lo": 1.6,
+   "along_hi": 39.5,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.23
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 25.50900000333786,
+   "z_hi": 30.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.07,
+   "n_returns": 116,
+   "spread_m": 0.17,
+   "along_lo": 1.6,
+   "along_hi": 39.5,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.19
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 30.50900000333786,
+   "z_hi": 35.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.07,
+   "n_returns": 125,
+   "spread_m": 0.14,
+   "along_lo": 1.6,
+   "along_hi": 39.5,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 35.50900000333786,
+   "z_hi": 40.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.06,
+   "n_returns": 123,
+   "spread_m": 0.17,
+   "along_lo": 1.6,
+   "along_hi": 39.4,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.24
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 40.50900000333786,
+   "z_hi": 45.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.95,
+   "n_returns": 133,
+   "spread_m": 0.17,
+   "along_lo": 1.6,
+   "along_hi": 39.4,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 45.50900000333786,
+   "z_hi": 50.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.99,
+   "n_returns": 115,
+   "spread_m": 0.17,
+   "along_lo": 1.6,
+   "along_hi": 39.4,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.2
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 50.50900000333786,
+   "z_hi": 55.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.08,
+   "n_returns": 129,
+   "spread_m": 0.19,
+   "along_lo": 1.6,
+   "along_hi": 39.4,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 55.50900000333786,
+   "z_hi": 60.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.06,
+   "n_returns": 144,
+   "spread_m": 0.19,
+   "along_lo": 1.6,
+   "along_hi": 39.4,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 60.50900000333786,
+   "z_hi": 65.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.06,
+   "n_returns": 144,
+   "spread_m": 0.18,
+   "along_lo": 1.6,
+   "along_hi": 39.4,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.2
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 65.50900000333786,
+   "z_hi": 70.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.98,
+   "n_returns": 125,
+   "spread_m": 0.16,
+   "along_lo": 1.6,
+   "along_hi": 39.4,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.19
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 70.50900000333786,
+   "z_hi": 75.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.98,
+   "n_returns": 121,
+   "spread_m": 0.15,
+   "along_lo": 1.6,
+   "along_hi": 39.3,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 75.50900000333786,
+   "z_hi": 80.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.07,
+   "n_returns": 163,
+   "spread_m": 0.13,
+   "along_lo": 1.6,
+   "along_hi": 39.3,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.19
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 80.50900000333786,
+   "z_hi": 85.50900000333786,
+   "clip_lo": 1.1,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.97,
+   "n_returns": 126,
+   "spread_m": 0.18,
+   "along_lo": 1.7,
+   "along_hi": 39.2,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.2
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 85.50900000333786,
+   "z_hi": 90.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.1,
+   "n_returns": 134,
+   "spread_m": 0.13,
+   "along_lo": 1.7,
+   "along_hi": 39.2,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 90.50900000333786,
+   "z_hi": 95.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.1,
+   "n_returns": 136,
+   "spread_m": 0.17,
+   "along_lo": 1.7,
+   "along_hi": 39.2,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.22
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 95.50900000333786,
+   "z_hi": 100.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.97,
+   "n_returns": 148,
+   "spread_m": 0.19,
+   "along_lo": 1.9,
+   "along_hi": 39.2,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 100.50900000333786,
+   "z_hi": 105.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.1,
+   "n_returns": 140,
+   "spread_m": 0.17,
+   "along_lo": 1.9,
+   "along_hi": 39.2,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 105.50900000333786,
+   "z_hi": 110.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.96,
+   "n_returns": 122,
+   "spread_m": 0.18,
+   "along_lo": 9.7,
+   "along_hi": 39.2,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 110.50900000333786,
+   "z_hi": 115.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.97,
+   "n_returns": 126,
+   "spread_m": 0.17,
+   "along_lo": 9.7,
+   "along_hi": 39.2,
+   "segments": [
+    [
+     6.0,
+     12.0,
+     2.18
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 115.50900000333786,
+   "z_hi": 120.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 0.96,
+   "n_returns": 140,
+   "spread_m": 0.14,
+   "along_lo": 13.3,
+   "along_hi": 39.2,
+   "segments": [
+    [
+     0.0,
+     6.0,
+     -3.2
+    ],
+    [
+     6.0,
+     12.0,
+     2.22
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 120.50900000333786,
+   "z_hi": 125.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -1.67,
+   "n_returns": 151,
+   "spread_m": 0.22,
+   "along_lo": 4.8,
+   "along_hi": 37.7,
+   "segments": [
+    [
+     12.0,
+     18.0,
+     1.2
+    ],
+    [
+     30.0,
+     42.0,
+     -3.11
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 125.50900000333786,
+   "z_hi": 130.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -1.74,
+   "n_returns": 98,
+   "spread_m": 0.24,
+   "along_lo": 4.9,
+   "along_hi": 30.5,
+   "segments": [
+    [
+     30.0,
+     42.0,
+     -3.14
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 130.50900000333786,
+   "z_hi": 135.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -1.34,
+   "n_returns": 91,
+   "spread_m": 0.2,
+   "along_lo": 4.9,
+   "along_hi": 30.6,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 135.50900000333786,
+   "z_hi": 140.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": -7.25,
+   "offset_m": -1.25,
+   "n_returns": 523,
+   "spread_m": 0.0,
+   "along_lo": 6.7,
+   "along_hi": 35.6,
+   "segments": [],
+   "status": "open"
+  },
+  {
+   "z_lo": 140.50900000333786,
+   "z_hi": 145.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -3.4,
+   "n_returns": 65,
+   "spread_m": 0.18,
+   "along_lo": 12.7,
+   "along_hi": 32.0,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 145.50900000333786,
+   "z_hi": 150.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -4.89,
+   "n_returns": 85,
+   "spread_m": 0.23,
+   "along_lo": 14.4,
+   "along_hi": 28.9,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 150.50900000333786,
+   "z_hi": 155.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -7.21,
+   "n_returns": 115,
+   "spread_m": 0.29,
+   "along_lo": 13.9,
+   "along_hi": 30.0,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 155.50900000333786,
+   "z_hi": 160.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 20,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 160.50900000333786,
+   "z_hi": 164.09860229492188,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 0,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  }
+ ],
+ "2": [
+  {
+   "z_lo": 0.5090000033378601,
+   "z_hi": 5.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 2.19,
+   "n_returns": 96,
+   "spread_m": 0.27,
+   "along_lo": 1.7,
+   "along_hi": 41.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 5.50900000333786,
+   "z_hi": 10.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 2.15,
+   "n_returns": 42,
+   "spread_m": 0.22,
+   "along_lo": 1.7,
+   "along_hi": 41.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 10.50900000333786,
+   "z_hi": 15.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.95,
+   "n_returns": 45,
+   "spread_m": 0.2,
+   "along_lo": 1.7,
+   "along_hi": 41.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 15.50900000333786,
+   "z_hi": 20.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.95,
+   "n_returns": 96,
+   "spread_m": 0.0,
+   "along_lo": 1.7,
+   "along_hi": 41.0,
+   "segments": [],
+   "status": "bridged"
+  },
+  {
+   "z_lo": 20.50900000333786,
+   "z_hi": 25.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.34,
+   "n_returns": 40,
+   "spread_m": 0.24,
+   "along_lo": 1.7,
+   "along_hi": 41.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 25.50900000333786,
+   "z_hi": 30.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.39,
+   "n_returns": 41,
+   "spread_m": 0.23,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 30.50900000333786,
+   "z_hi": 35.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.32,
+   "n_returns": 37,
+   "spread_m": 0.14,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 35.50900000333786,
+   "z_hi": 40.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.26,
+   "n_returns": 39,
+   "spread_m": 0.23,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 40.50900000333786,
+   "z_hi": 45.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.22,
+   "n_returns": 42,
+   "spread_m": 0.16,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 45.50900000333786,
+   "z_hi": 50.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.14,
+   "n_returns": 36,
+   "spread_m": 0.1,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 50.50900000333786,
+   "z_hi": 55.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.14,
+   "n_returns": 43,
+   "spread_m": 0.0,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "bridged"
+  },
+  {
+   "z_lo": 55.50900000333786,
+   "z_hi": 60.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.23,
+   "n_returns": 36,
+   "spread_m": 0.18,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 60.50900000333786,
+   "z_hi": 65.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.27,
+   "n_returns": 39,
+   "spread_m": 0.25,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 65.50900000333786,
+   "z_hi": 70.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.34,
+   "n_returns": 40,
+   "spread_m": 0.26,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 70.50900000333786,
+   "z_hi": 75.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.35,
+   "n_returns": 37,
+   "spread_m": 0.23,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 75.50900000333786,
+   "z_hi": 80.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.29,
+   "n_returns": 43,
+   "spread_m": 0.2,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 80.50900000333786,
+   "z_hi": 85.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.29,
+   "n_returns": 49,
+   "spread_m": 0.26,
+   "along_lo": 1.8,
+   "along_hi": 40.9,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 85.50900000333786,
+   "z_hi": 90.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.25,
+   "n_returns": 45,
+   "spread_m": 0.24,
+   "along_lo": 2.2,
+   "along_hi": 40.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 90.50900000333786,
+   "z_hi": 95.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.24,
+   "n_returns": 36,
+   "spread_m": 0.1,
+   "along_lo": 2.3,
+   "along_hi": 40.1,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 95.50900000333786,
+   "z_hi": 100.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.15,
+   "n_returns": 49,
+   "spread_m": 0.13,
+   "along_lo": 2.3,
+   "along_hi": 40.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 100.50900000333786,
+   "z_hi": 105.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.2,
+   "n_returns": 47,
+   "spread_m": 0.2,
+   "along_lo": 2.7,
+   "along_hi": 40.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 105.50900000333786,
+   "z_hi": 110.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.69,
+   "n_returns": 40,
+   "spread_m": 0.2,
+   "along_lo": 4.9,
+   "along_hi": 38.5,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 110.50900000333786,
+   "z_hi": 115.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.4,
+   "n_returns": 42,
+   "spread_m": 0.24,
+   "along_lo": 5.0,
+   "along_hi": 38.5,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 115.50900000333786,
+   "z_hi": 120.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.59,
+   "n_returns": 53,
+   "spread_m": 0.22,
+   "along_lo": 5.0,
+   "along_hi": 38.5,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 120.50900000333786,
+   "z_hi": 125.50900000333786,
+   "clip_lo": 1.7,
+   "clip_hi": 41.7,
+   "back_offset_m": null,
+   "offset_m": 1.14,
+   "n_returns": 202,
+   "spread_m": 0.29,
+   "along_lo": 5.0,
+   "along_hi": 38.5,
+   "segments": [],
+   "status": "extended"
+  },
+  {
+   "z_lo": 125.50900000333786,
+   "z_hi": 130.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 277,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 130.50900000333786,
+   "z_hi": 135.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 254,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 135.50900000333786,
+   "z_hi": 140.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": -7.75,
+   "offset_m": -2.75,
+   "n_returns": 610,
+   "spread_m": 0.0,
+   "along_lo": 6.8,
+   "along_hi": 36.8,
+   "segments": [],
+   "status": "open"
+  },
+  {
+   "z_lo": 140.50900000333786,
+   "z_hi": 145.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 216,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 145.50900000333786,
+   "z_hi": 150.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 231,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 150.50900000333786,
+   "z_hi": 155.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -7.22,
+   "n_returns": 102,
+   "spread_m": 0.26,
+   "along_lo": 12.8,
+   "along_hi": 30.1,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 155.50900000333786,
+   "z_hi": 160.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 32,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 160.50900000333786,
+   "z_hi": 164.09860229492188,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 0,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  }
+ ],
+ "3": [
+  {
+   "z_lo": 0.5090000033378601,
+   "z_hi": 5.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.18,
+   "n_returns": 173,
+   "spread_m": 0.19,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 5.50900000333786,
+   "z_hi": 10.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.13,
+   "n_returns": 99,
+   "spread_m": 0.14,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 10.50900000333786,
+   "z_hi": 15.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.18,
+   "n_returns": 131,
+   "spread_m": 0.13,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [
+    [
+     33.0,
+     39.0,
+     2.05
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 15.50900000333786,
+   "z_hi": 20.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.19,
+   "n_returns": 118,
+   "spread_m": 0.13,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [
+    [
+     30.0,
+     36.0,
+     2.02
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 20.50900000333786,
+   "z_hi": 25.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.14,
+   "n_returns": 136,
+   "spread_m": 0.15,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 25.50900000333786,
+   "z_hi": 30.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.18,
+   "n_returns": 118,
+   "spread_m": 0.13,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 30.50900000333786,
+   "z_hi": 35.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.17,
+   "n_returns": 114,
+   "spread_m": 0.13,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [
+    [
+     33.0,
+     39.0,
+     2.06
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 35.50900000333786,
+   "z_hi": 40.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.16,
+   "n_returns": 126,
+   "spread_m": 0.14,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [
+    [
+     33.0,
+     39.0,
+     2.04
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 40.50900000333786,
+   "z_hi": 45.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.16,
+   "n_returns": 132,
+   "spread_m": 0.14,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 45.50900000333786,
+   "z_hi": 50.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.18,
+   "n_returns": 123,
+   "spread_m": 0.14,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 50.50900000333786,
+   "z_hi": 55.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.17,
+   "n_returns": 117,
+   "spread_m": 0.15,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 55.50900000333786,
+   "z_hi": 60.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.14,
+   "n_returns": 147,
+   "spread_m": 0.14,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 60.50900000333786,
+   "z_hi": 65.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.15,
+   "n_returns": 130,
+   "spread_m": 0.14,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 65.50900000333786,
+   "z_hi": 70.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.15,
+   "n_returns": 112,
+   "spread_m": 0.14,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 70.50900000333786,
+   "z_hi": 75.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.15,
+   "n_returns": 123,
+   "spread_m": 0.16,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 75.50900000333786,
+   "z_hi": 80.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.14,
+   "n_returns": 148,
+   "spread_m": 0.16,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 80.50900000333786,
+   "z_hi": 85.50900000333786,
+   "clip_lo": null,
+   "clip_hi": 42.0,
+   "back_offset_m": null,
+   "offset_m": 1.18,
+   "n_returns": 124,
+   "spread_m": 0.15,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 85.50900000333786,
+   "z_hi": 90.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.19,
+   "n_returns": 116,
+   "spread_m": 0.12,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 90.50900000333786,
+   "z_hi": 95.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.19,
+   "n_returns": 126,
+   "spread_m": 0.15,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 95.50900000333786,
+   "z_hi": 100.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.14,
+   "n_returns": 148,
+   "spread_m": 0.15,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 100.50900000333786,
+   "z_hi": 105.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.13,
+   "n_returns": 135,
+   "spread_m": 0.17,
+   "along_lo": 3.8,
+   "along_hi": 41.3,
+   "segments": [
+    [
+     33.0,
+     39.0,
+     2.02
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 105.50900000333786,
+   "z_hi": 110.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.15,
+   "n_returns": 104,
+   "spread_m": 0.18,
+   "along_lo": 3.8,
+   "along_hi": 35.4,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 110.50900000333786,
+   "z_hi": 115.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.15,
+   "n_returns": 116,
+   "spread_m": 0.18,
+   "along_lo": 3.8,
+   "along_hi": 35.0,
+   "segments": [
+    [
+     33.0,
+     39.0,
+     2.04
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 115.50900000333786,
+   "z_hi": 120.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": 1.17,
+   "n_returns": 126,
+   "spread_m": 0.18,
+   "along_lo": 4.2,
+   "along_hi": 35.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 120.50900000333786,
+   "z_hi": 125.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -1.2,
+   "n_returns": 146,
+   "spread_m": 0.26,
+   "along_lo": 4.8,
+   "along_hi": 35.6,
+   "segments": [
+    [
+     3.0,
+     12.0,
+     -2.77
+    ],
+    [
+     30.0,
+     39.0,
+     -2.21
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 125.50900000333786,
+   "z_hi": 130.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -1.25,
+   "n_returns": 59,
+   "spread_m": 0.14,
+   "along_lo": 8.0,
+   "along_hi": 34.0,
+   "segments": [
+    [
+     3.0,
+     12.0,
+     -2.81
+    ],
+    [
+     30.0,
+     39.0,
+     -2.11
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 130.50900000333786,
+   "z_hi": 135.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -1.19,
+   "n_returns": 67,
+   "spread_m": 0.11,
+   "along_lo": 8.0,
+   "along_hi": 34.0,
+   "segments": [
+    [
+     3.0,
+     12.0,
+     -2.98
+    ]
+   ],
+   "status": "observed"
+  },
+  {
+   "z_lo": 135.50900000333786,
+   "z_hi": 140.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -1.25,
+   "n_returns": 502,
+   "spread_m": 0.0,
+   "along_lo": 8.0,
+   "along_hi": 34.0,
+   "segments": [],
+   "status": "observed"
+  },
+  {
+   "z_lo": 140.50900000333786,
+   "z_hi": 145.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -3.29,
+   "n_returns": 60,
+   "spread_m": 0.19,
+   "along_lo": 11.0,
+   "along_hi": 30.5,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 145.50900000333786,
+   "z_hi": 150.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -4.84,
+   "n_returns": 85,
+   "spread_m": 0.23,
+   "along_lo": 13.6,
+   "along_hi": 29.1,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 150.50900000333786,
+   "z_hi": 155.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": -6.78,
+   "n_returns": 98,
+   "spread_m": 0.27,
+   "along_lo": 13.4,
+   "along_hi": 27.8,
+   "segments": [],
+   "status": "sloped"
+  },
+  {
+   "z_lo": 155.50900000333786,
+   "z_hi": 160.50900000333786,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 17,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  },
+  {
+   "z_lo": 160.50900000333786,
+   "z_hi": 164.09860229492188,
+   "clip_lo": null,
+   "clip_hi": null,
+   "back_offset_m": null,
+   "offset_m": null,
+   "n_returns": 0,
+   "spread_m": 0.0,
+   "along_lo": 0.0,
+   "along_hi": 0.0,
+   "segments": [],
+   "status": "unknown"
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "counts": {
+  "meshed": 387,
+  "landmark": 3
+ },
+ "paths": {
+  "box": 30,
+  "profile": 357
+ },
+ "t_median": 18.0,
+ "failed": []
+}

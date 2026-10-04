@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kentucky buildings 3D</title>
+  <script>window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/";</script>
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Cesium.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Widgets/widgets.css">
+  <style>
+    html, body, #cesium { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #000; }
+    .panel { position: absolute; z-index: 5; font: 13px system-ui, sans-serif; color: #fff;
+             background: rgba(0,0,0,.65); padding: 8px 12px; border-radius: 6px; }
+    #hud { top: 10px; left: 10px; max-width: 360px; }
+    #hud b { font-size: 15px; }
+    .muted { color: #bbb; }
+    #product button { font: 12px system-ui, sans-serif; margin: 6px 4px 0 0; padding: 3px 8px; border-radius: 4px;
+                      border: 1px solid #888; background: #222; color: #ddd; cursor: pointer; }
+    #product button.on { background: #2a78d6; border-color: #2a78d6; color: #fff; }
+    #pick { bottom: 28px; left: 10px; display: none; max-width: 360px; }
+    #pick table { border-collapse: collapse; }
+    #pick td { padding: 1px 8px 1px 0; vertical-align: top; }
+    #key { display: none; margin-top: 6px; font-size: 12px; }
+    #key i { display: inline-block; width: 10px; height: 10px; margin: 0 4px 0 8px; border-radius: 2px; vertical-align: -1px; }
+    #key i:first-child { margin-left: 0; }
+    #credit { bottom: 4px; right: 8px; padding: 2px 8px; font-size: 11px; }
+    #credit a { color: #9cf; }
+  </style>
+</head>
+<body>
+  <div id="cesium"></div>
+  <div id="hud" class="panel"><b>Kentucky buildings</b> · 3D Tiles<br>
+    <span class="muted" id="info">loading…</span>
+    <div id="product"></div>
+    <div id="key" class="muted">height from: <i style="background:rgb(190,190,185)"></i>Overture
+      <i style="background:rgb(150,165,190)"></i>floors × 3.5 m <i style="background:rgb(225,150,80)"></i>none, 6 m guessed</div>
+    <span class="muted">drag to orbit · right drag to pan · scroll to zoom · click a building</span></div>
+  <div id="pick" class="panel"></div>
+  <div id="credit" class="panel">imagery © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+    contributors · buildings from KyFromAbove LiDAR and oblique imagery, Overture footprints</div>
+  <script>
+    // Opened as https://user:password@host/...: the browser now holds the
+    // password for this site, but fetch() refuses any address that carries
+    // one, relative ones included. Reload at the same address without it.
+    if (/^[a-z]+:\/\/[^/]*@/i.test(location.href)) {
+      location.replace(location.origin + location.pathname + location.search + location.hash);
+    }
+    Cesium.Ion.defaultAccessToken = "";
+    const params = new URLSearchParams(location.search);
+
+    function terrainOf(t) {
+      // "heightmap": static Cesium heightmap tiles (layer.json); "endpoint": a
+      // server that answers /terrain?x&y&level (scripts/intake_server.py, local)
+      if (!t) return Promise.resolve(new Cesium.EllipsoidTerrainProvider());
+      if (t.type === "heightmap") return Cesium.CesiumTerrainProvider.fromUrl(t.url, { requestVertexNormals: false });
+      return Promise.resolve(new Cesium.CustomHeightmapTerrainProvider({
+        width: 32, height: 32,
+        callback: async (x, y, level) => {
+          const r = await fetch(`${t.url}?x=${x}&y=${y}&level=${level}&w=32&h=32`);
+          if (!r.ok) throw new Error(`terrain ${level}/${x}/${y}: ${r.status}`);
+          return new Float32Array(await r.arrayBuffer());
+        },
+      }));
+    }
+
+    function showPick(feature) {
+      const box = document.getElementById("pick");
+      if (!feature || !(feature instanceof Cesium.Cesium3DTileFeature)) { box.style.display = "none"; return; }
+      const row = (k, v) => (v === undefined || v === null || v === "" || (typeof v === "number" && isNaN(v)))
+        ? "" : `<tr><td class="muted">${k}</td><td>${v}</td></tr>`;
+      const h = feature.getProperty("height_m");
+      const num = (v) => typeof v === "number" && !isNaN(v);
+      const from = { lidar: "LiDAR", height: "Overture", floors: "Overture floors × 3.5 m",
+                     default: "a 6 m guess (Overture has none)" }[feature.getProperty("height_from") || "lidar"];
+      const oh = feature.getProperty("overture_height_m"), lh = feature.getProperty("lidar_height_m");
+      box.innerHTML = "<table>" +
+        row("name", feature.getProperty("name")) +
+        row("GERS id", feature.getProperty("gers")) +
+        row("height", num(h) ? `${h.toFixed(1)} m (${from})` : undefined) +
+        row("LiDAR height", num(lh) ? `${lh.toFixed(1)} m` : undefined) +
+        row("Overture height", num(oh) && feature.getProperty("height_from") !== "height" ? `${oh.toFixed(1)} m` : undefined) +
+        row("archetype", feature.getProperty("archetype")) +
+        row("built as", feature.getProperty("path")) +
+        row("product", feature.getProperty("product")) +
+        row("LiDAR", [feature.getProperty("lidar_phase"), feature.getProperty("lidar_date")].filter(Boolean).join(", ")) +
+        row("photos", [feature.getProperty("oblique_collection"), feature.getProperty("oblique_date")].filter(Boolean).join(", ")) +
+        row("apart", (() => { const g = feature.getProperty("gap_months");
+                               return typeof g === "number" && !isNaN(g) ? `${g.toFixed(0)} months` : undefined; })()) +
+        "</table>";
+      box.style.display = "block";
+    }
+
+    (async () => {
+      const info = document.getElementById("info");
+      try {
+        const cfgUrl = new URL(params.get("config") || "config.json", location.origin + location.pathname);
+        const cfg = await (await fetch(cfgUrl)).json();
+        const viewer = new Cesium.Viewer("cesium", {
+          baseLayer: new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider(
+            { url: "https://tile.openstreetmap.org/", maximumLevel: 19 })),
+          terrainProvider: await terrainOf(cfg.terrain),
+          geocoder: false, baseLayerPicker: false, sceneModePicker: false, navigationHelpButton: false,
+          animation: false, timeline: false, homeButton: false, infoBox: false, selectionIndicator: false,
+          fullscreenButton: false, creditContainer: document.createElement("div"),
+        });
+        viewer.scene.globe.depthTestAgainstTerrain = true;
+        window.viewer = viewer;
+        const sets = {};
+        for (const [name, url] of Object.entries(cfg.tilesets)) {
+          const ts = await Cesium.Cesium3DTileset.fromUrl(url, { maximumScreenSpaceError: cfg.maximumScreenSpaceError || 16 });
+          ts.show = false;
+          viewer.scene.primitives.add(ts);
+          sets[name] = ts;
+        }
+        window.tilesets = sets;
+        const bar = document.getElementById("product");
+        const choose = (name) => {
+          for (const [n, ts] of Object.entries(sets)) ts.show = n === name;
+          for (const b of bar.children) b.classList.toggle("on", b.dataset.name === name);
+          document.getElementById("key").style.display = name === "overture" ? "block" : "none";
+          const ex = sets[name].extras || {};
+          info.textContent = `${cfg.titles && cfg.titles[name] || name}` + (ex.buildings ? ` · ${ex.buildings.toLocaleString()} buildings` : "");
+        };
+        for (const name of Object.keys(sets)) {
+          const b = document.createElement("button");
+          b.textContent = (cfg.titles && cfg.titles[name]) || name; b.dataset.name = name;
+          b.onclick = () => choose(name);
+          bar.appendChild(b);
+        }
+        const first = params.get("product") || cfg.default;
+        choose(first && sets[first] ? first : Object.keys(sets)[0]);
+        new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas).setInputAction(
+          (e) => showPick(viewer.scene.pick(e.position)), Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        const s = cfg.start || {};
+        const lon = parseFloat(params.get("lon") || s.lon), lat = parseFloat(params.get("lat") || s.lat);
+        if (!isNaN(lon) && !isNaN(lat)) {
+          viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(lon, lat, parseFloat(params.get("height") || s.height || 1500)),
+            orientation: { heading: Cesium.Math.toRadians(parseFloat(params.get("heading") || s.heading || 0)),
+                           pitch: Cesium.Math.toRadians(parseFloat(params.get("pitch") || s.pitch || -35)), roll: 0 },
+          });
+        } else {
+          await viewer.zoomTo(Object.values(sets)[0]);
+        }
+      } catch (e) {
+        info.textContent = "failed: " + e.message;
+        console.error(e);
+      }
+    })();
+  </script>
+</body>
+</html>

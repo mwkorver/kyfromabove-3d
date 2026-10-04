@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <style>
+    .box { fill: #f4f4f4; stroke: #444; stroke-width: 1.2; }
+    .photo { fill: #fde9c9; stroke: #b5651d; stroke-width: 1.2; }
+    .frame { fill: #d9e8f5; stroke: #2b5d8a; stroke-width: 1.2; }
+    .feat { fill: #e2f0d9; stroke: #3c763d; stroke-width: 1.2; }
+    .wasted { fill: #f8d7da; stroke: #a94442; stroke-width: 1.2; }
+    .t { fill: #222; }
+    .h { fill: #222; font-weight: bold; font-size: 16px; }
+    .s { fill: #555; font-size: 12px; }
+    .arrow { stroke: #444; stroke-width: 1.4; fill: none; marker-end: url(#a); }
+  </style>
+  <defs>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#444"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="20" y="28" class="h">How one LoFTR match works, and what could be reused</text>
+  <text x="20" y="48" class="s">Every match runs the same two stages. Stage 1 turns each picture into a feature map. Stage 2 compares the two feature maps.</text>
+
+  <!-- ===== Today ===== -->
+  <text x="20" y="90" class="h">Today: for 8 photos x 12 frames = 96 matches</text>
+
+  <!-- photo -->
+  <rect x="20" y="105" width="110" height="60" rx="6" class="photo"/>
+  <text x="75" y="130" text-anchor="middle" class="t">photo</text>
+  <text x="75" y="150" text-anchor="middle" class="s">(from the internet)</text>
+
+  <!-- frame -->
+  <rect x="20" y="185" width="110" height="60" rx="6" class="frame"/>
+  <text x="75" y="210" text-anchor="middle" class="t">oblique frame</text>
+  <text x="75" y="230" text-anchor="middle" class="s">(aerial, never changes)</text>
+
+  <!-- stage 1 boxes -->
+  <path d="M130,135 L200,135" class="arrow"/>
+  <rect x="200" y="105" width="150" height="60" rx="6" class="box"/>
+  <text x="275" y="128" text-anchor="middle" class="t">Stage 1: backbone</text>
+  <text x="275" y="148" text-anchor="middle" class="s">photo -> feature map</text>
+
+  <path d="M130,215 L200,215" class="arrow"/>
+  <rect x="200" y="185" width="150" height="60" rx="6" class="wasted"/>
+  <text x="275" y="208" text-anchor="middle" class="t">Stage 1: backbone</text>
+  <text x="275" y="228" text-anchor="middle" class="s">frame -> feature map</text>
+
+  <!-- feature maps -->
+  <path d="M350,135 L420,135" class="arrow"/>
+  <rect x="420" y="112" width="90" height="46" rx="6" class="feat"/>
+  <text x="465" y="140" text-anchor="middle" class="s">feature map</text>
+
+  <path d="M350,215 L420,215" class="arrow"/>
+  <rect x="420" y="192" width="90" height="46" rx="6" class="feat"/>
+  <text x="465" y="220" text-anchor="middle" class="s">feature map</text>
+
+  <!-- stage 2 -->
+  <path d="M510,135 L580,165" class="arrow"/>
+  <path d="M510,215 L580,185" class="arrow"/>
+  <rect x="580" y="145" width="150" height="60" rx="6" class="box"/>
+  <text x="655" y="168" text-anchor="middle" class="t">Stage 2: compare</text>
+  <text x="655" y="188" text-anchor="middle" class="s">-> matched points</text>
+
+  <!-- cost annotation -->
+  <text x="20" y="275" class="s">Cost of one match, measured: stage 1 is about 75% of the time (both pictures), stage 2 about 25%.</text>
+  <text x="20" y="293" class="s">The red box is recomputed for the SAME 12 frames on every one of the 8 photos: 96 times, for 12 distinct answers.</text>
+
+  <!-- ===== With cache ===== -->
+  <text x="20" y="335" class="h">With a cache: run stage 1 on the 12 frames once, keep the 12 feature maps</text>
+
+  <rect x="20" y="355" width="110" height="46" rx="6" class="frame"/>
+  <text x="75" y="383" text-anchor="middle" class="t">12 frames</text>
+  <path d="M130,378 L200,378" class="arrow"/>
+  <rect x="200" y="355" width="150" height="46" rx="6" class="box"/>
+  <text x="275" y="376" text-anchor="middle" class="t">Stage 1, once</text>
+  <text x="275" y="393" text-anchor="middle" class="s">at startup, ~10 s</text>
+  <path d="M350,378 L420,378" class="arrow"/>
+  <rect x="420" y="355" width="120" height="46" rx="6" class="feat"/>
+  <text x="480" y="376" text-anchor="middle" class="s">12 feature maps</text>
+  <text x="480" y="393" text-anchor="middle" class="s">kept in memory</text>
+
+  <rect x="20" y="415" width="110" height="46" rx="6" class="photo"/>
+  <text x="75" y="443" text-anchor="middle" class="t">each photo</text>
+  <path d="M130,438 L200,438" class="arrow"/>
+  <rect x="200" y="415" width="150" height="46" rx="6" class="box"/>
+  <text x="275" y="436" text-anchor="middle" class="t">Stage 1, once</text>
+  <text x="275" y="453" text-anchor="middle" class="s">per photo, not per frame</text>
+  <path d="M350,438 L420,438" class="arrow"/>
+  <rect x="420" y="415" width="120" height="46" rx="6" class="feat"/>
+  <text x="480" y="443" text-anchor="middle" class="s">1 feature map</text>
+
+  <path d="M540,378 L610,410" class="arrow"/>
+  <path d="M540,438 L610,420" class="arrow"/>
+  <rect x="610" y="392" width="150" height="46" rx="6" class="box"/>
+  <text x="685" y="413" text-anchor="middle" class="t">Stage 2 x 12</text>
+  <text x="685" y="430" text-anchor="middle" class="s">the only per-frame work</text>
+
+  <text x="770" y="405" class="s">per photo:</text>
+  <text x="770" y="422" class="s">was 12 x (1 + 1 + compare)</text>
+  <text x="770" y="439" class="s">becomes 1 + 12 x compare</text>
+  <text x="770" y="456" class="s">roughly 2-3x less work</text>
+</svg>

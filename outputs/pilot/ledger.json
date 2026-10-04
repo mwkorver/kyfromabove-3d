@@ -1,0 +1,54 @@
+{
+ "cap_usd": 10.0,
+ "entries": [
+  {
+   "when": "2026-09-27",
+   "what": "tile step, 255 tiles on Lambda (247 ok, 8 failed)",
+   "usd": 0.5,
+   "basis": "estimate: ~50 s x 3 GB x 255 at $0.0000133/GB-s"
+  },
+  {
+   "when": "2026-09-27",
+   "what": "tile/piece Lambda image rebuild, ECR storage",
+   "usd": 0.05,
+   "basis": "estimate"
+  },
+  {
+   "when": "2026-09-27",
+   "what": "tile step with the data choice, 255 tiles on Lambda (all ok)",
+   "usd": 0.81,
+   "basis": "measured: 19,285 Lambda-seconds at 3,008 MB, + ~$0.05 image push and S3 writes"
+  },
+  {
+   "when": "2026-09-27",
+   "what": "piece step, 6,891 pieces on 12 tiles (279 Lambdas)",
+   "usd": 0.46,
+   "basis": "measured 5,728 Lambda-seconds at 2 GB ($0.15) + ~62k S3 writes ($0.31)"
+  },
+  {
+   "when": "2026-09-27/28",
+   "what": "building step + step 4, tree, terrain: 2 x c8g.4xlarge Spot (machine 0 reclaimed by AWS at 00:58 UTC)",
+   "usd": 3.37,
+   "basis": "measured hours: machine 0 4.56 h x $0.2559 = $1.17, machine 1 ~7.95 h x $0.2695 = $2.14, + 2 x 40 GB disk ($0.06); includes ~3 h idle while the session was paused and ~70 min lost to a hang"
+  },
+  {
+   "when": "2026-09-27/28",
+   "what": "S3 requests for the building step and publish (9,252 buildings, ~600 area files, 3,003 terrain tiles)",
+   "usd": 1.15,
+   "basis": "estimate: ~208k writes x $0.005/1000 + ~250k reads x $0.0004/1000"
+  },
+  {
+   "when": "2026-09-28",
+   "what": "box files republished (rectangles, quantized, gzipped): step 4 and the tree on one c8g.4xlarge Spot, plus laptop downloads",
+   "usd": 0.28,
+   "basis": "measured 0.48 h x $0.2689 ($0.13) + ~16k S3 writes ($0.08) + reads and ~300 MB of downloads to the laptop (~$0.07)"
+  },
+  {
+   "when": "2026-09-28",
+   "what": "Overture and LiDAR-heights views published from the laptop (255 tiles each, and their trees)",
+   "usd": 0.11,
+   "basis": "estimate: ~15.1k S3 writes ($0.08) + the tree reading 272 MB of building lists back to the laptop ($0.025) + reads"
+  }
+ ],
+ "total_usd": 6.73
+}

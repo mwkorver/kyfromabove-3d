@@ -1,0 +1,68 @@
+# The audit's reference set: buildings that have broken before, each with
+# what went wrong. scripts/audit_reference.py rebuilds them, audits them and
+# compares with tests/data/audit_baseline.json; a measure that gets worse
+# beyond its tolerance fails, naming the building, the face and the measure.
+#
+# exceptions: a hole the audit finds that is not a defect -- a real
+# colonnade, a driveway under the podium -- allowed up to allow_m2 on that
+# face, with the reason. Add one only after looking at the building.
+
+buildings:
+  - id: b7daf154-da79-4a42-b938-a973aa1111b5
+    name: Omni Louisville Hotel
+    why: west tower wall hole 47-72 m up (face 1012); 57 m south wing without its south wall (faces 1000-1002)
+  # landmarks: built on their own (build_mesh.py --case), not by run_downtown
+  - id: building_002
+    dir: outputs/urban/building_002
+    case: building_002
+    name: 400 West Market
+    why: the domed crown is right (September 2026); do not regress it
+  - id: pnc_tower
+    dir: outputs/pnc_tower/pnc_tower
+    case: pnc_tower
+    name: PNC Tower
+    why: walls stopped at 152 m under a roof at 155-160 m (the crown band left open), a floating lid
+  - id: bf3923af-34d6-4fdb-b867-2a9f533bef4e
+    name: Kentucky Home Life Building
+    why: wall panels standing on the roof; rooftop structure cut off
+  - id: c5fe3ad2-ffa0-4800-9240-410277f7b332
+    name: The Seelbach Hilton Hotel
+    why: round dots, then straight fill lines, on sparsely seen upper floors
+  - id: 39a33bd6-59b1-4edc-bd76-ffe26f85a868-a
+    name: 39a33bd6 part a
+    why: split part squashed to a point
+  - id: 39a33bd6-59b1-4edc-bd76-ffe26f85a868-b
+    name: 39a33bd6 part b
+    why: three-roof split
+  - id: 39a33bd6-59b1-4edc-bd76-ffe26f85a868-c
+    name: 39a33bd6 part c
+    why: three-roof split
+  - id: 9947f2b0-4b1e-41af-b68c-af6ae665b1a8
+    name: 9947f2b0 (beside 400 West Market)
+    why: LiDAR height taken from a tall neighbour's wall
+  - id: bcbc0005-cfe4-4719-8b90-7e9c69dc9782
+    name: Marmaduke Building
+    why: mostly blank walls; invention seeded from specks
+  # towers on podiums: a wall edge inside the building, roofs on both sides
+  - {id: ec790737-7929-4a57-8ba7-ad8843bbef4f, name: Chase Bank Plaza, why: tower on podium}
+  - {id: 9e9df280-ccae-46bd-b450-354e7d5e2fcf, name: Hyatt Regency Louisville, why: tower on podium}
+  - {id: d683e785-f8c8-475c-a0a3-c3b476924098, name: Louisville Marriott Downtown, why: tower on podium}
+  - {id: a1f393cc-05c9-43cb-a726-34aa92a2016a, name: RIVUE Tower, why: tower on podium; mirrored bands once ran past the tower}
+  - {id: 3158c676-4406-43e9-8a71-183312badbb5, name: Truist Tower - One Riverfront Plaza, why: tower on podium}
+  - {id: 40ead71b-7947-4e87-ab44-b3f11d755957, name: Hampton Inn Louisville Downtown, why: tower on podium}
+  - {id: 8ab5c0ec-896c-4cb3-aece-2a5510b34a88, name: Louisville Gas & Electric, why: tower on podium}
+  - {id: 6f0cece2-9ef7-4c8e-ac57-32b2cf39157a, name: 6f0cece2, why: tower on podium}
+  - {id: cfb7194a-2889-4b49-942f-7beaabbd2cf4, name: cfb7194a, why: tower on podium}
+
+exceptions: []
+
+# how much worse a measure may get before compare fails
+tolerances:
+  hole_m2: {abs: 10.0, rel: 0.10}      # per face, and the largest view
+  roof_wall_m2: 5.0
+  height_m: 1.5                        # mesh top against the LiDAR, change in the difference
+  blank_share: 0.03
+  dots: 0                              # any new dot or line fails
+  lines: 0
+  min_corner_deg: 30.0                 # a split part sharper than this fails, if it was not before
+  min_width_m: 4.0

@@ -1,0 +1,127 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Environments
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+
+# ---------------------------------------------------------------- source data
+# Kentucky From Above GeoPackages and LiDAR tiles: ~105 MB, fetched from public
+# S3 and verified by SHA-256 in outputs/phase1/source_manifest.json.
+# scripts/validate_building.py downloads anything missing.
+data/
+# the audit's known answers and baseline are small and belong in git
+!tests/data/
+
+# -------------------------------------------------------------- bulk outputs
+# Regenerable in one command: python scripts/validate_building.py
+#
+# Tracked: the QA evidence behind PHASE_1.md (text reports, small figures) and
+# the camera/crop geometry.
+# Ignored: pixel data and per-match records, which are large and derived.
+
+# Rules are pattern-based, not per-AOI. They were originally written as
+# outputs/phase1/... and outputs/phase2/..., and building_002 -- which writes to
+# outputs/urban/ -- matched none of them, so 91 MB of imagery, overlays and
+# point cloud went straight into the index. Any new AOI is covered now.
+
+# Pixel payload and point clouds. Regenerable:
+#   python scripts/validate_building.py --config <cfg>
+outputs/**/images/
+outputs/**/masks/
+outputs/**/validity_masks/
+outputs/**/overlays/
+outputs/**/lidar_local.ply
+# Coloured clouds are derived from the LiDAR plus the crops and run to
+# tens of MB; scripts/colorize_building.py rebuilds one in seconds.
+outputs/**/colorized*.ply
+outputs/**/building_in_crops.png
+
+# Per-match records (~8 MB per AOI). Their summaries live in qa/camera_findings.md
+# and in the acceptance block that validate_building.py prints.
+outputs/**/reprojection_report.json
+outputs/**/cross_direction_report.json
+outputs/**/cross_direction_building_report.json
+outputs/**/cross_view_matches.csv
+
+# Scratch
+outputs/*.png
+
+
+# local leftovers of an early experiment, not part of the pipeline
+outputs/phase2/building_001/
+
+# Diagnostic figures: regenerable with scripts/make_diagnostics.py, and the
+# building_profile / anchor_visibility rasters run to several MB each.
+outputs/diagnostics/*.png
+outputs/**/round_*_cones.json
+outputs/**/round_*_exclude.json
+outputs/**/commons_api_cache.json
+outputs/**/3dtiles/*.pnts
+
+# The downtown run: 375 building directories and their glTFs (1.7 GB),
+# regenerable with scripts/run_downtown.py run. The manifest, the report
+# and the merged tileset.json stay tracked as the record of the run.
+outputs/downtown/buildings/
+outputs/downtown/glb/
+outputs/downtown/*.glb
+outputs/downtown/*.npz
+outputs/downtown/*.gpkg
+outputs/downtown/run.log
+outputs/overture_boxes/**/*.glb
+outputs/**/crops_cache/
+# run outputs are rebuilt, not versioned; the survey figures the docs cite are
+outputs/**/*.glb
+outputs/**/*.laz
+outputs/**/*.log
+outputs/**/*.png
+!outputs/survey/*.png
+outputs/snapshots/
+
+viewers/s3_compare/data/
+viewers/s3_compare/tilesets/
+outputs/downtown/retired/
+
+# the audit's working files: the before/after audits of one rebuild, the
+# accepted pictures, the comparison sheet (the baseline itself is in tests/data)
+outputs/downtown/audit_before/
+outputs/downtown/audit_summary_before.json
+outputs/audit_baseline/
+outputs/audit_compare.png
+# per-texel sources for the held-out fill test, and the check's picture sheets
+outputs/**/3dtiles_complete/fill_faces.npz
+outputs/**/texture_check.jpg
+
+# build logs
+outputs/**/log.txt
+
+# the cloud stages' local runs and CDK's staging
+outputs/cloud/
+outputs/cloud_work/
+deploy/cdk.out/
+cdk.out/
+outputs/step1_local*/
+outputs/step2_local*/
+outputs/step3_*
+outputs/ec2_bench/
+deploy/cdk.context.json
+occlusion.npz
+outputs/cog_cache/
+deploy/viewer_password.txt
+# local step-4 test builds, and the pilot's logs (they carry the account number) and scratch folders
+outputs/pub_*
+outputs/pilot/*.log
+outputs/pilot/dt_local*/
+outputs/pilot/hazard_local/
+# the README's one-tile example
+outputs/one_tile/
+
+# the S3 orphan listing: regenerate with deploy/s3_orphans.py
+outputs/pilot/s3_orphans.txt

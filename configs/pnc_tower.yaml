@@ -1,0 +1,67 @@
+# pnc_tower -- PNC Tower (formerly National City Tower), 101 S 5th, Louisville.
+#
+# The facade control. 300 m from 400 West Market, 156 m against its 167, on the
+# same LiDAR tile and in the same oblique collection -- and a plain rectangular
+# slab with a flat roof where 400 West Market carries a stepped crown. Chosen
+# for that, and it is what separated "this measure reads structure" from "this
+# measure reads height"; see docs/CASE_COMPLEXITY.md.
+#
+#   footprint     28 x 62 m     (400 West Market 43 x 43 -- inverted aspect)
+#   height        156 m         (167 m)
+#   wall area     28,013 m2     wall-to-roof 16.3, the highest in Kentucky
+#   roof plate    63% of returns on one level, 153 m up
+
+project:
+  name: kyfromabove-3d
+  phase: 2
+
+source:
+  bucket: kyfromabove
+  region: us-west-2
+
+aoi:
+  horizontal_crs: "EPSG:3089"
+  # Footprint bounds padded 90 ft, which keeps the neighbouring towers out --
+  # Humana is 240 ft west and 400 West Market 300 m south-east.
+  bounds: [4918820.1, 3980791.8, 4919118.5, 3981185.7]
+  # Ground is about 455 ft NAVD88 and the roof plate 955 ft, with a mast to 990.
+  z_bounds_ft: [420.0, 1050.0]
+  roof:
+    max_height_m: 180.0
+    select: tallest
+  building_ids:
+    - "pnc_tower"
+  building_name: "PNC Tower (Louisville, KY)"
+  pad_ft_us: 30.0
+
+selection:
+  collection: "KY_KYAPED_2024_Season1_3IN"
+  flight_ids: null
+  camera_directions: ["Fwd", "Left", "Right", "Bwd", "Color"]
+  sensor_family: "434S82525X818326-f120_v2"
+  target_frame_count: null
+
+coordinates:
+  local_origin_source_xyz: [4918969.3, 3980988.7, 455.0]
+  horizontal_unit: "US survey foot"
+  vertical_unit: "US survey foot"
+  vertical_datum: "NAVD88"
+
+paths:
+  raw: data/raw
+  derived: data/derived
+  output: outputs/pnc_tower
+
+qa:
+  # Its own output tree. qa_dir is output_dir/qa, so two buildings sharing a
+  # paths.output overwrite each other's reports -- running this one into
+  # outputs/urban destroyed building_002's reprojection_report.json.
+  target_median_check_error_px: 2.0
+  minimum_frame_count: 3
+  # Color line 7021 is the best-registered group over this tower at 1.10 px
+  # within-group, against 1.36-2.17 for the Right lines. The default reference
+  # is a Phase 1 frame that does not exist in the 2024 collection.
+  reference_frame: "Color_7021_46999"
+  include_facade_anchors: true
+  min_view_ray_separation_deg: 30.0
+  min_crop_coverage: 0.75

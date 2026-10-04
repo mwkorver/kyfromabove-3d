@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: pytest (no network, no AWS credentials)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      # Every AWS call in the tests goes to moto and every data read is a
+      # fixture under tests/data, so the suite needs no credentials or network.
+      # Tests marked `data` need the downtown outputs on disk and are skipped
+      # by the pytest config.
+      - run: pip install -e ".[overture,cloud]" pytest
+      - run: python -m pytest -q

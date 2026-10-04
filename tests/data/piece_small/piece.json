@@ -1,0 +1,19 @@
+{
+ "gers": "72df674c-99ac-4430-9f59-c4d30a4a0a4d",
+ "tile": "N077E229",
+ "code_version": "stage1-2",
+ "parent_gers": null,
+ "name": null,
+ "lidar_height_m": 4.32,
+ "lidar_ground_z": 138.48920497840996,
+ "n_returns_aoi": 15958,
+ "n_on_footprint": 376,
+ "n_frames": 16,
+ "heads": [
+  "Bwd",
+  "Color",
+  "Fwd",
+  "Left"
+ ],
+ "inputs_hash": "5de9259cafc1e38997664dcfa0282619c65bcdb5ca069dfda0bc4ba5d23c2154"
+}

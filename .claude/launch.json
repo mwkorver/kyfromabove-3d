@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "intake-server",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": [
+        "scripts/intake_server.py"
+      ],
+      "port": 8765
+    }
+  ]
+}

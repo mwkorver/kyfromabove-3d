@@ -1,0 +1,20 @@
+# The Lambda image's libraries, pinned to the versions the laptop runs, so the
+# same code gives the same bytes on both (pyproj 3.8 and numpy 2.5, picked up
+# unpinned, moved a split outline's last digits and dropped a corner).
+# Regenerate from the project's venv when it is upgraded.
+numpy==2.4.6
+scipy==1.17.1
+pandas==3.0.5
+geopandas==1.1.4
+shapely==2.1.2
+pyproj==3.7.2
+pyogrio==0.13.0
+rasterio==1.4.4
+laspy==2.7.0
+lazrs==0.8.2
+requests==2.34.2
+pillow==12.3.0
+boto3==1.43.89
+pyyaml==6.0.3
+matplotlib==3.11.1
+opencv-python-headless==5.0.0.93

@@ -1,0 +1,44 @@
+project:
+  name: kyfromabove-3d
+  phase: 1
+
+source:
+  bucket: kyfromabove
+  region: us-west-2
+
+aoi:
+  horizontal_crs: "EPSG:3089"
+  bounds: [5725000.0, 4025400.0, 5725350.0, 4025800.0]
+  building_ids:
+    - "building_001"
+  building_name: "Tractor Supply (Grayson, KY)"
+  pad_ft_us: 30.0
+
+selection:
+  # flight_ids: null accepts every line. The side-looking cameras fly different
+  # lines from the Fwd exposures over the same ground, so restricting to one
+  # line restricts you to a single look direction.
+  flight_ids: null
+  # Color is the nadir RGB head: a different sensor (20544x14016 at 79.6 mm)
+  # that the parser handles from the EO record. It contributes the top-down view.
+  camera_directions: ["Fwd", "Left", "Right", "Bwd", "Color"]
+  sensor_family: "434S82525X818326-f120_v2"
+  target_frame_count: null
+
+coordinates:
+  local_origin_source_xyz: [5725184.6, 4025570.9, 600.0]
+  horizontal_unit: "US survey foot"
+  vertical_unit: "US survey foot"
+  vertical_datum: "NAVD88"
+
+paths:
+  raw: data/raw
+  derived: data/derived
+  output: outputs/phase1
+
+qa:
+  target_median_check_error_px: 2.0        # within-group; tests the camera model
+  minimum_frame_count: 3
+  reference_frame: "Fwd_2034_201824"       # validated frame for cross-direction checks
+  min_view_ray_separation_deg: 30.0        # angular diversity needed for reconstruction
+  min_crop_coverage: 0.75                  # crop padding may clip the sensor edge; the mask records it

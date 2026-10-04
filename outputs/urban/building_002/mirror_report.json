@@ -1,0 +1,32 @@
+{
+ "0": {
+  "from_face": 2,
+  "symmetric": false,
+  "shape_diff_m": 0.8,
+  "n_joint": 15,
+  "mirrored": 0
+ },
+ "1": {
+  "from_face": 3,
+  "symmetric": true,
+  "shape_diff_m": 0.07,
+  "n_joint": 25,
+  "mirrored": 1,
+  "anchored": true
+ },
+ "2": {
+  "from_face": 0,
+  "symmetric": false,
+  "shape_diff_m": 0.8,
+  "n_joint": 15,
+  "mirrored": 0
+ },
+ "3": {
+  "from_face": 1,
+  "symmetric": true,
+  "shape_diff_m": 0.07,
+  "n_joint": 25,
+  "mirrored": 0,
+  "anchored": true
+ }
+}

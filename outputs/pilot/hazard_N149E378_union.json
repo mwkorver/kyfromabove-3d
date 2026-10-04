@@ -1,0 +1,533 @@
+{
+ "tile": "N149E378",
+ "code_version": "stage1-2",
+ "buildings": [
+  {
+   "id": "9f9aef9c-a890-4309-aa20-5ae619f59182",
+   "name": null,
+   "height": null,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1873349 37.2291361, -83.1873474 37.2290922, -83.1870556 37.2290395, -83.1870431 37.2290834, -83.1873349 37.2291361))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 294.5654051308103,
+   "lidar_height_m": 12.38,
+   "lidar_median_m": 4.51,
+   "lidar_n": 859
+  },
+  {
+   "id": "6b4e8ef0-bdcd-4a03-81c5-629ea6fc038e",
+   "name": null,
+   "height": null,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1929576 37.235829, -83.1928482 37.2358067, -83.192835 37.2358477, -83.1929444 37.23587, -83.1929576 37.235829))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 347.9847599695199,
+   "lidar_height_m": 5.03,
+   "lidar_median_m": 4.98,
+   "lidar_n": 309
+  },
+  {
+   "id": "cdbfa7e3-f739-40c7-b60d-46b4bc22ac7f",
+   "name": null,
+   "height": 5.560948848724365,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1920637 37.2259968, -83.1919542 37.2261333, -83.19216 37.2262379, -83.1922695 37.2261014, -83.1920637 37.2259968))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 456.0274320548641,
+   "lidar_height_m": 9.3,
+   "lidar_median_m": 8.97,
+   "lidar_n": 2409
+  },
+  {
+   "id": "60ab0c34-09ae-42e3-9b18-977ebe151d06",
+   "name": null,
+   "height": 4.334261894226074,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1936411 37.2267749, -83.1937361 37.2265928, -83.1931893 37.2264119, -83.1930943 37.2265941, -83.1936411 37.2267749))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 452.04673609347213,
+   "lidar_height_m": 7.62,
+   "lidar_median_m": 4.85,
+   "lidar_n": 7055
+  },
+  {
+   "id": "beae025c-fdb2-412b-812c-c7a028725072",
+   "name": null,
+   "height": null,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1942711 37.2245637, -83.1943132 37.2245081, -83.1942699 37.2244873, -83.1942278 37.2245429, -83.1942711 37.2245637))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 476.53746507493014,
+   "lidar_height_m": 8.37,
+   "lidar_median_m": 7.15,
+   "lidar_n": 111
+  },
+  {
+   "id": "18b521e4-cbe5-45ac-bb85-e3444fee6132",
+   "name": null,
+   "height": 6.0509209632873535,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1875328 37.2266747, -83.1874886 37.2266249, -83.1874223 37.2266621, -83.187411 37.2266493, -83.1873591 37.2266785, -83.1874349 37.226764, -83.1874939 37.2267307, -83.1874737 37.2267079, -83.1875328 37.2266747))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 385.2207264414529,
+   "lidar_height_m": 19.62,
+   "lidar_median_m": 11.39,
+   "lidar_n": 863
+  },
+  {
+   "id": "dc4b52aa-4734-4e19-81a8-e1c6aad89e32",
+   "name": null,
+   "height": null,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1869593 37.2257399, -83.1869198 37.225725, -83.1867002 37.2258993, -83.1867149 37.2259111, -83.1867187 37.225936, -83.1866854 37.2259445, -83.1866606 37.2259864, -83.1865814 37.2260067, -83.1865619 37.2260396, -83.1865991 37.2260693, -83.1864552 37.2261835, -83.186523 37.2262377, -83.1866102 37.2262706, -83.1866405 37.2262628, -83.1867736 37.2261572, -83.18669 37.2260904, -83.1866988 37.2260756, -83.186752 37.2260333, -83.1868675 37.2260036, -83.1869069 37.2259723, -83.1869619 37.2260162, -83.1870459 37.2259496, -83.1870723 37.2259051, -83.1871307 37.2258588, -83.1871445 37.2258354, -83.1870652 37.225772, -83.1870155 37.2257848, -83.1869593 37.2257399))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 363.31623063246127,
+   "lidar_height_m": 33.41,
+   "lidar_median_m": 17.96,
+   "lidar_n": 7698
+  },
+  {
+   "id": "dad5bfad-ff4c-44c3-82a2-d71ac40eb1ca",
+   "name": null,
+   "height": null,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1866925 37.2237764, -83.1866731 37.22385, -83.1867681 37.2238659, -83.1867875 37.2237923, -83.1866925 37.2237764))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 449.7272034544069,
+   "lidar_height_m": 7.28,
+   "lidar_median_m": 7.14,
+   "lidar_n": 351
+  },
+  {
+   "id": "cff00c64-188f-4718-82ba-1f28c4789c93",
+   "name": null,
+   "height": null,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1865498 37.2238608, -83.1864476 37.2238482, -83.1864358 37.2239087, -83.186538 37.2239213, -83.1865498 37.2238608))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 442.48209296418594,
+   "lidar_height_m": 16.26,
+   "lidar_median_m": 14.6,
+   "lidar_n": 506
+  },
+  {
+   "id": "3802e5ff-d2b4-4118-937c-e7ee639549eb",
+   "name": null,
+   "height": 2.9544575214385986,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1858066 37.2257884, -83.1858347 37.2257201, -83.185664 37.2256755, -83.1856359 37.2257438, -83.1858066 37.2257884))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 362.8864617729235,
+   "lidar_height_m": 8.61,
+   "lidar_median_m": 8.0,
+   "lidar_n": 1363
+  },
+  {
+   "id": "e29b37e8-7ecb-4a2a-9296-99ecc7e7800b",
+   "name": null,
+   "height": 8.284587860107422,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1860874 37.2266454, -83.1859807 37.2266035, -83.1859451 37.2266609, -83.1860518 37.2267028, -83.1860874 37.2266454))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 363.35585471170947,
+   "lidar_height_m": 24.93,
+   "lidar_median_m": 22.12,
+   "lidar_n": 521
+  },
+  {
+   "id": "fcd38909-f252-4048-a8f4-c0209afc1757",
+   "name": null,
+   "height": 4.674375534057617,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1856018 37.2264633, -83.1858144 37.2263513, -83.1856564 37.2261612, -83.1854438 37.2262733, -83.1856018 37.2264633))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 363.54787909575816,
+   "lidar_height_m": 7.73,
+   "lidar_median_m": 7.35,
+   "lidar_n": 5751
+  },
+  {
+   "id": "be312954-efc7-4d31-98fa-49205dbbe922",
+   "name": null,
+   "height": 4.043561935424805,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1855399 37.2262111, -83.1856374 37.2261691, -83.1855958 37.226108, -83.1854983 37.2261501, -83.1855399 37.2262111))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 363.35585471170947,
+   "lidar_height_m": 3.55,
+   "lidar_median_m": 3.39,
+   "lidar_n": 519
+  },
+  {
+   "id": "edbc636a-ea0f-422b-888f-a40c9e71242b",
+   "name": null,
+   "height": 3.658949613571167,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1855298 37.2261379, -83.1854776 37.2260626, -83.1853573 37.2261154, -83.1854095 37.2261907, -83.1855298 37.2261379))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 363.4381508763018,
+   "lidar_height_m": 4.42,
+   "lidar_median_m": 4.31,
+   "lidar_n": 1171
+  },
+  {
+   "id": "63609b30-e37c-40d2-9f0d-2a2724bc0935",
+   "name": null,
+   "height": 5.277166366577148,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.185092 37.2310086, -83.1852507 37.2306642, -83.1851136 37.2306241, -83.1849549 37.2309686, -83.185092 37.2310086))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 294.00762001524004,
+   "lidar_height_m": 7.5,
+   "lidar_median_m": 7.3,
+   "lidar_n": 5754
+  },
+  {
+   "id": "aacf59c9-560b-400e-9f0b-173cc513cad4",
+   "name": null,
+   "height": 4.461034774780273,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1850338 37.2298375, -83.184848 37.2300701, -83.1849938 37.230144, -83.1851797 37.2299113, -83.1850338 37.2298375))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 293.3553467106934,
+   "lidar_height_m": 7.61,
+   "lidar_median_m": 7.38,
+   "lidar_n": 4611
+  },
+  {
+   "id": "4a1f0b4b-ae8a-475e-8117-317c8c1a9262",
+   "name": null,
+   "height": 9.681530952453613,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.184886 37.2304608, -83.184798 37.2304427, -83.1847552 37.2305749, -83.1848432 37.2305929, -83.184886 37.2304608))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 294.0259080518161,
+   "lidar_height_m": 24.54,
+   "lidar_median_m": 18.79,
+   "lidar_n": 1060
+  },
+  {
+   "id": "926f8284-d8b8-430d-b568-f4b6b94cd3a9",
+   "name": null,
+   "height": null,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.184008 37.2320135, -83.184019 37.2319301, -83.18395 37.2319243, -83.183939 37.2320077, -83.184008 37.2320135))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 283.4554229108458,
+   "lidar_height_m": 5.09,
+   "lidar_median_m": 4.87,
+   "lidar_n": 529
+  },
+  {
+   "id": "4c938415-2662-4236-8771-f89a2aa52503",
+   "name": null,
+   "height": 6.88232946395874,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1858848 37.2342306, -83.1859884 37.234215, -83.1859758 37.2341623, -83.1858722 37.2341779, -83.1858848 37.2342306))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 320.39725679451357,
+   "lidar_height_m": 3.68,
+   "lidar_median_m": 2.74,
+   "lidar_n": 257
+  },
+  {
+   "id": "4256ce3f-335a-4db9-a667-aed493a80ee2",
+   "name": null,
+   "height": 5.072585582733154,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1855499 37.2343318, -83.1857417 37.2342792, -83.1857158 37.2342192, -83.1855239 37.2342718, -83.1855499 37.2343318))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 313.75565151130303,
+   "lidar_height_m": 0.0,
+   "lidar_n": 1269,
+   "lidar_median_m": 0.0
+  },
+  {
+   "id": "cf8e9ee9-cf58-4f8d-a774-df5a649178f6",
+   "name": null,
+   "height": 3.824587821960449,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1841536 37.2356764, -83.1841581 37.2357991, -83.1843055 37.2357957, -83.184301 37.235673, -83.1841536 37.2356764))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 339.32537465074927,
+   "lidar_height_m": 18.7,
+   "lidar_median_m": 18.2,
+   "lidar_n": 1554
+  },
+  {
+   "id": "c657d65d-81db-4ac7-a4e3-98dd36939555",
+   "name": null,
+   "height": 4.926945209503174,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1834169 37.2365823, -83.1835545 37.2364535, -83.1831999 37.2362132, -83.1830966 37.2363098, -83.1833191 37.2364605, -83.1832846 37.2364927, -83.1834169 37.2365823))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 292.4470408940818,
+   "lidar_height_m": 8.52,
+   "lidar_median_m": 4.96,
+   "lidar_n": 6132
+  },
+  {
+   "id": "a352932a-28c5-45f9-a7df-7d6f306736ab",
+   "name": null,
+   "height": 3.5237114429473877,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1819084 37.2358049, -83.1819964 37.2357549, -83.1819704 37.235726, -83.1818825 37.235776, -83.1819084 37.2358049))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 291.18516637033275,
+   "lidar_height_m": 0.0,
+   "lidar_n": 364,
+   "lidar_median_m": 0.0
+  },
+  {
+   "id": "0dafa5d9-61c1-4e31-993c-58d4ac6d0d9e",
+   "name": null,
+   "height": 6.652449607849121,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": "college",
+   "subtype": "education",
+   "wkt": "POLYGON ((-83.178352 37.2361085, -83.1783102 37.2358051, -83.1779208 37.2358458, -83.1779183 37.2358049, -83.1778649 37.23581, -83.1778605 37.2357773, -83.1777985 37.2357829, -83.1777884 37.2357285, -83.1777428 37.235733, -83.1777258 37.235635, -83.1771855 37.2356784, -83.1772234 37.2359774, -83.1773731 37.235966, -83.1773749 37.2360175, -83.1776261 37.2359953, -83.1776125 37.2359443, -83.1777605 37.2359327, -83.1777589 37.235884, -83.1777977 37.2358818, -83.1777997 37.2359239, -83.1778654 37.2359212, -83.1778687 37.2359644, -83.1779281 37.2359601, -83.1779409 37.2361373, -83.178352 37.2361085))",
+   "datasets": [
+    "OpenStreetMap",
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    "",
+    "/properties/height"
+   ],
+   "lidar_ground_z": 290.16713233426464,
+   "lidar_height_m": 16.82,
+   "lidar_median_m": 12.93,
+   "lidar_n": 30270
+  }
+ ],
+ "halo": [
+  {
+   "id": "7841327a-d459-43ff-9b28-89062831f771",
+   "name": null,
+   "height": 5.368834018707275,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": null,
+   "subtype": null,
+   "wkt": "POLYGON ((-83.1873096 37.2229407, -83.1882456 37.2229353, -83.1882436 37.2227103, -83.1880881 37.2227112, -83.1880876 37.2226642, -83.1878758 37.2226654, -83.1878762 37.2227132, -83.1873076 37.2227165, -83.1873096 37.2229407))",
+   "datasets": [
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    ""
+   ],
+   "lidar_ground_z": 449.8582677165354,
+   "lidar_height_m": 8.61,
+   "lidar_median_m": 8.07,
+   "lidar_n": 13989
+  },
+  {
+   "id": "a3a6ef15-de09-4a93-8561-0dd4589d0e16",
+   "name": "Challenger Learning Center",
+   "height": 4.051303386688232,
+   "num_floors": null,
+   "roof_shape": null,
+   "class": "college",
+   "subtype": "education",
+   "wkt": "POLYGON ((-83.1779701 37.2350079, -83.1779545 37.2349026, -83.1778295 37.2349138, -83.17782 37.2348218, -83.1776867 37.2348315, -83.1776877 37.234855, -83.1776691 37.2348572, -83.1776654 37.2348271, -83.1776285 37.2348304, -83.1776168 37.2347353, -83.1775534 37.2347413, -83.1775526 37.2347176, -83.1773725 37.2347323, -83.1773663 37.2346918, -83.1772205 37.2347027, -83.1772356 37.234835, -83.1772724 37.2348323, -83.1772783 37.234889, -83.1773021 37.2348953, -83.1773218 37.234895, -83.1773244 37.2349467, -83.177358 37.2349448, -83.1773593 37.2349804, -83.1774472 37.2349736, -83.1774513 37.2350099, -83.1775366 37.2350035, -83.1775351 37.2349838, -83.1775578 37.2349818, -83.1775708 37.2349915, -83.1775889 37.2349963, -83.1776159 37.234996, -83.1776309 37.234992, -83.177645 37.2349846, -83.1776513 37.2349749, -83.1776817 37.2349733, -83.1776812 37.2350018, -83.177837 37.2349904, -83.1778384 37.2350172, -83.1779701 37.2350079))",
+   "datasets": [
+    "OpenStreetMap",
+    "Microsoft ML Buildings"
+   ],
+   "props": [
+    "",
+    "/properties/height"
+   ],
+   "lidar_ground_z": 293.48641097282194,
+   "lidar_height_m": 10.54,
+   "lidar_median_m": 4.98,
+   "lidar_n": 11723
+  }
+ ],
+ "split": []
+}

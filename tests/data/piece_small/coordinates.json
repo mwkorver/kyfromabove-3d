@@ -1,0 +1,17 @@
+{
+  "origin_source_xyz": [
+    4922932.2758766385,
+    3976563.1705050073,
+    454.36
+  ],
+  "horizontal_crs": "EPSG:3089",
+  "horizontal_unit": "US survey foot",
+  "vertical_datum": "NAVD88",
+  "vertical_unit": "US survey foot",
+  "scale_source_to_meter": 0.3048006096012192,
+  "local_axes": {
+    "+X": "East (meters)",
+    "+Y": "North (meters)",
+    "+Z": "Up (meters)"
+  }
+}

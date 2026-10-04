@@ -1,0 +1,62 @@
+{
+ "asset": {
+  "version": "1.1",
+  "generator": "kyfromabove-3d overture_boxes.py"
+ },
+ "geometricError": 500.0,
+ "root": {
+  "transform": [
+   0.997258508682898,
+   0.07399639761206084,
+   0.0,
+   0.0,
+   -0.045815691381675745,
+   0.6174636811524826,
+   0.785263984199482,
+   0.0,
+   0.05810670600525593,
+   -0.7831111898051661,
+   0.6191611059483272,
+   0.0,
+   371095.1624088812,
+   -5001294.930376433,
+   3927766.347813114,
+   1.0
+  ],
+  "boundingVolume": {
+   "sphere": [
+    0.0,
+    -0.0,
+    76.78023910522461,
+    860.2537152346871
+   ]
+  },
+  "geometricError": 0.0,
+  "refine": "REPLACE",
+  "content": {
+   "uri": "boxes.glb"
+  }
+ },
+ "extras": {
+  "name": "Overture 2026-08-19.0 buildings, LiDAR heights",
+  "kind": "boxes",
+  "heights_from": "lidar",
+  "buildings": 378,
+  "heights": {
+   "lidar": 364,
+   "height": 0,
+   "floors": 0,
+   "default": 14
+  },
+  "height_sources": {
+   "none": 278,
+   "Microsoft ML Buildings": 86,
+   "OpenStreetMap": 14
+  },
+  "origin_lon_lat_h": [
+   -85.75644011425297,
+   38.25489983281047,
+   105.85457729455084
+  ]
+ }
+}

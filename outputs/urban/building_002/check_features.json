@@ -1,0 +1,52 @@
+{
+  "features": [
+    {
+      "feature_id": "RoofApex",
+      "description": "Highest point of a curved roof (plane RMS 1.50 m over 7.9 m radius)",
+      "xyz_local_m": [
+        -0.6766573535190913,
+        0.5638811277906423,
+        164.81788163576326
+      ],
+      "provenance": "lidar:apex"
+    },
+    {
+      "feature_id": "RoofSurface_N",
+      "description": "Curved roof surface 6.3 m N of centre, at the local median elevation",
+      "xyz_local_m": [
+        0.057912115807199585,
+        6.289982554181372,
+        161.59309118618236
+      ],
+      "provenance": "lidar:surface_sample"
+    },
+    {
+      "feature_id": "RoofSurface_S",
+      "description": "Curved roof surface 6.3 m S of centre, at the local median elevation",
+      "xyz_local_m": [
+        0.057912115807199585,
+        -6.293030560209256,
+        164.47955295910592
+      ],
+      "provenance": "lidar:surface_sample"
+    },
+    {
+      "feature_id": "RoofSurface_W",
+      "description": "Curved roof surface 6.3 m W of centre, at the local median elevation",
+      "xyz_local_m": [
+        -6.233594441388115,
+        -0.0015240030139419755,
+        164.57251714503428
+      ],
+      "provenance": "lidar:surface_sample"
+    }
+  ],
+  "volume_local_m": {
+    "min_x_m": -31.666698455810547,
+    "max_x_m": 31.463848114013672,
+    "min_y_m": -31.449312210083008,
+    "max_y_m": 31.524763107299805,
+    "min_z_m": -1.5915671831343565,
+    "max_z_m": 166.95808991617983
+  }
+}

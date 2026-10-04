@@ -1,0 +1,66 @@
+# humana -- Humana Building, 500 W Main, Louisville.
+#
+# The third Louisville case, and a deliberate contrast to the other two. Michael
+# Graves, 1985: a postmodern tower with a deep portico, setbacks and a
+# cantilevered belvedere, where 400 West Market is a shaft under a crown and PNC
+# Tower is a plain slab. Overture draws all three as bare rectangles, which is
+# the point -- a footprint cannot see any of it.
+#
+#   footprint     51 x 56 m
+#   height        127 m
+#   wall area     27,166 m2     wall-to-roof 9.5
+#   roof plate    the modal level is 33 m, a podium, not the tower
+
+project:
+  name: kyfromabove-3d
+  phase: 2
+
+source:
+  bucket: kyfromabove
+  region: us-west-2
+
+aoi:
+  horizontal_crs: "EPSG:3089"
+  # Footprint bounds padded 90 ft. PNC Tower is 240 ft east and its shaft
+  # will clip the corner of this box; the footprint clip removes it.
+  bounds: [4918578.7, 3980896.6, 4918948.5, 3981280.7]
+  # Ground is about 455 ft NAVD88 and the roof about 875 ft.
+  z_bounds_ft: [420.0, 950.0]
+  roof:
+    max_height_m: 150.0
+    select: tallest
+  building_ids:
+    - "humana"
+  building_name: "Humana Building (Louisville, KY)"
+  pad_ft_us: 30.0
+
+selection:
+  collection: "KY_KYAPED_2024_Season1_3IN"
+  flight_ids: null
+  camera_directions: ["Fwd", "Left", "Right", "Bwd", "Color"]
+  sensor_family: "434S82525X818326-f120_v2"
+  target_frame_count: null
+
+coordinates:
+  local_origin_source_xyz: [4918763.6, 3981088.7, 455.0]
+  horizontal_unit: "US survey foot"
+  vertical_unit: "US survey foot"
+  vertical_datum: "NAVD88"
+
+paths:
+  raw: data/raw
+  derived: data/derived
+  output: outputs/humana
+
+qa:
+  # Its own output tree. qa_dir is output_dir/qa, so two buildings sharing a
+  # paths.output overwrite each other's reports -- running this one into
+  # outputs/urban destroyed building_002's reprojection_report.json.
+  target_median_check_error_px: 2.0
+  minimum_frame_count: 3
+  # Set after the first run reports its within-group groups; the default is a
+  # Phase 1 frame that does not exist in the 2024 collection.
+  reference_frame: "Color_7021_46999"
+  include_facade_anchors: true
+  min_view_ray_separation_deg: 30.0
+  min_crop_coverage: 0.75

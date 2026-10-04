@@ -1,0 +1,15 @@
+{
+ "archetype": "sculpted_facade",
+ "roof_type": "complex",
+ "facade_type": "sculpted",
+ "metrics": {
+  "num_levels": 2,
+  "plate_rms_m": 0.1042,
+  "roof_plateau_frac": 0.12,
+  "sloped_fraction": 0.1572,
+  "max_wall_offset_m": 2.27,
+  "has_arcs": false,
+  "has_open_bands": true,
+  "party_faces": 0
+ }
+}

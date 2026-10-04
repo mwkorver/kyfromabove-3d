@@ -1,0 +1,316 @@
+{
+ "building": "building_002",
+ "name": "400 West Market",
+ "path": "profile",
+ "glb": "outputs/urban/building_002/3dtiles_mesh/building.glb",
+ "holes": {
+  "views": [
+   {
+    "view": "from S",
+    "hole_m2": 172.2,
+    "holes": [
+     {
+      "m2": 75.0,
+      "face": 2,
+      "z_lo": 125.9,
+      "z_hi": 139.4
+     },
+     {
+      "m2": 35.8,
+      "face": "corner",
+      "z_lo": 86.9,
+      "z_hi": 120.4
+     },
+     {
+      "m2": 21.8,
+      "face": "corner",
+      "z_lo": 121.9,
+      "z_hi": 135.4
+     },
+     {
+      "m2": 13.0,
+      "face": "corner",
+      "z_lo": 1.9,
+      "z_hi": 14.9
+     },
+     {
+      "m2": 12.0,
+      "face": "corner",
+      "z_lo": 38.9,
+      "z_hi": 50.9
+     },
+     {
+      "m2": 8.5,
+      "face": 2,
+      "z_lo": 125.9,
+      "z_hi": 129.9
+     },
+     {
+      "m2": 6.2,
+      "face": "corner",
+      "z_lo": 135.9,
+      "z_hi": 138.4
+     }
+    ]
+   },
+   {
+    "view": "from SW",
+    "hole_m2": 107.0,
+    "holes": [
+     {
+      "m2": 59.5,
+      "face": 2,
+      "z_lo": 125.9,
+      "z_hi": 139.4
+     },
+     {
+      "m2": 34.2,
+      "face": 2,
+      "z_lo": 1.9,
+      "z_hi": 26.4
+     },
+     {
+      "m2": 8.0,
+      "face": 1,
+      "z_lo": 130.9,
+      "z_hi": 137.4
+     },
+     {
+      "m2": 5.2,
+      "face": 2,
+      "z_lo": 125.9,
+      "z_hi": 129.9
+     }
+    ]
+   },
+   {
+    "view": "from W",
+    "hole_m2": 79.2,
+    "holes": [
+     {
+      "m2": 34.2,
+      "face": "corner",
+      "z_lo": 1.9,
+      "z_hi": 26.9
+     },
+     {
+      "m2": 22.8,
+      "face": 1,
+      "z_lo": 130.9,
+      "z_hi": 137.4
+     },
+     {
+      "m2": 6.8,
+      "face": 1,
+      "z_lo": 130.9,
+      "z_hi": 135.9
+     },
+     {
+      "m2": 6.5,
+      "face": 1,
+      "z_lo": 130.9,
+      "z_hi": 135.4
+     },
+     {
+      "m2": 4.5,
+      "face": "corner",
+      "z_lo": 115.9,
+      "z_hi": 120.4
+     },
+     {
+      "m2": 4.5,
+      "face": 1,
+      "z_lo": 125.9,
+      "z_hi": 128.9
+     }
+    ]
+   },
+   {
+    "view": "from NW",
+    "hole_m2": 46.8,
+    "holes": [
+     {
+      "m2": 23.2,
+      "face": 1,
+      "z_lo": 130.9,
+      "z_hi": 137.4
+     },
+     {
+      "m2": 7.8,
+      "face": 0,
+      "z_lo": 110.9,
+      "z_hi": 115.9
+     },
+     {
+      "m2": 6.8,
+      "face": 1,
+      "z_lo": 130.9,
+      "z_hi": 135.9
+     },
+     {
+      "m2": 4.5,
+      "face": 1,
+      "z_lo": 125.9,
+      "z_hi": 128.9
+     },
+     {
+      "m2": 4.5,
+      "face": 1,
+      "z_lo": 130.9,
+      "z_hi": 135.4
+     }
+    ]
+   },
+   {
+    "view": "from N",
+    "hole_m2": 58.0,
+    "holes": [
+     {
+      "m2": 17.5,
+      "face": 0,
+      "z_lo": 110.9,
+      "z_hi": 115.9
+     },
+     {
+      "m2": 14.2,
+      "face": 0,
+      "z_lo": 110.9,
+      "z_hi": 116.4
+     },
+     {
+      "m2": 8.2,
+      "face": "corner",
+      "z_lo": 130.9,
+      "z_hi": 135.9
+     },
+     {
+      "m2": 6.8,
+      "face": 0,
+      "z_lo": 110.9,
+      "z_hi": 114.9
+     },
+     {
+      "m2": 6.0,
+      "face": "corner",
+      "z_lo": 125.9,
+      "z_hi": 131.9
+     },
+     {
+      "m2": 5.2,
+      "face": 0,
+      "z_lo": 110.9,
+      "z_hi": 113.9
+     }
+    ]
+   },
+   {
+    "view": "from NE",
+    "hole_m2": 29.5,
+    "holes": [
+     {
+      "m2": 12.8,
+      "face": 0,
+      "z_lo": 110.9,
+      "z_hi": 115.9
+     },
+     {
+      "m2": 10.2,
+      "face": 0,
+      "z_lo": 110.9,
+      "z_hi": 115.9
+     },
+     {
+      "m2": 6.5,
+      "face": 0,
+      "z_lo": 110.9,
+      "z_hi": 114.4
+     }
+    ]
+   },
+   {
+    "view": "from E",
+    "hole_m2": 9.0,
+    "holes": [
+     {
+      "m2": 4.5,
+      "face": "corner",
+      "z_lo": 45.9,
+      "z_hi": 50.4
+     },
+     {
+      "m2": 4.5,
+      "face": "corner",
+      "z_lo": 80.9,
+      "z_hi": 85.4
+     }
+    ]
+   },
+   {
+    "view": "from SE",
+    "hole_m2": 79.5,
+    "holes": [
+     {
+      "m2": 36.8,
+      "face": 2,
+      "z_lo": 125.9,
+      "z_hi": 137.9
+     },
+     {
+      "m2": 26.0,
+      "face": 2,
+      "z_lo": 1.9,
+      "z_hi": 14.9
+     },
+     {
+      "m2": 12.0,
+      "face": 2,
+      "z_lo": 38.9,
+      "z_hi": 50.9
+     },
+     {
+      "m2": 4.8,
+      "face": 2,
+      "z_lo": 125.9,
+      "z_hi": 129.9
+     }
+    ]
+   },
+   {
+    "view": "from above",
+    "hole_m2": 0.0,
+    "holes": []
+   }
+  ],
+  "by_face": {
+   "2": 75.0,
+   "corner": 35.8,
+   "1": 23.2,
+   "0": 17.5
+  },
+  "total_m2": 172.2
+ },
+ "roof_walls": {
+  "m2": 0.0,
+  "n_triangles": 0
+ },
+ "heights": {
+  "mesh_top_m": 164.5,
+  "lidar_p99_m": 164.5,
+  "product1_m": 167.0,
+  "mesh_minus_lidar_m": -0.1,
+  "product1_minus_lidar_m": 2.5
+ },
+ "texture": {
+  "blank_share": 0.0341,
+  "dots": 0,
+  "lines": 0,
+  "dots_per_1000m2": 0.0,
+  "lines_per_1000m2": 0.0
+ },
+ "check_agreement": 0.404,
+ "shape": {
+  "min_corner_deg": 89.9,
+  "min_width_m": 42.9
+ },
+ "seconds": 4.3
+}

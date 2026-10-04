@@ -1,0 +1,147 @@
+{
+ "asset": {
+  "version": "1.0",
+  "generator": "kyfromabove-3d export_3dtiles.py"
+ },
+ "geometricError": 24.0,
+ "root": {
+  "boundingVolume": {
+   "sphere": [
+    370894.5688314198,
+    -5001248.851432551,
+    3927931.007638394,
+    118.43860626220703
+   ]
+  },
+  "geometricError": 6.0,
+  "refine": "ADD",
+  "content": {
+   "uri": "root.pnts"
+  },
+  "children": [
+   {
+    "boundingVolume": {
+     "sphere": [
+      370873.6735458147,
+      -5001242.263540201,
+      3927903.655319903,
+      53.582149505615234
+     ]
+    },
+    "geometricError": 0.0,
+    "content": {
+     "uri": "q0h0.pnts"
+    }
+   },
+   {
+    "boundingVolume": {
+     "sphere": [
+      370878.4818507256,
+      -5001279.195619657,
+      3927934.5659964317,
+      52.54653549194336
+     ]
+    },
+    "geometricError": 0.0,
+    "content": {
+     "uri": "q0h1.pnts"
+    }
+   },
+   {
+    "boundingVolume": {
+     "sphere": [
+      370910.04422116803,
+      -5001242.245840148,
+      3927901.355481813,
+      59.199031829833984
+     ]
+    },
+    "geometricError": 0.0,
+    "content": {
+     "uri": "q1h0.pnts"
+    }
+   },
+   {
+    "boundingVolume": {
+     "sphere": [
+      370915.71831080335,
+      -5001280.826924403,
+      3927935.7035072376,
+      81.06863403320312
+     ]
+    },
+    "geometricError": 0.0,
+    "content": {
+     "uri": "q1h1.pnts"
+    }
+   },
+   {
+    "boundingVolume": {
+     "sphere": [
+      370871.3771924322,
+      -5001213.292242231,
+      3927929.931565503,
+      61.4949951171875
+     ]
+    },
+    "geometricError": 0.0,
+    "content": {
+     "uri": "q2h0.pnts"
+    }
+   },
+   {
+    "boundingVolume": {
+     "sphere": [
+      370877.81643081026,
+      -5001265.099951524,
+      3927955.362971534,
+      50.48731231689453
+     ]
+    },
+    "geometricError": 0.0,
+    "content": {
+     "uri": "q2h1.pnts"
+    }
+   },
+   {
+    "boundingVolume": {
+     "sphere": [
+      370914.48859452695,
+      -5001205.193518269,
+      3927929.7138053672,
+      58.65885543823242
+     ]
+    },
+    "geometricError": 0.0,
+    "content": {
+     "uri": "q3h0.pnts"
+    }
+   },
+   {
+    "boundingVolume": {
+     "sphere": [
+      370914.6403067759,
+      -5001267.140961676,
+      3927955.36887221,
+      73.636474609375
+     ]
+    },
+    "geometricError": 0.0,
+    "content": {
+     "uri": "q3h1.pnts"
+    }
+   }
+  ]
+ },
+ "extras": {
+  "source_ply": "outputs/humana/humana/colorized.ply",
+  "points": 672902,
+  "lon": -85.75868659893356,
+  "lat": 38.25640375771756,
+  "height_ellipsoidal_m": [
+   94.81450099218637,
+   254.9840422347188
+  ],
+  "vertical_datum_of_source": "NAVD88"
+ }
+}

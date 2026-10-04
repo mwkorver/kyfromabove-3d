@@ -1,0 +1,111 @@
+{
+ "corners": [
+  {
+   "corner": 0,
+   "status": "no-observation",
+   "before": [
+    -28.685,
+    -24.508
+   ],
+   "after": [
+    -28.685,
+    -24.508
+   ],
+   "gap_before_m": null,
+   "gap_after_m": null,
+   "note": ""
+  },
+  {
+   "corner": 1,
+   "status": "no-observation",
+   "before": [
+    21.536,
+    -31.108
+   ],
+   "after": [
+    21.536,
+    -31.108
+   ],
+   "gap_before_m": null,
+   "gap_after_m": null,
+   "note": ""
+  },
+  {
+   "corner": 2,
+   "status": "snapped",
+   "before": [
+    28.91,
+    24.465
+   ],
+   "after": [
+    27.819,
+    24.608
+   ],
+   "gap_before_m": 0.55,
+   "gap_after_m": 0.55,
+   "note": ""
+  },
+  {
+   "corner": 3,
+   "status": "no-observation",
+   "before": [
+    -20.809,
+    30.999
+   ],
+   "after": [
+    -20.809,
+    30.999
+   ],
+   "gap_before_m": null,
+   "gap_after_m": null,
+   "note": ""
+  }
+ ],
+ "observations": {
+  "0:start": {
+   "along_m": null,
+   "n_votes": 0,
+   "why": "no frame sees the corner"
+  },
+  "0:end": {
+   "along_m": null,
+   "n_votes": 1,
+   "why": "1 vote(s), none agreeing"
+  },
+  "1:start": {
+   "along_m": null,
+   "n_votes": 0,
+   "why": "no frame sees the corner"
+  },
+  "1:end": {
+   "along_m": null,
+   "n_votes": 1,
+   "why": "1 vote(s), none agreeing"
+  },
+  "2:start": {
+   "along_m": 0.55,
+   "n_votes": 4,
+   "why": "2 frames, 1 line(s)"
+  },
+  "2:end": {
+   "along_m": null,
+   "n_votes": 2,
+   "why": "2 vote(s), none agreeing"
+  },
+  "3:start": {
+   "along_m": null,
+   "n_votes": 1,
+   "why": "1 vote(s), none agreeing"
+  },
+  "3:end": {
+   "along_m": null,
+   "n_votes": 0,
+   "why": "no frame sees the corner"
+  }
+ },
+ "strip_z_m": [
+  2.87,
+  14.87
+ ],
+ "n_frames": 22
+}

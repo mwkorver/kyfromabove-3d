@@ -1,0 +1,891 @@
+{
+ "building": {
+  "faces": 6,
+  "faces_checked": 6,
+  "area_m2": 28674.0,
+  "area_checked_m2": 28674.0,
+  "ncc": 0.172,
+  "ncc_source": 0.82,
+  "area_shifted_half_metre_m2": 17773.1,
+  "area_low_without_shift_m2": 9337.4,
+  "seconds": 8.9
+ },
+ "faces": {
+  "roof": {
+   "kind": "roof",
+   "area_m2": 1563.5,
+   "spacing_m": 0.25,
+   "frames_checked": 19,
+   "ncc": 0.586,
+   "ncc_by_flight_line": {
+    "7019": 0.515,
+    "7020": 0.659,
+    "7021": 0.68,
+    "7022": 0.524,
+    "7023": 0.215
+   },
+   "low_without_shift": false,
+   "ncc_source": 0.898,
+   "clear_shifts": 1,
+   "shift_m": 0.25,
+   "frames": [
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Bwd_7021_47004",
+     "head": "Bwd",
+     "n": 16667,
+     "ncc": 0.705,
+     "ncc_best": 0.705,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Bwd_7021_47005",
+     "head": "Bwd",
+     "n": 14988,
+     "ncc": 0.655,
+     "ncc_best": 0.655,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Bwd_7021_47006",
+     "head": "Bwd",
+     "n": 13243,
+     "ncc": 0.501,
+     "ncc_best": 0.672,
+     "shift_m": [
+      0.0,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47041",
+     "head": "Color",
+     "n": 19722,
+     "ncc": 0.675,
+     "ncc_best": 0.675,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47042",
+     "head": "Color",
+     "n": 19180,
+     "ncc": 0.675,
+     "ncc_best": 0.675,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47043",
+     "head": "Color",
+     "n": 19966,
+     "ncc": 0.643,
+     "ncc_best": 0.643,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_46998",
+     "head": "Color",
+     "n": 19770,
+     "ncc": 0.853,
+     "ncc_best": 0.853,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_46999",
+     "head": "Color",
+     "n": 4292,
+     "ncc": 0.849,
+     "ncc_best": 0.849,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_46999",
+     "head": "Color",
+     "n": 16724,
+     "ncc": 0.898,
+     "ncc_best": 0.898,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_47000",
+     "head": "Color",
+     "n": 19380,
+     "ncc": 0.865,
+     "ncc_best": 0.865,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7020_47035",
+     "head": "Fwd",
+     "n": 13102,
+     "ncc": 0.586,
+     "ncc_best": 0.678,
+     "shift_m": [
+      0.0,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7021_46993",
+     "head": "Fwd",
+     "n": 13514,
+     "ncc": 0.55,
+     "ncc_best": 0.577,
+     "shift_m": [
+      0.0,
+      -0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7021_46994",
+     "head": "Fwd",
+     "n": 15042,
+     "ncc": 0.642,
+     "ncc_best": 0.642,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7019_47214",
+     "head": "Right",
+     "n": 16706,
+     "ncc": 0.514,
+     "ncc_best": 0.514,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7019_47215",
+     "head": "Right",
+     "n": 16878,
+     "ncc": 0.516,
+     "ncc_best": 0.516,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7022_46827",
+     "head": "Right",
+     "n": 17817,
+     "ncc": 0.516,
+     "ncc_best": 0.516,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7022_46828",
+     "head": "Right",
+     "n": 17838,
+     "ncc": 0.532,
+     "ncc_best": 0.532,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43730",
+     "head": "Right",
+     "n": 12940,
+     "ncc": 0.195,
+     "ncc_best": 0.239,
+     "shift_m": [
+      0.5,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43731",
+     "head": "Right",
+     "n": 12974,
+     "ncc": 0.228,
+     "ncc_best": 0.243,
+     "shift_m": [
+      0.25,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43732",
+     "head": "Right",
+     "n": 13108,
+     "ncc": 0.215,
+     "ncc_best": 0.235,
+     "shift_m": [
+      0.25,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    }
+   ]
+  },
+  "face 1": {
+   "kind": "wall",
+   "area_m2": 7874.9,
+   "spacing_m": 0.25,
+   "frames_checked": 9,
+   "ncc": 0.438,
+   "ncc_by_flight_line": {
+    "7021": 0.267,
+    "7022": 0.475,
+    "7023": 0.72
+   },
+   "low_without_shift": false,
+   "ncc_source": 0.82,
+   "clear_shifts": 7,
+   "shift_m": 0.5,
+   "frames": [
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_46998",
+     "head": "Color",
+     "n": 92823,
+     "ncc": 0.438,
+     "ncc_best": 0.619,
+     "shift_m": [
+      0.0,
+      -0.5
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_46999",
+     "head": "Color",
+     "n": 92370,
+     "ncc": 0.39,
+     "ncc_best": 0.622,
+     "shift_m": [
+      0.0,
+      -0.5
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_47000",
+     "head": "Color",
+     "n": 90539,
+     "ncc": 0.154,
+     "ncc_best": 0.463,
+     "shift_m": [
+      -0.25,
+      -0.5
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7021_46993",
+     "head": "Fwd",
+     "n": 89906,
+     "ncc": 0.267,
+     "ncc_best": 0.464,
+     "shift_m": [
+      0.5,
+      -0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7021_46994",
+     "head": "Fwd",
+     "n": 94776,
+     "ncc": 0.248,
+     "ncc_best": 0.492,
+     "shift_m": [
+      0.5,
+      -0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7022_46827",
+     "head": "Right",
+     "n": 109532,
+     "ncc": 0.453,
+     "ncc_best": 0.712,
+     "shift_m": [
+      -0.25,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7022_46828",
+     "head": "Right",
+     "n": 109100,
+     "ncc": 0.497,
+     "ncc_best": 0.733,
+     "shift_m": [
+      -0.25,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43730",
+     "head": "Right",
+     "n": 108878,
+     "ncc": 0.716,
+     "ncc_best": 0.732,
+     "shift_m": [
+      -0.25,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43731",
+     "head": "Right",
+     "n": 108896,
+     "ncc": 0.724,
+     "ncc_best": 0.724,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43732",
+     "head": "Right",
+     "n": 109138,
+     "ncc": 0.82,
+     "ncc_best": 0.82,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    }
+   ]
+  },
+  "face 0": {
+   "kind": "wall",
+   "area_m2": 4237.5,
+   "spacing_m": 0.25,
+   "frames_checked": 3,
+   "ncc": 0.001,
+   "ncc_by_flight_line": {
+    "7020": 0.001,
+    "7021": 0.303
+   },
+   "low_without_shift": false,
+   "ncc_source": 0.405,
+   "clear_shifts": 1,
+   "shift_m": 1.35,
+   "frames": [
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47043",
+     "head": "Color",
+     "n": 55611,
+     "ncc": 0.001,
+     "ncc_best": 0.142,
+     "shift_m": [
+      0.5,
+      -1.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47043",
+     "head": "Color",
+     "n": 9844,
+     "ncc": -0.049,
+     "ncc_best": -0.049,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_46998",
+     "head": "Color",
+     "n": 63448,
+     "ncc": -0.203,
+     "ncc_best": 0.323,
+     "shift_m": [
+      -0.5,
+      1.5
+     ],
+     "source": false,
+     "at_limit": true
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7021_46993",
+     "head": "Fwd",
+     "n": 51487,
+     "ncc": 0.859,
+     "ncc_best": 0.859,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7021_46994",
+     "head": "Fwd",
+     "n": 51469,
+     "ncc": 0.808,
+     "ncc_best": 0.808,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    }
+   ]
+  },
+  "face 2": {
+   "kind": "wall",
+   "area_m2": 1457.5,
+   "spacing_m": 0.25,
+   "frames_checked": 9,
+   "ncc": 0.238,
+   "ncc_by_flight_line": {
+    "7021": 0.216,
+    "7022": 0.548,
+    "7023": 0.738
+   },
+   "low_without_shift": false,
+   "ncc_source": 0.828,
+   "clear_shifts": 7,
+   "shift_m": 0.79,
+   "frames": [
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_46998",
+     "head": "Color",
+     "n": 18109,
+     "ncc": 0.216,
+     "ncc_best": 0.627,
+     "shift_m": [
+      0.25,
+      -0.75
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_46999",
+     "head": "Color",
+     "n": 19100,
+     "ncc": 0.238,
+     "ncc_best": 0.656,
+     "shift_m": [
+      0.0,
+      -0.75
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7021_47000",
+     "head": "Color",
+     "n": 19575,
+     "ncc": 0.102,
+     "ncc_best": 0.615,
+     "shift_m": [
+      -0.25,
+      -1.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7021_46993",
+     "head": "Fwd",
+     "n": 17087,
+     "ncc": 0.218,
+     "ncc_best": 0.708,
+     "shift_m": [
+      1.0,
+      -0.5
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7021_46994",
+     "head": "Fwd",
+     "n": 17511,
+     "ncc": 0.159,
+     "ncc_best": 0.663,
+     "shift_m": [
+      1.0,
+      -0.5
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7022_46827",
+     "head": "Right",
+     "n": 21762,
+     "ncc": 0.526,
+     "ncc_best": 0.738,
+     "shift_m": [
+      -0.25,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7022_46828",
+     "head": "Right",
+     "n": 20988,
+     "ncc": 0.57,
+     "ncc_best": 0.682,
+     "shift_m": [
+      -0.25,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43730",
+     "head": "Right",
+     "n": 20954,
+     "ncc": 0.75,
+     "ncc_best": 0.75,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43731",
+     "head": "Right",
+     "n": 20893,
+     "ncc": 0.727,
+     "ncc_best": 0.745,
+     "shift_m": [
+      0.0,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43732",
+     "head": "Right",
+     "n": 20910,
+     "ncc": 0.828,
+     "ncc_best": 0.828,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    }
+   ]
+  },
+  "face 3": {
+   "kind": "wall",
+   "area_m2": 4203.2,
+   "spacing_m": 0.25,
+   "frames_checked": 5,
+   "ncc": 0.172,
+   "ncc_by_flight_line": {
+    "7020": 0.25,
+    "7021": 0.208,
+    "7022": -0.084,
+    "7023": 0.024
+   },
+   "low_without_shift": false,
+   "ncc_source": 0.834,
+   "clear_shifts": 1,
+   "shift_m": 1.46,
+   "frames": [
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Bwd_7021_47004",
+     "head": "Bwd",
+     "n": 66495,
+     "ncc": 0.172,
+     "ncc_best": 0.237,
+     "shift_m": [
+      0.0,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Bwd_7021_47005",
+     "head": "Bwd",
+     "n": 66417,
+     "ncc": 0.245,
+     "ncc_best": 0.291,
+     "shift_m": [
+      0.0,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Bwd_7021_47006",
+     "head": "Bwd",
+     "n": 66515,
+     "ncc": 0.834,
+     "ncc_best": 0.834,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7020_47035",
+     "head": "Fwd",
+     "n": 65835,
+     "ncc": 0.25,
+     "ncc_best": 0.283,
+     "shift_m": [
+      0.25,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7022_46827",
+     "head": "Right",
+     "n": 66112,
+     "ncc": -0.084,
+     "ncc_best": 0.229,
+     "shift_m": [
+      -0.75,
+      1.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7023_43730",
+     "head": "Right",
+     "n": 64312,
+     "ncc": 0.024,
+     "ncc_best": 0.057,
+     "shift_m": [
+      -1.5,
+      0.5
+     ],
+     "source": false,
+     "at_limit": true
+    }
+   ]
+  },
+  "face 4": {
+   "kind": "wall",
+   "area_m2": 9337.4,
+   "spacing_m": 0.25,
+   "frames_checked": 5,
+   "ncc": 0.137,
+   "ncc_by_flight_line": {
+    "7019": 0.349,
+    "7020": 0.107
+   },
+   "low_without_shift": true,
+   "ncc_source": 0.253,
+   "clear_shifts": 0,
+   "shift_m": null,
+   "frames": [
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47041",
+     "head": "Color",
+     "n": 72475,
+     "ncc": 0.071,
+     "ncc_best": 0.083,
+     "shift_m": [
+      0.0,
+      1.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47041",
+     "head": "Color",
+     "n": 22533,
+     "ncc": 0.23,
+     "ncc_best": 0.23,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47042",
+     "head": "Color",
+     "n": 101470,
+     "ncc": 0.156,
+     "ncc_best": 0.177,
+     "shift_m": [
+      0.0,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Color_7020_47043",
+     "head": "Color",
+     "n": 108285,
+     "ncc": 0.137,
+     "ncc_best": 0.214,
+     "shift_m": [
+      0.25,
+      0.25
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7020_47035",
+     "head": "Fwd",
+     "n": 85534,
+     "ncc": 0.077,
+     "ncc_best": 0.093,
+     "shift_m": [
+      -0.25,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Fwd_7020_47035",
+     "head": "Fwd",
+     "n": 21317,
+     "ncc": 0.253,
+     "ncc_best": 0.253,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7019_47214",
+     "head": "Right",
+     "n": 83676,
+     "ncc": 0.349,
+     "ncc_best": 0.349,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": false,
+     "at_limit": false
+    },
+    {
+     "frame": "KY_KYAPED_2024_Season1_3IN/Right_7019_47215",
+     "head": "Right",
+     "n": 84233,
+     "ncc": 0.829,
+     "ncc_best": 0.829,
+     "shift_m": [
+      0.0,
+      0.0
+     ],
+     "source": true,
+     "at_limit": false
+    }
+   ]
+  }
+ }
+}

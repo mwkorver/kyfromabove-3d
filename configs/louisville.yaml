@@ -1,0 +1,85 @@
+# building_002 -- 400 West Market (AEGON Center), downtown Louisville.
+#
+# The urban counterpart to the Grayson pilot, chosen from data by
+# scripts/find_urban_candidates.py rather than by hand. Every number below was
+# measured; see docs/URBAN_AOI.md for how and why.
+#
+# What makes it a different test from building_001:
+#
+#   footprint      49 x 49 m      (pilot 71 x 74 m -- SMALLER)
+#   height        165 m           (pilot 16 m      -- 10x TALLER)
+#   aspect        1 : 3.4 tall    (pilot 4.5 : 1 wide -- inverted)
+#   roof height   10% of AGL      (pilot ~1% -- 10x the relief displacement)
+#
+# A 16 m warehouse is effectively all roof, which aerial LiDAR initialises well.
+# A 165 m tower is mostly facade, where the LiDAR is thinnest and the obliques
+# are the only real source. That is the point of the test.
+
+project:
+  name: kyfromabove-3d
+  phase: 2
+
+source:
+  bucket: kyfromabove
+  region: us-west-2
+
+aoi:
+  horizontal_crs: "EPSG:3089"
+  # Tight to the tower: tall returns within 200 ft of the cluster centroid,
+  # padded 100 ft. A wider mask merges the neighbouring towers -- PNC Tower is
+  # two blocks away at 514 ft, and >300 ft returns over a 1000 ft window are
+  # several buildings, not one.
+  bounds: [4919002.7, 3980336.0, 4919364.2, 3980697.8]
+  # Ground is 463 ft NAVD88 and the roof 1004 ft. The default is deliberately
+  # wide, but stating the real range here documents the building's vertical
+  # extent alongside its footprint.
+  z_bounds_ft: [430.0, 1050.0]
+  # The roof is 165 m up, not 15 m. Leaving the pilot's ceiling in place
+  # excludes the tower's roof entirely and "largest" then selects the podium --
+  # a 43 x 96 m surface at 17 m, which is a different building.
+  roof:
+    max_height_m: 180.0
+    select: tallest
+  building_ids:
+    - "building_002"
+  building_name: "400 West Market / AEGON Center (Louisville, KY)"
+  pad_ft_us: 30.0
+
+selection:
+  # The oblique collections barely overlap and only this one reaches the urban
+  # cores. 2022_Season2, which building_001 uses, is a 19 km-wide rural corridor
+  # containing no city at all.
+  collection: "KY_KYAPED_2024_Season1_3IN"
+  flight_ids: null
+  camera_directions: ["Fwd", "Left", "Right", "Bwd", "Color"]
+  # Unchanged from the pilot: the 2024 flights use the same camera rig, so the
+  # interior orientation and the Phase 1 camera model carry over as-is.
+  sensor_family: "434S82525X818326-f120_v2"
+  target_frame_count: null
+
+coordinates:
+  # Centre of the AOI at local ground (median class-2 return, 463 ft NAVD88).
+  local_origin_source_xyz: [4919183.4, 3980516.9, 462.9]
+  horizontal_unit: "US survey foot"
+  vertical_unit: "US survey foot"
+  vertical_datum: "NAVD88"
+
+paths:
+  raw: data/raw
+  derived: data/derived
+  output: outputs/urban
+
+qa:
+  target_median_check_error_px: 2.0
+  minimum_frame_count: 3
+  # The best-registered frame that survives coverage selection: Color line 7021
+  # has a 0.97 px within-group median and this exposure sits most centrally on
+  # the sensor (5541 px margin). Right frames land on lines 7019/7022/7023, and
+  # Left does not survive selection at all over this tower.
+  reference_frame: "Color_7021_46999"
+  # A tower is mostly facade, and the horizontal-only anchor pass finds almost
+  # nothing on it -- 24 anchors, all on the crown, so the residuals describe the
+  # building's neighbours. See docs/WHAT_THE_QA_MEASURES.md.
+  include_facade_anchors: true
+  min_view_ray_separation_deg: 30.0
+  min_crop_coverage: 0.75

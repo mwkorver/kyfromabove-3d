@@ -1,0 +1,16 @@
+# the Lambda image copies src/, scripts/, pyproject.toml, README.md, deploy/handlers.py
+# and the Phase 2 tile grid; nothing else needs to reach the build
+outputs
+.venv
+.git
+docs
+tests
+tools
+viewers
+deploy/cdk.out
+cdk.out
+data/derived
+data/raw/photos
+data/raw/*.laz
+data/raw/KY_*
+data/raw/kyfromabove_phase1_*

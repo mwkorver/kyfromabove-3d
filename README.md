@@ -255,6 +255,7 @@ scripts/
   overture_boxes.py    Overture footprints: fetched, measured on the LiDAR, split, boxed
   audit_reference.py   the reference-set audit
   intake_server.py     local viewers: /tiles, /compare, frames and crops, terrain
+  render_flyaround.py  a synthetic orbit or walk round a built building, with its true camera path
   ...                  surveys, diagnostics, the downtown batch run
 deploy/                the AWS stacks (CDK), the Lambda handlers, the runners, cost models
 viewer/index.html      the published viewer (CesiumJS, four views)

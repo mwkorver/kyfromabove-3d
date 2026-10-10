@@ -257,6 +257,8 @@ scripts/
   intake_server.py     local viewers: /tiles, /compare, frames and crops, terrain
   render_flyaround.py  a synthetic orbit or walk round a built building, with its true camera path
   score_trajectory.py  camera poses estimated from video against the true ones: ATE, RPE, scale, drift
+  video_poses.py       a video model's (LingBot-Map's) camera for every frame, run on a Mac or a GPU
+  register_video.py    a real video's true camera path, from landmarks and tracking against the meshes
   ...                  surveys, diagnostics, the downtown batch run
 deploy/                the AWS stacks (CDK), the Lambda handlers, the runners, cost models
 viewer/index.html      the published viewer (CesiumJS, four views)

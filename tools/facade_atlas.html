@@ -1,0 +1,344 @@
+<title>Downtown Facade Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: a drawing-office sheet. Face list on the left; the elevation, its depth-against-height and its floor-line trace share one vertical scale on the right. */
+:root {
+  --paper: #eef0f1;
+  --sheet: #fbfbfa;
+  --ink: #1f2a33;
+  --muted: #5d6973;
+  --rule: #c9cfd4;
+  --frames: #0f7c78;      /* what the frames say */
+  --lidar: #d4691c;       /* what the LiDAR says */
+  --step: #b3261e;
+  --chip: #e2e6e9;
+  --scrim: rgba(20, 26, 31, .62);
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #141a1f; --sheet: #1b232a; --ink: #e3e8ec; --muted: #9aa6b0; --rule: #34404a;
+    --frames: #3cc2bb; --lidar: #f08a3c; --step: #ff6b5e; --chip: #26313a; --scrim: rgba(0, 0, 0, .72); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #141a1f; --sheet: #1b232a; --ink: #e3e8ec; --muted: #9aa6b0; --rule: #34404a;
+  --frames: #3cc2bb; --lidar: #f08a3c; --step: #ff6b5e; --chip: #26313a; --scrim: rgba(0, 0, 0, .72); color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.5 var(--body); padding-inline: 16px; padding-block: 16px 24px; box-sizing: border-box; }
+h1 { font: 600 26px/1.15 var(--display); letter-spacing: .01em; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 68ch; margin: 6px 0 0; }
+.app { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 16px; margin-top: 14px; }
+@media (max-width: 860px) { .app { grid-template-columns: 1fr; } }
+.side { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; display: flex; flex-direction: column; min-height: 0; max-height: 82vh; }
+.filters { display: grid; gap: 8px; padding: 12px; border-bottom: 1px solid var(--rule); }
+.filters label { font: 600 11px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+select { font: 14px var(--body); padding: 5px 6px; border: 1px solid var(--rule); border-radius: 4px; background: var(--sheet); color: var(--ink); width: 100%; }
+.seg { display: flex; gap: 4px; flex-wrap: wrap; }
+.seg button { font: 500 13px var(--body); border: 1px solid var(--rule); background: transparent; color: var(--ink); border-radius: 4px; padding: 4px 8px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.list { overflow-y: auto; padding: 6px; display: grid; gap: 2px; align-content: start; }
+.item { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; border: 1px solid transparent; text-align: left; background: none; color: inherit; font: inherit; }
+.item:hover { background: var(--chip); }
+.item[aria-current="true"] { border-color: var(--frames); background: var(--chip); }
+.item .n { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item .m { font: 12px var(--mono); color: var(--muted); grid-column: 1 / -1; }
+.tag { font: 600 11px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; align-self: start; }
+.tag.measured { color: var(--lidar); border: 1px solid var(--lidar); }
+.tag.missed { color: var(--muted); border: 1px solid var(--rule); }
+.main { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; min-width: 0; display: grid; gap: 12px; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.head h2 { font: 600 22px/1.2 var(--display); margin: 0; }
+.nav { margin-left: auto; display: flex; gap: 6px; }
+.nav button { font: 500 13px var(--body); border: 1px solid var(--rule); background: transparent; color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+button:focus-visible, select:focus-visible, .item:focus-visible { outline: 2px solid var(--frames); outline-offset: 2px; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.sheet { display: flex; gap: 10px; align-items: flex-start; overflow-x: auto; padding-bottom: 4px; }
+.col { display: grid; gap: 4px; flex: none; }
+.cap { font: 600 11px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.facade { position: relative; flex: none; }
+.facade img { display: block; height: 100%; width: auto; max-width: none; image-rendering: auto; border: 1px solid var(--rule); }
+.facade svg { position: absolute; inset: 0; pointer-events: none; }
+svg text { font: 11px var(--mono); fill: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.key { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 3px; display: inline-block; border-radius: 2px; }
+.how { font-size: 14px; color: var(--muted); max-width: 75ch; }
+.how b { color: var(--ink); }
+.toggles { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; }
+.toggles input { accent-color: var(--frames); }
+.obl { display: grid; gap: 6px; }
+.thumbs { display: flex; flex-wrap: wrap; gap: 10px; }
+.thumb { flex: 1 1 200px; max-width: 280px; padding: 0; border: 1px solid var(--rule); border-radius: 4px; background: var(--sheet); color: var(--ink); cursor: zoom-in; overflow: hidden; text-align: left; font: inherit; }
+.thumb img { display: block; width: 100%; height: 170px; object-fit: cover; }
+.thumb span { display: block; padding: 4px 8px; font: 12px var(--mono); color: var(--muted); }
+.thumb:hover { border-color: var(--frames); }
+dialog.pop { padding: 0; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); color: var(--ink); max-width: 96vw; max-height: 96vh; }
+dialog.pop::backdrop { background: var(--scrim); }
+.pop figure { margin: 0; display: grid; gap: 8px; padding: 10px; }
+.pop img { display: block; max-width: calc(96vw - 22px); max-height: calc(96vh - 90px); width: auto; height: auto; margin: 0 auto; }
+.pop figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 14px; color: var(--muted); }
+.pop figcaption b { color: var(--ink); }
+.pop .btns { margin-left: auto; display: flex; gap: 6px; }
+.pop button { font: 500 13px var(--body); border: 1px solid var(--rule); background: transparent; color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+</style>
+
+<header>
+  <h1>Downtown Facade Atlas</h1>
+  <p class="lede">The 19 reference buildings' straight wall faces, each laid flat from the aerial frame that faces it most squarely. Beside each elevation, on the same vertical scale: how far in or out the frames say each 2&nbsp;m slice of wall stands, what the LiDAR measured, and the horizontal lines the facade shows. A real step in the wall should line up with a change in the facade's pattern.</p>
+</header>
+
+<div class="app">
+  <aside class="side" aria-label="Faces">
+    <div class="filters">
+      <div>
+        <label for="bld">Building</label>
+        <select id="bld"></select>
+      </div>
+      <div>
+        <label>Faces</label>
+        <div class="seg" role="group" aria-label="Which faces">
+          <button type="button" data-k="all" aria-pressed="true">All</button>
+          <button type="button" data-k="missed" aria-pressed="false">LiDAR missed</button>
+          <button type="button" data-k="measured" aria-pressed="false">LiDAR measured</button>
+          <button type="button" data-k="step" aria-pressed="false">Has a step</button>
+        </div>
+      </div>
+    </div>
+    <div class="list" id="list" role="listbox" aria-label="Faces"></div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<dialog class="pop" id="pop" aria-label="Oblique frame">
+  <figure>
+    <img id="pop-img" alt="">
+    <figcaption>
+      <span id="pop-cap"></span>
+      <span class="btns"><button type="button" id="pop-prev" aria-label="Previous frame">&larr;</button><button type="button" id="pop-next" aria-label="Next frame">&rarr;</button><button type="button" id="pop-close">Close</button></span>
+    </figcaption>
+  </figure>
+</dialog>
+
+<script id="atlas-data" type="application/json">__ATLAS__</script>
+<script>
+(() => {
+  const ALL = JSON.parse(document.getElementById("atlas-data").textContent);
+  const H = () => (window.innerWidth < 600 ? 320 : 460);
+  const STATUS = { observed: "measured", unknown: "unknown", mirrored: "copied", extended: "extended", bridged: "filled", open: "open", sloped: "sloped", matched: "matched" };
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  // a step: the median depth of the 3 slices below a height against the 3 above, both confident
+  function steps(r) {
+    const c = r.curve.filter((p) => p[3] === null || p[3] >= 0.02);
+    const out = [];
+    for (let k = 3; k + 3 <= c.length; k++) {
+      const med = (a) => { const s = a.map((p) => p[1]).sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+      const below = med(c.slice(k - 3, k)), above = med(c.slice(k, k + 3));
+      if (Math.abs(above - below) >= 0.5) out.push({ z: (c[k - 1][0] + c[k][0]) / 2, below, above });
+    }
+    // keep the strongest of runs of neighbouring heights
+    const kept = [];
+    for (const s of out) {
+      const last = kept[kept.length - 1];
+      if (last && s.z - last.z < 2.5) { if (Math.abs(s.above - s.below) > Math.abs(last.above - last.below)) kept[kept.length - 1] = s; }
+      else kept.push(s);
+    }
+    return kept;
+  }
+  ALL.forEach((r) => { r.steps = steps(r); });
+
+  const state = { kind: "all", bld: "", list: [], i: 0 };
+  try { const s = JSON.parse(localStorage.getItem("facade-atlas") || "{}"); Object.assign(state, { kind: s.kind || "all", bld: s.bld || "" }); } catch (e) {}
+
+  const bldSel = document.getElementById("bld");
+  const names = [...new Set(ALL.map((r) => r.name))].sort();
+  bldSel.innerHTML = `<option value="">All 19 buildings (${ALL.length} faces)</option>` +
+    names.map((n) => `<option value="${n}">${n} (${ALL.filter((r) => r.name === n).length})</option>`).join("");
+  bldSel.value = state.bld;
+  bldSel.addEventListener("change", () => { state.bld = bldSel.value; state.i = 0; refresh(); });
+  document.querySelectorAll(".seg button").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.k === state.kind));
+    b.addEventListener("click", () => {
+      state.kind = b.dataset.k; state.i = 0;
+      document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      refresh();
+    });
+  });
+
+  function filtered() {
+    return ALL.filter((r) => (!state.bld || r.name === state.bld) &&
+      (state.kind === "all" || (state.kind === "measured" && r.measured) || (state.kind === "missed" && !r.measured) || (state.kind === "step" && r.steps.length)));
+  }
+
+  function refresh() {
+    try { localStorage.setItem("facade-atlas", JSON.stringify({ kind: state.kind, bld: state.bld })); } catch (e) {}
+    state.list = filtered();
+    if (state.i >= state.list.length) state.i = 0;
+    const L = document.getElementById("list");
+    L.innerHTML = state.list.map((r, k) => `<button class="item" role="option" type="button" data-k="${k}" aria-current="${k === state.i}">
+        <span class="n">${r.name}</span><span class="tag ${r.measured ? "measured" : "missed"}">${r.measured ? "measured" : "missed"}</span>
+        <span class="m">face ${r.face} &middot; ${(r.along[1] - r.along[0]).toFixed(0)} m &times; ${(r.z[1] - r.z[0]).toFixed(0)} m${r.steps.length ? " &middot; step" : ""}</span></button>`).join("")
+      || `<p class="how" style="padding:8px">No face matches these filters.</p>`;
+    L.querySelectorAll(".item").forEach((el) => el.addEventListener("click", () => { state.i = +el.dataset.k; refresh(); }));
+    render();
+  }
+
+  function render() {
+    const M = document.getElementById("main");
+    const r = state.list[state.i];
+    if (!r) { M.innerHTML = `<p class="how">Pick a face on the left.</p>`; return; }
+    const h = H(), [pw, ph] = r.image_px, w = Math.round(h * pw / ph);
+    const z0 = r.z[0], z1 = r.z[1], Y = (z) => h * (1 - (z - z0) / (z1 - z0));
+    const L = r.along[1] - r.along[0];
+    const ink = css("--muted"), fr = css("--frames"), li = css("--lidar"), st = css("--step"), rule = css("--rule");
+
+    // overlay on the elevation: the lines the image shows, the old fixed 5 m bands, and any step
+    let ov = "";
+    if (document.getElementById("t-lines")?.checked ?? true)
+      ov += r.lines.map((z) => `<line x1="0" x2="${w}" y1="${Y(z)}" y2="${Y(z)}" stroke="${fr}" stroke-width="1.2" stroke-dasharray="3 3"/>`).join("");
+    if (document.getElementById("t-bands")?.checked ?? false)
+      ov += r.bands.map((b) => (b.z_lo > z0 && b.z_lo < z1) ? `<line x1="0" x2="${w}" y1="${Y(b.z_lo)}" y2="${Y(b.z_lo)}" stroke="${ink}" stroke-width="1" stroke-dasharray="4 4" opacity=".8"/>` : "").join("");
+    if (document.getElementById("t-steps")?.checked ?? true)
+      ov += r.steps.map((s) => `<line x1="0" x2="${w}" y1="${Y(s.z)}" y2="${Y(s.z)}" stroke="${st}" stroke-width="2"/>`).join("");
+
+    // depth against height: x = metres off the face's matched wall (+ out)
+    const DW = 230, sx = (s) => 30 + (s + 2.5) / 5 * (DW - 40);
+    let dg = `<rect x="0" y="0" width="${DW}" height="${h}" fill="none"/>`;
+    for (const s of [-2, -1, 0, 1, 2]) dg += `<line x1="${sx(s)}" x2="${sx(s)}" y1="0" y2="${h}" stroke="${rule}" stroke-width="${s === 0 ? 1.5 : 1}"/>`;
+    // the band column: what the LiDAR profile calls each band
+    for (const b of r.bands) {
+      const ya = Y(Math.min(b.z_hi, z1)), yb = Y(Math.max(b.z_lo, z0));
+      if (yb <= ya) continue;
+      const col = b.status === "observed" ? li : rule;
+      dg += `<rect x="2" y="${ya}" width="22" height="${yb - ya}" fill="${col}" opacity="${b.status === "observed" ? 0.9 : 0.6}"/>`;
+      if (yb - ya > 26) dg += `<text x="13" y="${(ya + yb) / 2}" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 13 ${(ya + yb) / 2})" style="font-size:10px">${STATUS[b.status] || b.status}</text>`;
+      if (b.status === "observed" && b.shift_m !== null && Math.abs(b.shift_m) <= 2.5)
+        dg += `<line x1="${sx(b.shift_m)}" x2="${sx(b.shift_m)}" y1="${ya + 1}" y2="${yb - 1}" stroke="${li}" stroke-width="4" opacity=".85"/>`;
+    }
+    const pts = r.curve.map((p) => ({ x: sx(p[1]), y: Y(p[0]), ok: p[3] === null || p[3] >= 0.02 }));
+    if (pts.length) dg += `<polyline points="${pts.map((p) => `${p.x},${p.y}`).join(" ")}" fill="none" stroke="${fr}" stroke-width="1.5" opacity=".7"/>`;
+    dg += pts.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="${p.ok ? 3.5 : 2.5}" fill="${p.ok ? fr : "none"}" stroke="${fr}" stroke-width="1.2"/>`).join("");
+    dg += r.steps.map((s) => `<line x1="26" x2="${DW}" y1="${Y(s.z)}" y2="${Y(s.z)}" stroke="${st}" stroke-width="1.5" stroke-dasharray="5 3"/>`).join("");
+    dg += [-2, 0, 2].map((s) => `<text x="${sx(s)}" y="${h - 4}" text-anchor="middle">${s > 0 ? "+" : ""}${s}</text>`).join("");
+
+    // lines: horizontal-edge strength up the facade (0.1 m a row), and a tick at each line found
+    const FW = 90, ft = r.floor_trace, fmax = Math.max(...ft, 1e-6);
+    const fpts = ft.map((v, k) => `${4 + v / fmax * (FW - 8)},${Y(z0 + k * 0.1)}`).join(" ");
+    let fg = `<polyline points="4,${Y(z0)} ${fpts} 4,${Y(z0 + (ft.length - 1) * 0.1)}" fill="${fr}" fill-opacity=".18" stroke="${fr}" stroke-width="1"/>`;
+    fg += r.lines.map((z) => `<line x1="${FW - 12}" x2="${FW}" y1="${Y(z)}" y2="${Y(z)}" stroke="${ink}" stroke-width="1.5"/>`).join("");
+
+    // window bays: vertical-edge strength along the facade (0.5 m steps)
+    const bt = r.bay_trace, bmax = Math.max(...bt, 1e-6), BH = 54;
+    const bpts = bt.map((v, k) => `${(k * 0.5) / L * w},${BH - 3 - v / bmax * (BH - 8)}`).join(" ");
+    const bg = `<polyline points="0,${BH - 3} ${bpts} ${w},${BH - 3}" fill="${fr}" fill-opacity=".18" stroke="${fr}" stroke-width="1.2"/>`;
+
+    const stepTxt = r.steps.length ? r.steps.map((s) => `${s.z.toFixed(1)} m up (${s.below > s.above ? "upper part stands " + (s.below - s.above).toFixed(1) + " m further in" : "upper part stands " + (s.above - s.below).toFixed(1) + " m further out"})`).join("; ") : "none found";
+    const sign = (x) => (x > 0 ? "+" : "") + x.toFixed(2);
+    M.innerHTML = `
+      <div class="head">
+        <h2>${r.name} <span style="color:var(--muted);font-weight:500">&middot; face ${r.face}</span></h2>
+        <span class="tag ${r.measured ? "measured" : "missed"}">${r.measured ? "LiDAR measured" : "LiDAR missed"}</span>
+        <div class="nav"><button type="button" id="prev" aria-label="Previous face">&larr; Prev</button><button type="button" id="next" aria-label="Next face">Next &rarr;</button></div>
+      </div>
+      <div class="facts">
+        <span><b>${L.toFixed(0)} m</b> long</span><span><b>${z0.toFixed(1)}&ndash;${z1.toFixed(1)} m</b> up</span>
+        <span>frames: <b>${r.frames}</b> (shown: ${r.frame})</span>
+        <span>matched wall: <b>${sign(r.d0)} m</b> at the left end, <b>${sign(r.d1)} m</b> at the right (off the footprint edge, + out)</span>
+        <span>lines in the image: <b>${r.lines.length}</b>${r.line_spacing_m ? `, mostly <b>&asymp; ${r.line_spacing_m.toFixed(1)} m</b> apart` : r.lines.length >= 3 ? ", not evenly spaced" : ""}</span>
+        <span>step: <b>${stepTxt}</b></span>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="t-lines" ${document.getElementById("t-lines")?.checked === false ? "" : "checked"}> lines the image shows</label>
+        <label><input type="checkbox" id="t-bands" ${document.getElementById("t-bands")?.checked ? "checked" : ""}> old fixed 5 m bands</label>
+        <label><input type="checkbox" id="t-steps" ${document.getElementById("t-steps")?.checked === false ? "" : "checked"}> steps the frames see</label>
+      </div>
+      <div class="sheet">
+        <div class="col">
+          <span class="cap">Elevation, laid flat (0.1 m a pixel)</span>
+          <div class="facade" style="height:${h}px;width:${w}px">
+            <img src="${r.image}" alt="${r.name} face ${r.face}, laid flat" style="height:${h}px;width:${w}px">
+            <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">${ov}</svg>
+          </div>
+          <span class="cap">Window bays: vertical edges along the face</span>
+          <svg width="${w}" height="${BH}" viewBox="0 0 ${w} ${BH}" role="img" aria-label="vertical edge strength along the face">${bg}</svg>
+        </div>
+        <div class="col">
+          <span class="cap">Depth, slice by slice (m)</span>
+          <svg width="${DW}" height="${h}" viewBox="0 0 ${DW} ${h}" role="img" aria-label="depth against height">${dg}</svg>
+        </div>
+        <div class="col">
+          <span class="cap">Lines across the face</span>
+          <svg width="${FW}" height="${h}" viewBox="0 0 ${FW} ${h}" role="img" aria-label="horizontal edge strength up the facade">${fg}</svg>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="key"><span class="sw" style="background:${fr}"></span>frames: depth of each 2 m slice where two frames agree best (filled = clear, hollow = weak)</span>
+        <span class="key"><span class="sw" style="background:${li}"></span>LiDAR: measured band and its depth</span>
+        <span class="key"><span class="sw" style="background:${fr}"></span>dotted: a horizontal line in the image</span>
+        <span class="key"><span class="sw" style="background:${st}"></span>step: the slices below and above differ by 0.5 m or more</span>
+      </div>
+      ${r.obliques.length ? `<div class="obl">
+        <span class="cap">The obliques: the frames as taken (teal = the face's matched wall, red = a step the frames see); click to enlarge</span>
+        <div class="thumbs">${r.obliques.map((o, k) => `<button type="button" class="thumb" data-o="${k}"><img data-file="${o.file}" alt="${r.name} face ${r.face} in frame ${o.frame}"><span>${o.head} &middot; ${o.frame}</span></button>`).join("")}</div>
+      </div>` : ""}
+      <p class="how"><b>How to read it.</b> The three panels share one height scale, so a row across them is one height on the building. The middle panel's zero line is the face's matched wall; dots left of it are further in, right of it further out. Where the dots jump, the wall steps; that height should match a change you can see in the elevation, such as a shopfront level, a setback or a cornice, and often one of the dotted lines: those are the horizontal lines the elevation itself shows (floors, panel joints, a cornice), found from the image alone, and ticked again on the right. On measured faces, the orange bars are the LiDAR's own depth: the dots should sit on them.</p>`;
+    document.getElementById("prev").onclick = () => { state.i = (state.i - 1 + state.list.length) % state.list.length; refresh(); };
+    document.getElementById("next").onclick = () => { state.i = (state.i + 1) % state.list.length; refresh(); };
+    ["t-lines", "t-bands", "t-steps"].forEach((id) => document.getElementById(id).addEventListener("change", render));
+    M.querySelectorAll(".thumb").forEach((el) => el.addEventListener("click", () => openPop(r, +el.dataset.o)));
+    fillObliques(M);
+    document.querySelector(`.item[data-k="${state.i}"]`)?.scrollIntoView({ block: "nearest" });
+  }
+
+  // the oblique crops come in one file per building, fetched when first needed
+  const bundles = {};
+  function bundle(file) {
+    const k = file.split("/").pop().split("_")[0];
+    if (!bundles[k]) bundles[k] = fetch(`obl/${k}.json`).then((x) => (x.ok ? x.json() : {})).catch(() => ({}));
+    return bundles[k];
+  }
+  function fillObliques(root) {
+    root.querySelectorAll("img[data-file]").forEach((img) => {
+      bundle(img.dataset.file).then((b) => { if (b[img.dataset.file]) img.src = b[img.dataset.file]; else img.alt = "frame not available"; });
+    });
+  }
+  const pop = document.getElementById("pop"), popImg = document.getElementById("pop-img"), popCap = document.getElementById("pop-cap");
+  const popState = { r: null, k: 0 };
+  function showPop() {
+    const o = popState.r.obliques[popState.k];
+    popImg.removeAttribute("src");
+    bundle(o.file).then((b) => { if (b[o.file]) popImg.src = b[o.file]; });
+    popImg.alt = `${popState.r.name} face ${popState.r.face} in frame ${o.frame}`;
+    popCap.innerHTML = `<b>${popState.r.name} &middot; face ${popState.r.face}</b> &middot; ${o.head} camera, frame ${o.frame} &middot; ${popState.k + 1} of ${popState.r.obliques.length}`;
+  }
+  function openPop(r, k) {
+    popState.r = r; popState.k = k; showPop();
+    if (typeof pop.showModal === "function") pop.showModal(); else pop.setAttribute("open", "");
+  }
+  const stepPop = (d) => { const n = popState.r.obliques.length; popState.k = (popState.k + d + n) % n; showPop(); };
+  document.getElementById("pop-prev").addEventListener("click", () => stepPop(-1));
+  document.getElementById("pop-next").addEventListener("click", () => stepPop(1));
+  document.getElementById("pop-close").addEventListener("click", () => pop.close());
+  pop.addEventListener("click", (e) => { if (e.target === pop) pop.close(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (pop.open) {
+      if (e.key === "ArrowLeft") { stepPop(-1); e.preventDefault(); }
+      if (e.key === "ArrowRight") { stepPop(1); e.preventDefault(); }
+      return;
+    }
+    if (e.target.closest("select")) return;
+    if (e.key === "ArrowDown" || e.key === "j") { state.i = (state.i + 1) % state.list.length; refresh(); e.preventDefault(); }
+    if (e.key === "ArrowUp" || e.key === "k") { state.i = (state.i - 1 + state.list.length) % state.list.length; refresh(); e.preventDefault(); }
+  });
+  window.addEventListener("resize", () => render());
+  refresh();
+})();
+</script>

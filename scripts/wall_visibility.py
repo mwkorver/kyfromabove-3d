@@ -134,6 +134,8 @@ class Samples:
     normal: np.ndarray                                                       # (N, 3) outward, horizontal
     band: np.ndarray                                                         # (N,) index into bands
     bands: List[dict]                                                        # building, face, z, status, ...
+    along: np.ndarray = None                                                 # (N,) metres along the face
+    z: np.ndarray = None                                                     # (N,) height in the building's frame
 
 
 def wall_samples(b: Building, step_m: float = 1.0) -> Samples:
@@ -142,7 +144,7 @@ def wall_samples(b: Building, step_m: float = 1.0) -> Samples:
     planes = {p.face: p for p in load_wall_planes(b.dir / "wall_planes.json")}
     profiles = json.loads((b.dir / "wall_profiles.json").read_text(encoding="utf-8"))
     A, t = b.M[:3, :3], b.M[:3, 3]
-    xyz, nrm, idx, bands = [], [], [], []
+    xyz, nrm, idx, bands, al, zs = [], [], [], [], [], []
     for face, rows in profiles.items():
         p = planes.get(int(face))
         if p is None:
@@ -172,11 +174,13 @@ def wall_samples(b: Building, step_m: float = 1.0) -> Samples:
             xyz.append(pts @ A.T + t)
             nrm.append(n3 @ A.T)
             idx.append(np.full(len(aa), len(bands)))
+            al.append(aa)
+            zs.append(zz)
             bands.append(dict(building=b.key, face=int(face), z_lo=row["z_lo"], z_hi=row["z_hi"], status=row["status"],
                               n_points=int(len(aa)), along=[round(lo, 2), round(hi, 2)]))
     if not xyz:
-        return Samples(np.zeros((0, 3)), np.zeros((0, 3)), np.zeros(0, int), [])
-    return Samples(np.vstack(xyz), np.vstack(nrm), np.concatenate(idx), bands)
+        return Samples(np.zeros((0, 3)), np.zeros((0, 3)), np.zeros(0, int), [], np.zeros(0), np.zeros(0))
+    return Samples(np.vstack(xyz), np.vstack(nrm), np.concatenate(idx), bands, np.concatenate(al), np.concatenate(zs))
 
 
 def roof_grid(V: np.ndarray, cell_m: float = 0.5):
@@ -333,10 +337,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             on = p.band == i
             band["wall_fraction"] = round(float(keep[on].mean()), 3) if on.any() else 0.0
             band["n_points"] = int(keep[on].sum())
-        p.xyz, p.normal, p.band = p.xyz[keep], p.normal[keep], p.band[keep]
+        p.xyz, p.normal, p.band, p.along, p.z = p.xyz[keep], p.normal[keep], p.band[keep], p.along[keep], p.z[keep]
     off = np.cumsum([0] + [len(p.bands) for p in parts])
     s = Samples(np.vstack([p.xyz for p in parts]), np.vstack([p.normal for p in parts]),
-                np.concatenate([p.band + o for p, o in zip(parts, off)]), [x for p in parts for x in p.bands])
+                np.concatenate([p.band + o for p, o in zip(parts, off)]), [x for p in parts for x in p.bands],
+                np.concatenate([p.along for p in parts]), np.concatenate([p.z for p in parts]))
     print(f"{len(s.bands)} bands, {len(s.xyz)} wall points; testing them in every frame ...", flush=True)
     t0 = time.time()
     results = {}
@@ -352,7 +357,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     for r in rows:
         r["name"] = names[r["building"]]
     (a.out / "bands.json").write_text(json.dumps(rows, indent=1), encoding="utf-8")
-    np.savez_compressed(a.out / "points.npz", xyz=s.xyz.astype(np.float32), band=s.band,
+    np.savez_compressed(a.out / "points.npz", xyz=s.xyz.astype(np.float32), band=s.band, along=s.along.astype(np.float32),
+                        z=s.z.astype(np.float32),
                         frames=np.array(list(results)), usable=np.stack([v[0] for v in results.values()]))
     air = [r for r in rows if r["wall_fraction"] < 0.5]
     print(f"{len(air)} of {len(rows)} bands are mostly air (no building behind them): "

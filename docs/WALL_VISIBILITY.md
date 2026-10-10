@@ -1,4 +1,4 @@
-# Which frames see the walls the LiDAR missed
+# The walls the LiDAR missed: which frames see them, and how far back they stand
 
 The LiDAR is flown from above and catches few returns on walls. The wall
 profile cuts each face into 5 m slices ("bands") and records what the
@@ -79,16 +79,83 @@ band by four frames. Only 8 % are seen by none.
 - The blockers are the meshes, with their own inferred walls; a wall the
   mesh puts in the wrong place blocks the wrong view.
 
+## Finding the depth by matching
+
+Seen is not the same as measured. A band's direction is the footprint's;
+what is unknown is how far in or out of the footprint edge the wall stands.
+Two frames laid onto a trial wall at the right depth show the same pattern
+in the same place; at the wrong depth they slide apart. The test sweeps the
+trial wall from 8 m inside the edge to 3 m out, every 25 cm and then every
+5 cm about the best, lays each frame on it at 10 cm a pixel (only where the
+measure above found the frame sees it), and scores how well every pair of
+frames 10 degrees apart agrees (`scripts/wall_match.py`). Two confidences
+come with each depth: how well the frames agree there, and the **margin** by
+which it beats the best depth at least 0.75 m away -- a facade of repeated
+windows also agrees one bay off. The imagery is 408 windows of 73 frames,
+0.3 GB, read once.
+
+Below, two frames of a Chase Bank Plaza wall laid on top of each other, one
+in red, one in cyan: grey where they agree. At the LiDAR's depth and at the
+depth matching found (9 cm apart) they agree; 2 m out, the windows split
+into red and cyan.
+
+![Chase Bank Plaza: the two frames agree only at the right depth](figures/wall_match_good.png)
+
+**On the 363 bands the LiDAR measured, where the answer is known.** The
+cut, a minimum margin, was chosen on half the buildings to keep matches off
+by more than a metre rare, and scored on the other half, both ways round:
+
+![depth from matching against the LiDAR](figures/wall_match_score.png)
+
+- **It passes 317 of the 363 bands (87 %), and puts 68 % within 0.3 m of the
+  LiDAR, 84 % within 0.5 m, 95 % within 1 m; half are within 0.20 m.**
+  Today's guess for a wall the LiDAR missed -- on the footprint edge --
+  puts 24 % of the same bands within 0.3 m and 30 % within 0.5 m (half
+  within 0.84 m).
+- **The margin is what tells a failed match.** The bands it rejects are the
+  ones off by metres: a 2 m strip at the Truist Tower's podium edge agrees
+  almost as well at three depths 2-4 m apart, and the margin is 0.02.
+
+![Truist Tower: a strip that agrees at several depths](figures/wall_match_failure.png)
+
+- **Most of what is left is a lean, not noise.** Matching puts walls a
+  little further in than the LiDAR, by a different amount on each building:
+  none on the Truist Tower and RIVUE, 0.3-0.5 m on the Seelbach, Chase Bank
+  Plaza and the Kentucky Home Life, masonry walls with windows set into
+  them. The same frames saw all of them and the lean does not follow the way
+  a wall faces, which points to the facades rather than the cameras: the
+  likeliest reading is that the pattern matched is the windows, set back
+  behind the face the laser hits. Taking out each building's lean, measured on its *other* bands
+  as an unknown wall's would be, brings it to 74 % within 0.3 m and 89 %
+  within 0.5 m (half within 0.16 m).
+- PNC Tower's three measured bands, all in its set-back crown 152 m up, are
+  matched 1-2 m further in than the LiDAR has them, and two of the three pass
+  the cut. The laser and the frames may be seeing different surfaces of the
+  crown; three bands are too few to say.
+
+**On the 575 unknown bands.** With the cut chosen on all the measured bands,
+463 get a depth, and on 232 of them -- half -- the wall stands more than
+1 m from the footprint edge where the mesh now draws it; the median is
+0.85 m inside it. The Hampton Inn's, 5-10 m up, is 2.3 m in:
+
+![Hampton Inn: an unknown wall 2.3 m behind the footprint edge](figures/wall_match_unknown.png)
+
 ## So
 
-The obliques can carry the walls the LiDAR missed: most of them are seen,
-in frames the pipeline already has, from two directions, at finer detail
-than the textures use. The next step is to find each unknown wall's depth by
-matching between two of those frames, held to within a few metres of what
-the LiDAR measured above and below, and to score the method first where the
-answer is known: on bands the LiDAR *did* measure.
+The obliques can carry the walls the LiDAR missed. Most are seen, in frames
+the pipeline already has, and matching between them finds a wall's depth to
+within 0.3 m on two bands in three where the LiDAR can check it, and within
+0.5 m on five in six -- against one in four for today's guess. What it
+leaves is a per-building lean that the building's measured walls can take
+out. The next step is to use it: a band status `matched` in the wall
+profile, behind a switch, at the matched depth less the building's lean,
+and the audit run over the reference set to see what it changes.
 
 ```bash
 python scripts/register_video.py scene --tileset outputs/downtown --out data/derived/video/downtown_scene.npz
 python scripts/wall_visibility.py --scene data/derived/video/downtown_scene.npz --out outputs/wall_visibility/reference
+python scripts/wall_match.py fetch      # the frame windows, 0.3 GB, once
+python scripts/wall_match.py sweep
+python scripts/wall_match.py score
+python scripts/wall_match.py show --band 900 --out-png docs/figures/wall_match_good.png
 ```

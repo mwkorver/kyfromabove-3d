@@ -260,6 +260,7 @@ scripts/
   video_poses.py       a video model's (LingBot-Map's) camera for every frame, run on a Mac or a GPU
   register_video.py    a real video's true camera path, from landmarks and tracking against the meshes
   wall_visibility.py   which aerial frames see each slice of wall, clearly and face-on enough to use
+  wall_match.py        how far back a wall stands, by matching the frames that see it
   ...                  surveys, diagnostics, the downtown batch run
 deploy/                the AWS stacks (CDK), the Lambda handlers, the runners, cost models
 viewer/index.html      the published viewer (CesiumJS, four views)

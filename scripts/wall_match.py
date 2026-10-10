@@ -26,6 +26,12 @@ gives the depth; scored first on bands the LiDAR measured.
             goes beside it.
     show    one band: two frames laid onto the wall at chosen depths, as a
             red/cyan overlay (grey where they agree), and its agreement curve
+    sheet   accepted unknown bands at random, each laid out twice -- where
+            the mesh has the wall now and where matching puts it -- as
+            red/cyan with each frame's brightness evened out
+    outlines  one building's matched walls drawn on a frame twice: where the
+            mesh stands them now (the footprint edge) and where matching
+            puts them -- whichever hugs the wall's edges is right
     score   the sweep against the LiDAR, on the bands it measured: a
             confidence cut (agreement and margin) chosen on half the
             buildings and scored on the other half, both ways round; the
@@ -129,7 +135,7 @@ def band_geometry(b, rows_by_band):
             d, n, p0 = (np.asarray(p.p1) - np.asarray(p.p0)) / L, np.asarray(p.normal, float), np.asarray(p.p0, float)
             to_xy = (lambda p0, d, n: lambda a, o: p0[None, :] + a[:, None] * d[None, :] + o * n[None, :])(p0, d, n)
         lidar = row["offset_m"] if row["status"] == "observed" else None
-        out[i] = (to_xy, lidar)
+        out[i] = (to_xy, lidar, int(row.get("n_returns") or 0))
     return out
 
 
@@ -144,12 +150,17 @@ def bilinear_gray(img: np.ndarray, u: np.ndarray, v: np.ndarray):
     return val, ok
 
 
-def sweep_band(geom, A, Z, masks, frames_img, cams, M, offsets, sigma_px, pairs):
-    """Agreement between the frames' views of the trial wall at each offset."""
+def sweep_band(geom, A, Z, masks, frames_img, cams, M, offsets, sigma_px, pairs, segments=()):
+    """Agreement between the frames' views of the trial wall at each offset:
+    an array (1 + len(segments), len(offsets)) -- the whole band, then each
+    segment (a boolean mask over the band's columns) on its own -- and, per
+    offset, the pattern's strength: the high-passed views' spread in grey
+    levels, the weaker of the frames'."""
     from kyfromabove_3d.texture_check import highpass, masked_ncc
-    to_xy, _ = geom
+    to_xy = geom[0]
     nz, na = A.shape
-    scores = []
+    parts = [np.ones(na, bool)] + list(segments)
+    scores, strength = [], []
     for o in offsets:
         xy = to_xy(A.ravel(), o)
         P = np.column_stack([xy, Z.ravel()]) @ M[:3, :3].T + M[:3, 3]
@@ -162,18 +173,23 @@ def sweep_band(geom, A, Z, masks, frames_img, cams, M, offsets, sigma_px, pairs)
             g, ok = bilinear_gray(img, u, v)
             m = masks[f] & ok.reshape(nz, na)
             views[f] = (highpass(g.reshape(nz, na), m, sigma_px), m)
-        s, w = 0.0, 0.0
-        for f1, f2 in pairs:
-            m = views[f1][1] & views[f2][1]
-            n = int(m.sum())
-            if n < 400:
-                continue
-            r = masked_ncc(views[f1][0], views[f2][0], m)
-            if np.isfinite(r):
-                s += r * np.sqrt(n)
-                w += np.sqrt(n)
-        scores.append(s / w if w > 0 else np.nan)
-    return np.array(scores)
+        row = []
+        for k, cols in enumerate(parts):
+            min_n = 400 if k == 0 else 150                                   # pixels two views must share
+            s, w = 0.0, 0.0
+            for f1, f2 in pairs:
+                m = views[f1][1] & views[f2][1] & cols[None, :]
+                n = int(m.sum())
+                if n < min_n:
+                    continue
+                r = masked_ncc(views[f1][0], views[f2][0], m)
+                if np.isfinite(r):
+                    s += r * np.sqrt(n)
+                    w += np.sqrt(n)
+            row.append(s / w if w > 0 else np.nan)
+        scores.append(row)
+        strength.append(min((float(v[0][v[1]].std()) for v in views.values() if v[1].sum() > 50), default=0.0))
+    return np.array(scores).T, np.array(strength)
 
 
 def sweep_building(job) -> List[dict]:
@@ -220,20 +236,26 @@ def sweep_building(job) -> List[dict]:
         if not pairs:
             continue
         coarse = np.arange(args.depth_min, args.depth_max + 1e-9, 0.25)
-        sc = sweep_band(geom[i], A, Z, masks, imgs, cams, b.M, coarse, args.sigma_px, pairs)
+        na = A.shape[1]
+        thirds = [(np.arange(na) * 3 // na) == t for t in range(3)]
+        sc_all, _ = sweep_band(geom[i], A, Z, masks, imgs, cams, b.M, coarse, args.sigma_px, pairs, thirds)
+        sc = sc_all[0]
         if not np.isfinite(sc).any():
             continue
         k = int(np.nanargmax(sc))
         fine = np.arange(coarse[k] - 0.3, coarse[k] + 0.3001, 0.05)
-        sf = sweep_band(geom[i], A, Z, masks, imgs, cams, b.M, fine, args.sigma_px, pairs)
+        sf_all, strength = sweep_band(geom[i], A, Z, masks, imgs, cams, b.M, fine, args.sigma_px, pairs)
+        sf = sf_all[0]
         kf = int(np.nanargmax(sf))
         best, peak = float(fine[kf]), float(sf[kf])
+        thirds_m = [float(coarse[int(np.nanargmax(t))]) if np.isfinite(t).any() else None for t in sc_all[1:]]
         far = np.abs(coarse - best) >= args.rival_m
         rival = float(np.nanmax(sc[far])) if np.isfinite(sc[far]).any() else float("nan")
         lidar = geom[i][1]
         out.append(dict(r, band=i, depth_m=round(best, 2), agreement=round(peak, 3), rival=round(rival, 3),
                         margin=round(peak - rival, 3), rival_depth_m=float(coarse[far][np.nanargmax(sc[far])]) if np.isfinite(rival) else None,
-                        pairs=len(pairs), frames_used=fids, lidar_m=lidar,
+                        pairs=len(pairs), frames_used=fids, lidar_m=lidar, lidar_returns=geom[i][2],
+                        thirds_m=thirds_m, pattern=round(float(strength[kf]), 2),
                         curve=[[round(float(o), 2), None if not np.isfinite(v) else round(float(v), 3)] for o, v in zip(coarse, sc)]))
     return out
 
@@ -275,7 +297,7 @@ def cmd_sweep(a) -> int:
 def rectify(b, geom, cam, img, x0, y0, A, Z, offset):
     """One frame laid onto the trial wall at ``offset``: an (nz, na, 3) image."""
     import cv2
-    to_xy, _ = geom
+    to_xy = geom[0]
     P = np.column_stack([to_xy(A.ravel(), offset), Z.ravel()]) @ b.M[:3, :3].T + b.M[:3, 3]
     pc = (P - cam["C"]) @ cam["R_cw"].T
     u = (cam["K"][0, 0] * pc[:, 0] / pc[:, 2] + cam["K"][0, 2] - x0).astype(np.float32)
@@ -340,21 +362,153 @@ def cmd_show(a) -> int:
     return 0
 
 
+def cmd_outlines(a) -> int:
+    import cv2
+    rows = json.loads(a.match.read_text(encoding="utf-8"))
+    rep = json.loads(a.report.read_text(encoding="utf-8"))["unknown"]
+    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    b = blds[a.building]
+    cut = (rep["cut_margin"], rep["cut_pattern"])
+    sel = [r for r in rows if r["building"] == b.key and r["status"] == "unknown" and is_accepted(r, cut) and abs(r["depth_m"]) >= a.min_move]
+    if not sel:
+        print(f"[FAIL] no matched band of {b.name} moved {a.min_move} m or more")
+        return 1
+    cams = {c["id"]: c for c in wv.cameras_in_tileset_frame(wv.read_frames(a.frames), b)}
+    geom = band_geometry(b, {r["band"]: r for r in sel})
+    index = json.loads((a.cache / "index.json").read_text(encoding="utf-8"))
+    win = {w["frame"]: (k, w) for k, w in index.items() if w["building"] == b.key}
+
+    def outline(r, f, o):
+        A = np.array([r["along"][0], r["along"][1], r["along"][1], r["along"][0]], float)
+        Z = np.array([r["z_lo"], r["z_lo"], r["z_hi"], r["z_hi"]], float)
+        P = np.column_stack([geom[r["band"]][0](A, o), Z]) @ b.M[:3, :3].T + b.M[:3, 3]
+        c = cams[f]
+        pc = (P - c["C"]) @ c["R_cw"].T
+        return np.column_stack([c["K"][0, 0] * pc[:, 0] / pc[:, 2] + c["K"][0, 2], c["K"][1, 1] * pc[:, 1] / pc[:, 2] + c["K"][1, 2]])
+
+    # the frame that sees the most of these bands, weighted by how far the two outlines differ in it
+    def worth(f):
+        return sum(np.abs(outline(r, f, 0.0) - outline(r, f, r["depth_m"])).max() for r in sel if f in r["frames_used"])
+    f = max((f for f in win if any(f in r["frames_used"] for r in sel)), key=worth)
+    k, w = win[f]
+    img = cv2.imread(str(a.cache / k))
+    shown = 0
+    for r in sel:
+        if f not in r["frames_used"]:
+            continue
+        for o, col in ((0.0, (0, 140, 255)), (r["depth_m"], (60, 220, 60))):
+            q = (outline(r, f, o) - [w["x0"], w["y0"]]).round().astype(np.int32)
+            cv2.polylines(img, [q], True, col, 2, cv2.LINE_AA)
+        shown += 1
+    s_ = min(1.0, 1600 / max(img.shape[:2]))
+    img = cv2.resize(img, None, fx=s_, fy=s_, interpolation=cv2.INTER_AREA)
+    cv2.rectangle(img, (0, 0), (img.shape[1], 34), (0, 0, 0), -1)
+    cv2.putText(img, f"{b.name}, {f.split('/')[-1]}: {shown} matched bands. orange = where the mesh stands the wall now, green = where matching puts it",
+                (8, 23), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
+    a.out_png.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(a.out_png), img, [cv2.IMWRITE_JPEG_QUALITY, 88])
+    print(f"{b.name}: {shown} bands drawn on {f.split('/')[-1]} -> {a.out_png}")
+    return 0
+
+
+def cmd_sheet(a) -> int:
+    import cv2
+    rows = json.loads(a.match.read_text(encoding="utf-8"))
+    rep = json.loads(a.report.read_text(encoding="utf-8"))["unknown"]
+    cut = (rep["cut_margin"], rep["cut_pattern"])
+    pool = [r for r in rows if r["status"] == "unknown" and is_accepted(r, cut) and abs(r["depth_m"]) >= a.min_move]
+    rng = np.random.default_rng(a.seed)
+    pick = [pool[i] for i in rng.choice(len(pool), min(a.n, len(pool)), replace=False)]
+    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    frames = wv.read_frames(a.frames)
+    index = json.loads((a.cache / "index.json").read_text(encoding="utf-8"))
+    win = {(w["building"], w["frame"]): (k, w) for k, w in index.items()}
+
+    def even(g):
+        m = g > 0
+        x = g.astype(np.float32)
+        mu, sd = (x[m].mean(), x[m].std() + 1e-3) if m.any() else (0.0, 1.0)
+        return np.clip(128 + (x - mu) / sd * 45, 0, 255).astype(np.uint8)
+
+    tiles, W = [], 400
+    for r in pick:
+        b = blds[r["building"]]
+        cams = {c["id"]: c for c in wv.cameras_in_tileset_frame(frames, b)}
+        geom = band_geometry(b, {r["band"]: r})[r["band"]]
+        fu = r["frames_used"]
+        f1, f2 = max(((g1, g2) for x, g1 in enumerate(fu) for g2 in fu[x + 1:]),
+                     key=lambda q: np.linalg.norm(cams[q[0]]["C"] - cams[q[1]]["C"]))
+        lo, hi = r["along"]
+        mid = (lo + hi) / 2
+        lo, hi = max(lo, mid - 10), min(hi, mid + 10)
+        A, Z = np.meshgrid(np.arange(lo, hi, 0.1), np.arange(r["z_lo"], r["z_hi"], 0.1))
+        pair = []
+        for o in (0.0, r["depth_m"]):
+            g = []
+            for f in (f1, f2):
+                k, w = win[(b.key, f)]
+                img = cv2.imread(str(a.cache / k), cv2.IMREAD_GRAYSCALE)
+                g.append(even(rectify(b, geom, cams[f], img, w["x0"], w["y0"], A, Z, o)))
+            an = np.dstack([g[1], g[1], g[0]])
+            pair.append(cv2.resize(an, (W, max(20, int(W * an.shape[0] / an.shape[1]))), interpolation=cv2.INTER_AREA))
+        h = pair[0].shape[0]
+        lab = np.full((24, 2 * W + 12, 3), 255, np.uint8)
+        cv2.putText(lab, f"{r['name'][:28]}, {r['z_lo']:.0f}-{r['z_hi']:.0f} m up: matching {r['depth_m']:+.1f} m",
+                    (4, 17), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1, cv2.LINE_AA)
+        tiles.append(np.vstack([lab, np.hstack([pair[0], np.full((h, 12, 3), 255, np.uint8), pair[1]]),
+                                np.full((10, 2 * W + 12, 3), 255, np.uint8)]))
+    cols = [np.vstack(tiles[k::3]) for k in range(3) if tiles[k::3]]
+    H = max(len(c) for c in cols)
+    cols = [cv2.copyMakeBorder(c, 0, H - len(c), 0, 30, cv2.BORDER_CONSTANT, value=(255, 255, 255)) for c in cols]
+    body = np.hstack(cols)
+    head = np.full((44, body.shape[1], 3), 255, np.uint8)
+    cv2.putText(head, "Each pair: left = two frames laid on the wall where the mesh has it now; right = at the depth matching found. "
+                "One frame red, the other cyan.", (4, 16), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1, cv2.LINE_AA)
+    cv2.putText(head, f"Grey = the frames agree there; red/cyan fringes = they do not. {len(pick)} accepted unknown bands moved "
+                f"{a.min_move} m or more, at random (seed {a.seed}).", (4, 36), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1, cv2.LINE_AA)
+    a.out_png.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(a.out_png), np.vstack([head, body]), [cv2.IMWRITE_JPEG_QUALITY, 88])
+    print(f"{len(pick)} of {len(pool)} bands -> {a.out_png}")
+    return 0
+
+
 # ------------------------------------------------------------------ the score
 
+def thirds_spread(r) -> float:
+    """How far apart the depths of the band's thirds (and the whole band's)
+    are; inf with fewer than two thirds matched."""
+    t = [x for x in r.get("thirds_m") or [] if x is not None]
+    return float(max(t + [r["depth_m"]]) - min(t + [r["depth_m"]])) if len(t) >= 2 else float("inf")
+
+
+def passes_rules(r, depth_min: float = -8.0, depth_max: float = 3.0, edge_m: float = 0.5, thirds_m: float = 0.5) -> bool:
+    """The fixed rules: not at the end of the search (a depth there is the
+    search running out, not a wall), and the band's thirds agree -- a flat
+    wall agrees with itself; a reflection or a rounded wall seldom does."""
+    return depth_min + edge_m < r["depth_m"] < depth_max - edge_m and thirds_spread(r) <= thirds_m
+
+
 def choose_cut(rows, errors, max_gross: float = 0.03, gross_m: float = 1.0):
-    """The loosest (agreement, margin) cut that keeps the share of accepted
-    bands off by more than ``gross_m`` at or under ``max_gross``: a cut
-    against matching that failed, not against the lean (see ``lean``)."""
-    ag = np.array([r["agreement"] for r in rows])
+    """Past the fixed rules, the loosest (margin, pattern) cut that keeps the
+    share of accepted bands off by more than ``gross_m`` at or under
+    ``max_gross``: a cut against matching that failed, not against the lean
+    (see ``lean_removed``)."""
+    ok = np.array([passes_rules(r) for r in rows])
     mg = np.nan_to_num(np.array([r["margin"] for r in rows], float), nan=1.0)
-    best = (0.95, 1.0, 0)
-    for ta in np.arange(0.0, 0.9, 0.025):
-        for tm in np.arange(0.0, 0.2, 0.01):
-            acc = (ag >= ta) & (mg >= tm)
+    pt = np.array([r.get("pattern", 99.0) for r in rows])
+    best = (1.0, 99.0, 0)
+    for tm in np.arange(0.0, 0.2, 0.01):
+        for tp in np.arange(0.0, 40.0, 1.0):
+            acc = ok & (mg >= tm) & (pt >= tp)
             if acc.sum() >= 10 and np.mean(np.abs(errors[acc]) > gross_m) <= max_gross and acc.sum() > best[2]:
-                best = (float(ta), float(tm), int(acc.sum()))
+                best = (float(tm), float(tp), int(acc.sum()))
     return best[0], best[1]
+
+
+def is_accepted(r, cut) -> bool:
+    tm, tp = cut
+    m = r["margin"] if r["margin"] == r["margin"] else 1.0
+    return passes_rules(r) and m >= tm and r.get("pattern", 99.0) >= tp
 
 
 def lean_removed(err: np.ndarray, building: np.ndarray, min_others: int = 3) -> np.ndarray:
@@ -398,12 +552,13 @@ def cmd_score(a) -> int:
     accepted = np.zeros(len(meas), bool)
     for k in (0, 1):
         tr = np.array([r["building"] in half[k] for r in meas])
-        ta, tm = choose_cut([r for r, t in zip(meas, tr) if t], err[tr], a.max_gross)
+        cut = choose_cut([r for r, t in zip(meas, tr) if t], err[tr], a.max_gross)
         te = ~tr
-        acc = te & (np.array([r["agreement"] for r in meas]) >= ta) & (np.nan_to_num(np.array([r["margin"] for r in meas], float), nan=1.0) >= tm)
+        acc = te & np.array([is_accepted(r, cut) for r in meas])
         accepted |= acc
         e = np.abs(err[acc])
-        report["folds"].append(dict(gross_over_1m=round(float(np.mean(e > 1.0)), 3), cut_agreement=round(ta, 3), cut_margin=round(tm, 3), test_bands=int(te.sum()), accepted=int(acc.sum()),
+        report["folds"].append(dict(gross_over_1m=round(float(np.mean(e > 1.0)), 3), cut_margin=round(cut[0], 3), cut_pattern=round(cut[1], 1),
+                                    test_bands=int(te.sum()), accepted=int(acc.sum()),
                                     within_03=round(float(np.mean(e <= 0.3)), 3), within_05=round(float(np.mean(e <= 0.5)), 3),
                                     within_1=round(float(np.mean(e <= 1.0)), 3), median_m=round(float(np.median(e)), 3),
                                     p90_m=round(float(np.percentile(e, 90)), 3)))
@@ -420,6 +575,15 @@ def cmd_score(a) -> int:
                               edge_guess_within_03=round(float(np.mean(edge[accepted] <= 0.3)), 3),
                               edge_guess_within_05=round(float(np.mean(edge[accepted] <= 0.5)), 3),
                               edge_guess_median_m=round(float(np.median(edge[accepted])), 3))
+    # the hard measured bands, most like the unknown ones: the quarter with the
+    # fewest LiDAR returns, or on a face that also has unknown bands
+    faces_unknown = {(r["building"], r["face"]) for r in unk}
+    q1 = np.percentile([r.get("lidar_returns", 0) for r in meas], 25)
+    hard = np.array([r.get("lidar_returns", 0) <= q1 or (r["building"], r["face"]) in faces_unknown for r in meas])
+    eh = np.abs(err[accepted & hard])
+    report["held_out_hard"] = dict(bands=int(hard.sum()), accepted=int((accepted & hard).sum()),
+                                   within_03=round(float(np.mean(eh <= 0.3)), 3), within_05=round(float(np.mean(eh <= 0.5)), 3),
+                                   within_1=round(float(np.mean(eh <= 1.0)), 3), median_m=round(float(np.median(eh)), 3))
     # the lean: by the way the wall faces, and by building
     hd = np.array([heading[(r["building"], r["face"])] for r in meas])
     quad = ((hd + 45) % 360 // 90).astype(int)
@@ -427,9 +591,9 @@ def cmd_score(a) -> int:
                                 for q, n in enumerate(("north", "east", "south", "west")) if (quad == q).any()}
     report["lean_by_building"] = {blds[k].name: round(float(np.median(err[[r["building"] == k for r in meas]])), 3) for k in keys}
     # the cut, chosen on all measured bands, applied to the unknown ones
-    ta, tm = choose_cut(meas, err, a.max_gross)
-    ua = [r for r in unk if r["agreement"] >= ta and (r["margin"] if r["margin"] == r["margin"] else 1.0) >= tm]
-    report["unknown"] = dict(cut_agreement=round(ta, 3), cut_margin=round(tm, 3), swept=len(unk), accepted=len(ua),
+    cut = choose_cut(meas, err, a.max_gross)
+    ua = [r for r in unk if is_accepted(r, cut)]
+    report["unknown"] = dict(cut_margin=round(cut[0], 3), cut_pattern=round(cut[1], 1), swept=len(unk), accepted=len(ua),
                              moved_over_1m=int(sum(abs(r["depth_m"]) > 1.0 for r in ua)),
                              depth_median_m=round(float(np.median([r["depth_m"] for r in ua])), 3) if ua else None)
     a.report.write_text(json.dumps(report, indent=1), encoding="utf-8")
@@ -501,12 +665,29 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     w.add_argument("--match", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "match.json")
     w.add_argument("--band", type=int, required=True, help="the band's index (match.json's 'band')")
     w.add_argument("--out-png", type=Path, required=True)
+    o = sub.add_parser("outlines", help="a building's matched walls on a frame: where the mesh has them, where matching does")
+    for act in p._actions[1:]:
+        o._add_action(act)
+    o.add_argument("--match", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "match.json")
+    o.add_argument("--report", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "match_score.json")
+    o.add_argument("--building", required=True, help="the reference set's id")
+    o.add_argument("--min-move", type=float, default=1.0, help="only bands matching moves this far (m)")
+    o.add_argument("--out-png", type=Path, required=True)
+    h = sub.add_parser("sheet", help="accepted unknown bands at random, where the mesh has them and where matching does")
+    for act in p._actions[1:]:
+        h._add_action(act)
+    h.add_argument("--match", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "match.json")
+    h.add_argument("--report", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "match_score.json")
+    h.add_argument("--n", type=int, default=24)
+    h.add_argument("--min-move", type=float, default=0.5)
+    h.add_argument("--seed", type=int, default=11)
+    h.add_argument("--out-png", type=Path, required=True)
     return ap.parse_args(argv)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     a = parse_args(argv)
-    return dict(fetch=cmd_fetch, sweep=cmd_sweep, score=cmd_score, show=cmd_show)[a.cmd](a)
+    return dict(fetch=cmd_fetch, sweep=cmd_sweep, score=cmd_score, show=cmd_show, outlines=cmd_outlines, sheet=cmd_sheet)[a.cmd](a)
 
 
 if __name__ == "__main__":

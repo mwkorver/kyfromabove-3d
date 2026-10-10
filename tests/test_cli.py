@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ["colorize_building.py", "build_mesh.py", "check_building.py", "run_downtown.py",
            "merge_downtown_tileset.py", "rebuild_downtown_meshes.py", "plot_texture_check.py",
            "plot_corner_snap.py", "export_3dtiles.py", "eval_fill.py", "render_flyaround.py",
-           "score_trajectory.py", "register_video.py", "video_poses.py"]
+           "score_trajectory.py", "register_video.py", "video_poses.py", "wall_visibility.py"]
 
 
 @pytest.mark.parametrize("script", SCRIPTS)

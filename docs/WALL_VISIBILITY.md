@@ -179,6 +179,46 @@ of which by eye a little over half visibly agree at the new depth and few
 visibly do not. A per-building lean is left, which the building's own
 measured walls can take out.
 
+## In the pipeline, behind a switch
+
+`colorize_building.py --match-walls` (and `build_mesh.py`, `run_downtown.py`,
+`audit_reference.py rebuild` passing it on; off by default) runs the same
+matcher (`kyfromabove_3d.wall_match`) on a building's own crops, after the
+LiDAR profile and before the mirror: an unknown band that passes becomes
+`matched`, at the matched depth less the building's lean, drawn the face's
+length and coloured from the frames like any wall. It is never the evidence
+for a face -- a face with no LiDAR wall band keeps its prism, and the mirror
+and the bridges read measured bands only -- and `building_matched.glb` shows
+the matched walls tinted cyan. `match_report.json` records every band tried.
+
+The 19 reference buildings rebuilt twice, off and on (`wall_match.py
+compare-runs`):
+
+- **The texture check on the 5 faces that got matched walls: agreement
+  0.28 -> 0.42**, better on 4, worse on none; the other 259 faces unchanged.
+- **The audit: 6 measures better, 9 worse.** 6f0cece2's north face goes
+  from 540 m2 of hole to 167. Eight of the worse are cfb7194a, whose two
+  faces matching moved 1 m in from where the mirror had them, 0.9 m out:
+  the frames agree at -0.9 m and not at +0.9 m, and the face's own measured
+  band is at -0.8 m. The audit's LiDAR solid is the roof field stood on the
+  ground, so its sides are the roof's outline; a wall under an overhang
+  reads to it as a hole. That is the audit's limit, not the mesh's.
+- **Two fixes came out of it.** A face with one matched band and no LiDAR
+  wall had turned from a prism into one strip and a 1,000 m2 hole (the
+  Omni's face 1000): matched bands are now drawn only beside LiDAR ones.
+  And a matched band's corners are closed to the next wall
+  (`build_mesh.corner_returns`).
+
+The yield is small -- 64 bands on 19 buildings -- because the pipeline
+matches in the four frames per camera head the texturing keeps, 5 m strips
+at a time, and draws nothing on prism faces. The unknown bands are not
+harder to see: they have as many frames as the measured ones, as far apart,
+at the same detail. They are shorter (10 m against 27), so a band's thirds
+are 3 m of wall, and about half of those that disagree step one way along
+the wall -- a wall turned against its Overture edge, which a trial wall
+parallel to the edge fits only in part. The next step matches whole faces,
+with a depth at each end.
+
 ```bash
 python scripts/register_video.py scene --tileset outputs/downtown --out data/derived/video/downtown_scene.npz
 python scripts/wall_visibility.py --scene data/derived/video/downtown_scene.npz --out outputs/wall_visibility/reference

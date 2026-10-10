@@ -334,6 +334,51 @@ def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | No
     return quads, (z0, z1, L)
 
 
+def corner_returns(plane: WallPlane, bands: list[FaceBand], neighbour_offset, roof: "RoofField | None" = None,
+                   tol_m: float = 0.05):
+    """Short walls closing the corners of a face's *matched* bands.
+
+    A matched band moved off the footprint edge (by the frames, see
+    kyfromabove_3d.wall_match) ends where the next face's wall does not:
+    a prism beside it stands on the footprint line, a band beside it at its
+    own depth. Seen past the corner, the gap opened onto the building's
+    empty inside -- cfb7194a's two faces matched 1 m in made 1 m slits from
+    ground to roof. Each end of each matched run within half a metre of the
+    face's end gets a vertical quad from the run's end to where
+    ``neighbour_offset(end, z)`` (0 = p0's corner, 1 = p1's) puts the next
+    wall at that corner: a point in plan, or None to leave it open."""
+    seg = plane.p1 - plane.p0
+    L = float(np.hypot(*seg))
+    e1 = np.array([seg[0] / L, seg[1] / L, 0.0])
+    n3 = np.array([plane.normal[0], plane.normal[1], 0.0])
+    p0 = np.array([plane.p0[0], plane.p0[1], 0.0])
+    out = []
+    for b in bands:
+        if b.status != "matched" or b.offset_m is None:
+            continue
+        runs = _runs(plane, b, roof)
+        if not runs:
+            continue
+        zm = 0.5 * (b.z_lo + b.z_hi)
+        for end, (s_, off) in ((0, (runs[0][0], runs[0][2])), (1, (runs[-1][1], runs[-1][2]))):
+            if (end == 0 and s_ > 0.5) or (end == 1 and s_ < L - 0.5):
+                continue
+            q = neighbour_offset(end, zm)
+            if q is None:
+                continue
+            a = p0 + s_ * e1 + off * n3
+            bq = np.array([q[0], q[1], 0.0])
+            d = bq - a
+            if np.hypot(d[0], d[1]) < tol_m:
+                continue
+            corners = np.array([a + [0, 0, b.z_lo], bq + [0, 0, b.z_lo], bq + [0, 0, b.z_hi], a + [0, 0, b.z_hi]])
+            side = np.array([-d[1], d[0], 0.0])                              # horizontal, square to the gap
+            side /= np.linalg.norm(side)
+            want = side if side @ (n3 + (e1 if end == 1 else -e1)) >= 0 else -side    # out of the building
+            out.append((_orient(corners, want), want, None, "return"))
+    return out
+
+
 def roll_quads(quads, arc: ArcWall, step_m: float = 1.5):
     """Quads built in an arc's unrolled frame -> quads on the arc. Each is
     cut every ``step_m`` along the arc (and across, for a ledge), its
@@ -1342,6 +1387,9 @@ def main() -> int:
                          "building's own facade, and a tinted copy showing what was invented")
     ap.add_argument("--no-prism-occluders", action="store_true",
                     help="occlude with the LiDAR returns alone, in the colourise and the frame sampling here")
+    ap.add_argument("--match-walls", action="store_true",
+                    help="with --refresh: the colourise gives unknown wall bands the depth the frames agree on "
+                         "(kyfromabove_3d.wall_match); matched walls are drawn, and tinted cyan in building_matched.glb")
     ap.add_argument("--allow-no-frames", action="store_true",
                     help="build even though the listed frames' crops are missing (no colour from the frames)")
     ap.add_argument("--neighbours", type=Path, default=None,
@@ -1389,6 +1437,8 @@ def main() -> int:
             cmd += ["--neighbour-levels", str(args.neighbour_levels)]
         if args.no_prism_occluders:
             cmd.append("--no-prism-occluders")
+        if args.match_walls:
+            cmd.append("--match-walls")
         print(f"colouring from the aerial frames only -> {ply_path.name}")
         t_col = time.time()
         r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -1529,20 +1579,56 @@ def main() -> int:
     all_wall_quads = []
     n_tris = 0
     n_profile = n_prism = n_party = 0
+    n_matched_faces, matched_m2 = 0, 0.0              # walls whose depth came from the frames (wall_match)
     used_bands = {}
     n_arc = 0
+    def neighbour_wall_at(pl, end: int, z: float):
+        """Where the face meeting ``pl`` at its p0 (``end`` 0) or p1 (1)
+        has its wall at height ``z``, in plan: on its band's line if it has a
+        wall band there, else on the footprint (where its prism stands);
+        None when no straight face meets it there."""
+        corner = pl.p0 if end == 0 else pl.p1
+        # the footprint's edges, not the wall planes: an edge under 3 m has
+        # no plane (cfb7194a's face 1006) and stands as a prism on the line
+        for nb in edges:
+            if nb.face == pl.face or isinstance(nb, ArcWall):
+                continue
+            if np.hypot(*((nb.p1 if end == 0 else nb.p0) - corner)) > 0.05:
+                continue
+            nb_plane = by_face.get(nb.face)
+            if nb_plane is None or isinstance(nb_plane, ArcWall):
+                return np.asarray(corner, float)
+            nb_bands = plane_bands(nb_plane, profiles.get(nb.face, []))
+            lidar = any(x.status in WALL_STATUSES and x.status != "matched" and x.offset_m is not None for x in nb_bands)
+            off = 0.0
+            for x in nb_bands:
+                if (x.z_lo <= z < x.z_hi and x.status in WALL_STATUSES and x.offset_m is not None
+                        and (lidar or x.status != "matched")):
+                    off = float(x.offset_m)
+            return np.asarray(corner, float) + off * np.asarray(nb_plane.normal, float)
+        return None
+
     for edge in edges:
         plane = by_face.get(edge.face)
         arc = plane if isinstance(plane, ArcWall) else (edge if isinstance(edge, ArcWall) else None)
         if plane is not None and isinstance(edge, ArcWall) != isinstance(plane, ArcWall):
             plane = None                                 # the ring changed shape since the colourise
         bands = plane_bands(plane, profiles.get(plane.face, [])) if plane is not None else []
+        # A matched band (its depth from the frames) fills a wall the LiDAR
+        # left open on a face it measured; it is never the only evidence for
+        # a face. A face with no LiDAR wall band takes the prism, as it would
+        # without matching -- one matched band on the Omni's all-unknown face
+        # 1000 turned a full prism into one 5 m strip and a 1,000 m2 hole.
+        if not any(b.status in WALL_STATUSES and b.status != "matched" and b.offset_m is not None for b in bands):
+            bands = [b for b in bands if b.status != "matched"]
         quads, extent = (
             wall_geometry(plane, bands, roof, ground_field=(ArcGround(ground_field, arc) if arc is not None and ground_field is not None else ground_field),
                           edge_face=edge.face)
             if (plane is not None and path != "box")
             else ([], None)
         )
+        if quads and arc is None and any(b.status == "matched" for b in bands):
+            quads = quads + corner_returns(plane, bands, lambda end, z, pl=plane: neighbour_wall_at(pl, end, z), roof)
         if quads:
             used_bands[plane.face] = bands
             if arc is not None:
@@ -1556,8 +1642,11 @@ def main() -> int:
             else:
                 tex, n_pts = face_texture(plane, bands, extent, cxyz, crgb, args.texel_m, party=edge.face in party)
             walls = [q for q in quads if q[3] == "wall"]
+            matched = [(float(b.z_lo), float(b.z_hi)) for b in bands if b.status == "matched"]
+            matched_m2 += sum((b.z_hi - b.z_lo) * (b.along_hi - b.along_lo) for b in bands if b.status == "matched")
+            n_matched_faces += bool(matched)
             textured.append((atlas.add(tex, {"face": edge.face, "kind": "profile", "z": (extent[0], extent[1]),
-                                             "along": (0.0, extent[2])}), walls))
+                                             "along": (0.0, extent[2]), **({"matched": matched} if matched else {})}), walls))
             flat = [q for q in quads if q[3] != "wall"]
             if flat:
                 flat_quads.append((tex.reshape(-1, 3).mean(axis=0), flat))
@@ -1738,7 +1827,8 @@ def main() -> int:
               "levels": len(levels), "n_frames": len(cams), "heads": heads,
               **({"parent_gers": fp_entry["parent_gers"], "split": fp_entry.get("split")} if fp_entry.get("parent_gers") else {}),
               "faces": {"profile": n_profile, "prism": n_prism, "party": n_party}, "height_m": roof_top,
-              "source": "KyFromAbove LiDAR and aerial frames (no photographs); Overture footprint"}
+              "source": "KyFromAbove LiDAR and aerial frames (no photographs); Overture footprint",
+              **({"matched": {"faces": n_matched_faces, "area_m2": round(matched_m2, 1)}} if n_matched_faces else {})}
     size = glb.write(out / "building.glb", extras)
 
     # Tileset: the mesh in its local frame, placed by the root transform.
@@ -1757,9 +1847,12 @@ def main() -> int:
                    "archetype": classification.archetype, "texels": texels,
                    "faces": {"profile": n_profile, "prism": n_prism, "party": n_party}, "n_frames": len(cams),
                    "origin_lon_lat_h": origin_geo,
-                   **({"parent_gers": fp_entry["parent_gers"]} if fp_entry.get("parent_gers") else {})},
+                   **({"parent_gers": fp_entry["parent_gers"]} if fp_entry.get("parent_gers") else {}),
+                   **({"matched": extras["matched"]} if "matched" in extras else {})},
     }
     (out / "tileset.json").write_text(json.dumps(tileset, indent=1), encoding="utf-8")
+    if n_matched_faces:
+        write_matched_tint(out, glb, atlas, args, extras, tileset)
     print(f"mesh -> {out / 'building.glb'} ({size / 1e6:.1f} MB, {n_tris:,} triangles); tileset -> {out / 'tileset.json'}")
     print(f"[time] mesh {time.time() - t_start:.1f} s (with the colourise)")
     if args.complete:
@@ -1767,6 +1860,39 @@ def main() -> int:
         write_completed(args.building, glb, atlas, roof_tex, args, extras, tileset)
         print(f"[time] complete {time.time() - t_done:.1f} s")
     return 0
+
+
+def write_matched_tint(out: Path, glb: "GlbRecorder", atlas: TextureAtlas, args, extras: dict, tileset: dict):
+    """The measured mesh again with the walls whose depth came from the
+    frames (``matched`` bands, kyfromabove_3d.wall_match) tinted cyan for the
+    viewer: ``building_matched.glb`` and ``tileset_matched.json``. Measured,
+    not invented -- product 2 -- but from the frames, not the LiDAR, and
+    shown as such. A face texture's rows run top-down over its ``z`` range."""
+    images = []
+    for img, meta in zip(atlas.images, atlas.meta):
+        img = np.asarray(img)
+        if not meta.get("matched"):
+            images.append(img)
+            continue
+        z0, z1 = meta["z"]
+        H = img.shape[0]
+        out_img = img.astype(np.float64).copy()
+        for zb0, zb1 in meta["matched"]:
+            r0 = int(np.clip(np.floor((z1 - zb1) / max(z1 - z0, 1e-6) * H), 0, H))
+            r1 = int(np.clip(np.ceil((z1 - zb0) / max(z1 - z0, 1e-6) * H), 0, H))
+            out_img[r0:r1] = 0.45 * out_img[r0:r1] + 0.55 * np.array([40.0, 210.0, 230.0])      # cyan: matched
+        images.append(np.clip(out_img, 0, 255).astype(np.uint8))
+    a = TextureAtlas(atlas.page_px, atlas.gap)
+    for im in images:
+        a.add(im)
+    w = GlbWriter(args.texture)
+    glb.replay(w, {f"walls_{k}": pg for k, pg in enumerate(a.pack())})
+    w.write(out / "building_matched.glb", extras)
+    ts = json.loads(json.dumps(tileset))
+    ts["root"]["content"]["uri"] = "building_matched.glb"
+    (out / "tileset_matched.json").write_text(json.dumps(ts, indent=1), encoding="utf-8")
+    print(f"matched walls shown -> {out / 'building_matched.glb'} ({extras['matched']['faces']} face(s), "
+          f"{extras['matched']['area_m2']:.0f} m2)")
 
 
 def write_completed(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, args, extras: dict, tileset: dict):

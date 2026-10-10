@@ -79,6 +79,7 @@ outputs/overture_boxes/**/*.glb
 outputs/**/crops_cache/
 # regenerable with scripts/wall_visibility.py; docs/WALL_VISIBILITY.md holds the figures
 outputs/wall_visibility/
+outputs/wall_match_ab/
 # run outputs are rebuilt, not versioned; the survey figures the docs cite are
 outputs/**/*.glb
 outputs/**/*.laz

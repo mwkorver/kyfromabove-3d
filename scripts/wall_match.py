@@ -29,6 +29,12 @@ gives the depth; scored first on bands the LiDAR measured.
     sheet   accepted unknown bands at random, each laid out twice -- where
             the mesh has the wall now and where matching puts it -- as
             red/cyan with each frame's brightness evened out
+    compare-runs  two rebuilds of the reference set, matching off and on
+            (folders of each building's audit.json, texture_check.json,
+            wall_profiles.json, match_report.json): the audit's own
+            comparison, the texture check on the faces that got matched
+            walls against the rest, and the pipeline's matched depths
+            against this study's
     outlines  one building's matched walls drawn on a frame twice: where the
             mesh stands them now (the footprint edge) and where matching
             puts them -- whichever hugs the wall's edges is right
@@ -54,6 +60,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import wall_visibility as wv  # noqa: E402
+
+from kyfromabove_3d.wall_match import (  # noqa: E402
+    choose_cut,
+    is_accepted,
+    lean_removed,
+    match_band,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -139,59 +152,6 @@ def band_geometry(b, rows_by_band):
     return out
 
 
-def bilinear_gray(img: np.ndarray, u: np.ndarray, v: np.ndarray):
-    """Luminance of ``img`` at (u, v), and where it is inside the image."""
-    H, W = img.shape
-    ok = (u >= 0) & (u <= W - 1.001) & (v >= 0) & (v <= H - 1.001)
-    u, v = np.clip(u, 0, W - 1.001), np.clip(v, 0, H - 1.001)
-    x0, y0 = u.astype(int), v.astype(int)
-    fx, fy = u - x0, v - y0
-    val = (img[y0, x0] * (1 - fx) + img[y0, x0 + 1] * fx) * (1 - fy) + (img[y0 + 1, x0] * (1 - fx) + img[y0 + 1, x0 + 1] * fx) * fy
-    return val, ok
-
-
-def sweep_band(geom, A, Z, masks, frames_img, cams, M, offsets, sigma_px, pairs, segments=()):
-    """Agreement between the frames' views of the trial wall at each offset:
-    an array (1 + len(segments), len(offsets)) -- the whole band, then each
-    segment (a boolean mask over the band's columns) on its own -- and, per
-    offset, the pattern's strength: the high-passed views' spread in grey
-    levels, the weaker of the frames'."""
-    from kyfromabove_3d.texture_check import highpass, masked_ncc
-    to_xy = geom[0]
-    nz, na = A.shape
-    parts = [np.ones(na, bool)] + list(segments)
-    scores, strength = [], []
-    for o in offsets:
-        xy = to_xy(A.ravel(), o)
-        P = np.column_stack([xy, Z.ravel()]) @ M[:3, :3].T + M[:3, 3]
-        views = {}
-        for f in masks:
-            c, (img, x0, y0) = cams[f], frames_img[f]
-            pc = (P - c["C"]) @ c["R_cw"].T
-            u = c["K"][0, 0] * pc[:, 0] / pc[:, 2] + c["K"][0, 2] - x0
-            v = c["K"][1, 1] * pc[:, 1] / pc[:, 2] + c["K"][1, 2] - y0
-            g, ok = bilinear_gray(img, u, v)
-            m = masks[f] & ok.reshape(nz, na)
-            views[f] = (highpass(g.reshape(nz, na), m, sigma_px), m)
-        row = []
-        for k, cols in enumerate(parts):
-            min_n = 400 if k == 0 else 150                                   # pixels two views must share
-            s, w = 0.0, 0.0
-            for f1, f2 in pairs:
-                m = views[f1][1] & views[f2][1] & cols[None, :]
-                n = int(m.sum())
-                if n < min_n:
-                    continue
-                r = masked_ncc(views[f1][0], views[f2][0], m)
-                if np.isfinite(r):
-                    s += r * np.sqrt(n)
-                    w += np.sqrt(n)
-            row.append(s / w if w > 0 else np.nan)
-        scores.append(row)
-        strength.append(min((float(v[0][v[1]].std()) for v in views.values() if v[1].sum() > 50), default=0.0))
-    return np.array(scores).T, np.array(strength)
-
-
 def sweep_building(job) -> List[dict]:
     import cv2
     (b, frames, rows, vis, cache, index, args) = job
@@ -227,36 +187,17 @@ def sweep_building(job) -> List[dict]:
                 k, w = win[(b.key, f)]
                 g = cv2.imread(str(cache / k), cv2.IMREAD_GRAYSCALE)
                 imgs[f] = (g.astype(np.float32), w["x0"], w["y0"])
-        centre = np.array([A.mean(), 0.0])
-        cxy = geom[i][0](np.array([centre[0]]), 0.0)[0]
-        cP = np.r_[cxy, Z.mean()] @ b.M[:3, :3].T + b.M[:3, 3]
-        rays = {f: (cams[f]["C"] - cP) / np.linalg.norm(cams[f]["C"] - cP) for f in fids}
-        pairs = [(f1, f2) for x, f1 in enumerate(fids) for f2 in fids[x + 1:]
-                 if np.degrees(np.arccos(np.clip(rays[f1] @ rays[f2], -1, 1))) >= args.min_baseline]
-        if not pairs:
+        views = {f: dict(K=cams[f]["K"], R_cw=cams[f]["R_cw"], C=cams[f]["C"], gray=imgs[f][0], x0=imgs[f][1],
+                         y0=imgs[f][2], mask=masks[f]) for f in fids}
+        to_xy = geom[i][0]
+
+        def to_world(a, o, to_xy=to_xy, Z=Z):
+            return np.column_stack([to_xy(a, o), Z.ravel()]) @ b.M[:3, :3].T + b.M[:3, 3]
+
+        res = match_band(to_world, A, Z, views)
+        if res is None:
             continue
-        coarse = np.arange(args.depth_min, args.depth_max + 1e-9, 0.25)
-        na = A.shape[1]
-        thirds = [(np.arange(na) * 3 // na) == t for t in range(3)]
-        sc_all, _ = sweep_band(geom[i], A, Z, masks, imgs, cams, b.M, coarse, args.sigma_px, pairs, thirds)
-        sc = sc_all[0]
-        if not np.isfinite(sc).any():
-            continue
-        k = int(np.nanargmax(sc))
-        fine = np.arange(coarse[k] - 0.3, coarse[k] + 0.3001, 0.05)
-        sf_all, strength = sweep_band(geom[i], A, Z, masks, imgs, cams, b.M, fine, args.sigma_px, pairs)
-        sf = sf_all[0]
-        kf = int(np.nanargmax(sf))
-        best, peak = float(fine[kf]), float(sf[kf])
-        thirds_m = [float(coarse[int(np.nanargmax(t))]) if np.isfinite(t).any() else None for t in sc_all[1:]]
-        far = np.abs(coarse - best) >= args.rival_m
-        rival = float(np.nanmax(sc[far])) if np.isfinite(sc[far]).any() else float("nan")
-        lidar = geom[i][1]
-        out.append(dict(r, band=i, depth_m=round(best, 2), agreement=round(peak, 3), rival=round(rival, 3),
-                        margin=round(peak - rival, 3), rival_depth_m=float(coarse[far][np.nanargmax(sc[far])]) if np.isfinite(rival) else None,
-                        pairs=len(pairs), frames_used=fids, lidar_m=lidar, lidar_returns=geom[i][2],
-                        thirds_m=thirds_m, pattern=round(float(strength[kf]), 2),
-                        curve=[[round(float(o), 2), None if not np.isfinite(v) else round(float(v), 3)] for o, v in zip(coarse, sc)]))
+        out.append(dict(r, band=i, lidar_m=geom[i][1], lidar_returns=geom[i][2], **res))
     return out
 
 
@@ -472,57 +413,69 @@ def cmd_sheet(a) -> int:
     return 0
 
 
+def cmd_compare_runs(a) -> int:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import audit_reference as ar
+    cfg = ar.load_config()
+    off_audit, on_audit, rows = {}, {}, []
+    tex = {"matched": [], "other": []}
+    study = {(r["building"], r["face"], round(r["z_lo"], 1)): r for r in json.loads(a.match.read_text(encoding="utf-8"))}
+    port = []
+    for b in cfg["buildings"]:
+        key = b["id"]
+        d_off, d_on = a.off / key, a.on / key
+        if not (d_off / "audit.json").exists() or not (d_on / "audit.json").exists():
+            print(f"  {b['name']}: missing from one run")
+            continue
+        off_audit[key] = json.loads((d_off / "audit.json").read_text(encoding="utf-8"))
+        on_audit[key] = json.loads((d_on / "audit.json").read_text(encoding="utf-8"))
+        prof = json.loads((d_on / "wall_profiles.json").read_text(encoding="utf-8"))
+        lidar = ("observed", "bridged", "extended", "mirrored")
+        # the faces the mesh drew matched walls on: with a LiDAR wall band too (build_mesh)
+        matched_faces = {f for f, bands in prof.items() if any(x["status"] == "matched" for x in bands)
+                         and any(x["status"] in lidar for x in bands)}
+        t_off = json.loads((d_off / "texture_check.json").read_text(encoding="utf-8"))["faces"] if (d_off / "texture_check.json").exists() else {}
+        t_on = json.loads((d_on / "texture_check.json").read_text(encoding="utf-8"))["faces"] if (d_on / "texture_check.json").exists() else {}
+        for f in set(t_off) & set(t_on):
+            if t_off[f].get("kind") == "roof" or t_off[f].get("ncc") is None or t_on[f].get("ncc") is None:
+                continue
+            tex["matched" if f.replace("face ", "") in matched_faces else "other"].append((b["name"], f, t_off[f]["ncc"], t_on[f]["ncc"]))
+        rep = d_on / "match_report.json"
+        n_m = 0
+        if rep.exists():
+            r = json.loads(rep.read_text(encoding="utf-8"))
+            n_m = r["matched"]
+            for x in r["bands"]:
+                s_ = study.get((key, x["face"], round(x["z_lo"], 1)))
+                if s_ is not None and x["status"] == "unknown":
+                    port.append((x["depth_m"], s_["depth_m"], x["accepted"], is_accepted(s_)))
+        rows.append(dict(name=b["name"], matched_bands=n_m, matched_faces=len(matched_faces)))
+    worse, better = ar.compare(cfg, on_audit, {k: ar.essentials(v) for k, v in off_audit.items()})
+    print(f"audit, matching on against off: {len(worse)} measure(s) worse, {len(better)} better")
+    for w in worse:
+        print("   worse:", w)
+    for w in better:
+        print("   better:", w)
+    for k in ("matched", "other"):
+        v = tex[k]
+        if v:
+            dlt = np.array([on - off for _, _, off, on in v])
+            print(f"texture check, {k} faces ({len(v)}): agreement {np.mean([x[2] for x in v]):.3f} -> {np.mean([x[3] for x in v]):.3f}; "
+                  f"better by 0.02+ on {np.mean(dlt > 0.02) * 100:.0f}%, worse by 0.02+ on {np.mean(dlt < -0.02) * 100:.0f}%")
+    if port:
+        p = np.array([(x, y) for x, y, _, _ in port])
+        agree = np.array([acc == sacc for _, _, acc, sacc in port])
+        print(f"pipeline against the study on {len(port)} unknown bands: depth within 0.25 m on {np.mean(np.abs(p[:, 0] - p[:, 1]) <= 0.25) * 100:.0f}%; "
+              f"same accept/reject on {agree.mean() * 100:.0f}%")
+    out = dict(worse=worse, better=better, buildings=rows,
+               texture={k: [dict(name=n, face=f, off=o, on=x) for n, f, o, x in v] for k, v in tex.items()},
+               port=[dict(pipeline=x, study=y, pipeline_accepted=pa, study_accepted=sa) for x, y, pa, sa in port])
+    a.report_out.write_text(json.dumps(out, indent=1), encoding="utf-8")
+    print(f"-> {a.report_out}")
+    return 0
+
+
 # ------------------------------------------------------------------ the score
-
-def thirds_spread(r) -> float:
-    """How far apart the depths of the band's thirds (and the whole band's)
-    are; inf with fewer than two thirds matched."""
-    t = [x for x in r.get("thirds_m") or [] if x is not None]
-    return float(max(t + [r["depth_m"]]) - min(t + [r["depth_m"]])) if len(t) >= 2 else float("inf")
-
-
-def passes_rules(r, depth_min: float = -8.0, depth_max: float = 3.0, edge_m: float = 0.5, thirds_m: float = 0.5) -> bool:
-    """The fixed rules: not at the end of the search (a depth there is the
-    search running out, not a wall), and the band's thirds agree -- a flat
-    wall agrees with itself; a reflection or a rounded wall seldom does."""
-    return depth_min + edge_m < r["depth_m"] < depth_max - edge_m and thirds_spread(r) <= thirds_m
-
-
-def choose_cut(rows, errors, max_gross: float = 0.03, gross_m: float = 1.0):
-    """Past the fixed rules, the loosest (margin, pattern) cut that keeps the
-    share of accepted bands off by more than ``gross_m`` at or under
-    ``max_gross``: a cut against matching that failed, not against the lean
-    (see ``lean_removed``)."""
-    ok = np.array([passes_rules(r) for r in rows])
-    mg = np.nan_to_num(np.array([r["margin"] for r in rows], float), nan=1.0)
-    pt = np.array([r.get("pattern", 99.0) for r in rows])
-    best = (1.0, 99.0, 0)
-    for tm in np.arange(0.0, 0.2, 0.01):
-        for tp in np.arange(0.0, 40.0, 1.0):
-            acc = ok & (mg >= tm) & (pt >= tp)
-            if acc.sum() >= 10 and np.mean(np.abs(errors[acc]) > gross_m) <= max_gross and acc.sum() > best[2]:
-                best = (float(tm), float(tp), int(acc.sum()))
-    return best[0], best[1]
-
-
-def is_accepted(r, cut) -> bool:
-    tm, tp = cut
-    m = r["margin"] if r["margin"] == r["margin"] else 1.0
-    return passes_rules(r) and m >= tm and r.get("pattern", 99.0) >= tp
-
-
-def lean_removed(err: np.ndarray, building: np.ndarray, min_others: int = 3) -> np.ndarray:
-    """Each band's error less the median error of the *other* measured bands
-    of its building -- what an unknown band of that building could be
-    corrected by. NaN where the building has fewer than ``min_others``."""
-    out = np.full(len(err), np.nan)
-    for i in range(len(err)):
-        o = building == building[i]
-        o[i] = False
-        if o.sum() >= min_others:
-            out[i] = err[i] - np.median(err[o])
-    return out
-
 
 def face_heading(b, face: int) -> float:
     """Which way a face looks, degrees clockwise from north (the building's frame)."""
@@ -682,12 +635,18 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     h.add_argument("--min-move", type=float, default=0.5)
     h.add_argument("--seed", type=int, default=11)
     h.add_argument("--out-png", type=Path, required=True)
+    c = sub.add_parser("compare-runs", help="two rebuilds of the reference set, matching off and on")
+    c.add_argument("--off", type=Path, default=ROOT / "outputs" / "wall_match_ab" / "off")
+    c.add_argument("--on", type=Path, default=ROOT / "outputs" / "wall_match_ab" / "on")
+    c.add_argument("--match", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "match.json")
+    c.add_argument("--report-out", type=Path, default=ROOT / "outputs" / "wall_match_ab" / "compare.json")
     return ap.parse_args(argv)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     a = parse_args(argv)
-    return dict(fetch=cmd_fetch, sweep=cmd_sweep, score=cmd_score, show=cmd_show, outlines=cmd_outlines, sheet=cmd_sheet)[a.cmd](a)
+    return dict(fetch=cmd_fetch, sweep=cmd_sweep, score=cmd_score, show=cmd_show, outlines=cmd_outlines, sheet=cmd_sheet,
+                **{"compare-runs": cmd_compare_runs})[a.cmd](a)
 
 
 if __name__ == "__main__":

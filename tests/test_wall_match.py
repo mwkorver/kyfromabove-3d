@@ -1,4 +1,4 @@
-"""The matching score's two judgements, on errors made up on purpose: the
+"""The wall matcher's two judgements, on errors made up on purpose: the
 confidence cut drops matches that failed (off by metres) and keeps the rest,
 and taking out a building's lean uses only that building's *other* bands."""
 
@@ -10,9 +10,9 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "src"))
 
-import wall_match as wm  # noqa: E402
+import kyfromabove_3d.wall_match as wm  # noqa: E402
 
 
 def band(depth, margin, pattern=20.0, thirds=(0.0, 0.1, -0.1)):

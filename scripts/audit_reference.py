@@ -228,6 +228,7 @@ def main() -> int:
     ap.add_argument("--fresh", action="store_true", help="re-audit every building even if audit.json exists")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--keep-crops", action="store_true", help="keep the frame crops (for re-meshing by hand)")
+    ap.add_argument("--match-walls", action="store_true", help="rebuild with the colourise's wall matching on")
     args = ap.parse_args()
     cfg = load_config()
     ids = [b["id"] for b in cfg["buildings"] if not b.get("dir")]
@@ -242,7 +243,7 @@ def main() -> int:
             d = ROOT / b["dir"]
             print(f"landmark {b['name']}: colourise and mesh")
             r = subprocess.run([sys.executable, str(SCRIPTS / "build_mesh.py"), "--building", str(d), "--case", b["case"],
-                                "--refresh", "--complete"], cwd=str(ROOT), stdout=subprocess.PIPE,
+                                "--refresh", "--complete"] + (["--match-walls"] if args.match_walls else []), cwd=str(ROOT), stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, text=True)
             (d / "log.txt").open("a", encoding="utf-8").write(r.stdout)
             if r.returncode != 0:
@@ -254,6 +255,8 @@ def main() -> int:
                "--force-step", "colorize", "mesh", "--complete", "--workers", str(args.workers)]
         if args.keep_crops:
             cmd.append("--keep-crops")
+        if args.match_walls:
+            cmd.append("--match-walls")
         r = subprocess.run(cmd, cwd=str(ROOT))
         return rc or r.returncode
 

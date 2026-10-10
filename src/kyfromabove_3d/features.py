@@ -2494,7 +2494,10 @@ def band_extent(plane: WallPlane, b: FaceBand, full_width_fraction: float = 0.6,
     return s0, s1
 
 
-WALL_STATUSES = ("observed", "bridged", "extended", "mirrored")
+# The kinds of band that are wall. ``matched`` has its depth from the frames
+# (kyfromabove_3d.wall_match), not the LiDAR: a wall to draw, but never an
+# anchor -- bridging, extending and mirroring read ``observed`` bands only.
+WALL_STATUSES = ("observed", "bridged", "extended", "mirrored", "matched")
 
 
 def crown_bands(bands: List[FaceBand], reference_offset_m: Optional[float] = None,

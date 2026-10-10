@@ -192,6 +192,8 @@ def worker(args) -> int:
             cmd.append("--refresh")
         if args.no_prism_occluders:
             cmd.append("--no-prism-occluders")
+        if args.match_walls:
+            cmd.append("--match-walls")
         if args.complete:
             cmd.append("--complete")
         t = time.time()
@@ -404,6 +406,8 @@ def run(args) -> int:
             cmd.append("--no-audit")
         if args.no_prism_occluders:
             cmd.append("--no-prism-occluders")
+        if args.match_walls:
+            cmd.append("--match-walls")
         if args.check_sheets:
             cmd.append("--check-sheets")
         if args.complete:
@@ -504,6 +508,8 @@ def main() -> int:
     common.add_argument("--no-prism-occluders", action="store_true",
                         help="texture with LiDAR-point occlusion alone (neighbours' facades mostly missing)")
     common.add_argument("--check-sheets", action="store_true", help="the check also draws texture_check.jpg")
+    common.add_argument("--match-walls", action="store_true",
+                        help="the colourise gives unknown wall bands the depth the frames agree on (kyfromabove_3d.wall_match)")
     common.add_argument("--force-step", nargs="*", choices=STEPS, default=None)
     r = sub.add_parser("run", parents=[common]); r.add_argument("--workers", type=int, default=4)
     r.add_argument("--limit", type=int, default=0); r.add_argument("--only", nargs="*", default=None)

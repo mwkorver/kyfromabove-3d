@@ -809,6 +809,10 @@ def main() -> int:
                          "neither is one plane, both are walls")
     ap.add_argument("--prism-min-ratio", type=float, default=0.60,
                     help="minimum fraction of nominal perimeter verified before inferring prism completion")
+    ap.add_argument("--match-walls", action="store_true",
+                    help="give an unknown wall band the depth where the frames that see it agree (kyfromabove_3d.wall_match), "
+                         "when they agree well enough; such a band is 'matched', at the matched depth less the building's "
+                         "lean (from its measured bands, 0 with fewer than 3). Off by default; match_report.json says what it did")
     ap.add_argument("--profile-band-m", type=float, default=5.0,
                     help="height of the bands a profiled face is measured in")
     ap.add_argument("--extrude-max-rms-m", type=float, default=0.30,
@@ -1186,6 +1190,17 @@ def main() -> int:
                     bands = [b if b.z_lo < top_seen else d for b, d in zip(bands, deep)]
             profiles[plane.face] = bands
 
+        # Pass 1b: an unknown band takes its depth from the frames, where two
+        # that see it from directions apart agree on one (wall_match). Before
+        # the mirror and the bridges, which read measured bands only.
+        if args.match_walls:
+            from kyfromabove_3d.wall_match import MAX_ANGLE_DEG, match_profiles
+            facing = float(np.cos(np.radians(MAX_ANGLE_DEG)))
+            report = match_profiles(nominal_planes, profiles, cams,
+                                    lambda xyz, nrm, c: project_visible(xyz, nrm, c, facing)[0],
+                                    skip_faces=set(verified_planes))
+            (args.building / "match_report.json").write_text(json.dumps(report, indent=1, default=float), encoding="utf-8")
+
         # Pass 2a: a hidden face takes its shape from the face opposite, when
         # the two have been seen to share one -- buildings are mostly
         # symmetric across their middle, and the face in a neighbour's
@@ -1265,7 +1280,8 @@ def main() -> int:
             n_sl = sum(b.status == "sloped" for b in bands)
             n_ex = sum(b.status == "extended" for b in bands)
             n_mi = sum(b.status == "mirrored" for b in bands)
-            if n_obs == 0 and n_mi == 0:
+            n_ma = sum(b.status == "matched" for b in bands)
+            if n_obs == 0 and n_mi == 0:                                     # matched bands never stand alone (see build_mesh)
                 print(f"    face {plane.face}: no band observed; nothing extruded")
                 continue
             pts = extrude_profile(plane, bands, args.spacing_m)
@@ -1275,8 +1291,9 @@ def main() -> int:
             else:
                 pts_n = np.repeat(np.array([[plane.normal[0], plane.normal[1], 0.0]]), len(pts), axis=0)
             offs = sorted({round(b.offset_m, 1) for b in bands if b.offset_m is not None})
-            zs = [b for b in bands if b.status in ("observed", "bridged", "extended", "mirrored")]
-            print(f"    face {plane.face}: {n_obs} band(s) observed, {n_br} bridged, {n_ex} extended through thin bands, {n_mi} mirrored from the face opposite, {n_sl} sloped (not extruded); wall {zs[0].z_lo:.0f}-{zs[-1].z_hi:.0f} m up, "
+            zs = [b for b in bands if b.status in ("observed", "bridged", "extended", "mirrored", "matched")]
+            print(f"    face {plane.face}: {n_obs} band(s) observed, {n_br} bridged, {n_ex} extended through thin bands, {n_mi} mirrored from the face opposite, "
+                  + (f"{n_ma} matched in the frames, " if n_ma else "") + f"{n_sl} sloped (not extruded); wall {zs[0].z_lo:.0f}-{zs[-1].z_hi:.0f} m up, "
                   f"offsets {offs[0]:+.1f}..{offs[-1]:+.1f} m from the footprint; {len(pts):,} points")
             if len(pts):
                 prof_xyz.append(pts)

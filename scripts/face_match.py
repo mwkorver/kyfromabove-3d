@@ -49,7 +49,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import wall_visibility as wv  # noqa: E402
 
-from kyfromabove_3d.wall_match import bilinear_gray  # noqa: E402
+from kyfromabove_3d.wall_match import MIN_BASELINE_DEG, bilinear_gray  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 GRID_M = 0.25                 # the search's pixel
@@ -577,6 +577,167 @@ def line_steps(to_world, shape, views, d0, d1, pairs, Z, edges):
     return runs, steps, pieces
 
 
+# ------------------------------------------------------------------ is the end of a face wall, or a level surface?
+
+LEVEL_MARGIN = 0.1       # a level surface must beat the upright wall's agreement by this much
+LEVEL_EDGE_M = 1.0       # and stand within this of the piece's edge (a deck at its top, a roof at its bottom)
+LEVEL_MAX_CUT = 0.5      # never cut away more than this share of the face's height
+LEVEL_REACH_M = 1.0      # level heights tried: from this below the piece to this above it
+LEVEL_COVER = 0.8        # a level surface must explain at least this share of the piece's pixels
+LEVEL_MIN_DEG = 2.0      # frames this far apart already tell a wall from a deck metres in front of it
+LEVEL_ABSTAIN = 0.2      # a frame matching neither explanation better than this sits the vote out
+
+
+def _local_rays(b, plane, A, Z, lo, hi, d0, d1, C):
+    """The reference camera's rays to the cells (A, Z) on the matched wall, in
+    the building's local frame: origin (along, out, z) and direction, each per cell."""
+    Minv = np.linalg.inv(b.M)
+    c = Minv[:3, :3] @ np.asarray(C, float) + Minv[:3, 3]
+    p0 = np.asarray(plane.p0, float)
+    dv = (np.asarray(plane.p1, float) - p0) / float(plane.length_m)
+    nv = np.asarray(plane.normal, float)
+    a, z = A.ravel(), Z.ravel()
+    off = d0 + (d1 - d0) * (a - lo) / (hi - lo)
+    o_c = np.r_[(c[:2] - p0) @ dv, (c[:2] - p0) @ nv, c[2]]
+    return o_c, np.column_stack([a - o_c[0], off - o_c[1], z - o_c[2]])
+
+
+def _to_world(b, plane, q: np.ndarray) -> np.ndarray:
+    """(along, out, z) in the face's terms -> the cameras' frame."""
+    p0 = np.asarray(plane.p0, float)
+    dv = (np.asarray(plane.p1, float) - p0) / float(plane.length_m)
+    nv = np.asarray(plane.normal, float)
+    xy = p0[None, :] + q[:, :1] * dv[None, :] + q[:, 1:2] * nv[None, :]
+    return np.column_stack([xy, q[:, 2]]) @ b.M[:3, :3].T + b.M[:3, 3]
+
+
+def level_piece(b, plane, A, Z, lo, hi, d0, d1, views, ref, end: str) -> dict:
+    """Is this band of the face (the cells A, Z) an upright wall or a level
+    surface? The reference frame's pixels for the cells stay fixed; each is
+    explained as the wall at a trial depth (``SHIFTS`` off the matched wall)
+    or as a level surface at a trial height, and the other frames' pictures,
+    sampled where each explanation puts the pixel, are matched against the
+    reference's. A level surface counts only on the side it can be: in front
+    of the wall at a face's ``bottom`` (a deck, a lower roof), behind it at its
+    ``top`` (the roof beyond the wall's top edge)."""
+    from kyfromabove_3d.texture_check import highpass, masked_ncc
+    w0 = views[ref]
+    o_c, D = _local_rays(b, plane, A, Z, lo, hi, d0, d1, w0["C"])
+    shape = A.shape
+    P0 = _to_world(b, plane, o_c[None, :] + D)                       # the cells on the matched wall
+    pc = (P0 - w0["C"]) @ w0["R_cw"].T
+    u = w0["K"][0, 0] * pc[:, 0] / pc[:, 2] + w0["K"][0, 2] - w0["x0"]
+    v = w0["K"][1, 1] * pc[:, 1] / pc[:, 2] + w0["K"][1, 2] - w0["y0"]
+    g0, ok0 = bilinear_gray(w0["gray"], u, v)
+    m0 = w0["mask"] & ok0.reshape(shape)
+    g0 = g0.reshape(shape)
+    beta = (d1 - d0) / (hi - lo)
+    centre = P0.mean(axis=0)
+    look = lambda w: (centre - w["C"]) / np.linalg.norm(centre - w["C"])
+    if not m0.any():
+        return dict(z=[round(float(Z.min()), 2), round(float(Z.max()) + GRID_M, 2)], end=end, upright=None, upright_shift=None,
+                    level=None, level_h=None, is_level=False)
+    others = [f for f in views if f != ref and np.degrees(np.arccos(np.clip(look(views[f]) @ look(w0), -1, 1))) >= LEVEL_MIN_DEG]
+
+    def agreement(t, keep):
+        """Each other frame's (correlation, pixels) for this explanation."""
+        q = o_c[None, :] + t[:, None] * D
+        X = _to_world(b, plane, q)
+        out = np.full((len(others), 2), np.nan)
+        for i, f in enumerate(others):
+            w = views[f]
+            pc = (X - w["C"]) @ w["R_cw"].T
+            uu = w["K"][0, 0] * pc[:, 0] / pc[:, 2] + w["K"][0, 2] - w["x0"]
+            vv = w["K"][1, 1] * pc[:, 1] / pc[:, 2] + w["K"][1, 2] - w["y0"]
+            g, ok = bilinear_gray(w["gray"], uu, vv)
+            m = m0 & (ok & keep & (pc[:, 2] > 0)).reshape(shape)
+            n = int(m.sum())
+            if n < 150:
+                continue
+            r = masked_ncc(highpass(g0, m, SIGMA_PX), highpass(g.reshape(shape), m, SIGMA_PX), m)
+            if np.isfinite(r):
+                out[i] = r, n
+        return out
+
+    a_c = o_c[0]
+    up = []
+    for x in SHIFTS:                                                  # the upright wall, d0 + x .. d1 + x
+        alpha = d0 + x - beta * lo
+        den = D[:, 1] - beta * D[:, 0]
+        t = np.where(np.abs(den) > 1e-9, (alpha + beta * a_c - o_c[1]) / np.where(np.abs(den) > 1e-9, den, 1), -1)
+        up.append(agreement(t, t > 0))
+    z_lo, z_hi = float(Z.min()), float(Z.max()) + GRID_M
+    heights = np.arange(z_lo - LEVEL_REACH_M, z_hi + LEVEL_REACH_M + 1e-9, 0.25)
+    lv = []
+    for h in heights:                                                 # a level surface at height h
+        t = np.where(np.abs(D[:, 2]) > 1e-9, (h - o_c[2]) / np.where(np.abs(D[:, 2]) > 1e-9, D[:, 2], 1), -1)
+        q = o_c[None, :] + t[:, None] * D
+        wall_at = d0 + beta * (q[:, 0] - lo)
+        side = q[:, 1] >= wall_at - 0.25 if end == "bottom" else q[:, 1] <= wall_at + 0.25
+        keep = (t > 0) & side
+        lv.append(agreement(t, keep) if keep.reshape(shape)[m0].mean() >= LEVEL_COVER else np.full((len(others), 2), np.nan))
+    U, Lv = np.array(up), np.array(lv)                                # (explanations, frames, [r, n])
+    if not len(others):
+        U, Lv = np.full((len(SHIFTS), 0, 2), np.nan), np.full((len(lv), 0, 2), np.nan)
+    # frames that match neither explanation well (they do not see this band as the reference does) sit out
+    best_f = np.fmax(np.nanmax(np.where(np.isfinite(U[..., 0]), U[..., 0], -1), axis=0, initial=-1),
+                     np.nanmax(np.where(np.isfinite(Lv[..., 0]), Lv[..., 0], -1), axis=0, initial=-1)) if U.shape[1] else np.zeros(0)
+    vote = best_f >= LEVEL_ABSTAIN
+
+    def pooled(X):
+        r, n = X[:, vote, 0], X[:, vote, 1]
+        w = np.where(np.isfinite(r), np.sqrt(np.nan_to_num(n)), 0.0)
+        return np.where(w.sum(1) > 0, (np.nan_to_num(r) * w).sum(1) / np.maximum(w.sum(1), 1e-9), np.nan)
+    up, lv = (pooled(U), pooled(Lv)) if vote.any() else (np.full(len(SHIFTS), np.nan), np.full(len(Lv), np.nan))
+    ku = int(np.nanargmax(up)) if np.isfinite(up).any() else None
+    kl = int(np.nanargmax(lv)) if np.isfinite(lv).any() else None
+    res = dict(z=[round(z_lo, 2), round(z_hi, 2)], end=end,
+               upright=None if ku is None else round(float(up[ku]), 3), upright_shift=None if ku is None else round(float(SHIFTS[ku]), 2),
+               level=None if kl is None else round(float(lv[kl]), 3), level_h=None if kl is None else round(float(heights[kl]), 2),
+               frames_voting=int(vote.sum()), frames=len(others))
+    edge = z_hi if end == "bottom" else z_lo
+    res["is_level"] = bool(kl is not None and (ku is None or lv[kl] >= up[ku] + LEVEL_MARGIN)
+                           and abs(heights[kl] - edge) <= LEVEL_EDGE_M)
+    return res
+
+
+def level_ends(b, plane, A, Z, lo, hi, d0, d1, views, edges) -> dict:
+    """Test the face's pieces (between ``edges``) for level surfaces from the
+    bottom up and from the top down, each way stopping at the first piece that
+    is wall, and never cutting more than ``LEVEL_MAX_CUT`` of the face's
+    height. Returns the face's new bottom and top and every piece tested."""
+    p0 = np.asarray(plane.p0, float)
+    n3 = np.r_[np.asarray(plane.normal, float), 0.0] @ b.M[:3, :3].T
+    centre = make_to_world(b, plane, A, Z, lo, hi)(d0, d1).mean(axis=0)
+    ref = max(views, key=lambda f: float((views[f]["C"] - centre) @ n3 / np.linalg.norm(views[f]["C"] - centre)) * views[f]["mask"].mean())
+    z0, z1 = edges[0], edges[-1]
+    bottom, top, tests = z0, z1, []
+    rows = lambda a_, b_: (Z[:, 0] >= a_ - 1e-6) & (Z[:, 0] < b_ - 1e-6)
+    for k in range(len(edges) - 1):                                   # from the bottom up
+        if edges[k + 1] - z0 > LEVEL_MAX_CUT * (z1 - z0):
+            break
+        r_ = rows(edges[k], edges[k + 1])
+        if r_.sum() < 2:
+            continue
+        t = level_piece(b, plane, A[r_], Z[r_], lo, hi, d0, d1, {f: dict(w, mask=w["mask"][r_]) for f, w in views.items()}, ref, "bottom")
+        tests.append(t)
+        if not t["is_level"]:
+            break
+        bottom = edges[k + 1]
+    for k in range(len(edges) - 1, 0, -1):                            # from the top down
+        if z1 - edges[k - 1] > LEVEL_MAX_CUT * (z1 - z0) or edges[k - 1] < bottom:
+            break
+        r_ = rows(edges[k - 1], edges[k])
+        if r_.sum() < 2:
+            continue
+        t = level_piece(b, plane, A[r_], Z[r_], lo, hi, d0, d1, {f: dict(w, mask=w["mask"][r_]) for f, w in views.items()}, ref, "top")
+        tests.append(t)
+        if not t["is_level"]:
+            break
+        top = edges[k - 1]
+    return dict(bottom=round(float(bottom), 2), top=round(float(top), 2), ref=ref.split("/")[-1], tests=tests)
+
+
 def lidar_depths(b, plane, d0, d1, lo, hi, z0, z1, bin_m=1.0, min_n=8):
     """Where the LiDAR's own wall returns stand, height by height, off the
     face's matched wall: [[z, shift, n]] for each ``bin_m`` with at least
@@ -906,6 +1067,66 @@ def cmd_trim(a) -> int:
     return 0
 
 
+def level_building(job) -> List[dict]:
+    import cv2
+
+    from kyfromabove_3d.features import load_wall_planes
+    (b, frames, vis, cache, index, faces, args, lines_of) = job
+    cams = {c["id"]: c for c in wv.cameras_in_tileset_frame(frames, b)}
+    planes = {p.face: p for p in load_wall_planes(b.dir / "wall_planes.json")}
+    imgs = {}
+    for k, w in index.items():
+        if w["building"] == b.key:
+            imgs[w["frame"]] = (cv2.imread(str(cache / k), cv2.IMREAD_GRAYSCALE).astype(np.float32), w["x0"], w["y0"])
+    out = []
+    for r in faces:
+        plane = planes.get(r["face"])
+        got = face_views(b, r["face"], plane, vis, cams, imgs) if plane is not None and "d0" in r else None
+        if got is None:
+            continue
+        A, Z, views, (lo, hi) = got
+        if len(views) < 2:
+            continue
+        z0, z1 = float(Z.min()), float(Z.max()) + GRID_M
+        res = level_ends(b, plane, A, Z, lo, hi, r["d0"], r["d1"], views, pieces_of(z0, z1, lines_of.get((b.key, r["face"]), [])))
+        out.append(dict(building=b.key, name=b.name, face=r["face"], z=[round(z0, 2), round(z1, 2)], **res))
+    return out
+
+
+def cmd_level(a) -> int:
+    """Test the pieces at each end of every face for level surfaces (a deck, a
+    lower roof, the roof beyond the top edge); write ``level.json``."""
+    import multiprocessing as mp
+    blds = wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)
+    frames = wv.read_frames(a.frames)
+    bands = json.loads((a.visibility / "bands.json").read_text(encoding="utf-8"))
+    d = np.load(a.visibility / "points.npz")
+    index = json.loads((a.cache / "index.json").read_text(encoding="utf-8"))
+    faces = json.loads(a.faces.read_text(encoding="utf-8"))
+    lines_of = {(r["building"], r["face"]): r["lines"] for r in json.loads(a.atlas.read_text(encoding="utf-8"))}
+    jobs = []
+    for b in blds:
+        mine = [r for r in faces if r["building"] == b.key]
+        if not mine:
+            continue
+        ids = [i for i, r in enumerate(bands) if r["building"] == b.key and r["wall_fraction"] >= 0.5]
+        sel = np.isin(d["band"], ids)
+        vis = dict(face_of=np.array([bands[i]["face"] for i in d["band"][sel]]), along=d["along"][sel], z=d["z"][sel],
+                   usable=d["usable"][:, sel], frames=d["frames"], bands_of={})
+        jobs.append((b, frames, vis, a.cache, index, mine, a, lines_of))
+    out, t0 = [], time.time()
+    with mp.Pool(a.workers) as pool:
+        for k, res in enumerate(pool.imap_unordered(level_building, jobs)):
+            out += res
+            print(f"  {k + 1}/{len(jobs)} buildings, {len(out)} faces ({time.time() - t0:.0f} s)", flush=True)
+    out.sort(key=lambda r: (r["name"], r["face"]))
+    a.level_out.write_text(json.dumps(out, indent=1, default=float), encoding="utf-8")
+    cut = [r for r in out if r["bottom"] > r["z"][0] or r["top"] < r["z"][1]]
+    print(f"{len(out)} faces; a level surface cut from {len(cut)} "
+          f"(bottom {sum(r['bottom'] > r['z'][0] for r in out)}, top {sum(r['top'] < r['z'][1] for r in out)}) -> {a.level_out}")
+    return 0
+
+
 def trim_sheet(pics, path: Path) -> None:
     """One row per face: the face as it is today from its most face-on frame,
     what trimming cuts away shaded and the rest outlined, then each frame's
@@ -1106,6 +1327,13 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     m.add_argument("--show", nargs="*", default=[], help="faces for the sheet, as <building key's first 8>_<face>")
     m.add_argument("--trim-out", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "trim.json")
     m.add_argument("--sheet", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "trim_sheet.jpg")
+    lv = sub.add_parser("level", help="test the pieces at each end of every face: wall, or a level surface?")
+    for act in t._actions[1:]:
+        if act.dest not in ("atlas_out", "obliques_dir"):
+            lv._add_action(act)
+    lv.add_argument("--atlas", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "atlas.json",
+                    help="the atlas whose image lines cut the faces into pieces")
+    lv.add_argument("--level-out", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "level.json")
     g = sub.add_parser("page", help="the atlas page, with the oblique crops packed per building beside it")
     g.add_argument("--atlas", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "atlas.json")
     g.add_argument("--template", type=Path, default=ROOT / "tools" / "facade_atlas.html")
@@ -1116,7 +1344,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     a = parse_args(argv)
-    return dict(sweep=cmd_sweep, atlas=cmd_atlas, trim=cmd_trim, page=cmd_page)[a.cmd](a)
+    return dict(sweep=cmd_sweep, atlas=cmd_atlas, trim=cmd_trim, level=cmd_level, page=cmd_page)[a.cmd](a)
 
 
 if __name__ == "__main__":

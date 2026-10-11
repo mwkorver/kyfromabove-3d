@@ -71,3 +71,55 @@ def test_trim_keeps_the_rows_and_columns_that_are_mostly_wall():
     rs, cs = fm.trim_extent(wall)
     assert (rs.start, rs.stop) == (4, 18) and (cs.start, cs.stop) == (1, 10)
     assert fm.trim_extent(np.zeros((5, 5), bool)) is None
+
+
+def _deck_scene(deck: bool):
+    """A textured wall 60 m long and 20 m high, and (if ``deck``) a textured
+    deck at 4.7 m in front of it, 15 m deep; three frames looking at it from
+    70 m out and 35 m up. Returns the face's plane, grid, views and a frame
+    stand-in with the identity transform."""
+    import types
+
+    import render_flyaround as rf
+
+    from kyfromabove_3d.features import wall_planes
+    pl = wall_planes(np.array([[0.0, 0.0], [60.0, 0.0], [60.0, 30.0], [0.0, 30.0]]), z_lo=0.0, z_hi=20.0)[0]
+    d = (pl.p1 - pl.p0) / np.linalg.norm(pl.p1 - pl.p0)
+    n = np.asarray(pl.normal, float)
+
+    def patch(seed, along, out, z):
+        t = rf.ground_scene(np.array([0.0, 0.0]), 30.0, 0.0, seed=seed)
+        x, y = t.tris[..., 0] + 30.0, t.tris[..., 1] + 30.0              # 0..60 each way
+        a_, o_, z_ = along(x, y), out(x, y), z(x, y)
+        t.tris = np.concatenate([pl.p0[None, None, :] + a_[..., None] * d + o_[..., None] * n, z_[..., None]], axis=-1)
+        return t
+    scene = patch(4, lambda x, y: x, lambda x, y: 0 * x, lambda x, y: y / 3.0)            # the wall, 0..20 m up
+    if deck:
+        scene = scene + patch(9, lambda x, y: x, lambda x, y: y / 4.0, lambda x, y: 0 * x + 4.7)   # 0..15 m out
+    W, H = 900, 600
+    K = rf.intrinsics(W, H, 55.0)
+    centre = np.r_[pl.p0 + 30.0 * d, 8.0]
+    views = {}
+    for k, side in enumerate((-22.0, 0.0, 22.0)):
+        C = centre + np.r_[70.0 * n + side * d, 27.0]
+        R = rf.look_rotation(centre - C)
+        img, _ = rf.render(scene, K, R, -R @ C, W, H)
+        views[f"cam{k}"] = dict(K=K, R_cw=R, C=C, gray=img.mean(axis=2).astype(np.float32), x0=0, y0=0)
+    A, Z = np.meshgrid(np.arange(4.0, 56.0, fm.GRID_M), np.arange(0.0, 20.0, fm.GRID_M))
+    for w in views.values():
+        w["mask"] = np.ones(A.shape, bool)
+    return types.SimpleNamespace(M=np.eye(4)), pl, A, Z, views
+
+
+def test_a_deck_in_front_of_the_wall_is_found_level_and_cut_away():
+    b, pl, A, Z, views = _deck_scene(deck=True)
+    got = fm.level_ends(b, pl, A, Z, 4.0, 56.0, 0.0, 0.0, views, [0.0, 4.7, 9.0, 14.0, 20.0])
+    assert got["bottom"] == 4.7 and got["top"] == 20.0, got
+    first = got["tests"][0]
+    assert first["is_level"] and abs(first["level_h"] - 4.7) <= 0.25, first
+
+
+def test_a_plain_wall_is_left_whole():
+    b, pl, A, Z, views = _deck_scene(deck=False)
+    got = fm.level_ends(b, pl, A, Z, 4.0, 56.0, 0.0, 0.0, views, [0.0, 4.7, 9.0, 14.0, 20.0])
+    assert got["bottom"] == 0.0 and got["top"] == 20.0, got

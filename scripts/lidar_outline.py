@@ -658,6 +658,17 @@ def edge_in_frame(b, line_pts, nrm, heights, cam, win, gray, window_m, outer_sha
         return None, 0.0
     peaks = [i for i in range(1, len(gw) - 1) if inwin[i] and gw[i] >= gw[i - 1] and gw[i] >= gw[i + 1] and gw[i] >= outer_share * top]
     i = max(peaks) if peaks else int(np.argmax(gw))
+    # a parapet's cap from above is a band paler (or darker) than both sides: when the step chosen is its
+    # inner side, the edge is its outer side -- a weaker step, up to 0.8 m further out
+    band_px = int(round(0.8 / (ACROSS[1] - ACROSS[0])))
+    outer = [j for j in range(i + 2, min(len(gw) - 1, i + band_px + 1))
+             if inwin[j] and gw[j] >= gw[j - 1] and gw[j] >= gw[j + 1] and gw[j] >= 0.25 * top]
+    for j in outer:
+        mid = prof[i + 1:j].mean()
+        before, after = prof[max(0, i - 4):i].mean(), prof[j + 1:j + 5].mean()
+        if (mid > before and mid > after) or (mid < before and mid < after):
+            i = j
+            break
     # sub-sample: the peak of a parabola through it and its neighbours
     if 0 < i < len(gw) - 1:
         den = gw[i - 1] - 2 * gw[i] + gw[i + 1]
@@ -678,6 +689,10 @@ def refine_building(job) -> Optional[dict]:
     cams = {c["id"]: c for c in wv.cameras_in_tileset_frame(frames, b)}
     wins = sorted(((w["off_nadir_deg"], k, w) for k, w in index.items() if w["building"] == b.key), key=lambda t: t[0])[:a.max_frames]
     grays = {k: cv2.imread(str(cache / k), cv2.IMREAD_GRAYSCALE).astype(np.float32) for _, k, _ in wins}
+    # the angled frames' windows (cut for the walls; an edge is used where a window holds its strip)
+    oblique = [(k, w) for k, w in a.oblique_index.items() if w["building"] == b.key and w["frame"] in cams
+               and not w["frame"].split("/")[-1].startswith("Color")]
+    ogray = {}
     P = np.asarray(r["edges_moved"]["ring"])[:-1]
     P0 = np.asarray(r["overture"]["ring"])[:-1]
     sgn = outward(P0)
@@ -704,16 +719,41 @@ def refine_building(job) -> Optional[dict]:
             o, clarity = edge_in_frame(b, S, nrm, h, cams[w["frame"]], w, grays[kk], a.window_m, a.outer_share)
             if o is not None and clarity >= a.min_clarity:
                 per[w["frame"].split("/")[-1]] = round(o, 3)
+        # the angled frames' answers, one vote per camera head (the median of its frames)
+        by_head = {}
+        for kk, w in oblique:
+            if kk not in ogray:
+                ogray[kk] = cv2.imread(str(a.oblique_cache / kk), cv2.IMREAD_GRAYSCALE).astype(np.float32)
+            o, clarity = edge_in_frame(b, S, nrm, h, cams[w["frame"]], w, ogray[kk], a.window_m, a.outer_share)
+            if o is not None and clarity >= a.min_clarity:
+                by_head.setdefault(w["frame"].split("/")[-1].split("_")[0], []).append(o)
+        heads = {hd: round(float(np.median(v)), 3) for hd, v in by_head.items()}
         vals = np.array(list(per.values()))
-        if len(vals) < 2:
-            edges.append(dict(rec, status="fewer than 2 frames see a clear edge", refine_m=0.0, frames=per))
-            continue
-        m = float(np.median(vals))
-        spread = float(np.max(np.abs(vals - m)))
+        hv = np.array(list(heads.values()))
+        rec.update(frames=per, angled_heads=heads)
+        if len(vals) >= 2 and float(np.max(np.abs(vals - np.median(vals)))) <= a.agree_m:
+            m = float(np.median(vals))
+            spread = float(np.max(np.abs(vals - m)))
+            how = "straight-down frames agree"
+        else:
+            allv = np.concatenate([vals, hv])                            # the straight-down frames disagree: every frame votes
+            if len(allv) < 3:
+                edges.append(dict(rec, status="fewer than 3 frames see a clear edge", refine_m=0.0))
+                continue
+            m = float(np.median(allv))
+            near = np.abs(allv - m) <= a.agree_m
+            if near.sum() < 3 or near.mean() < 0.6:
+                edges.append(dict(rec, status="frames disagree", refine_m=0.0, frames_say_m=round(m, 3),
+                                  spread_m=round(float(np.max(np.abs(allv - m))), 3)))
+                continue
+            m = float(np.median(allv[near]))
+            spread = float(np.max(np.abs(allv[near] - m)))
+            how = "all frames together"
         at_limit = abs(m) >= a.window_m - 0.03
-        ok = spread <= a.agree_m and not at_limit
-        edges.append(dict(rec, status="refined" if ok else ("at the window's limit" if at_limit else "frames disagree"),
-                          refine_m=round(m, 3) if ok else 0.0, frames_say_m=round(m, 3), spread_m=round(spread, 3), frames=per))
+        angled_off = how == "straight-down frames agree" and len(hv) >= 2 and abs(float(np.median(hv)) - m) > a.angled_tolerance_m
+        status = "at the window's limit" if at_limit else "angled frames disagree" if angled_off else "refined"
+        edges.append(dict(rec, status=status, how=how, refine_m=round(m, 3) if status == "refined" else 0.0,
+                          frames_say_m=round(m, 3), spread_m=round(spread, 3)))
     moves = [e["lidar_move_m"] + e["refine_m"] for e in edges]
     ring = outline_from_moves(P0, moves, a.max_corner_move_m)
     from shapely.geometry import Polygon
@@ -729,6 +769,7 @@ def cmd_refine(a) -> int:
     blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
     frames = wv.read_frames(a.frames)
     index = json.loads((a.nadir_cache / "index.json").read_text(encoding="utf-8"))
+    a.oblique_index = json.loads((a.oblique_cache / "index.json").read_text(encoding="utf-8"))
     with mp.Pool(a.workers) as pool:
         out = list(pool.imap_unordered(refine_building, [(r, blds[r["building"]], frames, a.nadir_cache, index, a) for r in rows]))
     out.sort(key=lambda r: r["name"])
@@ -736,6 +777,7 @@ def cmd_refine(a) -> int:
     from collections import Counter
     E = [e for r in out for e in r["edges"]]
     print(Counter(e["status"] if not e["status"].startswith("not refined") else "not refined" for e in E))
+    print("refined by:", Counter(e["how"] for e in E if e["status"] == "refined"))
     ref = np.array([e["refine_m"] for e in E if e["status"] == "refined"])
     if len(ref):
         print(f"{len(ref)} edges refined: the frames move them a median {np.median(ref):+.2f} m (+ out) from the LiDAR's line; "
@@ -764,8 +806,12 @@ def cmd_edge_sheet(a) -> int:
     frames = wv.read_frames(a.frames)
     index = json.loads((a.nadir_cache / "index.json").read_text(encoding="utf-8"))
     picks = []
+    for want in a.pick or []:
+        bk, k = want.rsplit(":", 1)
+        hit = [(key, e) for key, r in ref.items() if key.startswith(bk) for e in r["edges"] if e["edge"] == int(k)]
+        picks += hit[:1]
     rng = np.random.default_rng(a.seed)
-    for status, n in (("refined", a.n_refined), ("frames disagree", a.n_disagree), ("at the window's limit", a.n_limit)):
+    for status, n in (("refined", a.n_refined), ("frames disagree", a.n_disagree), ("angled frames disagree", a.n_limit)):
         pool = [(bk, e) for bk, r in ref.items() for e in r["edges"] if e["status"] == status]
         for i in rng.permutation(len(pool))[:n]:
             picks.append(pool[i])
@@ -882,15 +928,18 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     rf.add_argument("--frames", type=Path, default=ROOT / "outputs" / "downtown" / "frames_2024s1.gpkg")
     rf.add_argument("--nadir-cache", type=Path, default=ROOT / "data" / "derived" / "frames_cache_nadir")
     rf.add_argument("--max-frames", type=int, default=4)
-    rf.add_argument("--window-m", type=float, default=0.5, help="the furthest the frames may move an edge from the LiDAR's line")
+    rf.add_argument("--window-m", type=float, default=0.75, help="the furthest the frames may move an edge from the LiDAR's line")
     rf.add_argument("--outer-share", type=float, default=0.6, help="a brightness step this share of the strongest counts")
     rf.add_argument("--min-clarity", type=float, default=3.0, help="the step over the profile's median gradient")
     rf.add_argument("--agree-m", type=float, default=0.15, help="every frame within this of their median")
+    rf.add_argument("--oblique-cache", type=Path, default=ROOT / "data" / "derived" / "frames_cache")
+    rf.add_argument("--angled-tolerance-m", type=float, default=0.3, help="angled frames further than this flag the edge")
     rf.add_argument("--refined-out", type=Path, default=REF / "lidar_outline_refined.json")
     es = sub.add_parser("edge-sheet", help="close-ups of edges from directly above, with the three lines")
     for act in rf._actions[1:]:
         if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "frames", "nadir_cache", "refined_out"):
             es._add_action(act)
+    es.add_argument("--pick", nargs="*", default=None, help="edges to show first, as <building key prefix>:<edge>")
     es.add_argument("--n-refined", type=int, default=12)
     es.add_argument("--n-disagree", type=int, default=6)
     es.add_argument("--n-limit", type=int, default=3)

@@ -34,3 +34,30 @@ def test_find_steps_marks_one_step_between_two_depths():
     steps = fm.find_steps(curve)
     assert len(steps) == 1 and abs(steps[0]["z"] - 8.0) <= 1.0
     assert steps[0]["below"] == -1.5 and steps[0]["above"] == -0.25
+
+
+def _scores(depths, clear=0.3):
+    """Agreement for each trial depth (rows) and piece (columns): a peak at each piece's depth."""
+    return np.array([[clear * np.exp(-((s - d) / 0.3) ** 2) for d in depths] for s in fm.SHIFTS])
+
+
+def test_runs_put_the_step_on_the_line_the_frames_prefer():
+    edges = [4.8, 5.9, 7.2, 8.2, 10.8, 16.0, 22.6, 24.5]                     # Hampton 1006's lines
+    S = _scores([-1.5, -1.5, -0.25, -0.25, -0.25, -0.25, -0.25])             # the 7.2-8.2 piece belongs above
+    runs = fm.runs_from_scores(S, np.ones(7), edges)
+    assert [r["z_lo"] for r in runs] == [4.8, 7.2] and [r["shift"] for r in runs] == [-1.5, -0.25]
+    assert fm.steps_of(runs) == [dict(z=7.2, below=-1.5, above=-0.25)]
+
+
+def test_one_unclear_piece_makes_no_step():
+    edges = [4.8, 7.5, 10.1, 12.7, 15.4, 17.9, 20.8, 22.1, 23.5]
+    S = _scores([0.5] * 8)
+    S[:, 6] = 0.05 + 0.02 * np.cos(fm.SHIFTS)                               # a piece with two surfaces: no clear depth
+    runs = fm.runs_from_scores(S, np.ones(8), edges)
+    assert len(runs) == 1 and runs[0]["shift"] == 0.5
+
+
+def test_a_run_shorter_than_two_metres_is_not_split_off():
+    edges = [0.0, 1.0, 10.0]
+    runs = fm.runs_from_scores(_scores([-2.0, 0.0]), np.array([1.0, 3.0]), edges)
+    assert len(runs) == 1

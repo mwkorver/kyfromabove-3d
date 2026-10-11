@@ -301,6 +301,138 @@ def find_steps(curve, min_jump_m: float = 0.5, min_margin: float = 0.02):
     return out
 
 
+# ------------------------------------------------------------------ steps on the image's lines
+
+SHIFTS = np.arange(-2.5, 2.5001, 0.25)   # trial depths off the face's matched wall
+STEP_COST = 0.02     # a step must buy this share of the face's whole agreement
+MIN_RUN_M = 2.0      # each run of one depth at least this tall
+MIN_JUMP_M = 0.5     # a step changes the depth by at least this
+MIN_CLEAR = 0.02     # each run's depth beats any depth 0.75 m away by this much agreement
+LINE_EDGE_M = 0.5    # lines this close to the face's bottom or top are its own edges, not breaks
+
+
+def pieces_of(z0: float, z1: float, lines) -> List[float]:
+    """The heights a face is cut at: its bottom, each line the image shows
+    (away from the face's own edges) and its top."""
+    return [z0] + [z for z in sorted(lines) if z0 + LINE_EDGE_M < z < z1 - LINE_EDGE_M] + [z1]
+
+
+def runs_from_scores(S: np.ndarray, W: np.ndarray, edges, shifts=SHIFTS, step_cost=STEP_COST, min_run_m=MIN_RUN_M,
+                     min_jump_m=MIN_JUMP_M, min_clear=MIN_CLEAR) -> List[dict]:
+    """Group neighbouring pieces into runs of one depth. ``S`` is the frames'
+    agreement for each trial depth (rows) and piece (columns; NaN where the
+    piece was not seen), ``W`` each piece's weight, ``edges`` the heights
+    between pieces (one more than the pieces). The grouping kept is the one
+    with the best weighted agreement after paying ``step_cost`` of the whole
+    face's weight for each step, among runs at least ``min_run_m`` tall; then
+    a step whose depths differ by less than ``min_jump_m``, or beside a run
+    whose depth is not clear by ``min_clear``, is dropped (its runs joined)
+    until none is left. Returns [{z_lo, z_hi, shift, clear}] bottom up."""
+    ok = np.isfinite(S)
+    Sw = np.where(ok, S, 0.0) * W[None, :]
+    cs = np.concatenate([np.zeros((len(shifts), 1)), np.cumsum(Sw, 1)], 1)
+    cw = np.concatenate([np.zeros((len(shifts), 1)), np.cumsum(ok * W[None, :], 1)], 1)
+    total = float(np.max(cw[:, -1])) or 1.0
+    far = np.abs(shifts[:, None] - shifts[None, :]) >= 0.75
+
+    def run(i, j):                                   # pieces i..j-1
+        tot, wt = cs[:, j] - cs[:, i], cw[:, j] - cw[:, i]
+        if not np.any(wt > 0):
+            return 0.0, None, 0.0
+        mean = np.where(wt > 0, tot / np.maximum(wt, 1e-9), -np.inf)
+        k = int(np.argmax(mean))
+        rival = np.max(np.where(far[k], mean, -np.inf))
+        clear = float(mean[k] - rival) if np.isfinite(rival) else 0.0
+        return float(tot[k]), k, clear
+
+    n = S.shape[1]
+    tall = lambda i, j: edges[j] - edges[i] >= min_run_m - 1e-9
+    best, back = [0.0] + [-np.inf] * n, [None] * (n + 1)
+    for j in range(1, n + 1):
+        for i in range(j):
+            if not (tall(i, j) or (i == 0 and j == n)) or not np.isfinite(best[i]):
+                continue
+            v = best[i] + run(i, j)[0] - (step_cost * total if i > 0 else 0.0)
+            if v > best[j]:
+                best[j], back[j] = v, i
+    cuts, j = [], n
+    while j and back[j] is not None:
+        cuts.append(j)
+        j = back[j]
+    cuts = [0] + sorted(cuts) if j == 0 else [0, n]
+    while True:                                      # drop the weakest failing step, then look again
+        runs = [run(cuts[k], cuts[k + 1]) for k in range(len(cuts) - 1)]
+        bad = []
+        for k in range(1, len(runs)):
+            (_, a, ca), (_, b_, cb) = runs[k - 1], runs[k]
+            jump = abs(shifts[b_] - shifts[a]) if a is not None and b_ is not None else 0.0
+            if jump < min_jump_m or min(ca, cb) < min_clear:
+                bad.append((jump, min(ca, cb), k))
+        if not bad:
+            break
+        cuts.pop(min(bad)[2])
+    return [dict(z_lo=round(float(edges[cuts[k]]), 2), z_hi=round(float(edges[cuts[k + 1]]), 2),
+                 shift=None if r[1] is None else round(float(shifts[r[1]]), 2), clear=round(r[2], 3))
+            for k, r in enumerate(runs)]
+
+
+def steps_of(runs) -> List[dict]:
+    return [dict(z=runs[k]["z_lo"], below=runs[k - 1]["shift"], above=runs[k]["shift"]) for k in range(1, len(runs))]
+
+
+def line_steps(to_world, shape, views, d0, d1, pairs, Z, edges):
+    """The face's runs and steps from all its frame pairs, each step marked
+    ``confirmed`` when both halves of the pairs, taken alone, also put a step
+    within 1 m of it, the same way (in or out)."""
+    parts = [(Z >= a) & (Z < b) for a, b in zip(edges[:-1], edges[1:])]
+    W = np.sqrt(np.array([p.sum() for p in parts], float))
+    walls = [(d0 + x, d1 + x) for x in SHIFTS]
+
+    def runs_with(pp):
+        return runs_from_scores(score_walls(to_world, shape, views, walls, pp, parts)[:, 1:], W, edges) if pp else []
+    S = score_walls(to_world, shape, views, walls, pairs, parts)[:, 1:]
+    pieces = []
+    for k in range(len(parts)):                      # each piece's own best depth, and how clear it is
+        col = S[:, k]
+        if not np.isfinite(col).any():
+            pieces.append([edges[k], edges[k + 1], None, None])
+            continue
+        j = int(np.nanargmax(col))
+        rival = np.where(np.abs(SHIFTS - SHIFTS[j]) >= 0.75, col, np.nan)
+        pieces.append([round(float(edges[k]), 2), round(float(edges[k + 1]), 2), round(float(SHIFTS[j]), 2),
+                       round(float(col[j] - np.nanmax(rival)), 3) if np.isfinite(rival).any() else None])
+    runs = runs_from_scores(S, W, edges)
+    halves = [steps_of(runs_with(pairs[0::2])), steps_of(runs_with(pairs[1::2]))] if len(pairs) >= 2 else [[], []]
+    steps = steps_of(runs)
+    for s_ in steps:
+        way = np.sign(s_["above"] - s_["below"])
+        s_["confirmed"] = all(any(abs(h["z"] - s_["z"]) <= 1.0 and np.sign(h["above"] - h["below"]) == way for h in half)
+                              for half in halves)
+    return runs, steps, pieces
+
+
+def lidar_depths(b, plane, d0, d1, lo, hi, z0, z1, bin_m=1.0, min_n=8):
+    """Where the LiDAR's own wall returns stand, height by height, off the
+    face's matched wall: [[z, shift, n]] for each ``bin_m`` with at least
+    ``min_n`` returns within 2.5 m of that wall, inside the face's span."""
+    import laspy
+    path = b.dir / "lidar_local.laz"
+    if not path.exists():
+        return []
+    las = laspy.read(path)
+    xyz = np.column_stack([las.x, las.y, las.z])
+    along, off = plane.local(xyz[:, :2])
+    wall = d0 + (d1 - d0) * (along - lo) / (hi - lo)
+    sh = off - wall
+    keep = (along >= lo) & (along <= hi) & (np.abs(sh) <= 2.5) & (xyz[:, 2] >= z0) & (xyz[:, 2] < z1)
+    out = []
+    for z in np.arange(z0, z1, bin_m):
+        m = keep & (xyz[:, 2] >= z) & (xyz[:, 2] < z + bin_m)
+        if m.sum() >= min_n:
+            out.append([round(float(z + bin_m / 2), 1), round(float(np.median(sh[m])), 2), int(m.sum())])
+    return out
+
+
 def oblique_crops(b, plane, views, cams, rgbs, d0, d1, lo, hi, z0, z1, steps, out_dir: Path, stem: str,
                   n: int = 3, max_px: int = 900):
     """Up to ``n`` of the frames that see the face, as they took it: from
@@ -350,7 +482,8 @@ def oblique_crops(b, plane, views, cams, rgbs, d0, d1, lo, hi, z0, z1, steps, ou
         w_ = max(2, int(round(2 * max(crop.shape[:2]) / 600)))
         cv2.polylines(crop, [np.array([t(q) for q in quad], np.int32)], True, (120, 124, 15), w_, cv2.LINE_AA)
         for s_ in steps:
-            cv2.line(crop, t(uv(world(lo, s_["z"], depth_at(lo)))), t(uv(world(hi, s_["z"], depth_at(hi)))), (30, 38, 179), w_, cv2.LINE_AA)
+            cv2.line(crop, t(uv(world(lo, s_["z"], depth_at(lo)))), t(uv(world(hi, s_["z"], depth_at(hi)))), (30, 38, 179),
+                     w_ if s_.get("confirmed", True) else max(1, w_ // 2), cv2.LINE_AA)
         name = f"{stem}_{f.split('/')[-1]}.jpg"
         cv2.imwrite(str(out_dir / name), crop, [cv2.IMWRITE_JPEG_QUALITY, 80])
         out.append(dict(file=f"obliques/{name}", frame=f.split("/")[-1], head=f.split("/")[-1].split("_")[0]))
@@ -437,14 +570,18 @@ def atlas_building(job) -> List[dict]:
         band_rows = [dict(z_lo=x["z_lo"], z_hi=x["z_hi"], status=x["status"],
                           shift_m=None if x.get("offset_m") is None else round(x["offset_m"] - mean_d, 2))
                      for x in profiles.get(str(r["face"]), [])]
-        steps = find_steps(curve)
+        z_lines = [round(float(Z.min()) + z, 2) for z in lines["lines"]]
+        runs, steps, pieces = line_steps(to_world, A.shape, views, r["d0"], r["d1"], pairs, Z,
+                                         pieces_of(float(Z.min()), float(Z.max()), z_lines)) if pairs else ([], [], [])
+        lidar = lidar_depths(b, plane, r["d0"], r["d1"], lo, hi, float(Z.min()), float(Z.max())) if r.get("lidar") else []
         obl = oblique_crops(b, plane, views, cams, rgbs, r["d0"], r["d1"], lo, hi, float(Z.min()), float(Z.max()), steps,
                             args.obliques_dir, f"{b.key[:8]}_{r['face']}") if args.obliques_dir else []
         out.append(dict(building=b.key, name=b.name, face=r["face"], measured=bool(r.get("lidar")), along=[lo, hi], obliques=obl,
                         z=[round(float(Z.min()), 1), round(float(Z.max()), 1)], d0=r["d0"], d1=r["d1"], margin=r["margin"],
                         frame=best.split("/")[-1], frames=len(views), curve=curve, bands=band_rows,
                         floor_trace=[round(float(x), 2) for x in rows], bay_trace=[round(float(x), 2) for x in cols[::5]],
-                        lines=[round(float(Z.min()) + z, 2) for z in lines["lines"]], line_spacing_m=lines["spacing_m"],
+                        lines=z_lines, line_spacing_m=lines["spacing_m"], runs=runs, line_steps=steps, pieces=pieces,
+                        slice_steps=find_steps(curve), lidar_depths=lidar,
                         line_regular=lines["regular"], bay_m=bay, bay_strength=bay_strength,
                         image="data:image/jpeg;base64," + base64.b64encode(jpg.tobytes()).decode(), image_px=list(small.shape[1::-1])))
     return out
@@ -481,8 +618,8 @@ def cmd_atlas(a) -> int:
     return 0
 
 
-PAGE_KEYS = ("name", "face", "measured", "along", "z", "d0", "d1", "margin", "frame", "frames", "curve", "bands",
-             "floor_trace", "bay_trace", "lines", "line_spacing_m", "line_regular", "image", "image_px", "obliques")
+PAGE_KEYS = ("building", "name", "face", "measured", "along", "z", "d0", "d1", "margin", "frame", "frames", "curve", "bands",
+             "floor_trace", "bay_trace", "lines", "line_spacing_m", "line_regular", "runs", "line_steps", "pieces", "slice_steps", "lidar_depths", "image", "image_px", "obliques")
 
 
 def cmd_page(a) -> int:

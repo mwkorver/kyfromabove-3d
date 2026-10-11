@@ -78,6 +78,15 @@ svg text { font: 11px var(--mono); fill: var(--muted); }
 .thumb img { display: block; width: 100%; height: 170px; object-fit: cover; }
 .thumb span { display: block; padding: 4px 8px; font: 12px var(--mono); color: var(--muted); }
 .thumb:hover { border-color: var(--frames); }
+.verdict { border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; display: grid; gap: 8px; background: var(--paper); }
+.verdict .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 14px; }
+.verdict .row > span:first-child { min-width: 15em; }
+.verdict .choice { display: flex; gap: 4px; flex-wrap: wrap; }
+.verdict .choice button { font: 500 13px var(--body); border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+.verdict .choice button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.verdict input[type="text"] { font: 14px var(--body); padding: 4px 6px; border: 1px solid var(--rule); border-radius: 4px; background: var(--sheet); color: var(--ink); flex: 1 1 260px; min-width: 0; }
+.verdict .note { font-size: 13px; color: var(--muted); }
+.item .done { color: var(--frames); }
 dialog.pop { padding: 0; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); color: var(--ink); max-width: 96vw; max-height: 96vh; }
 dialog.pop::backdrop { background: var(--scrim); }
 .pop figure { margin: 0; display: grid; gap: 8px; padding: 10px; }
@@ -90,7 +99,7 @@ dialog.pop::backdrop { background: var(--scrim); }
 
 <header>
   <h1>Downtown Facade Atlas</h1>
-  <p class="lede">The 19 reference buildings' straight wall faces, each laid flat from the aerial frame that faces it most squarely. Beside each elevation, on the same vertical scale: how far in or out the frames say each 2&nbsp;m slice of wall stands, what the LiDAR measured, and the horizontal lines the facade shows. A real step in the wall should line up with a change in the facade's pattern.</p>
+  <p class="lede">The 19 reference buildings' straight wall faces, each laid flat from the aerial frame that faces it most squarely. Beside each elevation, on the same vertical scale: the horizontal lines the facade shows, how far in or out the frames say the wall stands between each pair of lines, and what the LiDAR measured. Steps may only fall on a line the image shows; the frames decide which. Mark each step right or wrong below the picture: your marks are saved here and read back to score the rule.</p>
 </header>
 
 <div class="app">
@@ -107,9 +116,11 @@ dialog.pop::backdrop { background: var(--scrim); }
           <button type="button" data-k="missed" aria-pressed="false">LiDAR missed</button>
           <button type="button" data-k="measured" aria-pressed="false">LiDAR measured</button>
           <button type="button" data-k="step" aria-pressed="false">Has a step</button>
+          <button type="button" data-k="todo" aria-pressed="false">Not yet checked</button>
         </div>
       </div>
     </div>
+    <p class="how" id="progress" style="margin:0;padding:6px 12px;border-bottom:1px solid var(--rule)"></p>
     <div class="list" id="list" role="listbox" aria-label="Faces"></div>
   </aside>
 
@@ -134,25 +145,71 @@ dialog.pop::backdrop { background: var(--scrim); }
   const STATUS = { observed: "measured", unknown: "unknown", mirrored: "copied", extended: "extended", bridged: "filled", open: "open", sloped: "sloped", matched: "matched" };
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
-  // a step: the median depth of the 3 slices below a height against the 3 above, both confident
-  function steps(r) {
-    const c = r.curve.filter((p) => p[3] === null || p[3] >= 0.02);
-    const out = [];
-    for (let k = 3; k + 3 <= c.length; k++) {
-      const med = (a) => { const s = a.map((p) => p[1]).sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
-      const below = med(c.slice(k - 3, k)), above = med(c.slice(k, k + 3));
-      if (Math.abs(above - below) >= 0.5) out.push({ z: (c[k - 1][0] + c[k][0]) / 2, below, above });
-    }
-    // keep the strongest of runs of neighbouring heights
-    const kept = [];
-    for (const s of out) {
-      const last = kept[kept.length - 1];
-      if (last && s.z - last.z < 2.5) { if (Math.abs(s.above - s.below) > Math.abs(last.above - last.below)) kept[kept.length - 1] = s; }
-      else kept.push(s);
-    }
-    return kept;
+  // steps on the image's lines (the frames choose which), and the old 2 m slice rule's, for comparison
+  ALL.forEach((r) => { r.steps = r.line_steps; r.old = r.slice_steps; r.key = `${r.building.slice(0, 8)}_${r.face}`; });
+
+  // your verdicts: one document per face in the page's shared store, read back to score the rule.
+  // Every mark is also kept in this browser, so the buttons work before the store answers (or if it
+  // never does); marks made before it answers are sent to it once it does.
+  const RULE = "lines-1", LOCAL = "facade-atlas-verdicts";
+  const verdicts = {};
+  try { Object.assign(verdicts, JSON.parse(localStorage.getItem(LOCAL) || "{}")); } catch (e) {}
+  let db = null, mode = "connecting", dbNote = "";
+  const queue = {};
+  const keepLocal = () => { try { localStorage.setItem(LOCAL, JSON.stringify(verdicts)); } catch (e) {} };
+  // where a mark goes: the claude.ai store, or the local atlas server's file (scripts/atlas_server.py)
+  const put = (key, body) => mode === "file"
+    ? fetch("api/verdicts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ [key]: body }) })
+        .then((x) => { if (!x.ok) throw { code: "http " + x.status }; })
+    : db.collection("verdicts").doc(key).set(body);
+  function send(key) {
+    const body = verdicts[key], via = mode;
+    queue[key] = (queue[key] || Promise.resolve()).then(() => put(key, body)).then(() => {
+      if (dbNote) { dbNote = ""; renderVerdict(); }
+    }).catch((e) => {
+      mode = "local";
+      dbNote = `${via === "file" ? "The local atlas server" : "The page's store"} refused a mark (${(e && e.code) || "error"}); marks are kept in this browser only.`;
+      renderVerdict();
+    });
   }
-  ALL.forEach((r) => { r.steps = steps(r); });
+  function save(r, patch) {
+    const cur = verdicts[r.key] || { building: r.building, name: r.name, face: r.face, rule: RULE, steps: {}, missing: null, note: "" };
+    verdicts[r.key] = { ...cur, ...patch, steps: { ...cur.steps, ...(patch.steps || {}) }, rule: RULE,
+                        step_heights: r.steps.map((x) => x.z), at: new Date().toISOString() };
+    keepLocal();
+    renderVerdict(); refreshList();
+    if (mode === "shared" || mode === "file") send(r.key);
+  }
+  const checked = (r) => { const v = verdicts[r.key]; return !!v && (r.steps.every((x) => v.steps[x.z.toFixed(2)]) && (r.steps.length || v.missing !== null)); };
+  (async () => {
+    await null;                                      // after the page's own setup below has run
+    try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch (e) { db = null; }
+    if (!db) {
+      // no claude.ai store: a copy served by scripts/atlas_server.py saves marks to a file beside the atlas
+      try {
+        const x = await fetch("api/verdicts", { cache: "no-store" });
+        if (!x.ok) throw 0;
+        const there = await x.json();
+        for (const [k, v] of Object.entries(there)) if (!verdicts[k] || (v.at || "") >= (verdicts[k].at || "")) verdicts[k] = v;
+        mode = "file"; keepLocal();
+        for (const k of Object.keys(verdicts)) if (!there[k] || (there[k].at || "") < (verdicts[k].at || "")) send(k);
+      } catch (e) { mode = "local"; }
+      renderVerdict(); refreshList(); return;
+    }
+    let first = true;
+    db.collection("verdicts").onSnapshot((snap) => {
+      const there = {};
+      snap.docs.forEach((d) => { if (d.exists) there[d.id] = d.data(); });
+      for (const [k, v] of Object.entries(there)) if (!verdicts[k] || (v.at || "") >= (verdicts[k].at || "")) verdicts[k] = v;
+      if (first) {                                   // marks made in this browser that the store has not got yet
+        first = false; mode = "shared";
+        for (const k of Object.keys(verdicts)) if (!there[k] || (there[k].at || "") < (verdicts[k].at || "")) send(k);
+      }
+      keepLocal();
+      if (document.activeElement?.id !== "v-note") renderVerdict();
+      refreshList();
+    }, (e) => { mode = "local"; dbNote = "The page's store stopped answering; marks are kept in this browser until you reload."; renderVerdict(); });
+  })();
 
   const state = { kind: "all", bld: "", list: [], i: 0 };
   try { const s = JSON.parse(localStorage.getItem("facade-atlas") || "{}"); Object.assign(state, { kind: s.kind || "all", bld: s.bld || "" }); } catch (e) {}
@@ -174,20 +231,26 @@ dialog.pop::backdrop { background: var(--scrim); }
 
   function filtered() {
     return ALL.filter((r) => (!state.bld || r.name === state.bld) &&
-      (state.kind === "all" || (state.kind === "measured" && r.measured) || (state.kind === "missed" && !r.measured) || (state.kind === "step" && r.steps.length)));
+      (state.kind === "all" || (state.kind === "measured" && r.measured) || (state.kind === "missed" && !r.measured) || (state.kind === "step" && r.steps.length) || (state.kind === "todo" && !checked(r))));
   }
 
   function refresh() {
     try { localStorage.setItem("facade-atlas", JSON.stringify({ kind: state.kind, bld: state.bld })); } catch (e) {}
     state.list = filtered();
     if (state.i >= state.list.length) state.i = 0;
+    refreshList();
+    render();
+  }
+
+  function refreshList() {
+    const n = ALL.filter(checked).length;
+    document.getElementById("progress").textContent = `You have checked ${n} of ${ALL.length} faces.`;
     const L = document.getElementById("list");
     L.innerHTML = state.list.map((r, k) => `<button class="item" role="option" type="button" data-k="${k}" aria-current="${k === state.i}">
         <span class="n">${r.name}</span><span class="tag ${r.measured ? "measured" : "missed"}">${r.measured ? "measured" : "missed"}</span>
-        <span class="m">face ${r.face} &middot; ${(r.along[1] - r.along[0]).toFixed(0)} m &times; ${(r.z[1] - r.z[0]).toFixed(0)} m${r.steps.length ? " &middot; step" : ""}</span></button>`).join("")
+        <span class="m">face ${r.face} &middot; ${(r.along[1] - r.along[0]).toFixed(0)} m &times; ${(r.z[1] - r.z[0]).toFixed(0)} m${r.steps.length ? ` &middot; ${r.steps.length} step${r.steps.length > 1 ? "s" : ""}` : ""}${checked(r) ? ' &middot; <span class="done">checked</span>' : ""}</span></button>`).join("")
       || `<p class="how" style="padding:8px">No face matches these filters.</p>`;
     L.querySelectorAll(".item").forEach((el) => el.addEventListener("click", () => { state.i = +el.dataset.k; refresh(); }));
-    render();
   }
 
   function render() {
@@ -205,8 +268,17 @@ dialog.pop::backdrop { background: var(--scrim); }
       ov += r.lines.map((z) => `<line x1="0" x2="${w}" y1="${Y(z)}" y2="${Y(z)}" stroke="${fr}" stroke-width="1.2" stroke-dasharray="3 3"/>`).join("");
     if (document.getElementById("t-bands")?.checked ?? false)
       ov += r.bands.map((b) => (b.z_lo > z0 && b.z_lo < z1) ? `<line x1="0" x2="${w}" y1="${Y(b.z_lo)}" y2="${Y(b.z_lo)}" stroke="${ink}" stroke-width="1" stroke-dasharray="4 4" opacity=".8"/>` : "").join("");
+    if (document.getElementById("t-old")?.checked ?? false)
+      ov += r.old.map((s) => `<line x1="0" x2="${w}" y1="${Y(s.z)}" y2="${Y(s.z)}" stroke="${ink}" stroke-width="2" stroke-dasharray="8 4" opacity=".9"/>`).join("");
     if (document.getElementById("t-steps")?.checked ?? true)
-      ov += r.steps.map((s) => `<line x1="0" x2="${w}" y1="${Y(s.z)}" y2="${Y(s.z)}" stroke="${st}" stroke-width="2"/>`).join("");
+      ov += r.steps.map((s) => {
+        // a light edge under the red, so the line reads on dark and light facades alike; a label says which kind
+        const y = Y(s.z), dash = s.confirmed ? "" : ' stroke-dasharray="10 6"', lab = `step ${s.z.toFixed(1)} m${s.confirmed ? "" : " (not confirmed)"}`;
+        return `<line x1="0" x2="${w}" y1="${y}" y2="${y}" stroke="#fff" stroke-width="6.5" opacity=".85"${dash}/>` +
+          `<line x1="0" x2="${w}" y1="${y}" y2="${y}" stroke="${st}" stroke-width="3.5"${dash}/>` +
+          `<rect x="4" y="${y - 19}" width="${lab.length * 6.7 + 10}" height="15" rx="2" fill="${st}"/>` +
+          `<text x="9" y="${y - 8}" style="fill:#fff;font-size:11px">${lab}</text>`;
+      }).join("");
 
     // depth against height: x = metres off the face's matched wall (+ out)
     const DW = 230, sx = (s) => 30 + (s + 2.5) / 5 * (DW - 40);
@@ -222,10 +294,18 @@ dialog.pop::backdrop { background: var(--scrim); }
       if (b.status === "observed" && b.shift_m !== null && Math.abs(b.shift_m) <= 2.5)
         dg += `<line x1="${sx(b.shift_m)}" x2="${sx(b.shift_m)}" y1="${ya + 1}" y2="${yb - 1}" stroke="${li}" stroke-width="4" opacity=".85"/>`;
     }
-    const pts = r.curve.map((p) => ({ x: sx(p[1]), y: Y(p[0]), ok: p[3] === null || p[3] >= 0.02 }));
-    if (pts.length) dg += `<polyline points="${pts.map((p) => `${p.x},${p.y}`).join(" ")}" fill="none" stroke="${fr}" stroke-width="1.5" opacity=".7"/>`;
-    dg += pts.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="${p.ok ? 3.5 : 2.5}" fill="${p.ok ? fr : "none"}" stroke="${fr}" stroke-width="1.2"/>`).join("");
-    dg += r.steps.map((s) => `<line x1="26" x2="${DW}" y1="${Y(s.z)}" y2="${Y(s.z)}" stroke="${st}" stroke-width="1.5" stroke-dasharray="5 3"/>`).join("");
+    if (document.getElementById("t-old")?.checked ?? false) {
+      const pts = r.curve.map((p) => `${sx(p[1])},${Y(p[0])}`);
+      if (pts.length) dg += `<polyline points="${pts.join(" ")}" fill="none" stroke="${ink}" stroke-width="1" opacity=".55"/>`;
+    }
+    for (const [za, zb, sft, clr] of r.pieces) {
+      if (sft === null) continue;
+      const ok = clr !== null && clr >= 0.02, ya = Y(zb) + 1.5, yb = Y(za) - 1.5;
+      if (yb > ya) dg += `<rect x="${sx(sft) - 4}" y="${ya}" width="8" height="${yb - ya}" rx="2" fill="${ok ? fr : "none"}" fill-opacity=".85" stroke="${fr}" stroke-width="1.2"/>`;
+    }
+    for (const run of r.runs) if (run.shift !== null) dg += `<line x1="${sx(run.shift)}" x2="${sx(run.shift)}" y1="${Y(run.z_hi)}" y2="${Y(run.z_lo)}" stroke="${css("--ink")}" stroke-width="1.5"/>`;
+    dg += r.lidar_depths.filter((q) => Math.abs(q[1]) <= 2.5).map((q) => `<circle cx="${sx(q[1])}" cy="${Y(q[0])}" r="2.6" fill="${li}"/>`).join("");
+    dg += r.steps.map((s) => `<line x1="26" x2="${DW}" y1="${Y(s.z)}" y2="${Y(s.z)}" stroke="${st}" stroke-width="1.5"${s.confirmed ? "" : ' stroke-dasharray="5 3"'}/>`).join("");
     dg += [-2, 0, 2].map((s) => `<text x="${sx(s)}" y="${h - 4}" text-anchor="middle">${s > 0 ? "+" : ""}${s}</text>`).join("");
 
     // lines: horizontal-edge strength up the facade (0.1 m a row), and a tick at each line found
@@ -239,7 +319,7 @@ dialog.pop::backdrop { background: var(--scrim); }
     const bpts = bt.map((v, k) => `${(k * 0.5) / L * w},${BH - 3 - v / bmax * (BH - 8)}`).join(" ");
     const bg = `<polyline points="0,${BH - 3} ${bpts} ${w},${BH - 3}" fill="${fr}" fill-opacity=".18" stroke="${fr}" stroke-width="1.2"/>`;
 
-    const stepTxt = r.steps.length ? r.steps.map((s) => `${s.z.toFixed(1)} m up (${s.below > s.above ? "upper part stands " + (s.below - s.above).toFixed(1) + " m further in" : "upper part stands " + (s.above - s.below).toFixed(1) + " m further out"})`).join("; ") : "none found";
+    const stepTxt = r.steps.length ? r.steps.map((s) => stepWords(s)).join("; ") : "none found";
     const sign = (x) => (x > 0 ? "+" : "") + x.toFixed(2);
     M.innerHTML = `
       <div class="head">
@@ -252,12 +332,13 @@ dialog.pop::backdrop { background: var(--scrim); }
         <span>frames: <b>${r.frames}</b> (shown: ${r.frame})</span>
         <span>matched wall: <b>${sign(r.d0)} m</b> at the left end, <b>${sign(r.d1)} m</b> at the right (off the footprint edge, + out)</span>
         <span>lines in the image: <b>${r.lines.length}</b>${r.line_spacing_m ? `, mostly <b>&asymp; ${r.line_spacing_m.toFixed(1)} m</b> apart` : r.lines.length >= 3 ? ", not evenly spaced" : ""}</span>
-        <span>step: <b>${stepTxt}</b></span>
+        <span>steps: <b>${stepTxt}</b></span>
       </div>
       <div class="toggles">
         <label><input type="checkbox" id="t-lines" ${document.getElementById("t-lines")?.checked === false ? "" : "checked"}> lines the image shows</label>
         <label><input type="checkbox" id="t-bands" ${document.getElementById("t-bands")?.checked ? "checked" : ""}> old fixed 5 m bands</label>
-        <label><input type="checkbox" id="t-steps" ${document.getElementById("t-steps")?.checked === false ? "" : "checked"}> steps the frames see</label>
+        <label><input type="checkbox" id="t-steps" ${document.getElementById("t-steps")?.checked === false ? "" : "checked"}> steps on the lines</label>
+        <label><input type="checkbox" id="t-old" ${document.getElementById("t-old")?.checked ? "checked" : ""}> old 2 m slice steps (grey)</label>
       </div>
       <div class="sheet">
         <div class="col">
@@ -270,7 +351,7 @@ dialog.pop::backdrop { background: var(--scrim); }
           <svg width="${w}" height="${BH}" viewBox="0 0 ${w} ${BH}" role="img" aria-label="vertical edge strength along the face">${bg}</svg>
         </div>
         <div class="col">
-          <span class="cap">Depth, slice by slice (m)</span>
+          <span class="cap">Depth between the lines (m)</span>
           <svg width="${DW}" height="${h}" viewBox="0 0 ${DW} ${h}" role="img" aria-label="depth against height">${dg}</svg>
         </div>
         <div class="col">
@@ -279,22 +360,58 @@ dialog.pop::backdrop { background: var(--scrim); }
         </div>
       </div>
       <div class="legend">
-        <span class="key"><span class="sw" style="background:${fr}"></span>frames: depth of each 2 m slice where two frames agree best (filled = clear, hollow = weak)</span>
-        <span class="key"><span class="sw" style="background:${li}"></span>LiDAR: measured band and its depth</span>
+        <span class="key"><span class="sw" style="background:${fr}"></span>bar: where the frames put the wall between two lines (filled = clear, hollow = unclear)</span>
+        <span class="key"><span class="sw" style="background:${css("--ink")}"></span>thin line: the depth each run of bars is given</span>
+        <span class="key"><span class="sw" style="background:${li}"></span>LiDAR: dots = its wall returns height by height; bars = its measured bands</span>
         <span class="key"><span class="sw" style="background:${fr}"></span>dotted: a horizontal line in the image</span>
-        <span class="key"><span class="sw" style="background:${st}"></span>step: the slices below and above differ by 0.5 m or more</span>
+        <span class="key"><span class="sw" style="background:${st}"></span>step: solid = held-back frames agree, dashed = they don't</span>
       </div>
+      <div class="verdict" id="verdict"></div>
       ${r.obliques.length ? `<div class="obl">
-        <span class="cap">The obliques: the frames as taken (teal = the face's matched wall, red = a step the frames see); click to enlarge</span>
+        <span class="cap">The obliques: the frames as taken (teal = the face's matched wall, red = a step on the lines; thin red = not confirmed); click to enlarge</span>
         <div class="thumbs">${r.obliques.map((o, k) => `<button type="button" class="thumb" data-o="${k}"><img data-file="${o.file}" alt="${r.name} face ${r.face} in frame ${o.frame}"><span>${o.head} &middot; ${o.frame}</span></button>`).join("")}</div>
       </div>` : ""}
-      <p class="how"><b>How to read it.</b> The three panels share one height scale, so a row across them is one height on the building. The middle panel's zero line is the face's matched wall; dots left of it are further in, right of it further out. Where the dots jump, the wall steps; that height should match a change you can see in the elevation, such as a shopfront level, a setback or a cornice, and often one of the dotted lines: those are the horizontal lines the elevation itself shows (floors, panel joints, a cornice), found from the image alone, and ticked again on the right. On measured faces, the orange bars are the LiDAR's own depth: the dots should sit on them.</p>`;
+      <p class="how"><b>How to read it.</b> The three panels share one height scale, so a row across them is one height on the building. The dotted lines are the horizontal lines the elevation itself shows (floors, panel joints, a ledge, a cornice), found from the image alone and ticked again on the right. The face is cut at those lines, and the frames put each piece at a depth: the bars in the middle panel, left of zero further in, right further out. Neighbouring pieces are then grouped into runs of one depth, paying a fixed cost for each step, so a step appears only where the frames clearly want one, and always on a line. A step must change the depth by 0.5 m, leave at least 2 m of wall on each side, and is <b>confirmed</b> (solid red) only when each half of the frame pairs, on its own, puts a step within 1 m of it. On measured faces the orange dots are the LiDAR's own wall returns: the bars should sit on them.</p>`;
     document.getElementById("prev").onclick = () => { state.i = (state.i - 1 + state.list.length) % state.list.length; refresh(); };
     document.getElementById("next").onclick = () => { state.i = (state.i + 1) % state.list.length; refresh(); };
-    ["t-lines", "t-bands", "t-steps"].forEach((id) => document.getElementById(id).addEventListener("change", render));
+    ["t-lines", "t-bands", "t-steps", "t-old"].forEach((id) => document.getElementById(id).addEventListener("change", render));
+    renderVerdict();
     M.querySelectorAll(".thumb").forEach((el) => el.addEventListener("click", () => openPop(r, +el.dataset.o)));
     fillObliques(M);
     document.querySelector(`.item[data-k="${state.i}"]`)?.scrollIntoView({ block: "nearest" });
+  }
+
+  function stepWords(s) {
+    const d = Math.abs(s.above - s.below).toFixed(2).replace(/0$/, "");
+    return `${s.z.toFixed(1)} m up, upper part ${d} m further ${s.above < s.below ? "in" : "out"}${s.confirmed ? "" : " (not confirmed)"}`;
+  }
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const CHOICES = [["right", "Right"], ["off", "Right step, wrong height"], ["wrong", "No step here"], ["unsure", "Not sure"]];
+  function renderVerdict() {
+    const V = document.getElementById("verdict"), r = state.list[state.i];
+    if (!V || !r) return;
+    const v = verdicts[r.key] || { steps: {}, missing: null, note: "" };
+    const where = mode === "shared" ? "Marks are saved to the page, where Claude reads them."
+      : mode === "file" ? "Marks are saved to verdicts.json beside the atlas on this machine, where Claude reads them."
+      : mode === "connecting" ? "Connecting to the page's store&hellip; marks are kept in this browser meanwhile."
+      : "This view has no shared store, so marks are kept in this browser only. Use \u201cCopy my marks\u201d and paste them to Claude.";
+    const btns = (name, cur, opts) => `<span class="choice" role="group">${opts.map(([k, t]) => `<button type="button" data-name="${name}" data-v="${k}" aria-pressed="${cur === k}" >${t}</button>`).join("")}</span>`;
+    V.innerHTML = `<span class="cap">Your verdict on this face</span>
+      ${r.steps.map((s) => `<div class="row"><span>Step at <b>${stepWords(s)}</b></span>${btns("step:" + s.z.toFixed(2), v.steps[s.z.toFixed(2)], CHOICES)}</div>`).join("")}
+      <div class="row"><span>${r.steps.length ? "Is a step missing elsewhere?" : "No step drawn. Is one missing?"}</span>${btns("missing", v.missing === true ? "yes" : v.missing === false ? "no" : null, [["no", "No"], ["yes", "Yes, a step is missing"]])}</div>
+      <div class="row"><input type="text" id="v-note" maxlength="400" placeholder="Anything else (where a missing step is, what you see)" value="${esc(v.note || "")}" ><span class="choice"><button type="button" id="v-save" >Save note</button></span></div>
+      <div class="row"><span class="note">${dbNote || where}</span>${mode === "local" ? `<span class="choice"><button type="button" id="v-copy">Copy my marks</button></span>` : ""}</div>`;
+    V.querySelectorAll("button[data-name]").forEach((el) => el.addEventListener("click", () => {
+      const n = el.dataset.name, val = el.dataset.v;
+      if (n === "missing") save(r, { missing: val === "yes" });
+      else save(r, { steps: { [n.slice(5)]: v.steps[n.slice(5)] === val ? null : val } });
+    }));
+    V.querySelector("#v-save")?.addEventListener("click", () => save(r, { note: V.querySelector("#v-note").value.trim() }));
+    V.querySelector("#v-copy")?.addEventListener("click", async (ev) => {
+      const text = JSON.stringify(Object.values(verdicts));
+      try { await navigator.clipboard.writeText(text); ev.target.textContent = "Copied"; }
+      catch (e) { const t = document.createElement("textarea"); t.value = text; t.rows = 4; t.style.width = "100%"; ev.target.closest(".row").after(t); t.select(); }
+    });
   }
 
   // the oblique crops come in one file per building, fetched when first needed

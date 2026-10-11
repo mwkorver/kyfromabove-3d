@@ -13,13 +13,9 @@
       "name": "facade-atlas",
       "runtimeExecutable": ".venv/bin/python",
       "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8770",
-        "--bind",
-        "127.0.0.1",
-        "--directory",
-        "outputs/wall_visibility/reference"
+        "scripts/atlas_server.py",
+        "--port",
+        "8770"
       ],
       "port": 8770
     }

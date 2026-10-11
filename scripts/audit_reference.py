@@ -221,7 +221,11 @@ def diff_runs(cfg: dict, before_dir: Path, buildings: Path, ids, figure: Path) -
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("action", choices=("rebuild", "compare", "accept", "diff"))
+    ap.add_argument("action", choices=("rebuild", "compare", "accept", "diff", "snapshot"))
+    ap.add_argument("--audit-outline", choices=("footprint", "lidar"), default="footprint",
+                    help="snapshot: measure against the LiDAR solid within Overture's footprint (as the baseline) "
+                         "or within each building's LiDAR outline (footprint_lidar.json)")
+    ap.add_argument("--to", type=Path, default=None, help="snapshot: the folder for <id>.json")
     ap.add_argument("--before", type=Path, default=ROOT / "outputs" / "downtown" / "audit_before",
                     help="diff: a folder of earlier audit.json files, <id>.json")
     ap.add_argument("--figure", type=Path, default=ROOT / "docs" / "figures" / "audit_downtown_diff.png")
@@ -229,6 +233,7 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--keep-crops", action="store_true", help="keep the frame crops (for re-meshing by hand)")
     ap.add_argument("--match-walls", action="store_true", help="rebuild with the colourise's wall matching on")
+    ap.add_argument("--lidar-outline", action="store_true", help="rebuild with each building's LiDAR outline (footprint_lidar.json)")
     args = ap.parse_args()
     cfg = load_config()
     ids = [b["id"] for b in cfg["buildings"] if not b.get("dir")]
@@ -243,7 +248,8 @@ def main() -> int:
             d = ROOT / b["dir"]
             print(f"landmark {b['name']}: colourise and mesh")
             r = subprocess.run([sys.executable, str(SCRIPTS / "build_mesh.py"), "--building", str(d), "--case", b["case"],
-                                "--refresh", "--complete"] + (["--match-walls"] if args.match_walls else []), cwd=str(ROOT), stdout=subprocess.PIPE,
+                                "--refresh", "--complete"] + (["--match-walls"] if args.match_walls else [])
+                               + (["--lidar-outline"] if args.lidar_outline else []), cwd=str(ROOT), stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, text=True)
             (d / "log.txt").open("a", encoding="utf-8").write(r.stdout)
             if r.returncode != 0:
@@ -257,8 +263,23 @@ def main() -> int:
             cmd.append("--keep-crops")
         if args.match_walls:
             cmd.append("--match-walls")
+        if args.lidar_outline:
+            cmd.append("--lidar-outline")
         r = subprocess.run(cmd, cwd=str(ROOT))
         return rc or r.returncode
+
+    if args.action == "snapshot":
+        # every reference building audited now, against the outline asked for, into --to (the building's own
+        # audit.json is left alone), so two builds can be compared against the same LiDAR solid
+        from audit_building import audit
+        args.to.mkdir(parents=True, exist_ok=True)
+        for b in cfg["buildings"]:
+            d = building_dir(b)
+            if (d / "3dtiles_mesh" / "building.glb").exists():
+                rec = audit(d, case=b.get("case"), outline=args.audit_outline)
+                (args.to / f"{b['id']}.json").write_text(json.dumps(rec, indent=1, default=float), encoding="utf-8")
+        print(f"snapshot ({args.audit_outline} outline) -> {args.to}")
+        return 0
 
     if args.action == "diff":
         # every building the downtown run built, now against --before

@@ -36,10 +36,13 @@ from kyfromabove_3d.clouds import find_cloud, read_cloud                        
 from kyfromabove_3d.project import repo_relative                                 # noqa: E402
 
 
-def lidar_model(b: Path, case: str | None = None) -> dict:
+def lidar_model(b: Path, case: str | None = None, outline: str = "footprint") -> dict:
     """The building as the mesh step sets it up (build_mesh.py): the outline
     in the local frame, the levels, and the LiDAR roof field over the
-    outline, with the same cell and height cap."""
+    outline, with the same cell and height cap. ``outline="lidar"`` takes the
+    outline from the building's footprint_lidar.json (the LiDAR roof's edge,
+    scripts/lidar_outline.py) instead of Overture's footprint, so meshes built
+    on either outline can be measured against the same LiDAR solid."""
     import shapely
 
     from build_mesh import roof_heightfield
@@ -47,7 +50,10 @@ def lidar_model(b: Path, case: str | None = None) -> dict:
 
     coords = json.loads((b / "coordinates.json").read_text(encoding="utf-8"))
     ox, oy, _ = coords["origin_source_xyz"]
-    poly, fp = resolve_footprint(b, ox, oy, case=case)
+    if outline == "lidar" and (b / "footprint_lidar.json").exists():
+        poly, fp = resolve_footprint(b, ox, oy, footprint=b / "footprint_lidar.json")
+    else:
+        poly, fp = resolve_footprint(b, ox, oy, case=case)
     lidar = read_cloud(find_cloud(b, "lidar_local"))
     xyz = np.column_stack([lidar["x"], lidar["y"], lidar["z"]]).astype(np.float64)
     ground_z = 0.0
@@ -92,7 +98,8 @@ def level_edges(levels):
     return edges
 
 
-def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: str | None = None) -> dict:
+def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: str | None = None,
+          outline: str = "footprint") -> dict:
     from overture_boxes import min_corner_deg, roof_returns
 
     from kyfromabove_3d.texture_check import read_glb_geometry
@@ -100,8 +107,8 @@ def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: s
     t0 = time.time()
     glb = glb or (b / "3dtiles_mesh" / "building.glb")
     V, T = read_glb_geometry(glb)
-    m = lidar_model(b, case)
-    rec = {"building": b.name, "name": m["fp"].get("name"), "path": m["path"], "glb": repo_relative(glb)}
+    m = lidar_model(b, case, outline)
+    rec = {"building": b.name, "name": m["fp"].get("name"), "path": m["path"], "glb": repo_relative(glb), "audit_outline": outline}
 
     # holes: the mesh against the LiDAR solid, from eight sides and above
     pts, top = A.lidar_solid(m["xs"], m["ys"], m["Z"], m["valid"], floor_z=m["ground_z"] + 1.5)

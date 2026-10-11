@@ -882,6 +882,54 @@ def cmd_edge_sheet(a) -> int:
     return 0
 
 
+def local_to_wkt(ring, ox, oy) -> str:
+    """A ring in a building's local metres -> WKT in WGS84 (the inverse of
+    footprints.footprint_wgs84_to_local)."""
+    from pyproj import Transformer
+    from shapely.geometry import Polygon
+
+    from kyfromabove_3d.footprints import METERS_PER_US_SURVEY_FOOT
+    r = np.asarray(ring, float)
+    tr = Transformer.from_crs("EPSG:3089", "EPSG:4326", always_xy=True)
+    lon, lat = tr.transform(r[:, 0] / METERS_PER_US_SURVEY_FOOT + ox, r[:, 1] / METERS_PER_US_SURVEY_FOOT + oy)
+    return Polygon(np.column_stack([lon, lat])).wkt
+
+
+def cmd_write_footprints(a) -> int:
+    """Each building's ``footprint_lidar.json`` beside its own footprint: the
+    same record the colourise reads today (``footprint.json``, or the case
+    file's entry for the older cases), GERS id, neighbours and heights kept,
+    with the outline from the LiDAR refined in the straight-down frames and,
+    per edge, where it came from. The colourise reads it only with
+    ``--lidar-outline``."""
+    from kyfromabove_3d.footprints import footprint_wgs84_to_local, load_footprint_entry
+    rows = {r["building"]: r for r in json.loads(a.out.read_text(encoding="utf-8")) if r["status"] == "ok"}
+    ref = {r["building"]: r for r in json.loads(a.refined_out.read_text(encoding="utf-8"))}
+    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    n = 0
+    for key, r in ref.items():
+        b = blds[key]
+        if not r["valid"]:
+            print(f"  {b.name}: the refined outline crosses itself, not written")
+            continue
+        entry = (json.loads((b.dir / "footprint.json").read_text(encoding="utf-8")) if (b.dir / "footprint.json").exists()
+                 else load_footprint_entry(case=b.key))
+        ox, oy = rows[key]["origin"]
+        wkt = local_to_wkt(r["ring"], ox, oy)
+        back = np.asarray(footprint_wgs84_to_local(wkt, ox, oy).exterior.coords)
+        err = float(np.max(np.abs(back[:-1] - np.asarray(r["ring"])[:-1]))) if len(back) == len(r["ring"]) else float("nan")
+        moves = {e["edge"]: dict(lidar_m=e["lidar_move_m"], frames_m=e["refine_m"], status=e["status"], step1=e["outline_status"])
+                 for e in r["edges"]}
+        out = dict(entry, wkt=wkt, outline=dict(source="the LiDAR roof's edge, refined in the straight-down frames (lidar_outline.py)",
+                                                overture_wkt=entry["wkt"], edges=moves, round_trip_error_m=round(err, 4)))
+        (b.dir / "footprint_lidar.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
+        n += 1
+        print(f"  {b.name}: {sum(1 for m in moves.values() if m['lidar_m'] or m['frames_m'])} of {len(moves)} edges moved; "
+              f"converted and back to within {err * 1000:.1f} mm")
+    print(f"{n} footprint_lidar.json written")
+    return 0
+
+
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -965,12 +1013,16 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     es.add_argument("--seed", type=int, default=1)
     es.add_argument("--dpi", type=int, default=90)
     es.add_argument("--edges-out", type=Path, default=REF / "lidar_outline_edges.jpg")
+    wf = sub.add_parser("write-footprints", help="each building's footprint_lidar.json for the colourise")
+    for act in rf._actions[1:]:
+        if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "refined_out"):
+            wf._add_action(act)
     return ap.parse_args(argv)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     a = parse_args(argv)
-    return dict(measure=cmd_measure, plot=cmd_plot, sheet=cmd_sheet, ortho=cmd_ortho, refine=cmd_refine, **{'edge-sheet': cmd_edge_sheet}, **{'fetch-nadir': cmd_fetch_nadir})[a.cmd](a)
+    return dict(measure=cmd_measure, plot=cmd_plot, sheet=cmd_sheet, ortho=cmd_ortho, refine=cmd_refine, **{'edge-sheet': cmd_edge_sheet, 'write-footprints': cmd_write_footprints}, **{'fetch-nadir': cmd_fetch_nadir})[a.cmd](a)
 
 
 if __name__ == "__main__":

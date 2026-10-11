@@ -1387,6 +1387,8 @@ def main() -> int:
                          "building's own facade, and a tinted copy showing what was invented")
     ap.add_argument("--no-prism-occluders", action="store_true",
                     help="occlude with the LiDAR returns alone, in the colourise and the frame sampling here")
+    ap.add_argument("--lidar-outline", action="store_true",
+                    help="with --refresh: the colourise uses the building's footprint_lidar.json (scripts/lidar_outline.py)")
     ap.add_argument("--match-walls", action="store_true",
                     help="with --refresh: the colourise gives unknown wall bands the depth the frames agree on "
                          "(kyfromabove_3d.wall_match); matched walls are drawn, and tinted cyan in building_matched.glb")
@@ -1439,6 +1441,8 @@ def main() -> int:
             cmd.append("--no-prism-occluders")
         if args.match_walls:
             cmd.append("--match-walls")
+        if args.lidar_outline:
+            cmd.append("--lidar-outline")
         print(f"colouring from the aerial frames only -> {ply_path.name}")
         t_col = time.time()
         r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)

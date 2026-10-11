@@ -809,6 +809,9 @@ def main() -> int:
                          "neither is one plane, both are walls")
     ap.add_argument("--prism-min-ratio", type=float, default=0.60,
                     help="minimum fraction of nominal perimeter verified before inferring prism completion")
+    ap.add_argument("--lidar-outline", action="store_true",
+                    help="use the building's footprint_lidar.json (its outline from the LiDAR roof, refined in the "
+                         "straight-down frames: scripts/lidar_outline.py) instead of Overture's footprint, when it has one")
     ap.add_argument("--match-walls", action="store_true",
                     help="give an unknown wall band the depth where the frames that see it agree (kyfromabove_3d.wall_match), "
                          "when they agree well enough; such a band is 'matched', at the matched depth less the building's "
@@ -851,9 +854,16 @@ def main() -> int:
     # entry when the lookup missed, and coloured 400 West Market against Tractor
     # Supply's footprint without saying so.
     from kyfromabove_3d.footprints import resolve_footprint
+    fp_case, fp_gers, fp_file = args.case, args.gers, args.footprint
+    if args.lidar_outline and (args.building / "footprint_lidar.json").exists():
+        # the outline from our own data; Overture's polygon stays in the record as outline.overture_wkt
+        fp_case, fp_gers, fp_file = None, None, args.building / "footprint_lidar.json"
+        print("footprint: the LiDAR outline (footprint_lidar.json), not Overture's")
+    elif args.lidar_outline:
+        print("[warn] --lidar-outline: no footprint_lidar.json here; Overture's footprint used")
     try:
-        poly_local, entry = resolve_footprint(args.building, ox, oy, case=args.case, gers=args.gers,
-                                              footprint=args.footprint, footprints_json=args.footprints,
+        poly_local, entry = resolve_footprint(args.building, ox, oy, case=fp_case, gers=fp_gers,
+                                              footprint=fp_file, footprints_json=args.footprints,
                                               footprint_csv=args.footprint_csv)
     except (KeyError, ValueError) as exc:
         print(f"[FAIL] {exc}")

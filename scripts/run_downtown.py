@@ -194,6 +194,8 @@ def worker(args) -> int:
             cmd.append("--no-prism-occluders")
         if args.match_walls:
             cmd.append("--match-walls")
+        if args.lidar_outline:
+            cmd.append("--lidar-outline")
         if args.complete:
             cmd.append("--complete")
         t = time.time()
@@ -408,6 +410,8 @@ def run(args) -> int:
             cmd.append("--no-prism-occluders")
         if args.match_walls:
             cmd.append("--match-walls")
+        if args.lidar_outline:
+            cmd.append("--lidar-outline")
         if args.check_sheets:
             cmd.append("--check-sheets")
         if args.complete:
@@ -508,6 +512,8 @@ def main() -> int:
     common.add_argument("--no-prism-occluders", action="store_true",
                         help="texture with LiDAR-point occlusion alone (neighbours' facades mostly missing)")
     common.add_argument("--check-sheets", action="store_true", help="the check also draws texture_check.jpg")
+    common.add_argument("--lidar-outline", action="store_true",
+                        help="the colourise uses each building's footprint_lidar.json where it has one (scripts/lidar_outline.py)")
     common.add_argument("--match-walls", action="store_true",
                         help="the colourise gives unknown wall bands the depth the frames agree on (kyfromabove_3d.wall_match)")
     common.add_argument("--force-step", nargs="*", choices=STEPS, default=None)

@@ -244,11 +244,78 @@ def best_of(walls, scores):
 
 
 def match_face(b, face, plane, vis, cams, imgs, args):
-    from kyfromabove_3d.wall_match import pairs_apart
     got = face_views(b, face, plane, vis, cams, imgs)
     if got is None:
         return None
     A, Z, views, (lo, hi) = got
+    return match_grid(b, face, plane, vis, A, Z, views, lo, hi, args)
+
+
+MIN_FACE_AGREE = 0.4     # a face whose best pair of frames matches worse than this is not one wall at its depth
+
+
+def slice_face(A, Z, views, ext, wall=None, keep=None):
+    """The face's grid cut to ``ext`` (row slice, column slice), its views'
+    masks cut with it (and to ``wall``, already cut), only the frames in
+    ``keep`` (all if None)."""
+    rs, cs = ext
+    At, Zt = A[rs, cs], Z[rs, cs]
+    vt = {f: dict(w, mask=w["mask"][rs, cs] & (wall if wall is not None else True))
+          for f, w in views.items() if keep is None or f in keep}
+    return At, Zt, vt, (float(At.min()), float(At.max()) + GRID_M)
+
+
+def depth_at(d0, d1, lo, hi, a):
+    return d0 + (d1 - d0) * (a - lo) / (hi - lo)
+
+
+def match_trimmed(b, face, plane, vis, cams, imgs, args, field):
+    """``match_face`` on the face trimmed to its open wall, with only the
+    frames that see it properly. Trimmed first on the wall's line, then again
+    on the matched wall; frames that see under half the trimmed face or look
+    more than 60 degrees off straight on are left out before matching, and
+    those whose view matches no other frame's after it (then matched again).
+    A face whose best pair of frames matches worse than ``MIN_FACE_AGREE`` is
+    marked not ``reliable``: not one wall at that depth."""
+    got = face_views(b, face, plane, vis, cams, imgs)
+    if got is None:
+        return None
+    A, Z, views, (lo, hi) = got
+    d0 = d1 = 0.0
+    r, keep, checks = None, None, {}
+    for _ in range(3):
+        wall = wall_cells(b, plane, A, Z, lo, hi, d0, d1, field)
+        ext = trim_extent(wall)
+        if ext is None:
+            return dict(face=int(face), reliable=False, why="no open wall")
+        At, Zt, vt, (lo_t, hi_t) = slice_face(A, Z, views, ext, wall[ext], keep)
+        checks = frame_checks(b, plane, At, Zt, lo_t, hi_t, depth_at(d0, d1, lo, hi, lo_t), depth_at(d0, d1, lo, hi, hi_t),
+                              vt, wall[ext])
+        ok = {f for f, c in checks.items() if c["seen"] >= MIN_FRAME_SEEN and c["angle"] <= MAX_FRAME_DEG
+              and (r is None or (c["agree"] is not None and c["agree"] >= MIN_FRAME_AGREE))}
+        vt = {f: w for f, w in vt.items() if f in ok}
+        if len(vt) < 2:
+            return dict(face=int(face), reliable=False, why="fewer than 2 frames see it properly",
+                        frames_checked={f.split("/")[-1]: c for f, c in checks.items()})
+        new = match_grid(b, face, plane, vis, At, Zt, vt, lo_t, hi_t, args)
+        if new is None:
+            return None
+        nd0, nd1 = depth_at(new["d0"], new["d1"], lo_t, hi_t, lo), depth_at(new["d0"], new["d1"], lo_t, hi_t, hi)
+        same = r is not None and set(vt) == set(keep or vt) and abs(nd0 - d0) < 0.3 and abs(nd1 - d1) < 0.3
+        r, keep, d0, d1 = new, set(vt), nd0, nd1
+        if same:
+            break
+    checks = frame_checks(b, plane, At, Zt, lo_t, hi_t, r["d0"], r["d1"], {f: w for f, w in vt.items()}, wall[ext])
+    best = max([c["agree"] for c in checks.values() if c["agree"] is not None] or [-1.0])
+    r.update(reliable=bool(best >= MIN_FACE_AGREE), best_agree=round(best, 3),
+             why=None if best >= MIN_FACE_AGREE else f"its frames match each other only {best:.2f}",
+             frames_kept=sorted(f.split("/")[-1] for f in vt), untrimmed=dict(z=[round(float(Z.min()), 2), round(float(Z.max()), 2)],
+                                                                                along=[round(lo, 2), round(hi, 2)]))
+    return r
+
+
+def match_grid(b, face, plane, vis, A, Z, views, lo, hi, args):
+    from kyfromabove_3d.wall_match import pairs_apart
     if len(views) < 2:
         return None
     to_world = make_to_world(b, plane, A, Z, lo, hi)
@@ -609,10 +676,25 @@ def atlas_building(job) -> List[dict]:
     out = []
     for r in faces:
         plane = planes.get(r["face"])
+        if "d0" not in r:                                   # the sweep measured nothing here
+            continue
         got = face_views(b, r["face"], plane, vis, cams, imgs) if plane is not None else None
         if got is None:
             continue
         A, Z, views, (lo, hi) = got
+        if "untrimmed" in r:
+            # the sweep's trimmed face: its rows and columns, its open wall on the matched wall, its kept frames
+            if "f" not in _FIELD:
+                _FIELD["f"] = height_field(args.scene)
+            rs = np.flatnonzero((Z[:, 0] >= r["z"][0] - 0.06) & (Z[:, 0] <= r["z"][1] + 0.06))
+            cs = np.flatnonzero((A[0] >= r["along"][0] - 0.01) & (A[0] < r["along"][1] - 0.01))
+            if not len(rs) or not len(cs):
+                continue
+            ext = slice(rs[0], rs[-1] + 1), slice(cs[0], cs[-1] + 1)
+            lo_t, hi_t = r["along"]
+            wall = wall_cells(b, plane, A, Z, lo, hi, depth_at(r["d0"], r["d1"], lo_t, hi_t, lo),
+                              depth_at(r["d0"], r["d1"], lo_t, hi_t, hi), _FIELD["f"])
+            A, Z, views, (lo, hi) = slice_face(A, Z, views, ext, wall[ext], {f for f in views if f.split("/")[-1] in r["frames_kept"]})
         if len(views) < 2:
             continue
         to_world = make_to_world(b, plane, A, Z, lo, hi)
@@ -672,10 +754,13 @@ def atlas_building(job) -> List[dict]:
         z_lines = [round(float(Z.min()) + z, 2) for z in lines["lines"]]
         runs, steps, pieces = line_steps(to_world, A.shape, views, r["d0"], r["d1"], pairs, Z,
                                          pieces_of(float(Z.min()), float(Z.max()), z_lines)) if pairs else ([], [], [])
+        reliable = r.get("reliable", True)
+        steps = [s_ for s_ in steps if s_["confirmed"]] if reliable else []   # only steps the held-back frames agree on
         lidar = lidar_depths(b, plane, r["d0"], r["d1"], lo, hi, float(Z.min()), float(Z.max())) if r.get("lidar") else []
         obl = oblique_crops(b, plane, views, cams, rgbs, r["d0"], r["d1"], lo, hi, float(Z.min()), float(Z.max()), steps,
                             args.obliques_dir, f"{b.key[:8]}_{r['face']}") if args.obliques_dir else []
         out.append(dict(building=b.key, name=b.name, face=r["face"], measured=bool(r.get("lidar")), along=[lo, hi], obliques=obl,
+                        reliable=reliable, why=r.get("why"), untrimmed=r.get("untrimmed"),
                         z=[round(float(Z.min()), 1), round(float(Z.max()), 1)], d0=r["d0"], d1=r["d1"], margin=r["margin"],
                         frame=best.split("/")[-1], frames=len(views), curve=curve, bands=band_rows,
                         floor_trace=[round(float(x), 2) for x in rows], bay_trace=[round(float(x), 2) for x in cols[::5]],
@@ -929,10 +1014,19 @@ def sweep_building(job) -> List[dict]:
         plane = planes.get(int(face))
         if plane is None or isinstance(plane, ArcWall):
             continue
-        r = match_face(b, face, plane, vis, cams, imgs, args)
+        if args.trim:
+            if "f" not in _FIELD:
+                _FIELD["f"] = height_field(args.scene)
+            r = match_trimmed(b, face, plane, vis, cams, imgs, args, _FIELD["f"])
+        else:
+            r = match_face(b, face, plane, vis, cams, imgs, args)
         if r is None:
             continue
         rows = profiles.get(str(face), [])
+        if "d0" not in r:                                    # trimmed away, or too few frames: nothing measured
+            r.update(building=b.key, name=b.name, lidar=None)
+            out.append(r)
+            continue
         r.update(building=b.key, name=b.name, statuses="".join(x["status"][0] for x in rows),
                  verified=type(plane).__name__ == "VerifiedWallPlane",
                  lidar=lidar_line(b, face, plane, rows, *r["along"]))
@@ -964,6 +1058,9 @@ def cmd_sweep(a) -> int:
             out += res
             print(f"  {k + 1}/{len(jobs)} buildings, {len(out)} faces ({time.time() - t0:.0f} s)", flush=True)
     a.out.write_text(json.dumps(out, indent=1, default=float), encoding="utf-8")
+    if a.trim:
+        print(f"{sum(r.get('reliable', True) for r in out)} of {len(out)} faces reliable; "
+              f"{sum('d0' not in r for r in out)} with nothing measured")
     meas = [r for r in out if r["lidar"]]
     if meas:
         e = np.array([max(abs(r["d0"] - r["lidar"][0]), abs(r["d1"] - r["lidar"][1])) for r in meas])
@@ -988,6 +1085,11 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--depth-max", type=float, default=3.0)
     p.add_argument("--rival-m", type=float, default=0.75)
     p.add_argument("--workers", type=int, default=6)
+    p.add_argument("--scene", type=Path, default=ROOT / "data" / "derived" / "video" / "downtown_scene.npz",
+                   help="every downtown mesh, in the tileset's frame (register_video.py scene)")
+    p.add_argument("--trim", action=argparse.BooleanOptionalAction, default=False,
+                   help="trim each face to its open wall and keep only frames that see it properly (off: on the "
+                        "reference set it lost right steps as often as wrong ones, see faces_trimmed.json)")
     p.add_argument("--out", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "faces.json")
     t = sub.add_parser("atlas", help="each face laid flat, with its depth against height and its pattern traces")
     for act in p._actions[1:]:
@@ -1001,8 +1103,6 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     for act in t._actions[1:]:
         if act.dest not in ("atlas_out", "obliques_dir"):
             m._add_action(act)
-    m.add_argument("--scene", type=Path, default=ROOT / "data" / "derived" / "video" / "downtown_scene.npz",
-                   help="every downtown mesh, in the tileset's frame (register_video.py scene)")
     m.add_argument("--show", nargs="*", default=[], help="faces for the sheet, as <building key's first 8>_<face>")
     m.add_argument("--trim-out", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "trim.json")
     m.add_argument("--sheet", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "trim_sheet.jpg")

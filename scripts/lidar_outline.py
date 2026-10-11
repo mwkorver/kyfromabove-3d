@@ -714,6 +714,13 @@ def refine_building(job) -> Optional[dict]:
             edges.append(dict(rec, status="no roof height", refine_m=0.0))
             continue
         h = np.where(np.isfinite(h), h, np.nanmedian(h))
+        # the guard, part 1: an edge whose roof is not one thing along it -- a dome's crown, a tower and its
+        # podium on one footprint edge -- is not refined: its brightness has strong lines that are not the edge,
+        # and one profile cannot stand for two roof edges (such an edge wants splitting first)
+        spread_h = float(np.nanpercentile(h, 75) - np.nanpercentile(h, 25))
+        if spread_h > a.max_height_spread_m:
+            edges.append(dict(rec, status="roof height changes along the edge", refine_m=0.0, roof_height_spread_m=round(spread_h, 2)))
+            continue
         per = {}
         for off, kk, w in wins:
             o, clarity = edge_in_frame(b, S, nrm, h, cams[w["frame"]], w, grays[kk], a.window_m, a.outer_share)
@@ -750,6 +757,14 @@ def refine_building(job) -> Optional[dict]:
             spread = float(np.max(np.abs(allv[near] - m)))
             how = "all frames together"
         at_limit = abs(m) >= a.window_m - 0.03
+        # the guard, part 2: past the frames' line the LiDAR must drop (the street, a lower roof)
+        beyond = np.array([np.nanmedian(roof_height_along(g, G, S + (m + f) * nrm[None, :], nrm, inside_m=(0.0,)))
+                           for f in (0.75, 1.25, 1.75)])
+        no_drop = np.isfinite(beyond).any() and float(np.nanmedian(h)) - float(np.nanmax(beyond)) < a.min_drop_m
+        if no_drop and not at_limit:
+            edges.append(dict(rec, status="no drop past the frames' line", how=how, refine_m=0.0, frames_say_m=round(m, 3),
+                              spread_m=round(spread, 3)))
+            continue
         angled_off = how == "straight-down frames agree" and len(hv) >= 2 and abs(float(np.median(hv)) - m) > a.angled_tolerance_m
         status = "at the window's limit" if at_limit else "angled frames disagree" if angled_off else "refined"
         edges.append(dict(rec, status=status, how=how, refine_m=round(m, 3) if status == "refined" else 0.0,
@@ -933,6 +948,9 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     rf.add_argument("--min-clarity", type=float, default=3.0, help="the step over the profile's median gradient")
     rf.add_argument("--agree-m", type=float, default=0.15, help="every frame within this of their median")
     rf.add_argument("--oblique-cache", type=Path, default=ROOT / "data" / "derived" / "frames_cache")
+    rf.add_argument("--max-height-spread-m", type=float, default=2.0,
+                    help="roof height along the edge varying more than this (middle half of its heights): not refined")
+    rf.add_argument("--min-drop-m", type=float, default=1.5, help="the LiDAR must drop this much 0.75-1.75 m past the frames' line")
     rf.add_argument("--angled-tolerance-m", type=float, default=0.3, help="angled frames further than this flag the edge")
     rf.add_argument("--refined-out", type=Path, default=REF / "lidar_outline_refined.json")
     es = sub.add_parser("edge-sheet", help="close-ups of edges from directly above, with the three lines")

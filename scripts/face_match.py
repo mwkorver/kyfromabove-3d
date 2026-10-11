@@ -90,6 +90,105 @@ def face_views(b, face, plane, vis, cams, imgs, min_seen=0.3):
     return A, Z, views, (lo, hi)
 
 
+# ------------------------------------------------------------------ where the face is really wall
+
+FIELD_CELL_M = 0.5
+INSIDE_M = (0.5, 1.0, 1.5, 2.0, 2.5)     # behind the wall: the building's roof must stand above the point
+OUTSIDE_M = (1.0, 1.5, 2.0, 2.5, 3.0)    # in front of the wall's line: no roof or block above the point
+BURY_MARGIN_M = 0.5
+TRIM_SHARE = 0.5                          # rows and columns kept when at least this share of them is wall
+MAX_FRAME_DEG = 60.0                      # a frame looks within this of straight at the face
+MIN_FRAME_SEEN = 0.5                      # and sees at least this share of the trimmed face
+MIN_FRAME_AGREE = 0.15                    # and its view of the face matches another frame's at least this well
+
+
+def height_field(scene_path: Path, cell_m: float = FIELD_CELL_M):
+    """The highest mesh vertex in each cell of a plan grid over every
+    downtown mesh (the tileset frame, z up): the roofs, a building's own lower
+    parts included. Returns (z grid, x0, y0, cell)."""
+    from scipy.ndimage import maximum_filter
+    V = np.load(scene_path)["V"].astype(np.float64)
+    x0, y0 = V[:, 0].min() - 4.0, V[:, 1].min() - 4.0
+    ix = ((V[:, 0] - x0) / cell_m).astype(int)
+    iy = ((V[:, 1] - y0) / cell_m).astype(int)
+    g = np.full((iy.max() + 9, ix.max() + 9), -np.inf, np.float32)
+    np.maximum.at(g, (iy, ix), V[:, 2].astype(np.float32))
+    return maximum_filter(g, size=3), x0, y0, cell_m        # the meshes' vertices are 0.75 m apart: close the gaps
+
+
+def field_at(field, xy: np.ndarray) -> np.ndarray:
+    g, x0, y0, c = field
+    ix = np.clip(((xy[:, 0] - x0) / c).astype(int), 0, g.shape[1] - 1)
+    iy = np.clip(((xy[:, 1] - y0) / c).astype(int), 0, g.shape[0] - 1)
+    return g[iy, ix]
+
+
+def wall_cells(b, plane, A, Z, lo, hi, d0, d1, field) -> np.ndarray:
+    """Which cells of the face's grid, on its matched wall (d0 at ``lo``, d1
+    at ``hi``), are open wall: the roof just behind stands above the cell, and
+    nothing just in front -- a lower roof, the building's own podium, a
+    neighbour -- does. In front is measured from the wall's line or the
+    matched wall, whichever stands further out, so a wall matched behind its
+    mesh's line is not buried by its own roof."""
+    off = d0 + (d1 - d0) * (A.ravel() - lo) / (hi - lo)
+    n = np.r_[np.asarray(plane.normal, float), 0.0] @ b.M[:3, :3].T
+    P = make_to_world(b, plane, A, Z, lo, hi)(d0, d1)
+    top = np.max([field_at(field, P[:, :2] - k * n[:2]) for k in INSIDE_M], axis=0)
+    front = np.maximum(off, 0.0) - off
+    above = np.min([field_at(field, P[:, :2] + (front + k)[:, None] * n[None, :2]) for k in OUTSIDE_M], axis=0)
+    ok = (P[:, 2] < top - BURY_MARGIN_M) & ~(above > P[:, 2] + BURY_MARGIN_M)
+    return ok.reshape(A.shape)
+
+
+def trim_extent(wall: np.ndarray, share: float = TRIM_SHARE):
+    """(row slice, column slice) of the grid spanning the rows and the columns
+    that are at least ``share`` wall, or None if none is."""
+    rows = np.flatnonzero(wall.mean(1) >= share)
+    if not len(rows):
+        return None
+    cols = np.flatnonzero(wall[rows[0]:rows[-1] + 1].mean(0) >= share)
+    if not len(cols):
+        return None
+    return slice(rows[0], rows[-1] + 1), slice(cols[0], cols[-1] + 1)
+
+
+def frame_checks(b, plane, A, Z, lo, hi, d0, d1, views, wall) -> dict:
+    """For each frame: the share of the trimmed face it sees, how far off
+    straight on it looks (degrees), and how well its view of the face, on the
+    matched wall, matches its best partner's (high-passed correlation);
+    ``keep`` when all three pass."""
+    from kyfromabove_3d.texture_check import highpass, masked_ncc
+    to_world = make_to_world(b, plane, A, Z, lo, hi)
+    P = to_world(d0, d1)
+    n3 = np.r_[np.asarray(plane.normal, float), 0.0] @ b.M[:3, :3].T
+    centre = P[wall.ravel()].mean(axis=0) if wall.any() else P.mean(axis=0)
+    hp, out = {}, {}
+    for f, w in views.items():
+        pc = (P - w["C"]) @ w["R_cw"].T
+        u = w["K"][0, 0] * pc[:, 0] / pc[:, 2] + w["K"][0, 2] - w["x0"]
+        v = w["K"][1, 1] * pc[:, 1] / pc[:, 2] + w["K"][1, 2] - w["y0"]
+        g, ok = bilinear_gray(w["gray"], u, v)
+        m = w["mask"] & ok.reshape(A.shape) & wall
+        hp[f] = (highpass(g.reshape(A.shape), m, SIGMA_PX), m)
+        ray = w["C"] - centre
+        out[f] = dict(seen=round(float(m.sum() / max(wall.sum(), 1)), 3),
+                      angle=round(float(np.degrees(np.arccos(np.clip(ray @ n3 / np.linalg.norm(ray), -1, 1)))), 1), agree=None)
+    for f in views:
+        best = None
+        for g_ in views:
+            if g_ == f:
+                continue
+            m = hp[f][1] & hp[g_][1]
+            if m.sum() >= 150:
+                r = masked_ncc(hp[f][0], hp[g_][0], m)
+                if np.isfinite(r) and (best is None or r > best):
+                    best = float(r)
+        out[f]["agree"] = None if best is None else round(best, 3)
+        out[f]["keep"] = (out[f]["seen"] >= MIN_FRAME_SEEN and out[f]["angle"] <= MAX_FRAME_DEG
+                          and best is not None and best >= MIN_FRAME_AGREE)
+    return out
+
+
 def make_to_world(b, plane, A, Z, lo, hi):
     """(d0, d1) -> the trial wall's points in the cameras' frame: depth d0 at
     ``lo`` along, d1 at ``hi``, straight between."""
@@ -618,6 +717,174 @@ def cmd_atlas(a) -> int:
     return 0
 
 
+_FIELD: dict = {}
+
+
+def flatten(b, plane, lo, hi, z_lo, z_hi, d0, d1, cam, rgb, step_m: float = 0.1) -> np.ndarray:
+    """The face laid flat from one frame, on its matched wall, ``step_m`` a
+    pixel, up the right way and as seen standing in front of it."""
+    import cv2
+    A1, Z1 = np.meshgrid(np.arange(lo, hi, step_m), np.arange(z_lo, z_hi, step_m))
+    P = make_to_world(b, plane, A1, Z1, lo, hi)(d0, d1)
+    im, x0, y0 = rgb
+    pc = (P - cam["C"]) @ cam["R_cw"].T
+    u = (cam["K"][0, 0] * pc[:, 0] / pc[:, 2] + cam["K"][0, 2] - x0).astype(np.float32).reshape(A1.shape)
+    v = (cam["K"][1, 1] * pc[:, 1] / pc[:, 2] + cam["K"][1, 2] - y0).astype(np.float32).reshape(A1.shape)
+    flat = cv2.remap(im, u, v, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)[::-1]
+    dv = (np.asarray(plane.p1, float) - np.asarray(plane.p0, float)) / float(plane.length_m)
+    nv = np.asarray(plane.normal, float)
+    return flat[:, ::-1] if float(dv[0] * nv[1] - dv[1] * nv[0]) > 0 else flat
+
+
+def trim_building(job) -> List[dict]:
+    """Each face's trim and frame checks; for the faces in ``show``, the
+    pictures for the before/after sheet too."""
+    import cv2
+
+    from kyfromabove_3d.features import load_wall_planes
+    (b, frames, vis, cache, index, faces, args, show) = job
+    if "f" not in _FIELD:
+        _FIELD["f"] = height_field(args.scene)
+    field = _FIELD["f"]
+    cams = {c["id"]: c for c in wv.cameras_in_tileset_frame(frames, b)}
+    planes = {p.face: p for p in load_wall_planes(b.dir / "wall_planes.json")}
+    imgs, rgbs = {}, {}
+    for k, w in index.items():
+        if w["building"] == b.key:
+            im = cv2.imread(str(cache / k))
+            rgbs[w["frame"]] = (im, w["x0"], w["y0"])
+            imgs[w["frame"]] = (cv2.cvtColor(im, cv2.COLOR_BGR2GRAY).astype(np.float32), w["x0"], w["y0"])
+    out = []
+    for r in faces:
+        plane = planes.get(r["face"])
+        got = face_views(b, r["face"], plane, vis, cams, imgs) if plane is not None else None
+        if got is None:
+            continue
+        A, Z, views, (lo, hi) = got
+        wall = wall_cells(b, plane, A, Z, lo, hi, r["d0"], r["d1"], field)
+        ext = trim_extent(wall)
+        rec = dict(building=b.key, name=b.name, face=r["face"], z=[round(float(Z.min()), 2), round(float(Z.max()), 2)],
+                   along=[round(lo, 2), round(hi, 2)], wall_share=round(float(wall.mean()), 3), trimmed=None, frames={})
+        if ext is not None:
+            rs, cs = ext
+            At, Zt, Wt = A[rs, cs], Z[rs, cs], wall[rs, cs]
+            lo_t, hi_t = float(At.min()), float(At.max()) + GRID_M
+            vt = {f: dict(w, mask=w["mask"][rs, cs]) for f, w in views.items()}
+            # the trimmed face keeps the matched wall's line: its depths at the trimmed ends
+            dl = lambda a: r["d0"] + (r["d1"] - r["d0"]) * (a - lo) / (hi - lo)
+            rec["trimmed"] = dict(z=[round(float(Zt.min()), 2), round(float(Zt.max()) + GRID_M, 2)], along=[round(lo_t, 2), round(hi_t, 2)])
+            rec["frames"] = frame_checks(b, plane, At, Zt, lo_t, hi_t, dl(lo_t), dl(hi_t), vt, Wt)
+        if (b.key[:8], r["face"]) in show:
+            n3 = np.r_[np.asarray(plane.normal, float), 0.0] @ b.M[:3, :3].T
+            centre = make_to_world(b, plane, A, Z, lo, hi)(r["d0"], r["d1"]).mean(axis=0)
+            facing = lambda f: float((cams[f]["C"] - centre) @ n3 / np.linalg.norm(cams[f]["C"] - centre)) * views[f]["mask"].mean()
+            best = max(views, key=facing)
+            rec["pic_before"] = flatten(b, plane, lo, hi, float(Z.min()), float(Z.max()), r["d0"], r["d1"], cams[best], rgbs[best])
+            rec["pic_frames"] = {f: flatten(b, plane, lo, hi, float(Z.min()), float(Z.max()), r["d0"], r["d1"], cams[f], rgbs[f])
+                                 for f in views}
+            rec["pic_best"] = best
+        out.append(rec)
+    return out
+
+
+def cmd_trim(a) -> int:
+    """Trim every face to its open wall and check its frames; write
+    ``trim.json`` and a before/after sheet of the faces in ``--show``."""
+    import multiprocessing as mp
+    blds = wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)
+    frames = wv.read_frames(a.frames)
+    bands = json.loads((a.visibility / "bands.json").read_text(encoding="utf-8"))
+    d = np.load(a.visibility / "points.npz")
+    index = json.loads((a.cache / "index.json").read_text(encoding="utf-8"))
+    faces = json.loads(a.faces.read_text(encoding="utf-8"))
+    show = {(k.split("_")[0], int(k.split("_")[1])) for k in a.show}
+    jobs = []
+    for b in blds:
+        mine = [r for r in faces if r["building"] == b.key]
+        if not mine:
+            continue
+        ids = [i for i, r in enumerate(bands) if r["building"] == b.key and r["wall_fraction"] >= 0.5]
+        sel = np.isin(d["band"], ids)
+        vis = dict(face_of=np.array([bands[i]["face"] for i in d["band"][sel]]), along=d["along"][sel], z=d["z"][sel],
+                   usable=d["usable"][:, sel], frames=d["frames"], bands_of={})
+        jobs.append((b, frames, vis, a.cache, index, mine, a, show))
+    out = []
+    with mp.Pool(a.workers) as pool:
+        for res in pool.imap_unordered(trim_building, jobs):
+            out += res
+    out.sort(key=lambda r: (r["name"], r["face"]))
+    pics = [r for r in out if "pic_before" in r]
+    a.trim_out.write_text(json.dumps([{k: v for k, v in r.items() if not k.startswith("pic_")} for r in out], default=float), encoding="utf-8")
+    print(f"{len(out)} faces -> {a.trim_out}")
+    if pics:
+        trim_sheet(pics, a.sheet)
+    return 0
+
+
+def trim_sheet(pics, path: Path) -> None:
+    """One row per face: the face as it is today from its most face-on frame,
+    what trimming cuts away shaded and the rest outlined, then each frame's
+    view of the face, outlined teal if kept and red if dropped, with why."""
+    import cv2
+    font, H = cv2.FONT_HERSHEY_SIMPLEX, 240
+    teal, red, ink = (120, 124, 15), (30, 38, 179), (40, 40, 40)
+
+    def label(width, lines):
+        lab = np.full((22 * len(lines) + 6, width, 3), 255, np.uint8)
+        for k, (t, c) in enumerate(lines):
+            cv2.putText(lab, t, (4, 18 + 22 * k), font, 0.5, c, 1, cv2.LINE_AA)
+        return lab
+
+    rows = []
+    for r in pics:
+        im = r["pic_before"].copy()
+        z0, z1 = r["z"][0], r["z"][1] + GRID_M
+        h, w = im.shape[:2]
+        if r["trimmed"]:
+            ya = max(0, int(round((z1 - r["trimmed"]["z"][1]) / 0.1))); yb = int(round((z1 - r["trimmed"]["z"][0]) / 0.1))
+            xa = max(0, int(round((r["trimmed"]["along"][0] - r["along"][0]) / 0.1))); xb = int(round((r["trimmed"]["along"][1] - r["along"][0]) / 0.1))
+            faded = cv2.addWeighted(im, 0.3, np.full_like(im, 255), 0.7, 0)
+            faded[ya:yb, xa:xb] = im[ya:yb, xa:xb]
+            im = faded
+            cv2.rectangle(im, (xa, ya), (min(w, xb) - 1, min(h, yb) - 1), teal, 2)
+        s_ = H / h
+        W0 = max(1, int(w * s_))
+        if W0 > 900:                                            # very long faces: squeeze, say so
+            W0 = 900
+        tiles = [np.vstack([cv2.resize(im, (W0, H)), label(W0, [("today, from the most face-on frame;", ink), ("shaded = trimmed away", ink)])])]
+        for f, pic in r["pic_frames"].items():
+            c = r["frames"].get(f)
+            ww = min(600, max(60, int(pic.shape[1] * s_)))
+            t = cv2.resize(pic, (ww, H))
+            keep = bool(c and c["keep"])
+            col = teal if keep else red
+            cv2.rectangle(t, (1, 1), (ww - 2, H - 2), col, 4)
+            why = []
+            if c:
+                if c["seen"] < MIN_FRAME_SEEN:
+                    why.append(f"sees only {c['seen']:.0%}")
+                if c["angle"] > MAX_FRAME_DEG:
+                    why.append(f"{c['angle']:.0f} deg off straight")
+                if c["agree"] is None or c["agree"] < MIN_FRAME_AGREE:
+                    why.append("matches no other frame")
+            lines = [("KEPT" if keep else "DROPPED", col)] + [(x, col) for x in why[:2]]
+            if c and c["agree"] is not None:
+                lines.append((f"match {c['agree']:.2f}", ink))
+            lab = label(max(ww, 150), lines)
+            t = cv2.copyMakeBorder(t, 0, 0, 0, lab.shape[1] - t.shape[1], cv2.BORDER_CONSTANT, value=(255, 255, 255)) if lab.shape[1] > t.shape[1] else t
+            tiles.append(np.vstack([t, lab]))
+        hh = max(x.shape[0] for x in tiles)
+        tiles = [cv2.copyMakeBorder(x, 0, hh - x.shape[0], 0, 12, cv2.BORDER_CONSTANT, value=(255, 255, 255)) for x in tiles]
+        row = np.hstack(tiles)
+        cap = label(row.shape[1], [(f"{r['name']}, face {r['face']}: today {r['z'][0]:.1f} to {z1:.1f} m up"
+                                    + (f"; trimmed {r['trimmed']['z'][0]:.1f} to {r['trimmed']['z'][1]:.1f} m" if r["trimmed"] else "; nothing left"), ink)])
+        rows.append(np.vstack([cap, row, np.full((16, row.shape[1], 3), 255, np.uint8)]))
+    Wd = max(x.shape[1] for x in rows)
+    sheet = np.vstack([cv2.copyMakeBorder(x, 0, 0, 0, Wd - x.shape[1], cv2.BORDER_CONSTANT, value=(255, 255, 255)) for x in rows])
+    cv2.imwrite(str(path), sheet, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    print(f"sheet -> {path} ({sheet.shape[1]} x {sheet.shape[0]})")
+
+
 PAGE_KEYS = ("building", "name", "face", "measured", "along", "z", "d0", "d1", "margin", "frame", "frames", "curve", "bands",
              "floor_trace", "bay_trace", "lines", "line_spacing_m", "line_regular", "runs", "line_steps", "pieces", "slice_steps", "lidar_depths", "image", "image_px", "obliques")
 
@@ -730,6 +997,15 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     t.add_argument("--atlas-out", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "atlas.json")
     t.add_argument("--obliques-dir", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "obliques",
                    help="where the faces' oblique crops go (beside the atlas page)")
+    m = sub.add_parser("trim", help="trim each face to its open wall and check its frames; a before/after sheet")
+    for act in t._actions[1:]:
+        if act.dest not in ("atlas_out", "obliques_dir"):
+            m._add_action(act)
+    m.add_argument("--scene", type=Path, default=ROOT / "data" / "derived" / "video" / "downtown_scene.npz",
+                   help="every downtown mesh, in the tileset's frame (register_video.py scene)")
+    m.add_argument("--show", nargs="*", default=[], help="faces for the sheet, as <building key's first 8>_<face>")
+    m.add_argument("--trim-out", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "trim.json")
+    m.add_argument("--sheet", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "trim_sheet.jpg")
     g = sub.add_parser("page", help="the atlas page, with the oblique crops packed per building beside it")
     g.add_argument("--atlas", type=Path, default=ROOT / "outputs" / "wall_visibility" / "reference" / "atlas.json")
     g.add_argument("--template", type=Path, default=ROOT / "tools" / "facade_atlas.html")
@@ -740,7 +1016,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     a = parse_args(argv)
-    return dict(sweep=cmd_sweep, atlas=cmd_atlas, page=cmd_page)[a.cmd](a)
+    return dict(sweep=cmd_sweep, atlas=cmd_atlas, trim=cmd_trim, page=cmd_page)[a.cmd](a)
 
 
 if __name__ == "__main__":

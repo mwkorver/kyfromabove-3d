@@ -61,3 +61,13 @@ def test_a_run_shorter_than_two_metres_is_not_split_off():
     edges = [0.0, 1.0, 10.0]
     runs = fm.runs_from_scores(_scores([-2.0, 0.0]), np.array([1.0, 3.0]), edges)
     assert len(runs) == 1
+
+
+def test_trim_keeps_the_rows_and_columns_that_are_mostly_wall():
+    wall = np.ones((20, 10), bool)
+    wall[:4] = False                                                     # buried at the bottom
+    wall[18:] = False                                                    # roof at the top
+    wall[:, 0] = False                                                   # a column with no wall
+    rs, cs = fm.trim_extent(wall)
+    assert (rs.start, rs.stop) == (4, 18) and (cs.start, cs.stop) == (1, 10)
+    assert fm.trim_extent(np.zeros((5, 5), bool)) is None

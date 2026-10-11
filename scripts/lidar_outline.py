@@ -129,6 +129,39 @@ def mask_polygon(mask, x0, y0, cell, simplify_m):
     return p.simplify(simplify_m, preserve_topology=True)
 
 
+def outward(P: np.ndarray) -> float:
+    """+1 when the ring (without its closing point) runs counter-clockwise,
+    so an edge's outward side is right of its direction of travel."""
+    return 1.0 if np.sum(P[:, 0] * np.roll(P[:, 1], -1) - np.roll(P[:, 0], -1) * P[:, 1]) > 0 else -1.0
+
+
+def outline_from_moves(P: np.ndarray, moves, max_corner_move_m: float) -> np.ndarray:
+    """The ring with each edge k of ``P`` (corners, no closing point) moved
+    ``moves[k]`` metres outward along its perpendicular, corners where
+    neighbouring moved edges meet (a corner that would move more than
+    ``max_corner_move_m`` stays). Returns the closed ring."""
+    n, sgn = len(P), outward(P)
+    lines = []
+    for k in range(n):
+        p, q = P[k], P[(k + 1) % n]
+        d = (q - p) / max(np.linalg.norm(q - p), 1e-9)
+        lines.append((p + moves[k] * sgn * np.array([d[1], -d[0]]), d))
+    new = []
+    for k in range(n):
+        (a0, d0), (a1, d1) = lines[k - 1], lines[k]
+        A = np.column_stack([d0, -d1])
+        if abs(np.linalg.det(A)) < np.sin(np.radians(10)):              # nearly straight on: no sharp corner to find
+            c = 0.5 * (a1 + (a0 + d0 * ((P[k] - a0) @ d0)))
+        else:
+            s_, _ = np.linalg.solve(A, a1 - a0)
+            c = a0 + s_ * d0
+        if np.linalg.norm(c - P[k]) > max_corner_move_m:
+            c = P[k]
+        new.append(c)
+    new.append(new[0])
+    return np.array(new)
+
+
 def move_edges(ring, inside, height_at, others, a):
     """Overture's edges moved to where the roof ends. ``inside(xy)`` says
     whether points are on the LiDAR roof, ``height_at(xy)`` the LiDAR's
@@ -190,26 +223,7 @@ def move_edges(ring, inside, height_at, others, a):
                           spread_m=round(float(np.percentile(np.abs(np.array(moves) - m), 75)), 2)))
 
     def corners():
-        lines = []
-        for k in range(n):
-            p, q = P[k], P[(k + 1) % n]
-            d = (q - p) / max(np.linalg.norm(q - p), 1e-9)
-            nrm = sgn * np.array([d[1], -d[0]])
-            lines.append((p + edges[k]["move_m"] * nrm, d))
-        new = []
-        for k in range(n):
-            (a0, d0), (a1, d1) = lines[k - 1], lines[k]
-            A = np.column_stack([d0, -d1])
-            if abs(np.linalg.det(A)) < np.sin(np.radians(10)):          # nearly straight on: no sharp corner to find
-                c = 0.5 * (a1 + (a0 + d0 * ((P[k] - a0) @ d0)))
-            else:
-                s_, _ = np.linalg.solve(A, a1 - a0)
-                c = a0 + s_ * d0
-            if np.linalg.norm(c - P[k]) > a.max_corner_move_m:
-                c = P[k]
-            new.append(c)
-        new.append(new[0])
-        return np.array(new)
+        return outline_from_moves(P, [e["move_m"] for e in edges], a.max_corner_move_m)
     from shapely.geometry import Polygon
     new = corners()
     while not Polygon(new).is_valid:                                     # crossed itself: undo the biggest move, again
@@ -596,6 +610,217 @@ def cmd_ortho(a) -> int:
     return 0
 
 
+ACROSS = np.arange(-1.0, 1.0001, 0.05)       # metres across the edge, + out from the moved line
+
+
+def roof_height_along(g, G, S, inward, inside_m=(0.5, 1.0, 1.5, 2.0)):
+    """The LiDAR roof's height just inside each point of ``S``: the highest
+    grid cell ``inside_m`` metres in."""
+    ny, nx = G["shape"]
+    out = np.full(len(S), np.nan)
+    for i, s_ in enumerate(S):
+        vals = []
+        for f in inside_m:
+            q = s_ + f * inward
+            ii, jj = int((q[0] - G["x0"]) / G["cell"]), int((q[1] - G["y0"]) / G["cell"])
+            if 0 <= ii < nx and 0 <= jj < ny and np.isfinite(g[jj, ii]):
+                vals.append(g[jj, ii])
+        out[i] = max(vals) if vals else np.nan
+    return out
+
+
+def edge_in_frame(b, line_pts, nrm, heights, cam, win, gray, window_m, outer_share):
+    """Where one straight-down frame puts the edge: the brightness profile
+    across it (strip points ``ACROSS`` metres out from the moved line, each at
+    the roof's height there), averaged along the edge; the edge is the
+    outermost of its strong steps (``outer_share`` of the strongest) within
+    ``window_m``. Returns (offset, clarity) or (None, 0)."""
+    from scipy.ndimage import gaussian_filter1d
+    na = len(line_pts)
+    A_, O_ = np.meshgrid(np.arange(na), ACROSS, indexing="ij")
+    xy = line_pts[A_.ravel()] + O_.ravel()[:, None] * nrm[None, :]
+    X = np.column_stack([xy, heights[A_.ravel()]]) @ b.M[:3, :3].T + b.M[:3, 3]
+    pc = (X - cam["C"]) @ cam["R_cw"].T
+    u = cam["K"][0, 0] * pc[:, 0] / pc[:, 2] + cam["K"][0, 2] - win["x0"]
+    v = cam["K"][1, 1] * pc[:, 1] / pc[:, 2] + cam["K"][1, 2] - win["y0"]
+    from kyfromabove_3d.wall_match import bilinear_gray
+    val, ok = bilinear_gray(gray, u, v)
+    val, ok = val.reshape(na, len(ACROSS)), ok.reshape(na, len(ACROSS))
+    rows = ok.all(axis=1)
+    if rows.sum() < max(4, 0.5 * na):
+        return None, 0.0
+    prof = gaussian_filter1d(val[rows].mean(axis=0), 1.0)
+    grad = np.abs(np.gradient(prof))
+    inwin = np.abs(ACROSS) <= window_m + 1e-9
+    gw = np.where(inwin, grad, 0.0)
+    top = gw.max()
+    if top <= 0:
+        return None, 0.0
+    peaks = [i for i in range(1, len(gw) - 1) if inwin[i] and gw[i] >= gw[i - 1] and gw[i] >= gw[i + 1] and gw[i] >= outer_share * top]
+    i = max(peaks) if peaks else int(np.argmax(gw))
+    # sub-sample: the peak of a parabola through it and its neighbours
+    if 0 < i < len(gw) - 1:
+        den = gw[i - 1] - 2 * gw[i] + gw[i + 1]
+        frac = 0.5 * (gw[i - 1] - gw[i + 1]) / den if den < 0 else 0.0
+    else:
+        frac = 0.0
+    clarity = float(top / max(np.median(grad), 1e-6))
+    return float(ACROSS[i] + frac * (ACROSS[1] - ACROSS[0])), clarity
+
+
+def refine_building(job) -> Optional[dict]:
+    import cv2
+    r, b, frames, cache, index, a = job
+    B, _ = load_building(b)
+    G = r["grid"]
+    ny, nx = G["shape"]
+    g = roof_grid(B["xyz"], B["cls"], G["x0"], G["y0"], nx, ny, G["cell"])
+    cams = {c["id"]: c for c in wv.cameras_in_tileset_frame(frames, b)}
+    wins = sorted(((w["off_nadir_deg"], k, w) for k, w in index.items() if w["building"] == b.key), key=lambda t: t[0])[:a.max_frames]
+    grays = {k: cv2.imread(str(cache / k), cv2.IMREAD_GRAYSCALE).astype(np.float32) for _, k, _ in wins}
+    P = np.asarray(r["edges_moved"]["ring"])[:-1]
+    P0 = np.asarray(r["overture"]["ring"])[:-1]
+    sgn = outward(P0)
+    edges = []
+    for e in r["edges"]:
+        k = e["edge"]
+        rec = dict(edge=k, outline_status=e["status"], lidar_move_m=e["move_m"])
+        if e["status"] != "moved" or e["length_m"] < 3.0:
+            edges.append(dict(rec, status="not refined (" + e["status"] + ")", refine_m=0.0))
+            continue
+        p, q = P[k], P[(k + 1) % len(P)]
+        L = float(np.linalg.norm(q - p))
+        d = (q - p) / max(L, 1e-9)
+        nrm = sgn * np.array([d[1], -d[0]])
+        t = np.arange(min(1.0, L / 4), L - min(1.0, L / 4) + 1e-9, 0.25)
+        S = p[None, :] + t[:, None] * d[None, :]
+        h = roof_height_along(g, G, S, -nrm)
+        if not np.isfinite(h).any():
+            edges.append(dict(rec, status="no roof height", refine_m=0.0))
+            continue
+        h = np.where(np.isfinite(h), h, np.nanmedian(h))
+        per = {}
+        for off, kk, w in wins:
+            o, clarity = edge_in_frame(b, S, nrm, h, cams[w["frame"]], w, grays[kk], a.window_m, a.outer_share)
+            if o is not None and clarity >= a.min_clarity:
+                per[w["frame"].split("/")[-1]] = round(o, 3)
+        vals = np.array(list(per.values()))
+        if len(vals) < 2:
+            edges.append(dict(rec, status="fewer than 2 frames see a clear edge", refine_m=0.0, frames=per))
+            continue
+        m = float(np.median(vals))
+        spread = float(np.max(np.abs(vals - m)))
+        at_limit = abs(m) >= a.window_m - 0.03
+        ok = spread <= a.agree_m and not at_limit
+        edges.append(dict(rec, status="refined" if ok else ("at the window's limit" if at_limit else "frames disagree"),
+                          refine_m=round(m, 3) if ok else 0.0, frames_say_m=round(m, 3), spread_m=round(spread, 3), frames=per))
+    moves = [e["lidar_move_m"] + e["refine_m"] for e in edges]
+    ring = outline_from_moves(P0, moves, a.max_corner_move_m)
+    from shapely.geometry import Polygon
+    return dict(building=r["building"], name=r["name"], edges=edges, ring=np.round(ring, 3).tolist(),
+                valid=bool(Polygon(ring).is_valid), frames_used=[w["frame"].split("/")[-1] for _, _, w in wins])
+
+
+def cmd_refine(a) -> int:
+    """Each moved edge refined in the straight-down frames (see edge_in_frame);
+    writes lidar_outline_refined.json."""
+    import multiprocessing as mp
+    rows = [r for r in json.loads(a.out.read_text(encoding="utf-8")) if r["status"] == "ok"]
+    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    frames = wv.read_frames(a.frames)
+    index = json.loads((a.nadir_cache / "index.json").read_text(encoding="utf-8"))
+    with mp.Pool(a.workers) as pool:
+        out = list(pool.imap_unordered(refine_building, [(r, blds[r["building"]], frames, a.nadir_cache, index, a) for r in rows]))
+    out.sort(key=lambda r: r["name"])
+    a.refined_out.write_text(json.dumps(out, indent=1), encoding="utf-8")
+    from collections import Counter
+    E = [e for r in out for e in r["edges"]]
+    print(Counter(e["status"] if not e["status"].startswith("not refined") else "not refined" for e in E))
+    ref = np.array([e["refine_m"] for e in E if e["status"] == "refined"])
+    if len(ref):
+        print(f"{len(ref)} edges refined: the frames move them a median {np.median(ref):+.2f} m (+ out) from the LiDAR's line; "
+              f"size median {np.median(np.abs(ref)):.2f} m, over 0.25 m on {np.mean(np.abs(ref) > .25):.0%}")
+    sp = np.array([e["spread_m"] for e in E if "spread_m" in e])
+    print(f"frames' agreement on an edge (furthest frame from their median): median {np.median(sp):.2f} m; 75% under {np.percentile(sp, 75):.2f} m")
+    print(f"outlines that cross themselves: {[r['name'] for r in out if not r['valid']]}")
+    print(f"-> {a.refined_out}")
+    return 0
+
+
+def cmd_edge_sheet(a) -> int:
+    """Close-ups of chosen edges from directly above: the middle ``--span-m``
+    of the edge, 3 m either side, at 5 cm, sampled from the straight-down
+    frame nearest overhead at the roof's height, turned so the edge runs
+    across and outside is up. Lines: Overture (teal, dashed), the LiDAR's
+    move (orange), the frames' refinement (magenta)."""
+    import cv2
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from kyfromabove_3d.wall_match import bilinear_gray
+    rows = {r["building"]: r for r in json.loads(a.out.read_text(encoding="utf-8")) if r["status"] == "ok"}
+    ref = {r["building"]: r for r in json.loads(a.refined_out.read_text(encoding="utf-8"))}
+    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    frames = wv.read_frames(a.frames)
+    index = json.loads((a.nadir_cache / "index.json").read_text(encoding="utf-8"))
+    picks = []
+    rng = np.random.default_rng(a.seed)
+    for status, n in (("refined", a.n_refined), ("frames disagree", a.n_disagree), ("at the window's limit", a.n_limit)):
+        pool = [(bk, e) for bk, r in ref.items() for e in r["edges"] if e["status"] == status]
+        for i in rng.permutation(len(pool))[:n]:
+            picks.append(pool[i])
+    cols = 3
+    fig, axs = plt.subplots((len(picks) + cols - 1) // cols, cols, figsize=(6.2 * cols, 3.0 * ((len(picks) + cols - 1) // cols)), squeeze=False)
+    for ax in axs.ravel():
+        ax.axis("off")
+    for ax, (bk, e) in zip(axs.ravel(), picks):
+        r, b = rows[bk], blds[bk]
+        B, _ = load_building(b)
+        G = r["grid"]
+        ny, nx = G["shape"]
+        g = roof_grid(B["xyz"], B["cls"], G["x0"], G["y0"], nx, ny, G["cell"])
+        P0 = np.asarray(r["overture"]["ring"])[:-1]
+        sgn = outward(P0)
+        k = e["edge"]
+        p, q = P0[k], P0[(k + 1) % len(P0)]
+        L = float(np.linalg.norm(q - p))
+        d = (q - p) / L
+        nrm = sgn * np.array([d[1], -d[0]])
+        mid, half = L / 2, min(a.span_m, L - 1) / 2
+        t = np.arange(mid - half, mid + half, 0.05)
+        o = np.arange(-3.0, 3.0, 0.05)
+        base = p + e["lidar_move_m"] * nrm
+        h = roof_height_along(g, G, base[None, :] + t[:, None] * d[None, :], -nrm)
+        h = np.where(np.isfinite(h), h, np.nanmedian(h))
+        T, O = np.meshgrid(t, o)
+        xy = base[None, :] + T.ravel()[:, None] * d[None, :] + O.ravel()[:, None] * nrm[None, :]
+        X = np.column_stack([xy, np.tile(h, len(o))]) @ b.M[:3, :3].T + b.M[:3, 3]
+        _, kk, w = min(((w["off_nadir_deg"], kk, w) for kk, w in index.items() if w["building"] == bk), key=lambda z: z[0])
+        cam = {c["id"]: c for c in wv.cameras_in_tileset_frame(frames, b)}[w["frame"]]
+        img = cv2.imread(str(a.nadir_cache / kk))[:, :, ::-1].astype(np.float32)
+        pc = (X - cam["C"]) @ cam["R_cw"].T
+        u = cam["K"][0, 0] * pc[:, 0] / pc[:, 2] + cam["K"][0, 2] - w["x0"]
+        v = cam["K"][1, 1] * pc[:, 1] / pc[:, 2] + cam["K"][1, 2] - w["y0"]
+        rgb = np.stack([bilinear_gray(img[..., c_], u, v)[0] for c_ in range(3)], axis=-1).reshape(len(o), len(t), 3)
+        ax.imshow(np.clip(rgb, 0, 255).astype(np.uint8), origin="lower", extent=[t[0], t[-1], o[0], o[-1]], aspect="equal")
+        ax.axhline(-e["lidar_move_m"], color="#3cc2bb", lw=1.6, ls=(0, (4, 2)))
+        ax.axhline(0, color="#f0a020", lw=1.6)
+        if "frames_say_m" in e:
+            ax.axhline(e["frames_say_m"], color="#ff3cc8", lw=1.6)
+        ax.axis("on"); ax.set_yticks([-2, 0, 2]); ax.tick_params(labelsize=7); ax.set_xticks([])
+        ax.set_title(f'{r["name"][:24]} edge {k}: {e["status"]}'
+                     + (f'; frames say {e["frames_say_m"]:+.2f} m, spread {e["spread_m"]:.2f}' if "frames_say_m" in e else ""), fontsize=8.5)
+    from matplotlib.lines import Line2D
+    fig.legend([Line2D([], [], color="#3cc2bb", lw=2, ls=(0, (4, 2))), Line2D([], [], color="#f0a020", lw=2), Line2D([], [], color="#ff3cc8", lw=2)],
+               ["Overture", "LiDAR's line (step 1)", "the straight-down frames' edge (step 2)"], loc="upper center", ncol=3, fontsize=10, frameon=False)
+    fig.text(0.5, 0.005, "Each picture: the middle of one edge from directly above, outside at the top; numbers on the left are metres out from the LiDAR's line",
+             ha="center", fontsize=9)
+    fig.tight_layout(rect=(0, 0.015, 1, 0.97))
+    fig.savefig(a.edges_out, dpi=a.dpi)
+    print(f"{len(picks)} edges -> {a.edges_out}")
+    return 0
+
+
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -650,12 +875,35 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     o.add_argument("--size", type=float, default=6.5)
     o.add_argument("--dpi", type=int, default=90)
     o.add_argument("--ortho-out", type=Path, default=REF / "lidar_outline_ortho.jpg")
+    rf = sub.add_parser("refine", help="each moved edge refined in the straight-down frames")
+    for act in p._actions[1:]:
+        if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "workers", "max_corner_move_m"):
+            rf._add_action(act)
+    rf.add_argument("--frames", type=Path, default=ROOT / "outputs" / "downtown" / "frames_2024s1.gpkg")
+    rf.add_argument("--nadir-cache", type=Path, default=ROOT / "data" / "derived" / "frames_cache_nadir")
+    rf.add_argument("--max-frames", type=int, default=4)
+    rf.add_argument("--window-m", type=float, default=0.5, help="the furthest the frames may move an edge from the LiDAR's line")
+    rf.add_argument("--outer-share", type=float, default=0.6, help="a brightness step this share of the strongest counts")
+    rf.add_argument("--min-clarity", type=float, default=3.0, help="the step over the profile's median gradient")
+    rf.add_argument("--agree-m", type=float, default=0.15, help="every frame within this of their median")
+    rf.add_argument("--refined-out", type=Path, default=REF / "lidar_outline_refined.json")
+    es = sub.add_parser("edge-sheet", help="close-ups of edges from directly above, with the three lines")
+    for act in rf._actions[1:]:
+        if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "frames", "nadir_cache", "refined_out"):
+            es._add_action(act)
+    es.add_argument("--n-refined", type=int, default=12)
+    es.add_argument("--n-disagree", type=int, default=6)
+    es.add_argument("--n-limit", type=int, default=3)
+    es.add_argument("--span-m", type=float, default=10.0)
+    es.add_argument("--seed", type=int, default=1)
+    es.add_argument("--dpi", type=int, default=90)
+    es.add_argument("--edges-out", type=Path, default=REF / "lidar_outline_edges.jpg")
     return ap.parse_args(argv)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     a = parse_args(argv)
-    return dict(measure=cmd_measure, plot=cmd_plot, sheet=cmd_sheet, ortho=cmd_ortho, **{'fetch-nadir': cmd_fetch_nadir})[a.cmd](a)
+    return dict(measure=cmd_measure, plot=cmd_plot, sheet=cmd_sheet, ortho=cmd_ortho, refine=cmd_refine, **{'edge-sheet': cmd_edge_sheet}, **{'fetch-nadir': cmd_fetch_nadir})[a.cmd](a)
 
 
 if __name__ == "__main__":

@@ -2497,7 +2497,39 @@ def band_extent(plane: WallPlane, b: FaceBand, full_width_fraction: float = 0.6,
 # The kinds of band that are wall. ``matched`` has its depth from the frames
 # (kyfromabove_3d.wall_match), not the LiDAR: a wall to draw, but never an
 # anchor -- bridging, extending and mirroring read ``observed`` bands only.
-WALL_STATUSES = ("observed", "bridged", "extended", "mirrored", "matched")
+# ``edge`` is a band under a roof edge the LiDAR measured, drawn because
+# nothing says there is no wall there (``fill_under_roof_edge``).
+WALL_STATUSES = ("observed", "bridged", "extended", "mirrored", "matched", "edge")
+
+
+def fill_under_roof_edge(bands: List[FaceBand], length_m: float, max_offset_m: float = 1.5) -> int:
+    """A wall stands under a measured roof edge unless there is evidence of a
+    gap. For a face whose top edge the LiDAR placed (the roof's end, with a
+    drop beyond it), the bands the returns left unknown, and the ``sloped``
+    ones within ``max_offset_m`` of the edge, become wall (``edge``): the
+    Truist tower's face 1001 was seen to 47 m and then as glass whose depth
+    wobbled by a metre, and 30 m of it under a roof edge the LiDAR measured
+    was left a hole. Each takes the depth of the face's nearest drawn band
+    within ``max_offset_m`` of the edge, or the edge itself where there is
+    none (the Omni's one band 2.4 m out, at its tower's foot, is the
+    podium's, not the tower's). The evidence that keeps a gap is kept: an
+    ``open`` band (a second wall 4 m or more behind) is left as it is, and
+    the mesh stops any wall band where the LiDAR roof behind it does not
+    reach its height (``build_mesh.RoofField``). In place; returns how many
+    bands were filled."""
+    drawn = [b for b in bands if b.status in WALL_STATUSES and b.offset_m is not None
+             and abs(b.offset_m) <= max_offset_m]
+    n = 0
+    for i, b in enumerate(bands):
+        fill = b.status == "unknown" or (b.status == "sloped" and b.offset_m is not None and abs(b.offset_m) <= max_offset_m)
+        if not fill:
+            continue
+        mid = 0.5 * (b.z_lo + b.z_hi)
+        near = min(drawn, key=lambda d: (abs(0.5 * (d.z_lo + d.z_hi) - mid), d.z_lo), default=None)
+        bands[i] = FaceBand(b.z_lo, b.z_hi, near.offset_m if near is not None else 0.0, b.n_returns, 0.0,
+                            0.0, length_m, "edge", clip_lo=b.clip_lo, clip_hi=b.clip_hi)
+        n += 1
+    return n
 
 
 def crown_bands(bands: List[FaceBand], reference_offset_m: Optional[float] = None,

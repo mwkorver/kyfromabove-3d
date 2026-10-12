@@ -123,6 +123,8 @@ def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: s
 
     # wall standing on a flat roof
     rec["roof_walls"] = A.roof_walls(V, T, m["xs"], m["ys"], m["Z"], m["valid"], np.asarray(m["levels"][0]["ring"]))
+    # wall drawn where the LiDAR has no building
+    rec["stray_walls"] = A.stray_walls(V, T, m["xs"], m["ys"], m["Z"], m["valid"])
 
     # heights
     above = m["xyz"][m["xyz"][:, 2] > m["ground_z"] + 2.0]
@@ -171,7 +173,7 @@ def main() -> int:
     h = rec["holes"]
     print(f"{rec['name'] or rec['building']}: holes {h['total_m2']:,.0f} m2 (largest view)"
           + ("; by face " + ", ".join(f"{f}: {a:,.0f}" for f, a in list(h["by_face"].items())[:5]) if h["by_face"] else "")
-          + f"; wall on flat roof {rec['roof_walls']['m2']:,.0f} m2; top {rec['heights']['mesh_top_m']} m "
+          + f"; wall on flat roof {rec['roof_walls']['m2']:,.0f} m2; wall where the LiDAR has no building {rec['stray_walls']['m2']:,.0f} m2; top {rec['heights']['mesh_top_m']} m "
           f"(LiDAR {rec['heights']['lidar_p99_m']}, product 1 {rec['heights']['product1_m']})"
           + (f"; blank wall {rec['texture']['blank_share']:.0%}, {rec['texture']['dots']} dots, {rec['texture']['lines']} lines"
              if rec["texture"] else "")

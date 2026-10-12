@@ -134,6 +134,48 @@ class RoofField:
             ok |= ~seen
         return st, ok
 
+    def tops_along(self, plane: WallPlane, offset: float, a0: float, a1: float, first_m: float = 0.25,
+                   reach_m: float = 4.0, depth_m: float = 1.0, step_m: float = 1.0):
+        """Stations from ``a0`` to ``a1`` and the roof's height just inside
+        the wall line at each: the highest cell within ``depth_m`` of the
+        first one met going in (from ``first_m``, up to ``reach_m``) -- where
+        the field is blank along the edge the roof is found further in, and a
+        tower standing back behind a podium's edge is not mistaken for the
+        podium's roof. nan where there is none."""
+        if a1 - a0 < 1e-6:
+            return np.array([]), np.array([])
+        n = max(1, int(round((a1 - a0) / step_m)))
+        st = a0 + (np.arange(n) + 0.5) * (a1 - a0) / n
+        depths = np.arange(first_m, reach_m + 1e-6, self.cell)
+        H = np.array([self._near(plane.world(st, np.full(n, offset - d)), max(self.cell * 0.75, 0.6)) for d in depths])
+        top = np.full(n, np.nan)
+        for j in range(n):
+            ok = np.flatnonzero(np.isfinite(H[:, j]))
+            if len(ok):
+                d0 = depths[ok[0]]
+                top[j] = np.nanmax(H[(depths >= d0) & (depths <= d0 + depth_m), j])
+        return st, top
+
+    def capped_runs(self, plane, offset, z_lo, z_hi, a0, a1, min_run_m: float = 1.0, tol_m: float = 0.5):
+        """[a0, a1] cut where the roof's height just inside changes, each
+        stretch's wall top the roof there (at most ``z_hi``); stretches
+        whose roof is not above ``z_lo`` are dropped. A wall drawn under a
+        roof edge (an ``edge`` band) stops at the roof, not at its band's top."""
+        st, top = self.tops_along(plane, offset, a0, a1)
+        if not len(st):
+            return []
+        half = 0.5 * (a1 - a0) / len(st)
+        out = []
+        for s, t in zip(st, np.minimum(top, z_hi)):
+            if not np.isfinite(t) or t <= z_lo + 0.2:
+                continue
+            if out and abs(out[-1][1] - (s - half)) < 1e-6 and abs(out[-1][2] - t) <= tol_m:
+                out[-1][1] = s + half
+                out[-1][3].append(t)
+            else:
+                out.append([s - half, s + half, t, [t]])
+        return [(max(a0, a), min(a1, c), float(np.median(ts))) for a, c, _, ts in out if c - a >= min_run_m]
+
     def runs_with_roof(self, plane, offset, z, a0, a1, min_run_m: float = 1.5, keep_when_no_data: bool = False):
         """The stretches of [a0, a1] that have roof behind them."""
         st, ok = self.behind(plane, offset, z, a0, a1, keep_when_no_data=keep_when_no_data)
@@ -296,15 +338,20 @@ def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | No
         runs = _runs(plane, b, roof)
         is_bottom = (ground_field is not None and edge_face is not None and
                      edge_face < LEVEL_FACE_STRIDE and abs(b.z_lo - z0) < 1e-3)
-        for a, c, off in runs:
+        # a wall drawn under a roof edge because nothing says it is not there
+        # stops at the roof just inside, stretch by stretch
+        tops = ([(ra, rc, off, zt) for a, c, off in runs for ra, rc, zt in roof.capped_runs(plane, off, b.z_lo, b.z_hi, a, c)]
+                if b.status == "edge" and roof is not None else [(a, c, off, b.z_hi) for a, c, off in runs])
+        runs = [(a, c, off) for a, c, off, _ in tops]
+        for a, c, off, z_top in tops:
             if is_bottom:
                 za = ground_field.elevation_along_edge(edge_face, a, L)
                 zc = ground_field.elevation_along_edge(edge_face, c, L)
-                corners = np.array([P(a, off, za), P(c, off, zc), P(c, off, b.z_hi), P(a, off, b.z_hi)])
+                corners = np.array([P(a, off, za), P(c, off, zc), P(c, off, z_top), P(a, off, z_top)])
             else:
-                corners = np.array([P(a, off, b.z_lo), P(c, off, b.z_lo), P(c, off, b.z_hi), P(a, off, b.z_hi)])
+                corners = np.array([P(a, off, b.z_lo), P(c, off, b.z_lo), P(c, off, z_top), P(a, off, z_top)])
             uv = np.array([[a / L, (b.z_lo - z0) / (z1 - z0)], [c / L, (b.z_lo - z0) / (z1 - z0)],
-                           [c / L, (b.z_hi - z0) / (z1 - z0)], [a / L, (b.z_hi - z0) / (z1 - z0)]])
+                           [c / L, (z_top - z0) / (z1 - z0)], [a / L, (z_top - z0) / (z1 - z0)]])
             quads.append((corners, n3, uv, "wall"))
         # return walls where the offset changes along the band
         for (a, c, off), (a2, c2, off2) in zip(runs[:-1], runs[1:]):

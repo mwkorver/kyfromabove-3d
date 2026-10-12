@@ -73,6 +73,7 @@ def essentials(rec: dict) -> dict:
     return {"name": rec.get("name"), "hole_m2": h.get("total_m2"), "by_face": h.get("by_face") or {},
             "roof_wall_m2": (rec.get("roof_walls") or {}).get("m2"),
             "mesh_minus_lidar_m": (rec.get("heights") or {}).get("mesh_minus_lidar_m"),
+            "stray_wall_m2": (rec.get("stray_walls") or {}).get("m2"),
             "blank_share": t.get("blank_share"), "dots": t.get("dots"), "lines": t.get("lines"),
             "min_corner_deg": (rec.get("shape") or {}).get("min_corner_deg"),
             "min_width_m": (rec.get("shape") or {}).get("min_width_m"),
@@ -118,6 +119,13 @@ def compare(cfg: dict, now: dict, base: dict):
                 worse.append(f"{name}: wall on a flat roof {n['roof_wall_m2']:,.0f} m2, was {b['roof_wall_m2']:,.0f}")
             elif b["roof_wall_m2"] > n["roof_wall_m2"] + tol.get("roof_wall_m2", 5.0):
                 better.append(f"{name}: wall on a flat roof {n['roof_wall_m2']:,.0f} m2, was {b['roof_wall_m2']:,.0f}")
+        sw, sb = n.get("stray_wall_m2"), b.get("stray_wall_m2")
+        if sw is not None and sb is not None:
+            st = tol.get("stray_wall_m2", {"abs": 10.0, "rel": 0.10})
+            if sw > sb + max(st["abs"], st["rel"] * sb):
+                worse.append(f"{name}: wall where the LiDAR has no building {sw:,.0f} m2, was {sb:,.0f}")
+            elif sb > sw + max(st["abs"], st["rel"] * sw):
+                better.append(f"{name}: wall where the LiDAR has no building {sw:,.0f} m2, was {sb:,.0f}")
         if n["mesh_minus_lidar_m"] is not None and b["mesh_minus_lidar_m"] is not None:
             if abs(n["mesh_minus_lidar_m"]) > abs(b["mesh_minus_lidar_m"]) + tol.get("height_m", 1.5):
                 worse.append(f"{name}: mesh top {n['mesh_minus_lidar_m']:+.1f} m off the LiDAR's, was {b['mesh_minus_lidar_m']:+.1f}")

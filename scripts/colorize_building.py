@@ -697,6 +697,47 @@ def extrude_verified_faces(
             np.concatenate(ext_face), verified_planes)
 
 
+def under_measured_edge(planes, is_arc, level_of, tower_levels, measured_edges, max_off_m: float = 1.5,
+                        max_angle_deg: float = 10.0, min_cover: float = 0.6) -> set:
+    """The faces standing under a roof edge the LiDAR measured: every face of
+    a level whose outline is the LiDAR's tower edge, and the ground level's
+    faces lying along (within ``max_off_m`` and ``max_angle_deg``) outline
+    edges whose roof end it found, over at least ``min_cover`` of their length."""
+    out = set()
+    for pl in planes:
+        if is_arc[pl.face]:
+            continue
+        lv = level_of[pl.face]
+        if lv in tower_levels:
+            out.add(pl.face)
+            continue
+        if lv != 0 or not measured_edges:
+            continue
+        L = pl.length_m
+        e1 = (pl.p1 - pl.p0) / max(L, 1e-9)
+        covered = []
+        for q0, q1 in measured_edges:
+            d = q1[:2] - q0[:2]
+            Lq = float(np.hypot(*d))
+            if Lq < 1e-6 or abs(float(np.dot(d / Lq, e1))) < np.cos(np.radians(max_angle_deg)):
+                continue
+            mid = 0.5 * (q0[:2] + q1[:2])
+            if abs(float(np.dot(mid - pl.p0, pl.normal))) > max_off_m:
+                continue
+            a, b = sorted((float(np.dot(q0[:2] - pl.p0, e1)), float(np.dot(q1[:2] - pl.p0, e1))))
+            if min(b, L) > max(a, 0.0):
+                covered.append((max(a, 0.0), min(b, L)))
+        covered.sort()
+        tot, end = 0.0, 0.0
+        for a, b in covered:
+            if b > end:
+                tot += b - max(a, end)
+                end = b
+        if tot >= min_cover * L:
+            out.add(pl.face)
+    return out
+
+
 def write_ply(path: Path, xyz, rgb, extra=None, extras=None):
     """The coloured cloud: LAZ when the path says ``.laz`` (a quarter of the
     PLY), the binary PLY otherwise. ``clouds.read_cloud`` reads either."""
@@ -869,6 +910,12 @@ def main() -> int:
         print(f"[FAIL] {exc}")
         return 1
     ring_m = np.array(poly_local.exterior.coords, dtype=np.float64)
+    # the outline's edges whose roof end the LiDAR found (a drop beyond it), in
+    # the ring's own order: walls under them are drawn unless there is evidence
+    # of a gap (fill_under_roof_edge, below)
+    measured_edges = [(ring_m[int(i)].copy(), ring_m[int(i) + 1].copy())
+                      for i, e in ((entry.get("outline") or {}).get("edges") or {}).items()
+                      if e.get("step1") == "moved" and int(i) + 1 < len(ring_m)] if fp_file is not None and fp_file.name == "footprint_lidar.json" else []
     entry.setdefault("overture_name", entry.get("name"))
     if entry.get("neighbours"):
         # In a row of buildings the clip holds the neighbours too, and a
@@ -925,6 +972,7 @@ def main() -> int:
     roof_z = float(np.percentile(b_xyz[:, 2], 99))
     levels = building_levels(b_xyz, ring_m, ground_z) if args.levels else \
         [{"level": 0, "ring": ring_m, "z_lo": ground_z, "z_hi": roof_z}]
+    lidar_tower_levels: set[int] = set()                    # levels whose outline is the LiDAR's tower edge
     if args.lidar_outline and entry.get("towers_local") and len(levels) > 1:
         # each tower the colourise found takes the LiDAR's outline of it (footprint_lidar.json, lidar_outline.py
         # towers): traced on a grid fixed to the building, not re-traced from the footprint's corner each run
@@ -935,6 +983,7 @@ def main() -> int:
             best = max(ours, key=lambda q: q.intersection(mine).area / max(q.union(mine).area, 1e-9))
             if best.intersection(mine).area / max(best.union(mine).area, 1e-9) >= 0.5:
                 lv["ring"] = np.asarray(best.exterior.coords, dtype=float)
+                lidar_tower_levels.add(lv["level"])
                 print(f"  level {lv['level']}: the LiDAR's tower outline ({len(lv['ring']) - 1} corners)")
     roof_z = max(float(lv["z_hi"]) for lv in levels)
     height_m = roof_z - ground_z
@@ -1243,6 +1292,24 @@ def main() -> int:
                 print(f"    face {f}: face {rec['from_face']} opposite has a different shape "
                       f"({rec['shape_diff_m']} m apart on {rec['n_joint']} bands); nothing mirrored")
 
+        # Pass 2a'': a wall stands under a roof edge the LiDAR measured -- a
+        # tower edge from the LiDAR's own outline of the tower, or an edge of
+        # the outline whose roof end it found -- unless there is evidence of a
+        # gap. Only with the LiDAR outline: Overture's edge is not measured.
+        if args.lidar_outline:
+            from kyfromabove_3d.features import fill_under_roof_edge
+            under = under_measured_edge(nominal_planes, is_arc, level_of, lidar_tower_levels, measured_edges)
+            n_faces = n_bands = 0
+            for f in sorted(under):
+                if f in verified_planes or f not in profiles:
+                    continue
+                pl_f = next(pl for pl in nominal_planes if pl.face == f)
+                if (k := fill_under_roof_edge(profiles[f], pl_f.length_m)):
+                    n_faces += 1
+                    n_bands += k
+                    print(f"    face {f}: {k} band(s) under the measured roof edge drawn as wall (none seen as a gap)")
+            print(f"  {len(under)} face(s) under a measured roof edge; {n_bands} band(s) on {n_faces} of them drawn as wall")
+
         # Pass 2a': a wall stands on the wall below it -- where a neighbour
         # hid part of a band from the scanner, it runs as far as the band above.
         from kyfromabove_3d.features import carry_extents_down, crown_bands
@@ -1302,7 +1369,8 @@ def main() -> int:
             n_ex = sum(b.status == "extended" for b in bands)
             n_mi = sum(b.status == "mirrored" for b in bands)
             n_ma = sum(b.status == "matched" for b in bands)
-            if n_obs == 0 and n_mi == 0:                                     # matched bands never stand alone (see build_mesh)
+            n_ed = sum(b.status == "edge" for b in bands)
+            if n_obs == 0 and n_mi == 0 and n_ed == 0:                       # matched bands never stand alone (see build_mesh)
                 print(f"    face {plane.face}: no band observed; nothing extruded")
                 continue
             pts = extrude_profile(plane, bands, args.spacing_m)
@@ -1312,9 +1380,9 @@ def main() -> int:
             else:
                 pts_n = np.repeat(np.array([[plane.normal[0], plane.normal[1], 0.0]]), len(pts), axis=0)
             offs = sorted({round(b.offset_m, 1) for b in bands if b.offset_m is not None})
-            zs = [b for b in bands if b.status in ("observed", "bridged", "extended", "mirrored", "matched")]
+            zs = [b for b in bands if b.status in ("observed", "bridged", "extended", "mirrored", "matched", "edge")]
             print(f"    face {plane.face}: {n_obs} band(s) observed, {n_br} bridged, {n_ex} extended through thin bands, {n_mi} mirrored from the face opposite, "
-                  + (f"{n_ma} matched in the frames, " if n_ma else "") + f"{n_sl} sloped (not extruded); wall {zs[0].z_lo:.0f}-{zs[-1].z_hi:.0f} m up, "
+                  + (f"{n_ma} matched in the frames, " if n_ma else "") + (f"{n_ed} under the measured roof edge, " if n_ed else "") + f"{n_sl} sloped (not extruded); wall {zs[0].z_lo:.0f}-{zs[-1].z_hi:.0f} m up, "
                   f"offsets {offs[0]:+.1f}..{offs[-1]:+.1f} m from the footprint; {len(pts):,} points")
             if len(pts):
                 prof_xyz.append(pts)

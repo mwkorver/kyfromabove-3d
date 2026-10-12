@@ -292,6 +292,45 @@ def roof_walls(V: np.ndarray, T: np.ndarray, xs, ys, Z, valid, outline, inside_m
     return {"m2": round(float(area[vert][flagged].sum()), 1), "n_triangles": int(flagged.sum())}
 
 
+def stray_walls(V: np.ndarray, T: np.ndarray, xs, ys, Z, valid, near_m: float = 1.0, above_m: float = 1.5,
+                per_m2: float = 8.0) -> Dict[str, Any]:
+    """Wall drawn where the LiDAR has no building: near-vertical triangles
+    standing more than ``near_m`` outside every roof cell of the solid
+    (*outside*), or more than ``above_m`` above the highest roof within
+    ``near_m`` of them (*above* -- a wall carried up past a lower roof). The
+    holes measure what the mesh leaves out; this measures what it invents.
+    Returns {"m2", "outside_m2", "above_m2"}."""
+    from scipy.ndimage import maximum_filter
+
+    n, area = triangle_normals_areas(V, T)
+    vert = (np.abs(n[:, 2]) < 0.2) & (area > 0.01)
+    none = {"m2": 0.0, "outside_m2": 0.0, "above_m2": 0.0}
+    if not vert.any() or not valid.any():
+        return none
+    pts, tri = sample_mesh(V, T[vert], per_m2=per_m2, seed=2)
+    if not len(pts):
+        return none
+    cell = float(xs[1] - xs[0])
+    r = max(1, int(np.ceil(near_m / cell)))
+    hi = maximum_filter(np.where(valid, Z, -np.inf), size=2 * r + 1, mode="constant", cval=-np.inf)
+    fx, fy = (pts[:, 0] - xs[0]) / cell, (pts[:, 1] - ys[0]) / cell
+    ix = np.clip(np.round(fx).astype(int), 0, len(xs) - 1)
+    iy = np.clip(np.round(fy).astype(int), 0, len(ys) - 1)
+    # past the field's edge by more than near_m: nothing of the solid is near
+    beyond = (np.maximum(np.abs(fx - ix), np.abs(fy - iy)) * cell) > near_m
+    top = np.where(beyond, -np.inf, hi[iy, ix])
+    outside = ~np.isfinite(top)
+    above = ~outside & (pts[:, 2] > top + above_m)
+    counts = np.maximum(np.bincount(tri, minlength=int(vert.sum())), 1)
+    a_vert = area[vert]
+    res = {}
+    for k, bad in (("outside_m2", outside), ("above_m2", above)):
+        share = np.bincount(tri, weights=bad, minlength=int(vert.sum())) / counts
+        res[k] = round(float(a_vert[share >= 0.5].sum()), 1)
+    res["m2"] = round(res["outside_m2"] + res["above_m2"], 1)
+    return res
+
+
 # ------------------------------------------------------------------ texture
 
 def texture_artefacts(sources: Sequence[np.ndarray], texel_m: float) -> Dict[str, Any]:

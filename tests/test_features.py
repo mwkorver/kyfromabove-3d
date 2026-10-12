@@ -1169,3 +1169,21 @@ def test_an_open_band_at_the_top_is_the_walls_crown_when_its_front_continues_the
     assert crown_bands(chase) == 1 and chase[3].status == "observed" and chase[5].status == "open"
     own = [band(10, 0.0), band(15, -0.5, "open", -6.0)]                       # its returns reach 16.2 m
     assert crown_bands(own, top_z=20.0, top_of=lambda b: 16.2) == 1 and own[1].z_hi == 16.2
+
+
+def test_fill_under_roof_edge_draws_unseen_and_roof_backed_bands_but_keeps_a_wall_behind():
+    from kyfromabove_3d.features import FaceBand, fill_under_roof_edge
+
+    def band(z, status, off=None, back=None, fill=None):
+        return FaceBand(z, z + 5.0, off, 50, 0.1, 0.0, 30.0, status, back_offset_m=back, back_fill=fill)
+
+    bands = [band(0, "observed", -0.6), band(5, "unknown"), band(10, "sloped", -1.2), band(15, "sloped", -4.0),
+             band(20, "open", -1.0, -7.0, 0.1), band(25, "open", -7.0, -7.0, 0.9)]
+    assert fill_under_roof_edge(bands, 30.0) == 3
+    assert [b.status for b in bands] == ["observed", "edge", "edge", "sloped", "edge", "open"]
+    # each filled band at the depth of the nearest drawn band within 1.5 m of the edge
+    assert all(b.offset_m == -0.6 for b in bands[1:3]) and bands[4].offset_m == -0.6
+    # with nothing drawn near the edge, on the edge itself
+    lone = [band(0, "observed", 2.4), band(5, "unknown")]
+    fill_under_roof_edge(lone, 30.0)
+    assert lone[1].status == "edge" and lone[1].offset_m == 0.0

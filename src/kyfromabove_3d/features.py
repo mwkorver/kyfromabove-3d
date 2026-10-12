@@ -2226,12 +2226,17 @@ class FaceBand:
     # An open band (a loggia, a colonnade) has two surfaces; this is the
     # deeper one, where the wall behind the piers stands. None otherwise.
     back_offset_m: Optional[float] = None
+    # How much of the band's height the deeper surface's returns fill, in
+    # 0.5 m steps (0-1). A wall behind piers runs up through the band; a roof
+    # seen over a parapet, or two, sits at one or two heights. None if not open.
+    back_fill: Optional[float] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {"z_lo": self.z_lo, "z_hi": self.z_hi,
                 "clip_lo": None if self.clip_lo is None else round(float(self.clip_lo), 1),
                 "clip_hi": None if self.clip_hi is None else round(float(self.clip_hi), 1),
                 "back_offset_m": None if self.back_offset_m is None else round(float(self.back_offset_m), 2),
+                "back_fill": None if self.back_fill is None else round(float(self.back_fill), 2),
                 "offset_m": None if self.offset_m is None else round(float(self.offset_m), 2),
                 "n_returns": int(self.n_returns), "spread_m": round(float(self.spread_m), 2),
                 "along_lo": round(float(self.along_lo), 1), "along_hi": round(float(self.along_hi), 1),
@@ -2359,10 +2364,15 @@ def face_profile(plane: WallPlane, xyz: np.ndarray, band_m: float = 5.0,
                 back = float(min(mode, second))
                 on_back = np.abs(o - back) <= 0.6
                 a_back = along[m][on_back] * L
+                # does the deeper surface run up through the band (a wall) or
+                # sit at one or two heights (a roof seen over the parapet)?
+                z_back = z[m][on_back]
+                steps, _ = np.histogram(z_back, bins=np.arange(z0, z1 + 0.25, 0.5))
+                fill = float((steps >= max(3, 0.02 * len(z_back))).mean()) if len(steps) else 0.0
                 bands.append(FaceBand(z0, z1, float(mode), int(m.sum()), 0.0,
                                       float(a_back.min()) if len(a_back) else 0.0,
                                       float(a_back.max()) if len(a_back) else 0.0, "open",
-                                      back_offset_m=back))
+                                      back_offset_m=back, back_fill=fill))
                 z0 = z1
                 continue
             if near.sum() >= min_returns:
@@ -2502,7 +2512,8 @@ def band_extent(plane: WallPlane, b: FaceBand, full_width_fraction: float = 0.6,
 WALL_STATUSES = ("observed", "bridged", "extended", "mirrored", "matched", "edge")
 
 
-def fill_under_roof_edge(bands: List[FaceBand], length_m: float, max_offset_m: float = 1.5) -> int:
+def fill_under_roof_edge(bands: List[FaceBand], length_m: float, max_offset_m: float = 1.5,
+                         max_back_fill: float = 0.5) -> int:
     """A wall stands under a measured roof edge unless there is evidence of a
     gap. For a face whose top edge the LiDAR placed (the roof's end, with a
     drop beyond it), the bands the returns left unknown, and the ``sloped``
@@ -2512,16 +2523,22 @@ def fill_under_roof_edge(bands: List[FaceBand], length_m: float, max_offset_m: f
     was left a hole. Each takes the depth of the face's nearest drawn band
     within ``max_offset_m`` of the edge, or the edge itself where there is
     none (the Omni's one band 2.4 m out, at its tower's foot, is the
-    podium's, not the tower's). The evidence that keeps a gap is kept: an
-    ``open`` band (a second wall 4 m or more behind) is left as it is, and
-    the mesh stops any wall band where the LiDAR roof behind it does not
-    reach its height (``build_mesh.RoofField``). In place; returns how many
-    bands were filled."""
+    podium's, not the tower's). An ``open`` band whose deeper surface fills
+    less than ``max_back_fill`` of its height is a roof seen behind the edge,
+    not a second wall, and is filled like an unknown one: Hampton's long
+    tower walls were open at 20-25 m over a flat roof at 23.1 m reaching
+    to the edge. The evidence that keeps a gap is kept: an open band with a
+    wall behind (RIVUE's penthouse 7 m in) is left as it is, and the mesh
+    stops any wall band where the LiDAR roof behind it does not reach its
+    height (``build_mesh.RoofField``). In place; returns how many bands were
+    filled."""
     drawn = [b for b in bands if b.status in WALL_STATUSES and b.offset_m is not None
              and abs(b.offset_m) <= max_offset_m]
     n = 0
     for i, b in enumerate(bands):
-        fill = b.status == "unknown" or (b.status == "sloped" and b.offset_m is not None and abs(b.offset_m) <= max_offset_m)
+        fill = (b.status == "unknown"
+                or (b.status == "sloped" and b.offset_m is not None and abs(b.offset_m) <= max_offset_m)
+                or (b.status == "open" and b.back_fill is not None and b.back_fill < max_back_fill))
         if not fill:
             continue
         mid = 0.5 * (b.z_lo + b.z_hi)

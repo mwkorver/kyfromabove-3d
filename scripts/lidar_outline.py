@@ -930,6 +930,177 @@ def cmd_write_footprints(a) -> int:
     return 0
 
 
+# ------------------------------------------------------------------ towers
+
+def main_directions(ring) -> float:
+    """The building's main direction (radians, 0-90 degrees): the length-weighted
+    mean of its outline's edge directions taken modulo 90 degrees."""
+    P = np.asarray(ring, float)
+    d = np.diff(P, axis=0)
+    L = np.hypot(d[:, 0], d[:, 1])
+    a = np.arctan2(d[:, 1], d[:, 0])
+    return float(np.angle(np.sum(L * np.exp(4j * a))) / 4.0)
+
+
+def regularize(poly, theta: float, snap_deg: float = 20.0, min_edge_m: float = 2.0, simplify_m: float = 1.0):
+    """A traced roof outline as straight edges: simplified by ``simplify_m``,
+    each run snapped to the building's directions (``theta`` and at right
+    angles) when within ``snap_deg``, neighbouring runs in one direction
+    merged, runs under ``min_edge_m`` folded into their longer neighbour, and
+    each edge then placed through the traced boundary's points nearest it
+    (direction kept, position their median), corners re-intersected. Falls
+    back to the simplified outline when the straightened one is not a simple
+    polygon. Returns a closed ring, or None."""
+    from shapely.geometry import LineString, Polygon
+    g = poly.simplify(simplify_m, preserve_topology=True)
+    if g.geom_type != "Polygon" or len(g.exterior.coords) < 4:
+        return None
+    ext = g.exterior if g.exterior.is_ccw else LineString(list(g.exterior.coords)[::-1])
+    P = np.asarray(ext.coords)[:-1]
+    bd = poly.exterior                                                     # the traced boundary, densely
+    B = np.array([bd.interpolate(t).coords[0] for t in np.arange(0, bd.length, 0.25)])
+    runs = []
+    for k in range(len(P)):
+        a_, b_ = P[k], P[(k + 1) % len(P)]
+        v = b_ - a_
+        L = float(np.hypot(*v))
+        if L < 1e-6:
+            continue
+        ang = float(np.arctan2(v[1], v[0]))
+        snapped = theta + round((ang - theta) / (np.pi / 2)) * np.pi / 2
+        if abs(np.angle(np.exp(1j * (ang - snapped)))) <= np.radians(snap_deg):
+            ang = snapped
+        runs.append(dict(ang=ang, a=a_, b=b_, L=L))
+    def same(r, q):
+        return abs(np.angle(np.exp(1j * (r["ang"] - q["ang"])))) < 1e-6
+    merged = []
+    for r in runs:
+        if merged and same(merged[-1], r):
+            merged[-1].update(b=r["b"], L=merged[-1]["L"] + r["L"])
+        else:
+            merged.append(dict(r))
+    if len(merged) > 1 and same(merged[0], merged[-1]):
+        merged[-1].update(b=merged[0]["b"], L=merged[-1]["L"] + merged[0]["L"]); merged.pop(0)
+    while len(merged) > 4 and min(m["L"] for m in merged) < min_edge_m:
+        k = int(np.argmin([m["L"] for m in merged]))
+        prv, nxt = merged[k - 1], merged[(k + 1) % len(merged)]
+        if prv["L"] >= nxt["L"]:
+            prv.update(b=merged[k]["b"], L=prv["L"] + merged[k]["L"])
+        else:
+            nxt.update(a=merged[k]["a"], L=nxt["L"] + merged[k]["L"])
+        merged.pop(k)
+        i = 0                                                              # folding can leave two runs in one direction side by side
+        while i < len(merged) and len(merged) > 1:
+            j = (i + 1) % len(merged)
+            if same(merged[i], merged[j]) and i != j:
+                merged[i].update(b=merged[j]["b"], L=merged[i]["L"] + merged[j]["L"]); merged.pop(j)
+            else:
+                i += 1
+    if len(merged) < 3:
+        return None
+    # each run's line through the traced boundary points nearest it
+    segs = [LineString([m["a"], m["b"]]) for m in merged]
+    from shapely.geometry import Point
+    owner = np.array([int(np.argmin([sg.distance(Point(*q)) for sg in segs])) for q in B])
+    lines = []
+    for k, m in enumerate(merged):
+        d = np.array([np.cos(m["ang"]), np.sin(m["ang"])])
+        nrm = np.array([d[1], -d[0]])
+        pts = B[owner == k]
+        c = float(np.median(pts @ nrm)) if len(pts) >= 3 else float(np.asarray(m["a"]) @ nrm)
+        lines.append((nrm, c))
+    out = []
+    for k in range(len(lines)):
+        (n0, c0), (n1, c1) = lines[k - 1], lines[k]
+        A = np.array([n0, n1])
+        if abs(np.linalg.det(A)) < 0.17:                                   # under about 10 degrees apart: keep the simplified corner
+            out.append(np.asarray(merged[k]["a"]))
+        else:
+            out.append(np.linalg.solve(A, [c0, c1]))
+    ring = np.vstack([out, out[:1]])
+    if Polygon(ring).is_valid and Polygon(ring).area > 0.5 * poly.area:
+        return ring
+    return np.vstack([P, P[:1]])
+
+
+def tower_outline(B, level, footprint_ring, a):
+    """One tower's outline from the LiDAR: on a grid fixed to the building's
+    own coordinates, the connected patch of cells ``--tower-margin-m`` or more
+    above the podium, inside the building's outline, that overlaps the
+    colourise's tower trace most (so the trace only picks the patch, not its
+    shape); then straightened."""
+    from scipy.ndimage import binary_fill_holes, binary_opening, label
+    from shapely import contains_xy
+    from shapely.geometry import Polygon
+    c = a.cell_m
+    fp = Polygon(footprint_ring)
+    minx, miny, maxx, maxy = fp.buffer(2.0).bounds
+    x0, y0 = np.floor(minx / c) * c, np.floor(miny / c) * c              # fixed to the building's coordinates
+    nx, ny = int(np.ceil((maxx - x0) / c)), int(np.ceil((maxy - y0) / c))
+    g = roof_grid(B["xyz"], B["cls"], x0, y0, nx, ny, c)
+    cx, cy = np.meshgrid(x0 + (np.arange(nx) + 0.5) * c, y0 + (np.arange(ny) + 0.5) * c)
+    # a tower cell by the colourise's own rule (building_levels): at least upper_fraction of the top height,
+    # and in any case clear of the podium
+    floor = max(float(level["z_lo"]) + a.tower_margin_m, B["ground_z"] + a.upper_fraction * (float(level["z_hi"]) - B["ground_z"]))
+    up = (np.nan_to_num(g, nan=-999) >= floor) & contains_xy(fp.buffer(1.0), cx, cy)
+    # smooth by about a metre: close the LiDAR's gaps and rooftop plant's notches, then take off the spurs
+    from scipy.ndimage import binary_closing
+    r_ = max(1, int(round(a.smooth_m / c)))
+    up = binary_opening(binary_closing(up, iterations=r_), iterations=r_)
+    lab, n = label(up)
+    if n == 0:
+        return None, None
+    inseed = contains_xy(Polygon(level["ring"]), cx, cy)
+    k = int(np.argmax([(inseed & (lab == i)).sum() for i in range(1, n + 1)])) + 1
+    roof = binary_fill_holes(lab == k)
+    traced = mask_polygon(roof, x0, y0, c, 0.25)
+    if traced is None:
+        return None, None
+    ring = regularize(traced, main_directions(footprint_ring))
+    return ring, traced
+
+
+def cmd_towers(a) -> int:
+    """Each tower's outline from the LiDAR, from two seeds (the colourise's
+    tower trace in the build on Overture's outline and in the build on the
+    LiDAR outline), against those traces: how far apart each pair is."""
+    from shapely.geometry import Polygon
+    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    rows = {r["building"]: r for r in json.loads(a.out.read_text(encoding="utf-8")) if r["status"] == "ok"}
+    out = []
+    for key, b in blds.items():
+        lv = {side: json.loads((a.flips / side / key / "levels.json").read_text(encoding="utf-8"))
+              for side in ("overture", "lidar") if (a.flips / side / key / "levels.json").exists()}
+        if len(lv) < 2 or len(lv["overture"]) < 2 or len(lv["lidar"]) < 2:
+            continue
+        B, _ = load_building(b)
+        fp = np.asarray(rows[key]["edges_moved"]["ring"]) if key in rows else np.asarray(lv["overture"][0]["ring"])
+        rec = dict(building=key, name=b.name)
+        for side in ("overture", "lidar"):
+            t = lv[side][1]
+            ring, traced = tower_outline(B, t, fp, a)
+            rec[side] = dict(colourise_ring=np.round(np.asarray(t["ring"]), 3).tolist(), z_lo=t["z_lo"], z_hi=t["z_hi"],
+                             ring=None if ring is None else np.round(ring, 3).tolist(),
+                             traced=None if traced is None else np.round(np.asarray(traced.exterior.coords), 3).tolist())
+        ok = rec["overture"]["ring"] and rec["lidar"]["ring"]
+        h = lambda p, q: Polygon(p).hausdorff_distance(Polygon(q))
+        rec["colourise_apart_m"] = round(h(rec["overture"]["colourise_ring"], rec["lidar"]["colourise_ring"]), 2)
+        rec["ours_apart_m"] = round(h(rec["overture"]["ring"], rec["lidar"]["ring"]), 2) if ok else None
+        rec["corners"] = dict(colourise=[len(rec[s]["colourise_ring"]) - 1 for s in ("overture", "lidar")],
+                              ours=[len(rec[s]["ring"]) - 1 if rec[s]["ring"] else None for s in ("overture", "lidar")])
+        if ok:
+            T = Polygon(rec["overture"]["traced"])
+            rec["fit"] = dict(colourise_iou=round(Polygon(rec["overture"]["colourise_ring"]).intersection(T).area / Polygon(rec["overture"]["colourise_ring"]).union(T).area, 3),
+                              ours_iou=round(Polygon(rec["overture"]["ring"]).intersection(T).area / Polygon(rec["overture"]["ring"]).union(T).area, 3))
+        out.append(rec)
+        print(f"  {b.name[:30]:30s} two seeds -> colourise traces {rec['colourise_apart_m']:.2f} m apart, ours "
+              f"{rec['ours_apart_m'] if rec['ours_apart_m'] is not None else 'n/a'} m apart; corners {rec['corners']}; "
+              f"match to the LiDAR roof {rec.get('fit')}")
+    a.towers_out.write_text(json.dumps(out, indent=1), encoding="utf-8")
+    print(f"{len(out)} towers -> {a.towers_out}")
+    return 0
+
+
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -1017,12 +1188,21 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     for act in rf._actions[1:]:
         if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "refined_out"):
             wf._add_action(act)
+    tw = sub.add_parser("towers", help="each tower's outline from the LiDAR, and how stable it is")
+    for act in p._actions[1:]:
+        if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "cell_m", "max_step_m", "reach_m"):
+            tw._add_action(act)
+    tw.add_argument("--flips", type=Path, default=REF / "outline_audit" / "flips")
+    tw.add_argument("--tower-margin-m", type=float, default=3.0, help="a tower cell stands at least this above the podium")
+    tw.add_argument("--upper-fraction", type=float, default=0.4, help="a tower cell is at least this share of the top height (as building_levels)")
+    tw.add_argument("--smooth-m", type=float, default=1.0, help="close and open the tower patch by this much before tracing")
+    tw.add_argument("--towers-out", type=Path, default=REF / "lidar_towers.json")
     return ap.parse_args(argv)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     a = parse_args(argv)
-    return dict(measure=cmd_measure, plot=cmd_plot, sheet=cmd_sheet, ortho=cmd_ortho, refine=cmd_refine, **{'edge-sheet': cmd_edge_sheet, 'write-footprints': cmd_write_footprints}, **{'fetch-nadir': cmd_fetch_nadir})[a.cmd](a)
+    return dict(measure=cmd_measure, plot=cmd_plot, sheet=cmd_sheet, ortho=cmd_ortho, refine=cmd_refine, towers=cmd_towers, **{'edge-sheet': cmd_edge_sheet, 'write-footprints': cmd_write_footprints}, **{'fetch-nadir': cmd_fetch_nadir})[a.cmd](a)
 
 
 if __name__ == "__main__":

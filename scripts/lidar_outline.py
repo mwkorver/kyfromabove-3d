@@ -679,13 +679,11 @@ def edge_in_frame(b, line_pts, nrm, heights, cam, win, gray, window_m, outer_sha
     return float(ACROSS[i] + frac * (ACROSS[1] - ACROSS[0])), clarity
 
 
-def refine_building(job) -> Optional[dict]:
+def frames_context(b, frames, cache, index, a):
+    """The cameras and frame windows a building's edges are refined in: its
+    straight-down windows (the ``--max-frames`` nearest overhead) and its
+    angled ones."""
     import cv2
-    r, b, frames, cache, index, a = job
-    B, _ = load_building(b)
-    G = r["grid"]
-    ny, nx = G["shape"]
-    g = roof_grid(B["xyz"], B["cls"], G["x0"], G["y0"], nx, ny, G["cell"])
     cams = {c["id"]: c for c in wv.cameras_in_tileset_frame(frames, b)}
     wins = sorted(((w["off_nadir_deg"], k, w) for k, w in index.items() if w["building"] == b.key), key=lambda t: t[0])[:a.max_frames]
     grays = {k: cv2.imread(str(cache / k), cv2.IMREAD_GRAYSCALE).astype(np.float32) for _, k, _ in wins}
@@ -693,11 +691,17 @@ def refine_building(job) -> Optional[dict]:
     oblique = [(k, w) for k, w in a.oblique_index.items() if w["building"] == b.key and w["frame"] in cams
                and not w["frame"].split("/")[-1].startswith("Color")]
     ogray = {}
-    P = np.asarray(r["edges_moved"]["ring"])[:-1]
-    P0 = np.asarray(r["overture"]["ring"])[:-1]
-    sgn = outward(P0)
+    return cams, wins, grays, oblique, ogray
+
+
+def refine_edges(b, g, G, cams, wins, grays, oblique, ogray, P, sgn, edge_list, a):
+    """Each eligible edge of the ring ``P`` (corners, no closing point; ``sgn``
+    its outward side) refined in the frames: ``edge_list`` items carry
+    ``edge``, ``status`` (only "moved" is refined), ``move_m`` and
+    ``length_m``. Returns a record per edge."""
+    import cv2
     edges = []
-    for e in r["edges"]:
+    for e in edge_list:
         k = e["edge"]
         rec = dict(edge=k, outline_status=e["status"], lidar_move_m=e["move_m"])
         if e["status"] != "moved" or e["length_m"] < 3.0:
@@ -769,6 +773,20 @@ def refine_building(job) -> Optional[dict]:
         status = "at the window's limit" if at_limit else "angled frames disagree" if angled_off else "refined"
         edges.append(dict(rec, status=status, how=how, refine_m=round(m, 3) if status == "refined" else 0.0,
                           frames_say_m=round(m, 3), spread_m=round(spread, 3)))
+    return edges
+
+
+def refine_building(job) -> Optional[dict]:
+    r, b, frames, cache, index, a = job
+    B, _ = load_building(b)
+    G = r["grid"]
+    ny, nx = G["shape"]
+    g = roof_grid(B["xyz"], B["cls"], G["x0"], G["y0"], nx, ny, G["cell"])
+    cams, wins, grays, oblique, ogray = frames_context(b, frames, cache, index, a)
+    P = np.asarray(r["edges_moved"]["ring"])[:-1]
+    P0 = np.asarray(r["overture"]["ring"])[:-1]
+    sgn = outward(P0)
+    edges = refine_edges(b, g, G, cams, wins, grays, oblique, ogray, P, sgn, r["edges"], a)
     moves = [e["lidar_move_m"] + e["refine_m"] for e in edges]
     ring = outline_from_moves(P0, moves, a.max_corner_move_m)
     from shapely.geometry import Polygon
@@ -906,6 +924,7 @@ def cmd_write_footprints(a) -> int:
     rows = {r["building"]: r for r in json.loads(a.out.read_text(encoding="utf-8")) if r["status"] == "ok"}
     ref = {r["building"]: r for r in json.loads(a.refined_out.read_text(encoding="utf-8"))}
     blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    towers = json.loads(a.towers_out.read_text(encoding="utf-8")) if a.towers_out.exists() else []
     n = 0
     for key, r in ref.items():
         b = blds[key]
@@ -922,6 +941,12 @@ def cmd_write_footprints(a) -> int:
                  for e in r["edges"]}
         out = dict(entry, wkt=wkt, outline=dict(source="the LiDAR roof's edge, refined in the straight-down frames (lidar_outline.py)",
                                                 overture_wkt=entry["wkt"], edges=moves, round_trip_error_m=round(err, 4)))
+        tw = [t for t in towers if t["building"] == key]
+        if tw:
+            out["towers_local"] = [dict(ring=(t.get("refined") or {}).get("ring") or t["overture"]["ring"],
+                                        z_lo=t["overture"]["z_lo"], z_hi=t["overture"]["z_hi"],
+                                        source="the LiDAR tower's edge, refined in the straight-down frames (lidar_outline.py towers)")
+                                   for t in tw]
         (b.dir / "footprint_lidar.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
         n += 1
         print(f"  {b.name}: {sum(1 for m in moves.values() if m['lidar_m'] or m['frames_m'])} of {len(moves)} edges moved; "
@@ -1101,6 +1126,42 @@ def cmd_towers(a) -> int:
     return 0
 
 
+def cmd_refine_towers(a) -> int:
+    """Each tower's edges refined in the straight-down frames, as the
+    footprint's are; writes the refined ring into lidar_towers.json."""
+    from shapely.geometry import Polygon
+    rows = {r["building"]: r for r in json.loads(a.out.read_text(encoding="utf-8")) if r["status"] == "ok"}
+    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    frames = wv.read_frames(a.frames)
+    index = json.loads((a.nadir_cache / "index.json").read_text(encoding="utf-8"))
+    a.oblique_index = json.loads((a.oblique_cache / "index.json").read_text(encoding="utf-8"))
+    towers = json.loads(a.towers_out.read_text(encoding="utf-8"))
+    from collections import Counter
+    st = Counter()
+    for t in towers:
+        b, r = blds[t["building"]], rows[t["building"]]
+        B, _ = load_building(b)
+        G = r["grid"]
+        ny, nx = G["shape"]
+        g = roof_grid(B["xyz"], B["cls"], G["x0"], G["y0"], nx, ny, G["cell"])
+        cams, wins, grays, oblique, ogray = frames_context(b, frames, a.nadir_cache, index, a)
+        P = np.asarray(t["overture"]["ring"])[:-1]
+        sgn = outward(P)
+        edge_list = [dict(edge=k, status="moved", move_m=0.0, length_m=float(np.linalg.norm(P[(k + 1) % len(P)] - P[k])))
+                     for k in range(len(P))]
+        edges = refine_edges(b, g, G, cams, wins, grays, oblique, ogray, P, sgn, edge_list, a)
+        ring = outline_from_moves(P, [e["refine_m"] for e in edges], a.max_corner_move_m)
+        ok = Polygon(ring).is_valid
+        t["refined"] = dict(ring=np.round(ring if ok else np.vstack([P, P[:1]]), 3).tolist(), valid=bool(ok), edges=edges)
+        st.update(e["status"] for e in edges)
+        moved = [e["refine_m"] for e in edges if e["status"] == "refined"]
+        print(f"  {b.name[:30]:30s} {len(moved)} of {len(edges)} edges refined"
+              + (f", typically {np.median(np.abs(moved)):.2f} m" if moved else "") + ("" if ok else "; crossed itself, kept unrefined"))
+    a.towers_out.write_text(json.dumps(towers, indent=1), encoding="utf-8")
+    print(dict(st))
+    return 0
+
+
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -1184,10 +1245,16 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     es.add_argument("--seed", type=int, default=1)
     es.add_argument("--dpi", type=int, default=90)
     es.add_argument("--edges-out", type=Path, default=REF / "lidar_outline_edges.jpg")
+    rt = sub.add_parser("refine-towers", help="each tower's edges refined in the straight-down frames")
+    for act in rf._actions[1:]:
+        if act.dest not in ("refined_out",):
+            rt._add_action(act)
+    rt.add_argument("--towers-out", type=Path, default=REF / "lidar_towers.json")
     wf = sub.add_parser("write-footprints", help="each building's footprint_lidar.json for the colourise")
     for act in rf._actions[1:]:
         if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "refined_out"):
             wf._add_action(act)
+    wf.add_argument("--towers-out", type=Path, default=REF / "lidar_towers.json")
     tw = sub.add_parser("towers", help="each tower's outline from the LiDAR, and how stable it is")
     for act in p._actions[1:]:
         if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "cell_m", "max_step_m", "reach_m"):
@@ -1202,7 +1269,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     a = parse_args(argv)
-    return dict(measure=cmd_measure, plot=cmd_plot, sheet=cmd_sheet, ortho=cmd_ortho, refine=cmd_refine, towers=cmd_towers, **{'edge-sheet': cmd_edge_sheet, 'write-footprints': cmd_write_footprints}, **{'fetch-nadir': cmd_fetch_nadir})[a.cmd](a)
+    return dict(measure=cmd_measure, plot=cmd_plot, sheet=cmd_sheet, ortho=cmd_ortho, refine=cmd_refine, towers=cmd_towers, **{'refine-towers': cmd_refine_towers, 'edge-sheet': cmd_edge_sheet, 'write-footprints': cmd_write_footprints}, **{'fetch-nadir': cmd_fetch_nadir})[a.cmd](a)
 
 
 if __name__ == "__main__":

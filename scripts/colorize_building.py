@@ -925,6 +925,17 @@ def main() -> int:
     roof_z = float(np.percentile(b_xyz[:, 2], 99))
     levels = building_levels(b_xyz, ring_m, ground_z) if args.levels else \
         [{"level": 0, "ring": ring_m, "z_lo": ground_z, "z_hi": roof_z}]
+    if args.lidar_outline and entry.get("towers_local") and len(levels) > 1:
+        # each tower the colourise found takes the LiDAR's outline of it (footprint_lidar.json, lidar_outline.py
+        # towers): traced on a grid fixed to the building, not re-traced from the footprint's corner each run
+        from shapely.geometry import Polygon as _Poly
+        ours = [_Poly(np.asarray(t["ring"], dtype=float)[:, :2]) for t in entry["towers_local"]]
+        for lv in levels[1:]:
+            mine = _Poly(np.asarray(lv["ring"], dtype=float)[:, :2])
+            best = max(ours, key=lambda q: q.intersection(mine).area / max(q.union(mine).area, 1e-9))
+            if best.intersection(mine).area / max(best.union(mine).area, 1e-9) >= 0.5:
+                lv["ring"] = np.asarray(best.exterior.coords, dtype=float)
+                print(f"  level {lv['level']}: the LiDAR's tower outline ({len(lv['ring']) - 1} corners)")
     roof_z = max(float(lv["z_hi"]) for lv in levels)
     height_m = roof_z - ground_z
     print(f"zones: {zones.ground.sum():,} ground / {zones.wall.sum():,} wall / "

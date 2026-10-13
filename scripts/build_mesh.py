@@ -1747,6 +1747,26 @@ def main() -> int:
                         if np.isfinite(z) and z - lv_floor >= 0.5]
         else:
             stations = [(0.0, L, ground_z + roof_top)] if roof_top >= 0.5 else []
+        if edge.face in whole_party and stations:
+            # a party wall drawn whole stands to the top of the wall the LiDAR
+            # saw on it, where that is above the roof just inside -- a parapet
+            # (644a6ecb's party wall stopped 1.5 m short of its own top) -- but
+            # at most ``max_parapet_m`` above it: beside a taller neighbour the
+            # returns along the line are the neighbour's wall, and raised to them
+            # the held-out buildings stood 1,365 m2 of wall above their roofs
+            seen = [x for x in profiles.get(edge.face, []) if x.status in ("observed", "extended", "bridged")
+                    and x.offset_m is not None and abs(x.offset_m) <= 1.0]
+            max_parapet_m = 2.0
+            if seen:
+                off = float(np.median([x.offset_m for x in seen]))
+                along, across = edge.local(xyz[:, :2])
+                near = (np.abs(across - off) <= 0.75) & (xyz[:, 2] > lv_floor + 0.5)
+                raised = []
+                for a, c, z in stations:
+                    m = near & (along >= a) & (along <= c)
+                    top = float(np.percentile(xyz[m, 2], 98)) if m.sum() >= 10 else -np.inf
+                    raised.append((a, c, min(max(z, min(top, z + max_parapet_m)), lv_ceiling)))
+                stations = raised
         # merge neighbouring stretches at the same height
         runs = []
         for a, b, z in stations:

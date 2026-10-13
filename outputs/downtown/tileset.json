@@ -1723,7 +1723,7 @@
       "extras": {
        "name": "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
        "gers": "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
-       "triangles": 492,
+       "triangles": 472,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -2672,7 +2672,7 @@
       "extras": {
        "name": "National Society, Sons of the American Revolution",
        "gers": "f96de311-5fba-4a38-9f33-858ed5cbf24d",
-       "triangles": 332,
+       "triangles": 331,
        "path": "profile",
        "archetype": "simple_box",
        "faces": {
@@ -2828,8 +2828,8 @@
        "sphere": [
         3.7575564942217454,
         8.5465,
-        5.877800000000001,
-        29.390643092662664
+        6.091324999999999,
+        29.434821909872404
        ]
       },
       "geometricError": 0.0,
@@ -7377,7 +7377,7 @@
       "extras": {
        "name": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
        "gers": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
-       "triangles": 1386,
+       "triangles": 1381,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
@@ -7723,8 +7723,8 @@
        "sphere": [
         1.5487304340398693,
         5.421707529433599,
-        11.41545,
-        30.406963962114535
+        11.4395,
+        30.416001034666472
        ]
       },
       "geometricError": 0.0,
@@ -7734,7 +7734,7 @@
       "extras": {
        "name": "d3f10069-676a-4d9f-b83e-d588f18a8a88",
        "gers": "d3f10069-676a-4d9f-b83e-d588f18a8a88",
-       "triangles": 1412,
+       "triangles": 1416,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
@@ -14718,7 +14718,7 @@
       "extras": {
        "name": "ee557118-a94c-4277-9a86-1a9754f0e40b",
        "gers": "ee557118-a94c-4277-9a86-1a9754f0e40b",
-       "triangles": 716,
+       "triangles": 714,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -14728,10 +14728,10 @@
        },
        "n_frames": 16,
        "texels": {
-        "n": 117538,
-        "seen": 0.6808,
-        "near": 0.0596,
-        "plain": 0.2596
+        "n": 117741,
+        "seen": 0.6814,
+        "near": 0.0595,
+        "plain": 0.2592
        }
       }
      }
@@ -15715,9 +15715,9 @@
     "boundingVolume": {
      "sphere": [
       65.23952042721794,
-      -495.7172870046925,
+      -495.7172881073784,
       8.162162110675126,
-      92.64630238563538
+      92.64630206780535
      ]
     },
     "geometricError": 8.0,
@@ -16154,8 +16154,8 @@
        "sphere": [
         -1.7628703820870437,
         -1.502560479703222,
-        10.0693,
-        15.347363582303242
+        10.099935,
+        15.367480386895986
        ]
       },
       "geometricError": 0.0,
@@ -16165,7 +16165,7 @@
       "extras": {
        "name": "8979cfc6-004b-4198-bc28-8dd46b5511bc",
        "gers": "8979cfc6-004b-4198-bc28-8dd46b5511bc",
-       "triangles": 211,
+       "triangles": 207,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -16175,10 +16175,10 @@
        },
        "n_frames": 15,
        "texels": {
-        "n": 20092,
-        "seen": 0.7622,
-        "near": 0.0432,
-        "plain": 0.1946
+        "n": 20132,
+        "seen": 0.7629,
+        "near": 0.0442,
+        "plain": 0.1929
        }
       }
      },
@@ -20971,7 +20971,7 @@
   "name": "Downtown Louisville",
   "kind": "mesh",
   "buildings": 392,
-  "triangles": 1294516,
+  "triangles": 1294488,
   "paths": {
    "profile": 362,
    "box": 30

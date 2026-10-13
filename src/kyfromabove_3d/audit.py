@@ -338,6 +338,44 @@ def stray_walls(V: np.ndarray, T: np.ndarray, xs, ys, Z, valid, near_m: float = 
     return res
 
 
+def inside_walls(V: np.ndarray, T: np.ndarray, xs, ys, Z, valid, outline, inside_m: float = 2.0,
+                 step_tol_m: float = 1.5, radius_m: float = 2.0, per_m2: float = 8.0) -> Dict[str, Any]:
+    """Wall drawn inside the building, under its roof: near-vertical
+    triangles more than ``inside_m`` inside ``outline`` and below the LiDAR
+    roof there, where that roof does not step (within ``step_tol_m`` over
+    ``radius_m``) -- a wall standing under an unbroken roof is not a wall
+    anyone sees. fb099a5d, one storey, had its walls drawn 4-7 m inside its
+    edges this way; the holes never showed it, the mesh being less than 6 m
+    behind the solid's front. A tower's wall stands on a step and is not
+    counted. Returns {"m2", "n_triangles"}."""
+    import shapely
+    from scipy.ndimage import maximum_filter, minimum_filter
+
+    n, area = triangle_normals_areas(V, T)
+    vert = (np.abs(n[:, 2]) < 0.2) & (area > 0.01)
+    if not vert.any() or not valid.any():
+        return {"m2": 0.0, "n_triangles": 0}
+    pts, tri = sample_mesh(V, T[vert], per_m2=per_m2, seed=3)
+    if not len(pts):
+        return {"m2": 0.0, "n_triangles": 0}
+    cell = float(xs[1] - xs[0])
+    r = max(1, int(np.ceil(radius_m / cell)))
+    hi = maximum_filter(np.where(valid, Z, -np.inf), size=2 * r + 1, mode="nearest")
+    lo = minimum_filter(np.where(valid, Z, np.inf), size=2 * r + 1, mode="nearest")
+    ix = np.clip(np.round((pts[:, 0] - xs[0]) / cell).astype(int), 0, len(xs) - 1)
+    iy = np.clip(np.round((pts[:, 1] - ys[0]) / cell).astype(int), 0, len(ys) - 1)
+    flat = valid[iy, ix] & np.isfinite(hi[iy, ix]) & np.isfinite(lo[iy, ix]) & (hi[iy, ix] - lo[iy, ix] <= step_tol_m)
+    under = pts[:, 2] < Z[iy, ix] - 0.5
+    poly = shapely.Polygon(outline)
+    core = poly.buffer(-inside_m)
+    deep = shapely.contains_xy(core, pts[:, 0], pts[:, 1]) if not core.is_empty else np.zeros(len(pts), dtype=bool)
+    bad = flat & under & deep
+    nt = int(vert.sum())
+    share = np.bincount(tri, weights=bad, minlength=nt) / np.maximum(np.bincount(tri, minlength=nt), 1)
+    flagged = share >= 0.5
+    return {"m2": round(float(area[vert][flagged].sum()), 1), "n_triangles": int(flagged.sum())}
+
+
 # ------------------------------------------------------------------ texture
 
 def texture_artefacts(sources: Sequence[np.ndarray], texel_m: float) -> Dict[str, Any]:

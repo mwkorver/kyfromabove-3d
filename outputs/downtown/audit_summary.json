@@ -55,21 +55,6 @@
      "hole_m2": 942.8
     },
     {
-     "building": "18382333-6e97-4564-b705-f46bff2173b8",
-     "name": "Louisville Kentucky Visitors Center",
-     "hole_m2": 936.5
-    },
-    {
-     "building": "43383377-1e7c-49a1-a623-e4ac41826b55",
-     "name": "43383377-1e7c-49a1-a623-e4ac41826b55",
-     "hole_m2": 922.8
-    },
-    {
-     "building": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
-     "name": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
-     "hole_m2": 914.5
-    },
-    {
      "building": "893e88ee-626a-4d1c-a8b1-529ec062d9db",
      "name": "KFC Yum! Center",
      "hole_m2": 892.2
@@ -100,9 +85,24 @@
      "hole_m2": 796.2
     },
     {
-     "building": "ee557118-a94c-4277-9a86-1a9754f0e40b",
-     "name": "ee557118-a94c-4277-9a86-1a9754f0e40b",
-     "hole_m2": 779.5
+     "building": "62347f3b-0859-40ac-9eca-fa6440cafc15",
+     "name": "Louisville Gardens",
+     "hole_m2": 735.0
+    },
+    {
+     "building": "c5fe3ad2-ffa0-4800-9240-410277f7b332",
+     "name": "The Seelbach Hilton Hotel",
+     "hole_m2": 713.2
+    },
+    {
+     "building": "facdf3d7-0288-42b3-859a-c563c1eea758",
+     "name": "facdf3d7-0288-42b3-859a-c563c1eea758",
+     "hole_m2": 691.5
+    },
+    {
+     "building": "7c0e2eb6-96e6-4fa2-85b4-0ef2ae590026",
+     "name": "Jefferson County Judicial Center",
+     "hole_m2": 650.5
     }
    ]
   },
@@ -275,11 +275,6 @@
      "mesh_minus_lidar_m": -13.8
     },
     {
-     "building": "ee557118-a94c-4277-9a86-1a9754f0e40b",
-     "name": "ee557118-a94c-4277-9a86-1a9754f0e40b",
-     "mesh_minus_lidar_m": 13.4
-    },
-    {
      "building": "210a3a62-22ab-4a87-a688-1e4c0fb07a64",
      "name": "Main @ 7th",
      "mesh_minus_lidar_m": -11.9
@@ -312,6 +307,11 @@
     {
      "building": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
      "name": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
+     "mesh_minus_lidar_m": 10.0
+    },
+    {
+     "building": "f48393b0-5fcc-4e8a-b602-393d0631c824",
+     "name": "f48393b0-5fcc-4e8a-b602-393d0631c824",
      "mesh_minus_lidar_m": 10.0
     }
    ]
@@ -1431,9 +1431,9 @@
   {
    "building": "18382333-6e97-4564-b705-f46bff2173b8",
    "name": "Louisville Kentucky Visitors Center",
-   "hole_m2": 936.5,
-   "worst_face": "2",
-   "worst_face_m2": 936.5,
+   "hole_m2": 27.2,
+   "worst_face": "0",
+   "worst_face_m2": 27.2,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.1,
    "product1_minus_lidar_m": 0.0,
@@ -2367,7 +2367,7 @@
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 3.7,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.127,
+   "blank_share": 0.1225,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.4,
@@ -2406,9 +2406,9 @@
   {
    "building": "3cda3741-865e-4378-962d-3ca183fb4334",
    "name": "3cda3741-865e-4378-962d-3ca183fb4334",
-   "hole_m2": 321.0,
-   "worst_face": "4",
-   "worst_face_m2": 264.2,
+   "hole_m2": 42.8,
+   "worst_face": "corner",
+   "worst_face_m2": 33.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 2.5,
    "product1_minus_lidar_m": 0.0,
@@ -2601,9 +2601,9 @@
   {
    "building": "43383377-1e7c-49a1-a623-e4ac41826b55",
    "name": "43383377-1e7c-49a1-a623-e4ac41826b55",
-   "hole_m2": 922.8,
+   "hole_m2": 20.0,
    "worst_face": "3",
-   "worst_face_m2": 922.8,
+   "worst_face_m2": 20.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.0,
    "product1_minus_lidar_m": 0.0,
@@ -2661,9 +2661,9 @@
   {
    "building": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
    "name": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
-   "hole_m2": 914.5,
-   "worst_face": "1",
-   "worst_face_m2": 914.5,
+   "hole_m2": 0.0,
+   "worst_face": null,
+   "worst_face_m2": null,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.2,
    "product1_minus_lidar_m": 0.0,
@@ -2766,9 +2766,9 @@
   {
    "building": "4a16819c-a0ed-4edb-b2f4-32023d3bf48c",
    "name": "4a16819c-a0ed-4edb-b2f4-32023d3bf48c",
-   "hole_m2": 287.5,
-   "worst_face": "corner",
-   "worst_face_m2": 106.5,
+   "hole_m2": 0.0,
+   "worst_face": null,
+   "worst_face_m2": null,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 5.5,
    "product1_minus_lidar_m": 0.0,
@@ -2871,9 +2871,9 @@
   {
    "building": "4ef85a45-0731-46b4-a6c9-a070aaaa4a79",
    "name": "Practice Administrative Systems",
-   "hole_m2": 170.8,
-   "worst_face": "1",
-   "worst_face_m2": 170.8,
+   "hole_m2": 0.0,
+   "worst_face": null,
+   "worst_face_m2": null,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 1.6,
    "product1_minus_lidar_m": 0.0,
@@ -3201,11 +3201,11 @@
   {
    "building": "603254af-f84b-45fa-8991-01fe4f77f567",
    "name": "Miller Paper Co. Building",
-   "hole_m2": 325.8,
-   "worst_face": "1",
-   "worst_face_m2": 325.8,
+   "hole_m2": 0.0,
+   "worst_face": null,
+   "worst_face_m2": null,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 3.0,
+   "mesh_minus_lidar_m": -0.1,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.2917,
    "dots": 0,
@@ -3291,9 +3291,9 @@
   {
    "building": "644a6ecb-7f2f-4867-be8b-94b635e6e377",
    "name": "644a6ecb-7f2f-4867-be8b-94b635e6e377",
-   "hole_m2": 0.0,
-   "worst_face": null,
-   "worst_face_m2": null,
+   "hole_m2": 25.5,
+   "worst_face": "3",
+   "worst_face_m2": 18.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.4,
    "product1_minus_lidar_m": 0.0,
@@ -3996,11 +3996,11 @@
   {
    "building": "8979cfc6-004b-4198-bc28-8dd46b5511bc",
    "name": "8979cfc6-004b-4198-bc28-8dd46b5511bc",
-   "hole_m2": 120.0,
-   "worst_face": "1",
-   "worst_face_m2": 120.0,
+   "hole_m2": 0.0,
+   "worst_face": null,
+   "worst_face_m2": null,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": -0.4,
+   "mesh_minus_lidar_m": -0.6,
    "product1_minus_lidar_m": -0.0,
    "blank_share": 0.2792,
    "dots": 0,
@@ -4377,7 +4377,7 @@
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 25.4,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.4401,
+   "blank_share": 0.4518,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,
@@ -4581,13 +4581,13 @@
   {
    "building": "9e9df280-ccae-46bd-b450-354e7d5e2fcf",
    "name": "Hyatt Regency Louisville",
-   "hole_m2": 411.2,
+   "hole_m2": 410.0,
    "worst_face": "1006",
    "worst_face_m2": 173.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.6,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.0952,
+   "blank_share": 0.0955,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 86.0,
@@ -5016,9 +5016,9 @@
   {
    "building": "b144a5d2-079d-41e5-b52d-b36d264ce44e",
    "name": "b144a5d2-079d-41e5-b52d-b36d264ce44e",
-   "hole_m2": 85.0,
-   "worst_face": "3",
-   "worst_face_m2": 61.8,
+   "hole_m2": 0.0,
+   "worst_face": null,
+   "worst_face_m2": null,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 8.9,
    "product1_minus_lidar_m": 0.0,
@@ -5316,11 +5316,11 @@
   {
    "building": "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
    "name": "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
-   "hole_m2": 19.0,
-   "worst_face": "5",
-   "worst_face_m2": 12.0,
+   "hole_m2": 7.0,
+   "worst_face": "corner",
+   "worst_face_m2": 7.0,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 7.9,
+   "mesh_minus_lidar_m": 7.0,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.1846,
    "dots": 0,
@@ -5871,9 +5871,9 @@
   {
    "building": "d3f10069-676a-4d9f-b83e-d588f18a8a88",
    "name": "d3f10069-676a-4d9f-b83e-d588f18a8a88",
-   "hole_m2": 687.2,
-   "worst_face": "1",
-   "worst_face_m2": 687.2,
+   "hole_m2": 16.8,
+   "worst_face": "3",
+   "worst_face_m2": 12.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 1.1,
    "product1_minus_lidar_m": -0.0,
@@ -6426,11 +6426,11 @@
   {
    "building": "ee557118-a94c-4277-9a86-1a9754f0e40b",
    "name": "ee557118-a94c-4277-9a86-1a9754f0e40b",
-   "hole_m2": 779.5,
-   "worst_face": "4",
-   "worst_face_m2": 779.5,
+   "hole_m2": 9.0,
+   "worst_face": "corner",
+   "worst_face_m2": 9.0,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 13.4,
+   "mesh_minus_lidar_m": 8.9,
    "product1_minus_lidar_m": 0.2,
    "blank_share": 0.6426,
    "dots": 0,
@@ -6606,9 +6606,9 @@
   {
    "building": "f96de311-5fba-4a38-9f33-858ed5cbf24d",
    "name": "National Society, Sons of the American Revolution",
-   "hole_m2": 111.5,
-   "worst_face": "1",
-   "worst_face_m2": 51.0,
+   "hole_m2": 17.8,
+   "worst_face": "4",
+   "worst_face_m2": 13.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 8.6,
    "product1_minus_lidar_m": 0.0,

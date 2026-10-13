@@ -1,0 +1,170 @@
+[
+ {
+  "cls": "box/low",
+  "n": 26,
+  "holes": 0.39535863972783714,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 1.8800000000000001
+ },
+ {
+  "cls": "box/mid",
+  "n": 44,
+  "holes": 4.988269801915532,
+  "inside": 0.0,
+  "outside": 0.161956085535745,
+  "blank": 11.850000000000001
+ },
+ {
+  "cls": "box/tall",
+  "n": 14,
+  "holes": 10.407745204401575,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 16.005
+ },
+ {
+  "cls": "pitched/low",
+  "n": 4,
+  "holes": 3.6240637835225904,
+  "inside": 0.0,
+  "outside": 1.5462672143029719,
+  "blank": 4.175000000000001
+ },
+ {
+  "cls": "pitched/mid",
+  "n": 14,
+  "holes": 20.193782456972773,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 21.96
+ },
+ {
+  "cls": "pitched/tall",
+  "n": 1,
+  "holes": 3.3350622878618292,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 12.78
+ },
+ {
+  "cls": "row1/low",
+  "n": 14,
+  "holes": 0.0,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 8.605
+ },
+ {
+  "cls": "row1/mid",
+  "n": 46,
+  "holes": 13.48271788713661,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 33.519999999999996
+ },
+ {
+  "cls": "row1/tall",
+  "n": 10,
+  "holes": 10.638783225529865,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 40.72
+ },
+ {
+  "cls": "row2c/low",
+  "n": 2,
+  "holes": 0.0,
+  "inside": 0.0,
+  "outside": 6.261409273457466,
+  "blank": 25.455
+ },
+ {
+  "cls": "row2c/mid",
+  "n": 22,
+  "holes": 3.7619968527028425,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 36.625
+ },
+ {
+  "cls": "row2c/tall",
+  "n": 7,
+  "holes": 20.37962037962038,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 36.16
+ },
+ {
+  "cls": "row2o/low",
+  "n": 5,
+  "holes": 0.0,
+  "inside": 0.0,
+  "outside": 14.599906410856342,
+  "blank": 11.49
+ },
+ {
+  "cls": "row2o/mid",
+  "n": 48,
+  "holes": 5.398937472457524,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 27.94
+ },
+ {
+  "cls": "row2o/tall",
+  "n": 6,
+  "holes": 4.3529624389831945,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 38.11
+ },
+ {
+  "cls": "row3/low",
+  "n": 2,
+  "holes": 0.0,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 50.405
+ },
+ {
+  "cls": "row3/mid",
+  "n": 17,
+  "holes": 6.307977736549165,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 31.240000000000002
+ },
+ {
+  "cls": "row3/tall",
+  "n": 5,
+  "holes": 19.626215051608376,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 40.61
+ },
+ {
+  "cls": "tiered/low",
+  "n": 3,
+  "holes": 0.800384184408516,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 9.91
+ },
+ {
+  "cls": "tiered/mid",
+  "n": 44,
+  "holes": 34.33161710692321,
+  "inside": 0.0,
+  "outside": 0.0,
+  "blank": 28.405
+ },
+ {
+  "cls": "tiered/tall",
+  "n": 16,
+  "holes": 20.344834712805216,
+  "inside": 0.3589526340096384,
+  "outside": 0.7860583232203506,
+  "blank": 15.685
+ }
+]

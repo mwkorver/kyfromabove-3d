@@ -18,7 +18,7 @@ SCRIPTS = ["colorize_building.py", "build_mesh.py", "check_building.py", "run_do
            "plot_corner_snap.py", "export_3dtiles.py", "eval_fill.py", "render_flyaround.py",
            "score_trajectory.py", "register_video.py", "video_poses.py", "wall_visibility.py", "wall_match.py",
            "face_match.py", "atlas_server.py", "roof_edges.py", "camera_check.py",
-           "lidar_outline.py"]
+           "lidar_outline.py", "classify_buildings.py"]
 
 
 @pytest.mark.parametrize("script", SCRIPTS)

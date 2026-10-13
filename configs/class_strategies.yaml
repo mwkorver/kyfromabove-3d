@@ -1,0 +1,14 @@
+# A strategy per class of building (scripts/classify_buildings.py writes each
+# building's class to its folder, building_class.json). A class with no entry
+# here is built as every building was before classes. Each class is developed
+# on its development buildings and kept only if its held-out buildings agree
+# (outputs/classes/split_<class>.json).
+#
+# party_walls: whole -- a face that is a party wall over half its length or
+#   more is drawn on the outline from the ground to the roof's edge, plain up
+#   to the neighbour's roof and textured above it, whatever the colourise saw
+#   on it: in the middle of a row what the LiDAR catches on a party wall is
+#   usually a light well 6-7 m in, not the party wall.
+
+row2o/mid:
+  party_walls: whole

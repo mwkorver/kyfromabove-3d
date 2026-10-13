@@ -988,6 +988,19 @@ def edge_top_z(xs, ys, Z, valid, p0: np.ndarray, p1: np.ndarray, within_m: float
     return float(np.median(near)) if len(near) >= 3 else default
 
 
+def class_strategy(building: Path, config: Path = Path(__file__).resolve().parents[1] / "configs" / "class_strategies.yaml") -> dict:
+    """The strategy for the building's class: its building_class.json
+    (scripts/classify_buildings.py) looked up in ``config``; empty when
+    either is missing or the class has no entry -- built as before classes."""
+    import yaml
+    p = Path(building) / "building_class.json"
+    if not p.exists() or not config.exists():
+        return {}
+    cls = json.loads(p.read_text(encoding="utf-8")).get("class")
+    entry = (yaml.safe_load(config.read_text(encoding="utf-8")) or {}).get(cls)
+    return {**entry, "_class": cls} if entry else {}
+
+
 def party_edges(ring_m: np.ndarray, neighbours: list, faces, within_m: float = 0.5,
                 min_run_m: float = 1.0, tops: list | None = None) -> dict:
     """Where the faces are party walls: the stretches of each edge that lie
@@ -1614,6 +1627,16 @@ def main() -> int:
             edges.append(e); edge_level[e.face] = lv
     by_face = {p.face: p for p in planes}
     party = party_edges(ring_m, neighbours, [e for e in edges if edge_level[e.face]["level"] == 0], tops=nb_tops)
+    # the building's class and its strategy (classify_buildings.py, configs/class_strategies.yaml)
+    strategy = class_strategy(b)
+    whole_party = set()
+    if strategy.get("party_walls") == "whole":
+        for e in edges:
+            if e.face in party and not isinstance(e, ArcWall):
+                shared = sum(s1 - s0 for s0, s1, _ in party[e.face])
+                if shared >= 0.5 * e.length_m:
+                    whole_party.add(e.face)
+        print(f"  class {strategy['_class']}: {len(whole_party)} party wall(s) drawn whole, plain up to the neighbour's roof")
     classification = building_classification(b, xyz, poly, levels, profiles, edges, party, Z, valid, cell)
     if len(levels) > 1:
         print(f"  {len(levels)} levels: " + "; ".join(f"level {lv['level']} {float(lv['z_lo']):.0f}-{float(lv['z_hi']):.0f} m" for lv in levels))
@@ -1665,6 +1688,8 @@ def main() -> int:
         if plane is not None and isinstance(edge, ArcWall) != isinstance(plane, ArcWall):
             plane = None                                 # the ring changed shape since the colourise
         bands = plane_bands(plane, profiles.get(plane.face, [])) if plane is not None else []
+        if edge.face in whole_party:
+            bands = []                                   # the party-wall path below, not what was seen on it
         # A matched band (its depth from the frames) fills a wall the LiDAR
         # left open on a face it measured; it is never the only evidence for
         # a face. A face with no LiDAR wall band takes the prism, as it would

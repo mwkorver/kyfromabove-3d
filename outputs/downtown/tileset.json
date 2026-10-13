@@ -143,8 +143,8 @@
        "n_frames": 19,
        "texels": {
         "n": 238916,
-        "seen": 0.4988,
-        "near": 0.0599,
+        "seen": 0.4985,
+        "near": 0.0602,
         "plain": 0.4413
        }
       }
@@ -1712,8 +1712,8 @@
        "sphere": [
         0.34356186181010084,
         -1.038771404254942,
-        6.742099999999999,
-        13.93168524863185
+        6.2706,
+        13.709717933529715
        ]
       },
       "geometricError": 0.0,
@@ -1723,20 +1723,20 @@
       "extras": {
        "name": "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
        "gers": "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
-       "triangles": 487,
+       "triangles": 492,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 4,
-        "party": 0
+        "party": 2
        },
        "n_frames": 16,
        "texels": {
-        "n": 39121,
-        "seen": 0.6626,
-        "near": 0.0968,
-        "plain": 0.2406
+        "n": 13831,
+        "seen": 0.5813,
+        "near": 0.0505,
+        "plain": 0.3682
        }
       }
      },
@@ -2672,20 +2672,20 @@
       "extras": {
        "name": "National Society, Sons of the American Revolution",
        "gers": "f96de311-5fba-4a38-9f33-858ed5cbf24d",
-       "triangles": 341,
+       "triangles": 332,
        "path": "profile",
        "archetype": "simple_box",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 3,
-        "party": 0
+        "party": 2
        },
        "n_frames": 14,
        "texels": {
-        "n": 100630,
-        "seen": 0.4885,
-        "near": 0.1453,
-        "plain": 0.3663
+        "n": 42022,
+        "seen": 0.5098,
+        "near": 0.0184,
+        "plain": 0.4718
        }
       }
      }
@@ -2826,10 +2826,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        3.8713502696785933,
-        8.546433897521585,
-        7.4495000000000005,
-        29.83717582414784
+        3.7575564942217454,
+        8.5465,
+        5.877800000000001,
+        29.390643092662664
        ]
       },
       "geometricError": 0.0,
@@ -2839,20 +2839,20 @@
       "extras": {
        "name": "Miller Paper Co. Building",
        "gers": "603254af-f84b-45fa-8991-01fe4f77f567",
-       "triangles": 698,
+       "triangles": 678,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 3,
-        "party": 0
+        "party": 2
        },
        "n_frames": 20,
        "texels": {
-        "n": 129703,
-        "seen": 0.5701,
-        "near": 0.1058,
-        "plain": 0.3241
+        "n": 61813,
+        "seen": 0.616,
+        "near": 0.0207,
+        "plain": 0.3633
        }
       }
      },
@@ -3528,9 +3528,9 @@
        "n_frames": 19,
        "texels": {
         "n": 19606,
-        "seen": 0.6944,
-        "near": 0.0679,
-        "plain": 0.2377
+        "seen": 0.6984,
+        "near": 0.0659,
+        "plain": 0.2357
        }
       }
      },
@@ -5562,20 +5562,20 @@
       "extras": {
        "name": "Louisville Kentucky Visitors Center",
        "gers": "18382333-6e97-4564-b705-f46bff2173b8",
-       "triangles": 1202,
+       "triangles": 1192,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 2,
-        "party": 0
+        "party": 2
        },
        "n_frames": 18,
        "texels": {
-        "n": 100756,
-        "seen": 0.3164,
-        "near": 0.0913,
-        "plain": 0.5923
+        "n": 45552,
+        "seen": 0.4404,
+        "near": 0.0192,
+        "plain": 0.5403
        }
       }
      },
@@ -6225,20 +6225,20 @@
       "extras": {
        "name": "b144a5d2-079d-41e5-b52d-b36d264ce44e",
        "gers": "b144a5d2-079d-41e5-b52d-b36d264ce44e",
-       "triangles": 590,
+       "triangles": 638,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
-        "profile": 1,
+        "profile": 0,
         "prism": 5,
-        "party": 1
+        "party": 2
        },
        "n_frames": 18,
        "texels": {
-        "n": 31505,
-        "seen": 0.659,
-        "near": 0.0583,
-        "plain": 0.2827
+        "n": 20450,
+        "seen": 0.5182,
+        "near": 0.0469,
+        "plain": 0.4349
        }
       }
      },
@@ -7377,20 +7377,20 @@
       "extras": {
        "name": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
        "gers": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
-       "triangles": 1373,
+       "triangles": 1386,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 2,
-        "party": 0
+        "party": 2
        },
        "n_frames": 18,
        "texels": {
-        "n": 137485,
-        "seen": 0.311,
-        "near": 0.1093,
-        "plain": 0.5797
+        "n": 47561,
+        "seen": 0.5533,
+        "near": 0.0279,
+        "plain": 0.4188
        }
       }
      },
@@ -7721,7 +7721,7 @@
       ],
       "boundingVolume": {
        "sphere": [
-        1.5487304340398698,
+        1.5487304340398693,
         5.421707529433599,
         11.41545,
         30.406963962114535
@@ -7734,20 +7734,20 @@
       "extras": {
        "name": "d3f10069-676a-4d9f-b83e-d588f18a8a88",
        "gers": "d3f10069-676a-4d9f-b83e-d588f18a8a88",
-       "triangles": 1417,
+       "triangles": 1412,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 2,
-        "party": 0
+        "party": 2
        },
        "n_frames": 18,
        "texels": {
-        "n": 105998,
-        "seen": 0.4002,
-        "near": 0.1126,
-        "plain": 0.4873
+        "n": 42758,
+        "seen": 0.5031,
+        "near": 0.0229,
+        "plain": 0.474
        }
       }
      },
@@ -11285,20 +11285,20 @@
       "extras": {
        "name": "43383377-1e7c-49a1-a623-e4ac41826b55",
        "gers": "43383377-1e7c-49a1-a623-e4ac41826b55",
-       "triangles": 450,
+       "triangles": 410,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 2,
-        "party": 0
+        "party": 2
        },
        "n_frames": 18,
        "texels": {
-        "n": 112033,
-        "seen": 0.3531,
-        "near": 0.0692,
-        "plain": 0.5776
+        "n": 56953,
+        "seen": 0.4899,
+        "near": 0.0054,
+        "plain": 0.5047
        }
       }
      },
@@ -12396,10 +12396,10 @@
        },
        "n_frames": 14,
        "texels": {
-        "n": 554237,
-        "seen": 0.736,
-        "near": 0.0733,
-        "plain": 0.1908
+        "n": 553858,
+        "seen": 0.7361,
+        "near": 0.073,
+        "plain": 0.191
        }
       }
      },
@@ -12744,7 +12744,7 @@
       ],
       "boundingVolume": {
        "sphere": [
-        1.475243754777019,
+        1.4752437547770185,
         4.931848621415995,
         10.2883,
         30.399061668805103
@@ -12757,20 +12757,20 @@
       "extras": {
        "name": "4a16819c-a0ed-4edb-b2f4-32023d3bf48c",
        "gers": "4a16819c-a0ed-4edb-b2f4-32023d3bf48c",
-       "triangles": 287,
+       "triangles": 288,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
-        "profile": 1,
+        "profile": 0,
         "prism": 2,
-        "party": 1
+        "party": 2
        },
        "n_frames": 15,
        "texels": {
-        "n": 67092,
-        "seen": 0.4,
-        "near": 0.0757,
-        "plain": 0.5243
+        "n": 42168,
+        "seen": 0.4897,
+        "near": 0.0235,
+        "plain": 0.4868
        }
       }
      },
@@ -12808,20 +12808,20 @@
       "extras": {
        "name": "Practice Administrative Systems",
        "gers": "4ef85a45-0731-46b4-a6c9-a070aaaa4a79",
-       "triangles": 156,
+       "triangles": 158,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
-        "profile": 1,
+        "profile": 0,
         "prism": 4,
-        "party": 3
+        "party": 4
        },
        "n_frames": 16,
        "texels": {
-        "n": 21864,
-        "seen": 0.5443,
-        "near": 0.0969,
-        "plain": 0.3589
+        "n": 17138,
+        "seen": 0.6225,
+        "near": 0.0402,
+        "plain": 0.3373
        }
       }
      },
@@ -12950,8 +12950,8 @@
        "sphere": [
         1.687795220910596,
         5.478499999999999,
-        9.001,
-        29.74017142883463
+        8.994,
+        29.738053594955932
        ]
       },
       "geometricError": 0.0,
@@ -12961,20 +12961,20 @@
       "extras": {
        "name": "644a6ecb-7f2f-4867-be8b-94b635e6e377",
        "gers": "644a6ecb-7f2f-4867-be8b-94b635e6e377",
-       "triangles": 252,
+       "triangles": 250,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
-        "profile": 1,
+        "profile": 0,
         "prism": 2,
-        "party": 1
+        "party": 2
        },
        "n_frames": 15,
        "texels": {
-        "n": 64907,
-        "seen": 0.4969,
-        "near": 0.0774,
-        "plain": 0.4257
+        "n": 45459,
+        "seen": 0.503,
+        "near": 0.019,
+        "plain": 0.4779
        }
       }
      },
@@ -14420,10 +14420,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      -72.5500032765849,
+      -72.5500033715798,
       -382.10297432914376,
       31.474033303791657,
-      113.64556937303215
+      113.6455692906923
      ]
     },
     "geometricError": 8.0,
@@ -14707,8 +14707,8 @@
        "sphere": [
         -1.8947744451373243,
         -3.533640858532973,
-        20.0,
-        33.37131523543542
+        17.7757,
+        32.09046797777813
        ]
       },
       "geometricError": 0.0,
@@ -14718,20 +14718,20 @@
       "extras": {
        "name": "ee557118-a94c-4277-9a86-1a9754f0e40b",
        "gers": "ee557118-a94c-4277-9a86-1a9754f0e40b",
-       "triangles": 720,
+       "triangles": 716,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 4,
+        "profile": 2,
         "prism": 1,
-        "party": 1
+        "party": 3
        },
        "n_frames": 16,
        "texels": {
-        "n": 240463,
-        "seen": 0.3762,
-        "near": 0.0554,
-        "plain": 0.5685
+        "n": 117538,
+        "seen": 0.6808,
+        "near": 0.0596,
+        "plain": 0.2596
        }
       }
      }
@@ -15715,9 +15715,9 @@
     "boundingVolume": {
      "sphere": [
       65.23952042721794,
-      -495.71729028690606,
+      -495.7172870046925,
       8.162162110675126,
-      92.6463014395945
+      92.64630238563538
      ]
     },
     "geometricError": 8.0,
@@ -16154,8 +16154,8 @@
        "sphere": [
         -1.7628703820870437,
         -1.502560479703222,
-        10.1605,
-        15.407353007165371
+        10.0693,
+        15.347363582303242
        ]
       },
       "geometricError": 0.0,
@@ -16165,20 +16165,20 @@
       "extras": {
        "name": "8979cfc6-004b-4198-bc28-8dd46b5511bc",
        "gers": "8979cfc6-004b-4198-bc28-8dd46b5511bc",
-       "triangles": 215,
+       "triangles": 211,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 2,
-        "party": 0
+        "party": 2
        },
        "n_frames": 15,
        "texels": {
-        "n": 43828,
-        "seen": 0.6176,
-        "near": 0.1162,
-        "plain": 0.2662
+        "n": 20092,
+        "seen": 0.7622,
+        "near": 0.0432,
+        "plain": 0.1946
        }
       }
      },
@@ -16499,20 +16499,20 @@
       "extras": {
        "name": "3cda3741-865e-4378-962d-3ca183fb4334",
        "gers": "3cda3741-865e-4378-962d-3ca183fb4334",
-       "triangles": 651,
+       "triangles": 654,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 2,
+        "profile": 1,
         "prism": 2,
-        "party": 1
+        "party": 2
        },
        "n_frames": 19,
        "texels": {
-        "n": 40826,
-        "seen": 0.4844,
-        "near": 0.1219,
-        "plain": 0.3937
+        "n": 26052,
+        "seen": 0.6266,
+        "near": 0.0915,
+        "plain": 0.2819
        }
       }
      },
@@ -20309,9 +20309,9 @@
        "n_frames": 18,
        "texels": {
         "n": 523824,
-        "seen": 0.6081,
-        "near": 0.0419,
-        "plain": 0.35
+        "seen": 0.6047,
+        "near": 0.0405,
+        "plain": 0.3548
        }
       }
      },
@@ -20971,7 +20971,7 @@
   "name": "Downtown Louisville",
   "kind": "mesh",
   "buildings": 392,
-  "triangles": 1294538,
+  "triangles": 1294516,
   "paths": {
    "profile": 362,
    "box": 30

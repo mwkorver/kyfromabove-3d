@@ -2791,7 +2791,8 @@ def opposite_face(plane: WallPlane, planes: List[WallPlane]) -> Optional[WallPla
 
 
 def mirror_hidden_bands(planes: List[WallPlane], profiles: Dict[int, List[FaceBand]],
-                        max_shape_diff_m: float = 0.6, min_joint_bands: int = 3) -> Dict[int, Dict[str, Any]]:
+                        max_shape_diff_m: float = 0.6, min_joint_bands: int = 3,
+                        measured_faces: Optional[set] = None) -> Dict[int, Dict[str, Any]]:
     """Fill a face's unseen bands from the face opposite, when the two
     faces have been seen to have the same shape.
 
@@ -2813,6 +2814,13 @@ def mirror_hidden_bands(planes: List[WallPlane], profiles: Dict[int, List[FaceBa
     observed band at all takes the opposite face's offsets as they are.
     Observed, extended, open and sloped bands are never replaced: a face's
     own measurement outranks the prior.
+
+    A face in ``measured_faces`` -- under a roof edge the LiDAR measured --
+    with no observed band takes nothing from its twin: the roof edge is
+    better evidence than the opposite face, and the bands are left unknown
+    for ``fill_under_roof_edge`` to draw at the edge. The Hyatt's face 1023,
+    never seen, was given its twin's 5.3 m setback -- the shaft under the
+    drum, only on the other side -- and cut back the walls beside it.
 
     Returns, per face that received bands, a small record of what was done.
     """
@@ -2849,6 +2857,10 @@ def mirror_hidden_bands(planes: List[WallPlane], profiles: Dict[int, List[FaceBa
                 continue
             shift = anchor_f - anchor_g
         else:
+            if measured_faces is not None and face in measured_faces:
+                report[face] = {"from_face": opp.face, "symmetric": None, "shape_diff_m": None, "n_joint": 0, "mirrored": 0,
+                                "anchored": False, "skipped": "never seen, under a measured roof edge"}
+                continue
             joint, shape_diff, shift = [], None, 0.0
         n_mirrored = 0
         for i, b in enumerate(bands):

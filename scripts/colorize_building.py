@@ -1276,11 +1276,16 @@ def main() -> int:
         # symmetric across their middle, and the face in a neighbour's
         # shadow is best read from its twin.
         from kyfromabove_3d.features import mirror_hidden_bands
+        # the faces under a roof edge the LiDAR measured (only with the LiDAR outline):
+        # an unseen one takes the roof edge's word, not its twin's (pass 2a'')
+        under = (under_measured_edge(nominal_planes, is_arc, level_of, lidar_tower_levels, measured_edges)
+                 if args.lidar_outline else set())
         mirrored = {}
         for lv in levels:
             lv_planes = [pl for pl in nominal_planes if level_of[pl.face] == lv["level"] and not is_arc[pl.face]]
             lv_prof = {pl.face: profiles[pl.face] for pl in lv_planes}
-            mirrored.update(mirror_hidden_bands(lv_planes, lv_prof))
+            # (a verified plane is extruded whole and is not filled from the roof edge: its twin still speaks)
+            mirrored.update(mirror_hidden_bands(lv_planes, lv_prof, measured_faces=(under - set(verified_planes)) or None))
         # which faces are symmetric twins: the completed product's twin fill reads it
         (args.building / "mirror_report.json").write_text(
             json.dumps({str(f): rec for f, rec in mirrored.items()}, indent=1, default=float), encoding="utf-8")
@@ -1288,6 +1293,8 @@ def main() -> int:
             if rec["symmetric"] and rec["mirrored"]:
                 print(f"    face {f}: {rec['mirrored']} unseen band(s) taken from face {rec['from_face']} opposite "
                       + (f"(shapes agree within {rec['shape_diff_m']} m on {rec['n_joint']} bands)" if rec.get("anchored") else "(this face was never seen; the opposite face's offsets as they are)"))
+            elif rec.get("skipped"):
+                print(f"    face {f}: nothing taken from face {rec['from_face']} opposite ({rec['skipped']})")
             elif not rec["symmetric"]:
                 print(f"    face {f}: face {rec['from_face']} opposite has a different shape "
                       f"({rec['shape_diff_m']} m apart on {rec['n_joint']} bands); nothing mirrored")
@@ -1298,7 +1305,6 @@ def main() -> int:
         # gap. Only with the LiDAR outline: Overture's edge is not measured.
         if args.lidar_outline:
             from kyfromabove_3d.features import fill_under_roof_edge
-            under = under_measured_edge(nominal_planes, is_arc, level_of, lidar_tower_levels, measured_edges)
             n_faces = n_bands = 0
             for f in sorted(under):
                 if f in verified_planes or f not in profiles:

@@ -550,6 +550,27 @@ def test_mirror_takes_the_opposite_offsets_when_a_face_was_never_seen():
     assert abs(e[0].along_lo - 5.0) < 1e-6 and abs(e[0].along_hi - 95.0) < 1e-6
 
 
+def test_mirror_leaves_a_never_seen_face_under_a_measured_roof_edge_to_the_roof_edge():
+    """The Hyatt's face 1023: never seen, under a roof edge the LiDAR measured.
+    Its twin's setback is not copied; the roof edge rule draws it at the edge.
+    A face that was seen and agrees with its twin still takes the twin's shape."""
+    from kyfromabove_3d.features import fill_under_roof_edge, mirror_hidden_bands
+
+    west_obs = {0.0: 0.0, 10.0: 0.0, 20.0: -5.3, 30.0: -5.3, 40.0: -5.3, 50.0: -5.3}
+    planes, west, east, profiles = _profiles_for_square(west_obs, {})
+    rep = mirror_hidden_bands(planes, profiles, measured_faces={east.face})
+    assert rep[east.face]["mirrored"] == 0 and rep[east.face]["skipped"]
+    assert all(b.status == "unknown" for b in profiles[east.face])
+    fill_under_roof_edge(profiles[east.face], 100.0)
+    assert all(b.status == "edge" and b.offset_m == 0.0 for b in profiles[east.face])
+
+    west_obs = {0.0: 0.0, 10.0: 0.0, 20.0: 0.0, 30.0: -4.0, 40.0: -4.0, 50.0: -4.0}
+    east_obs = {0.0: 1.0, 10.0: 1.0, 20.0: 1.0, 50.0: -3.0}
+    planes, west, east, profiles = _profiles_for_square(west_obs, east_obs)
+    rep = mirror_hidden_bands(planes, profiles, measured_faces={east.face})
+    assert rep[east.face]["symmetric"] and rep[east.face]["mirrored"] == 2
+
+
 def test_mirror_replaces_a_bridge_where_the_twin_saw_a_step():
     """The east wall was seen at 0-20 m and at 50 m at the same offset, so
     its middle was bridged flat. The west wall, observed all the way up, has

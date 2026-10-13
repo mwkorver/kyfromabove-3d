@@ -1187,3 +1187,12 @@ def test_fill_under_roof_edge_draws_unseen_and_roof_backed_bands_but_keeps_a_wal
     lone = [band(0, "observed", 2.4), band(5, "unknown")]
     fill_under_roof_edge(lone, 30.0)
     assert lone[1].status == "edge" and lone[1].offset_m == 0.0
+    # a sloped band further in than 1.5 m is the wall holding its line when within 1 m of the wall beside it;
+    # a crown stepping in further is a slope, and a band at street level 2.6 m outside the edge is not the wall
+    truist = [band(37, "observed", -1.2), band(42, "extended", -1.12), band(47, "unknown"), band(52, "sloped", -1.58)]
+    assert fill_under_roof_edge(truist, 30.0) == 2 and truist[3].status == "edge" and truist[3].offset_m == -1.12
+    crown = [band(135, "observed", -1.3), band(140, "sloped", -3.4), band(145, "sloped", -4.9)]
+    assert fill_under_roof_edge(crown, 30.0) == 0
+    street = [band(0, "sloped", 2.6), band(5, "unknown")]
+    fill_under_roof_edge(street, 30.0)
+    assert street[0].status == "sloped" and street[1].offset_m == 0.0

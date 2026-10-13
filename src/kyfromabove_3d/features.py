@@ -2513,14 +2513,19 @@ WALL_STATUSES = ("observed", "bridged", "extended", "mirrored", "matched", "edge
 
 
 def fill_under_roof_edge(bands: List[FaceBand], length_m: float, max_offset_m: float = 1.5,
-                         max_back_fill: float = 0.5) -> int:
+                         max_back_fill: float = 0.5, max_wobble_m: float = 1.0) -> int:
     """A wall stands under a measured roof edge unless there is evidence of a
     gap. For a face whose top edge the LiDAR placed (the roof's end, with a
     drop beyond it), the bands the returns left unknown, and the ``sloped``
     ones within ``max_offset_m`` of the edge, become wall (``edge``): the
     Truist tower's face 1001 was seen to 47 m and then as glass whose depth
     wobbled by a metre, and 30 m of it under a roof edge the LiDAR measured
-    was left a hole. Each takes the depth of the face's nearest drawn band
+    was left a hole. A sloped band further in than that is filled too when
+    it lies within ``max_wobble_m`` of the nearest drawn band's depth -- the
+    wall holding its line, its depth wobbling on thin returns: the Truist's
+    faces 1001 and 1004 at 52-57 m, 1.6 m in beside walls at 1.1-1.2 m. A
+    band stepping in further than that (400 West Market's crown, 2-8 m in) is
+    a slope and stays one. Each takes the depth of the face's nearest drawn band
     within ``max_offset_m`` of the edge, or the edge itself where there is
     none (the Omni's one band 2.4 m out, at its tower's foot, is the
     podium's, not the tower's). An ``open`` band whose deeper surface fills
@@ -2536,13 +2541,14 @@ def fill_under_roof_edge(bands: List[FaceBand], length_m: float, max_offset_m: f
              and abs(b.offset_m) <= max_offset_m]
     n = 0
     for i, b in enumerate(bands):
-        fill = (b.status == "unknown"
-                or (b.status == "sloped" and b.offset_m is not None and abs(b.offset_m) <= max_offset_m)
+        mid = 0.5 * (b.z_lo + b.z_hi)
+        near = min(drawn, key=lambda d: (abs(0.5 * (d.z_lo + d.z_hi) - mid), d.z_lo), default=None)
+        sloped_wall = b.status == "sloped" and b.offset_m is not None and (
+            abs(b.offset_m) <= max_offset_m or (near is not None and abs(b.offset_m - near.offset_m) <= max_wobble_m))
+        fill = (b.status == "unknown" or sloped_wall
                 or (b.status == "open" and b.back_fill is not None and b.back_fill < max_back_fill))
         if not fill:
             continue
-        mid = 0.5 * (b.z_lo + b.z_hi)
-        near = min(drawn, key=lambda d: (abs(0.5 * (d.z_lo + d.z_hi) - mid), d.z_lo), default=None)
         bands[i] = FaceBand(b.z_lo, b.z_hi, near.offset_m if near is not None else 0.0, b.n_returns, 0.0,
                             0.0, length_m, "edge", clip_lo=b.clip_lo, clip_hi=b.clip_hi)
         n += 1

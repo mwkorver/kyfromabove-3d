@@ -76,47 +76,54 @@ class Solid:
     face: np.ndarray
 
 
-def lidar_solid(xs: np.ndarray, ys: np.ndarray, Z: np.ndarray, valid: np.ndarray, floor_z: float,
+def lidar_solid(xs: np.ndarray, ys: np.ndarray, Z: np.ndarray, valid: np.ndarray, floor_z,
                 step_m: float = 0.25):
     """Surface points of the columns the roof field describes (each valid
-    cell a column from ``floor_z`` to its height): the tops, and the sides
-    where a column stands above its neighbour (or above the floor at the
-    field's edge). Only the outer surface -- the inside of a solid is never
-    what a view sees first. Returns (points (P, 3), is_top (P,))."""
+    cell a column from its floor to its height): the tops, and the sides
+    where a column stands where its neighbour's does not (above it, or
+    below the neighbour's floor, or beside the field's edge). Only the outer
+    surface -- the inside of a solid is never what a view sees first.
+    ``floor_z`` is one height, or one per cell: a cell under an overhang
+    (the Hyatt's drum over its shaft, ``overhangs.json``) has its column
+    start at the overhang's underside. Returns (points (P, 3), is_top (P,))."""
     cell = float(xs[1] - xs[0]) if len(xs) > 1 else 1.0
     H, W = Z.shape
-    Zv = np.where(valid, Z, -np.inf)
+    F = np.broadcast_to(np.asarray(floor_z, dtype=float), Z.shape)
     per = max(2, int(round(cell / step_m)))
     offs = (np.arange(per) + 0.5) / per - 0.5                     # across a cell, in cells
-    iy, ix = np.nonzero(valid & (Z > floor_z))
+    iy, ix = np.nonzero(valid & (Z > F))
     pts = []
     # tops
     gx, gy = np.meshgrid(offs, offs)
     tx = (xs[ix][:, None] + gx.ravel()[None, :] * cell).ravel()
     ty = (ys[iy][:, None] + gy.ravel()[None, :] * cell).ravel()
     pts.append(np.column_stack([tx, ty, np.repeat(Z[iy, ix], per * per)]))
-    # sides, towards each of the four neighbours
+    # sides, towards each of the four neighbours: where this column stands and
+    # the neighbour's does not -- above the neighbour's top, and below its floor
+    has = valid & (Z > F)
     for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
         ny, nx = iy + dy, ix + dx
         inside = (ny >= 0) & (ny < H) & (nx >= 0) & (nx < W)
-        zn = np.full(len(iy), floor_z)
-        zn[inside] = np.maximum(Zv[ny[inside], nx[inside]], floor_z)
-        top = Z[iy, ix]
-        k = top > zn + step_m
-        if not k.any():
-            continue
-        cy, cx, lo, hi = iy[k], ix[k], zn[k], top[k]
-        nz = np.ceil((hi - lo) / step_m).astype(np.int64)
-        rep = np.repeat(np.arange(len(cy)), nz * per)
-        # position within the run of z samples and across the shared edge
-        start = np.repeat(np.cumsum(nz * per) - nz * per, nz * per)
-        j = np.arange(len(rep)) - start
-        zi, ai = j // per, j % per
-        z = lo[rep] + (zi + 0.5) * step_m
-        z = np.minimum(z, hi[rep])
-        x = xs[cx[rep]] + (0.5 * dx + (offs[ai] if dx == 0 else 0.0)) * cell
-        y = ys[cy[rep]] + (0.5 * dy + (offs[ai] if dy == 0 else 0.0)) * cell
-        pts.append(np.column_stack([x, y, z]))
+        nb_has = np.zeros(len(iy), dtype=bool)
+        nb_has[inside] = has[ny[inside], nx[inside]]
+        top, bot = Z[iy, ix], F[iy, ix]
+        nb_top = np.where(nb_has, Z[np.clip(ny, 0, H - 1), np.clip(nx, 0, W - 1)], -np.inf)
+        nb_bot = np.where(nb_has, F[np.clip(ny, 0, H - 1), np.clip(nx, 0, W - 1)], -np.inf)   # no neighbour: all of it is above
+        for lo, hi in ((np.maximum(bot, nb_top), top),                   # above the neighbour (or all of it)
+                       (bot, np.minimum(top, nb_bot))):                  # below the neighbour's floor
+            k = hi > lo + step_m
+            if not k.any():
+                continue
+            cy, cx, l0, h0 = iy[k], ix[k], lo[k], hi[k]
+            nz = np.ceil((h0 - l0) / step_m).astype(np.int64)
+            rep = np.repeat(np.arange(len(cy)), nz * per)
+            start = np.repeat(np.cumsum(nz * per) - nz * per, nz * per)
+            j = np.arange(len(rep)) - start
+            zi, ai = j // per, j % per
+            z = np.minimum(l0[rep] + (zi + 0.5) * step_m, h0[rep])
+            x = xs[cx[rep]] + (0.5 * dx + (offs[ai] if dx == 0 else 0.0)) * cell
+            y = ys[cy[rep]] + (0.5 * dy + (offs[ai] if dy == 0 else 0.0)) * cell
+            pts.append(np.column_stack([x, y, z]))
     P = np.vstack(pts)
     top = np.zeros(len(P), dtype=bool)
     top[:len(pts[0])] = True

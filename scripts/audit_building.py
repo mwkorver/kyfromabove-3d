@@ -80,8 +80,22 @@ def lidar_model(b: Path, case: str | None = None, outline: str = "footprint") ->
         X, Y = np.meshgrid(xs, ys)
         valid = shapely.contains_xy(poly, X, Y)
         Z = np.where(valid, ground_z + roof_top, np.nan)
+    # Under an overhang (the Hyatt's drum over its shaft) a roof field's column
+    # would stand to the ground: with the LiDAR outline, the cells over the
+    # overhang's plan start at its underside instead (overhangs.json, written by
+    # the colourise from the returns on the shaft's wall: find_overhangs).
+    floor = np.full(Z.shape, ground_z + 1.5)
+    under = []
+    oh_path = b / "overhangs.json"
+    if outline == "lidar" and oh_path.exists() and path != "box":
+        X, Y = np.meshgrid(xs, ys)
+        for oh in json.loads(oh_path.read_text(encoding="utf-8")):
+            inside = shapely.contains_xy(shapely.Polygon(oh["cut_m"]), X, Y) & valid
+            floor[inside] = np.maximum(floor[inside], float(oh["under_z"]))
+            under.append({"under_z": oh["under_z"], "plan_m2": round(float(inside.sum() * cell * cell), 1),
+                          "n_line_returns": oh.get("n_line_returns")})
     return {"poly": poly, "fp": fp, "xyz": xyz, "ground_z": ground_z, "levels": levels, "roof_top": roof_top,
-            "xs": xs, "ys": ys, "Z": Z, "valid": valid, "path": path, "extras": extras}
+            "xs": xs, "ys": ys, "Z": Z, "valid": valid, "path": path, "extras": extras, "floor": floor, "overhangs": under}
 
 
 def level_edges(levels):
@@ -111,7 +125,7 @@ def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: s
     rec = {"building": b.name, "name": m["fp"].get("name"), "path": m["path"], "glb": repo_relative(glb), "audit_outline": outline}
 
     # holes: the mesh against the LiDAR solid, from eight sides and above
-    pts, top = A.lidar_solid(m["xs"], m["ys"], m["Z"], m["valid"], floor_z=m["ground_z"] + 1.5)
+    pts, top = A.lidar_solid(m["xs"], m["ys"], m["Z"], m["valid"], floor_z=m["floor"])
     edges = level_edges(m["levels"])
     face = np.full(len(pts), -1, dtype=np.int64)
     face[~top] = A.nearest_face(pts[~top], edges)
@@ -120,6 +134,9 @@ def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: s
     normals = {e.face: np.asarray(e.normal, dtype=float) for e in edges if not isinstance(e, ArcWall)}
     h = A.holes(mesh_pts, A.Solid(pts, face), face_normals=normals)
     rec["holes"] = {k: v for k, v in h.items() if k != "images"}
+    if m["overhangs"]:
+        # what the LiDAR solid leaves out under overhangs, so a change in the measure is seen
+        rec["overhangs"] = m["overhangs"]
 
     # wall standing on a flat roof
     rec["roof_walls"] = A.roof_walls(V, T, m["xs"], m["ys"], m["Z"], m["valid"], np.asarray(m["levels"][0]["ring"]))

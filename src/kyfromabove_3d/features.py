@@ -2555,6 +2555,118 @@ def fill_under_roof_edge(bands: List[FaceBand], length_m: float, max_offset_m: f
     return n
 
 
+def find_overhangs(ring_m: np.ndarray, z_lo: float, z_hi: float, xyz: np.ndarray, band_m: float = 5.0,
+                   min_setback_m: float = 2.0, min_bands: int = 2, max_face_offset_m: float = 1.0,
+                   min_roof_above_m: float = 5.0, line_tol_m: float = 0.6, max_angle_deg: float = 5.0,
+                   min_line_returns: int = 30, max_cut_share: float = 0.4,
+                   min_face_m: float = 4.0) -> List[Dict[str, Any]]:
+    """Where an upper part of a level stands out over the part below it --
+    the Hyatt's drum, 60 m up, over its tower's shaft -- from the LiDAR alone.
+
+    The level's outline is its roof's edge, so it is the drum's; a roof
+    height field is one height per cell and cannot show that the shaft
+    below stands 5 m further in. The returns can: a face whose wall is seen
+    ``min_setback_m`` or more inside the edge over at least ``min_bands``
+    bands from the level's foot up, never within ``max_face_offset_m`` of the
+    edge below that, while the roof just inside the edge stands at least
+    ``min_roof_above_m`` above the top of the set-back wall (``under_z``, the
+    overhang's underside). The shaft's wall is then fitted as a line through
+    the returns within ``line_tol_m`` of it below ``under_z`` (within
+    ``max_angle_deg`` of the face), and the outline is cut back along that
+    line between the two places the line crosses it either side of the face
+    (the overhang's plan, ``cut_m``). The cut must take no more than
+    ``max_cut_share`` of the outline, and every other face along the cut
+    must have no wall seen within ``max_face_offset_m`` of its edge below
+    ``under_z``. Returns one record per overhang: ``under_z``, the shaft
+    line, ``ring_below_m`` (the outline below the overhang), ``cut_m``, the
+    faces cut and the returns on the shaft line."""
+    from shapely.geometry import LineString, Polygon
+    from shapely.ops import split
+
+    ring_m = np.asarray(ring_m, dtype=float)[:, :2]
+    poly = Polygon(ring_m)
+    if not poly.is_valid or poly.area < 1.0:
+        return []
+    near = xyz[(xyz[:, 2] >= z_lo - 2.0) & (xyz[:, 2] <= z_hi + 2.0)]
+    planes = [pl for pl in wall_planes(ring_m, z_lo, z_hi, min_length_m=min_face_m) if not isinstance(pl, ArcWall)]
+    measured = ("observed", "extended", "bridged")
+    profiles = {pl.face: face_profile(pl, near, band_m=band_m) for pl in planes}
+
+    def roof_inside(pl) -> float:
+        """The roof just inside the edge: the 90th percentile of the returns
+        0.25-1.5 m in, over the face's middle."""
+        a, o = pl.local(xyz[:, :2])
+        m = (a >= 0.2 * pl.length_m) & (a <= 0.8 * pl.length_m) & (o <= -0.25) & (o >= -1.5)
+        return float(np.percentile(xyz[m, 2], 90)) if m.sum() >= 10 else -np.inf
+
+    def wall_at_edge_below(pl, under_z: float) -> bool:
+        return any(b.status in measured and b.offset_m is not None and abs(b.offset_m) <= max_face_offset_m
+                   and b.z_lo < under_z for b in profiles.get(pl.face, []))
+
+    out = []
+    for pl in planes:
+        bands = sorted(profiles[pl.face], key=lambda b: b.z_lo)
+        run = []
+        for b in bands[:2]:                                   # the set-back wall starts at the level's foot
+            if b.status in measured and b.offset_m is not None and b.offset_m <= -min_setback_m:
+                run = [b]
+                break
+        if not run:
+            continue
+        for b in bands[bands.index(run[0]) + 1:]:
+            if b.status in measured and b.offset_m is not None and abs(b.offset_m - run[0].offset_m) <= 1.0:
+                run.append(b)
+            else:
+                break
+        under_z = run[-1].z_hi
+        if len(run) < min_bands or wall_at_edge_below(pl, under_z) or roof_inside(pl) < under_z + min_roof_above_m:
+            continue
+        setback = float(np.median([b.offset_m for b in run]))
+        # the shaft's wall: the returns on that line below the overhang, wherever they run along it
+        a, o = pl.local(near[:, :2])
+        on = (np.abs(o - setback) <= line_tol_m) & (near[:, 2] >= z_lo + 1.0) & (near[:, 2] <= under_z - 0.5)
+        if on.sum() < min_line_returns:
+            continue
+        P = near[on, :2]
+        c = P.mean(axis=0)
+        _, _, vt = np.linalg.svd(P - c, full_matrices=False)
+        d = vt[0] / np.linalg.norm(vt[0])
+        e1 = (pl.p1 - pl.p0) / pl.length_m
+        if abs(float(d @ e1)) < np.cos(np.radians(max_angle_deg)):
+            continue
+        d = d if d @ e1 > 0 else -d
+        # where the line crosses the outline either side of the face; the part outside it is the overhang
+        mid_t = float((0.5 * (pl.p0 + pl.p1) - c) @ d)
+        R = 4.0 * float(np.sqrt(poly.area)) + 100.0
+        hits = LineString([c - R * d, c + R * d]).intersection(poly.exterior)
+        ts = sorted(float((np.asarray(g.coords[0]) - c) @ d) for g in getattr(hits, "geoms", [hits]) if not g.is_empty)
+        lo = [t for t in ts if t < mid_t - 0.5]
+        hi = [t for t in ts if t > mid_t + 0.5]
+        if not lo or not hi:
+            continue
+        cutter = LineString([c + (lo[-1] - 0.01) * d, c + (hi[0] + 0.01) * d])
+        pieces = [g for g in split(poly, cutter).geoms if g.area > 0.5]
+        side = [g for g in pieces if float((np.asarray(g.representative_point().coords[0]) - c) @ pl.normal) > 0]
+        if len(pieces) < 2 or len(side) != 1:
+            continue
+        cut = side[0]
+        below = poly.difference(cut)
+        if below.geom_type != "Polygon" or cut.area > max_cut_share * poly.area:
+            continue
+        cut_faces = [q.face for q in planes if cut.exterior.buffer(0.05).contains(LineString([q.p0, q.p1]))]
+        if any(wall_at_edge_below(q, under_z) for q in planes if q.face in cut_faces and q.face != pl.face):
+            continue
+        a_line = P @ d
+        out.append({"face": int(pl.face), "under_z": round(float(under_z), 2), "setback_m": round(setback, 2),
+                    "line_point": [round(float(v), 3) for v in c], "line_dir": [round(float(v), 4) for v in d],
+                    "line_along_m": [round(float(a_line.min() - c @ d), 1), round(float(a_line.max() - c @ d), 1)],
+                    "n_line_returns": int(on.sum()), "faces_cut": [int(f) for f in cut_faces],
+                    "cut_m": np.asarray(cut.exterior.coords).round(3).tolist(), "cut_area_m2": round(float(cut.area), 1),
+                    "ring_below_m": np.asarray(below.exterior.coords).round(3).tolist()})
+        break                                                # one per level: the outline below changes the rest
+    return out
+
+
 def crown_bands(bands: List[FaceBand], reference_offset_m: Optional[float] = None,
                 max_step_m: float = 2.0, top_z: Optional[float] = None,
                 top_of: Optional[Callable[[FaceBand], Optional[float]]] = None) -> int:

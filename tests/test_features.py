@@ -1217,3 +1217,59 @@ def test_fill_under_roof_edge_draws_unseen_and_roof_backed_bands_but_keeps_a_wal
     street = [band(0, "sloped", 2.6), band(5, "unknown")]
     fill_under_roof_edge(street, 30.0)
     assert street[0].status == "sloped" and street[1].offset_m == 0.0
+
+
+def _drum_tower(seen_edge_below: bool = False):
+    """A 25 x 20 m tower, 10-60 m up, whose east 5 m is a drum standing out
+    over the shaft from 35 m: the shaft's east wall stands at x = 20 below it."""
+    rng = np.random.default_rng(0)
+    pts = []
+    ys, zs = np.arange(0.5, 20.0, 0.5), np.arange(10.25, 60.0, 0.5)
+    Y, Zg = np.meshgrid(ys, zs)
+    for x in (0.0,):                                                       # west wall, the full height
+        pts.append(np.column_stack([np.full(Y.size, x), Y.ravel(), Zg.ravel()]))
+    shaft = Zg < 35.0
+    pts.append(np.column_stack([np.full(shaft.sum(), 20.0), Y[shaft], Zg[shaft]]))      # the shaft's east wall
+    if seen_edge_below:
+        pts.append(np.column_stack([np.full(shaft.sum(), 25.0), Y[shaft], Zg[shaft]]))
+    xs = np.arange(0.5, 25.0, 0.5)
+    X, Zx = np.meshgrid(xs, zs)
+    for y in (0.0, 20.0):                                                  # north and south walls
+        keep = (X < 20.0) | (Zx >= 35.0)
+        pts.append(np.column_stack([X[keep], np.full(keep.sum(), y), Zx[keep]]))
+    RX, RY = np.meshgrid(np.arange(0.25, 25.0, 0.5), np.arange(0.25, 20.0, 0.5))
+    pts.append(np.column_stack([RX.ravel(), RY.ravel(), np.full(RX.size, 60.0)]))      # the roof
+    xyz = np.vstack(pts)
+    return xyz + rng.normal(0, 0.02, xyz.shape)
+
+
+def test_find_overhangs_finds_the_drum_over_the_shaft_and_cuts_the_outline_below():
+    from kyfromabove_3d.features import find_overhangs
+
+    ring = np.array([[0, 0], [25, 0], [25, 20], [0, 20], [0, 0]], dtype=float)
+    found = find_overhangs(ring, 10.0, 60.0, _drum_tower())
+    assert len(found) == 1, found
+    oh = found[0]
+    assert abs(oh["under_z"] - 35.0) < 1e-6 and abs(oh["setback_m"] + 5.0) < 0.3
+    assert abs(oh["cut_area_m2"] - 100.0) < 3.0
+    from shapely.geometry import Polygon
+    assert abs(Polygon(oh["ring_below_m"]).area - 400.0) < 3.0
+    # a wall seen on the edge below is no overhang
+    assert find_overhangs(ring, 10.0, 60.0, _drum_tower(seen_edge_below=True)) == []
+
+
+def test_lidar_solid_under_an_overhang_starts_at_its_underside():
+    from kyfromabove_3d.audit import lidar_solid
+
+    xs = ys = np.arange(3) + 0.5
+    Z = np.full((3, 3), 60.0)
+    valid = np.ones((3, 3), dtype=bool)
+    floor = np.full((3, 3), 10.0)
+    P0, _ = lidar_solid(xs, ys, Z, valid, floor_z=10.0)
+    floor[1, 2] = 35.0                                                     # the middle of the east column overhangs
+    P1, _ = lidar_solid(xs, ys, Z, valid, floor_z=floor)
+    # nothing of the overhanging cell below its underside, and its neighbour's side now shows there
+    in_cell = (P1[:, 0] > 2.0) & (P1[:, 1] > 1.0) & (P1[:, 1] < 2.0)
+    assert not ((P1[:, 2] < 35.0) & in_cell & (P1[:, 0] > 2.01)).any()
+    exposed = (np.abs(P1[:, 0] - 2.0) < 1e-6) & (P1[:, 1] > 1.0) & (P1[:, 1] < 2.0) & (P1[:, 2] < 35.0)
+    assert exposed.sum() > 0 and not ((np.abs(P0[:, 0] - 2.0) < 1e-6) & (P0[:, 2] < 35.0)).any()

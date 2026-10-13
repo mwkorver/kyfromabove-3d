@@ -985,6 +985,40 @@ def main() -> int:
                 lv["ring"] = np.asarray(best.exterior.coords, dtype=float)
                 lidar_tower_levels.add(lv["level"])
                 print(f"  level {lv['level']}: the LiDAR's tower outline ({len(lv['ring']) - 1} corners)")
+    # An upper part standing out over the part below it (the Hyatt's drum over
+    # its shaft): the roof's outline is the drum's, the returns show the shaft
+    # set back under it. Such a level is split at the overhang's underside, the
+    # part below on the outline cut back to the shaft's wall (find_overhangs).
+    # Only with the LiDAR's tower outlines; written to overhangs.json for the
+    # mesh (the drum's underside) and the audit (the LiDAR solid under it).
+    overhangs = []
+    if args.lidar_outline and lidar_tower_levels:
+        from kyfromabove_3d.features import find_overhangs
+        split_levels = []
+        for lv in levels:
+            found = find_overhangs(lv["ring"], lv["z_lo"], lv["z_hi"], profile_xyz) if lv["level"] in lidar_tower_levels else []
+            if not found:
+                split_levels.append(lv)
+                continue
+            oh = found[0]
+            split_levels.append({**lv, "ring": np.asarray(oh["ring_below_m"], dtype=float), "z_hi": oh["under_z"]})
+            split_levels.append({**lv, "z_lo": oh["under_z"]})
+            overhangs.append(oh)
+            print(f"  level {lv['level']}: overhangs its shaft from {oh['under_z']:.1f} m up -- the wall below stands "
+                  f"{-oh['setback_m']:.1f} m in ({oh['n_line_returns']} returns on it); split in two, {oh['cut_area_m2']:.0f} m2 cut "
+                  f"from the outline below")
+        if overhangs:
+            old_to_new = {}
+            for k, lv in enumerate(split_levels):
+                old_to_new.setdefault(lv["level"], []).append(k)
+                lv["level"] = k
+            lidar_tower_levels = {k for old in lidar_tower_levels for k in old_to_new.get(old, [])}
+            levels = split_levels
+    oh_path = args.building / "overhangs.json"
+    if overhangs:
+        oh_path.write_text(json.dumps(overhangs, indent=1), encoding="utf-8")
+    elif oh_path.exists():
+        oh_path.unlink()
     roof_z = max(float(lv["z_hi"]) for lv in levels)
     height_m = roof_z - ground_z
     print(f"zones: {zones.ground.sum():,} ground / {zones.wall.sum():,} wall / "

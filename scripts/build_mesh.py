@@ -1777,6 +1777,27 @@ def main() -> int:
         print(f"  {n_profile} face(s) from the profile ({n_arc} curved), {n_prism} prism face(s) at the roof's edge height, "
               f"{n_party} party wall(s) drawn plain")
 
+    # The underside of an upper part standing out over the part below it (the
+    # Hyatt's drum over its shaft, colorize_building.py / find_overhangs): a
+    # flat ceiling, facing down, over the plan the outline below was cut by.
+    oh_path = args.building / "overhangs.json"
+    if oh_path.exists() and path != "box":
+        import shapely
+        from shapely.geometry import Polygon as _OhPoly
+        down = np.array([0.0, 0.0, -1.0])
+        for oh in json.loads(oh_path.read_text(encoding="utf-8")):
+            z = float(oh["under_z"])
+            tris = shapely.constrained_delaunay_triangles(_OhPoly(oh["cut_m"]))
+            quads = []
+            for t in tris.geoms:
+                c = np.asarray(t.exterior.coords)[:3]
+                corners = _orient(np.array([[*c[0], z], [*c[1], z], [*c[2], z], [*c[2], z]]), down)
+                quads.append((corners, down, None, "ledge"))
+            if quads:
+                flat_quads.append((None, quads))
+                all_wall_quads.extend(quads)
+                print(f"  the underside of the overhang at {z:.1f} m: {len(quads)} triangle(s) over {oh['cut_area_m2']:.0f} m2")
+
     # Fitted wall tiles: the wall where the LiDAR saw it directly.
     tiles = tile_geometry(b, xyz, poly, cxyz, crgb, args.texel_m) if path != "box" else []
     for corners, n, uv, tex, face, n_pts in tiles:

@@ -99,9 +99,15 @@ def roof_grid(xyz, cls, x0, y0, nx, ny, cell):
     return np.where(np.isfinite(g), g, np.nan)
 
 
-def grow(g, seed, allowed, max_step_m):
+def grow(g, seed, allowed, max_step_m, ground_z=None, lower_roof_m=10.0, lower_roof_share=0.5):
     """Cells reachable from ``seed`` through ``allowed`` cells, each step
-    changing height by less than ``max_step_m``."""
+    changing height by less than ``max_step_m`` -- or, given ``ground_z``,
+    stepping down onto a lower roof of the same building: a surface still
+    ``lower_roof_m`` or more above the ground and at least
+    ``lower_roof_share`` of the height of the roof it steps down from.
+    cfb7194a's raised top at 46.5 m ends 1.8 m short of its wall; its main
+    roof at 43 m runs on to it, and the 3.5 m step down had been taken for
+    the building's edge. A canopy or a street-level roof still stops it."""
     out = seed & allowed
     q = deque(zip(*np.nonzero(out)))
     ny, nx = g.shape
@@ -110,7 +116,13 @@ def grow(g, seed, allowed, max_step_m):
         h = g[j, i]
         for dj, di in ((0, 1), (1, 0), (0, -1), (-1, 0)):
             jj, ii = j + dj, i + di
-            if 0 <= jj < ny and 0 <= ii < nx and allowed[jj, ii] and not out[jj, ii] and abs(g[jj, ii] - h) < max_step_m:
+            if not (0 <= jj < ny and 0 <= ii < nx and allowed[jj, ii] and not out[jj, ii]):
+                continue
+            h2 = g[jj, ii]
+            ok = abs(h2 - h) < max_step_m
+            if not ok and ground_z is not None and h2 < h:
+                ok = h2 - ground_z >= max(lower_roof_m, lower_roof_share * (h - ground_z))
+            if ok:
                 out[jj, ii] = True
                 q.append((jj, ii))
     return out
@@ -162,7 +174,7 @@ def outline_from_moves(P: np.ndarray, moves, max_corner_move_m: float) -> np.nda
     return np.array(new)
 
 
-def move_edges(ring, inside, height_at, others, a):
+def move_edges(ring, inside, height_at, others, a, inside_plain=None, wall_under=None):
     """Overture's edges moved to where the roof ends. ``inside(xy)`` says
     whether points are on the LiDAR roof, ``height_at(xy)`` the LiDAR's
     height there. Walking out from the roof along each edge's perpendicular,
@@ -170,7 +182,16 @@ def move_edges(ring, inside, height_at, others, a):
     counts only where the height then drops ``--max-step-m`` or more, so a
     neighbour's footprint, which the roof is not grown into, is not taken for
     an edge. An edge with a neighbour just outside and no drop is a party
-    wall and stays put. Returns the new ring and, per edge, its move and why."""
+    wall and stays put.
+
+    Given ``inside_plain`` (the roof grown without stepping down onto lower
+    roofs) and ``wall_under(p, d, nrm, length, offset, h_roof)`` (how many
+    returns stand as a wall under a roof's end, per metre of edge), an edge
+    the lower roof carries further out than the plain roof keeps the further
+    end only where a wall is seen under it: cfb7194a's main roof runs 1.8 m
+    past its raised top to a wall seen from 6 to 43 m up; Chase's edge 6
+    stepped down onto something 3 m past its wall with no wall under it.
+    Returns the new ring and, per edge, its move and why."""
     from shapely.geometry import Point
     P = np.asarray(ring[:-1], float)
     n = len(P)
@@ -192,35 +213,55 @@ def move_edges(ring, inside, height_at, others, a):
         t = np.arange(min(1.0, L / 4), L - min(1.0, L / 4) + 1e-9, 0.5)
         S = p[None, :] + t[:, None] * d[None, :]
         neighbour = others is not None and np.mean([others.contains(Point(*xy)) for xy in S + 1.0 * nrm[None, :]]) >= 0.5
-        moves = []
-        for s in S:
-            line = s[None, :] + offs[:, None] * nrm[None, :]
-            on = inside(line)
-            if not on.any():
-                continue
-            k2 = int(np.argmax(on))                                      # the first roof cell from the inner end
-            while True:                                                  # walk out, stepping over short gaps
-                nxt = np.flatnonzero(on[k2 + 1:k2 + 2 + gap])
-                if not len(nxt):
-                    break
-                k2 = k2 + 1 + int(nxt[-1]) if on[k2 + 1 + int(nxt[-1])] else k2 + 1
-                if k2 + 1 >= len(on):
-                    break
-            if k2 + 1 >= len(on):                                        # roof runs past the reach: no edge here
-                continue
-            h_in = height_at(line[k2:k2 + 1])[0]
-            beyond = height_at(line[k2 + 5:k2 + 16])                     # 0.5-1.5 m past the roof's last cell
-            h_out = float(np.nanmedian(beyond)) if np.isfinite(beyond).any() else -99.0
-            if np.isfinite(h_out) and h_in - h_out < a.max_step_m:       # no drop: the roof was stopped, not ended
-                continue
-            moves.append(offs[k2] + step / 2)
-        support = len(moves) / len(S)
-        if support < a.min_support:
-            edges.append(dict(rec, status="party wall" if neighbour else "roof does not reach it", move_m=0.0, support=round(support, 2)))
-            continue
-        m = float(np.median(moves))
-        edges.append(dict(rec, status="moved", move_m=round(m, 2), support=round(support, 2),
-                          spread_m=round(float(np.percentile(np.abs(np.array(moves) - m), 75)), 2)))
+        def ends(inside_fn):
+            """The roof's end along each perpendicular, and the roof's height there."""
+            moves, heights = [], []
+            for s in S:
+                line = s[None, :] + offs[:, None] * nrm[None, :]
+                on = inside_fn(line)
+                if not on.any():
+                    continue
+                k2 = int(np.argmax(on))                                  # the first roof cell from the inner end
+                while True:                                              # walk out, stepping over short gaps
+                    nxt = np.flatnonzero(on[k2 + 1:k2 + 2 + gap])
+                    if not len(nxt):
+                        break
+                    k2 = k2 + 1 + int(nxt[-1]) if on[k2 + 1 + int(nxt[-1])] else k2 + 1
+                    if k2 + 1 >= len(on):
+                        break
+                if k2 + 1 >= len(on):                                    # roof runs past the reach: no edge here
+                    continue
+                h_in = height_at(line[k2:k2 + 1])[0]
+                beyond = height_at(line[k2 + 5:k2 + 16])                 # 0.5-1.5 m past the roof's last cell
+                h_out = float(np.nanmedian(beyond)) if np.isfinite(beyond).any() else -99.0
+                if np.isfinite(h_out) and h_in - h_out < a.max_step_m:   # no drop: the roof was stopped, not ended
+                    continue
+                moves.append(offs[k2] + step / 2)
+                heights.append(h_in)
+            return moves, heights
+
+        def record(moves):
+            support = len(moves) / len(S)
+            if support < a.min_support:
+                return dict(rec, status="party wall" if neighbour else "roof does not reach it", move_m=0.0, support=round(support, 2))
+            m = float(np.median(moves))
+            return dict(rec, status="moved", move_m=round(m, 2), support=round(support, 2),
+                        spread_m=round(float(np.percentile(np.abs(np.array(moves) - m), 75)), 2))
+
+        moves, heights = ends(inside)
+        out = record(moves)
+        if inside_plain is not None and wall_under is not None:
+            plain = record(ends(inside_plain)[0])
+            further = out["status"] == "moved" and (plain["status"] != "moved" or out["move_m"] > plain["move_m"] + 0.3)
+            if further:
+                per_m = wall_under(p, d, nrm, L, out["move_m"], float(np.median(heights)))
+                if per_m < a.min_wall_returns_per_m:
+                    plain["lower_roof"] = (f"a lower roof ran on {out['move_m'] - plain['move_m']:.1f} m with no wall under its end "
+                                           f"({per_m:.1f} returns per metre); not taken")
+                    out = plain
+                else:
+                    out["lower_roof"] = f"stepped down onto a lower roof, a wall under its end ({per_m:.1f} returns per metre)"
+        edges.append(out)
 
     def corners():
         return outline_from_moves(P, [e["move_m"] for e in edges], a.max_corner_move_m)
@@ -274,23 +315,39 @@ def measure_building(job) -> Optional[dict]:
         allowed &= ~contains_xy(others_u, cx, cy)
     if seed.sum() < 20:
         return dict(building=b.key, name=b.name, status="too little roof in the LiDAR")
-    roof = grow(np.nan_to_num(g, nan=-99), seed, allowed, a.max_step_m)
-    from scipy.ndimage import binary_fill_holes, binary_opening
-    roof = binary_opening(roof, iterations=1) | seed                     # trim one-cell spurs (a lamp, a branch)
-    holes = binary_fill_holes(roof) & ~roof
-    from scipy.ndimage import label
-    lab, nlab = label(holes)
-    small = np.isin(lab, [i for i in range(1, nlab + 1) if (lab == i).sum() * c * c < 4.0])
-    roof = roof | small
+    from scipy.ndimage import binary_fill_holes, binary_opening, label
+
+    def tidy(r):
+        r = binary_opening(r, iterations=1) | seed                       # trim one-cell spurs (a lamp, a branch)
+        holes = binary_fill_holes(r) & ~r
+        lab, nlab = label(holes)
+        small = np.isin(lab, [i for i in range(1, nlab + 1) if (lab == i).sum() * c * c < 4.0])
+        return r | small
+    roof = tidy(grow(np.nan_to_num(g, nan=-99), seed, allowed, a.max_step_m, ground_z=B["ground_z"],
+                     lower_roof_m=a.lower_roof_m, lower_roof_share=a.lower_roof_share))
+    roof_plain = tidy(grow(np.nan_to_num(g, nan=-99), seed, allowed, a.max_step_m))
     traced = mask_polygon(roof, x0, y0, c, a.simplify_m)
 
-    def inside(xy):
-        i = ((xy[:, 0] - x0) / c).astype(int)
-        j = ((xy[:, 1] - y0) / c).astype(int)
-        ok = (i >= 0) & (j >= 0) & (i < nx) & (j < ny)
-        out = np.zeros(len(xy), bool)
-        out[ok] = roof[j[ok], i[ok]]
-        return out
+    def mask_lookup(mask):
+        def inside(xy):
+            i = ((xy[:, 0] - x0) / c).astype(int)
+            j = ((xy[:, 1] - y0) / c).astype(int)
+            ok = (i >= 0) & (j >= 0) & (i < nx) & (j < ny)
+            out = np.zeros(len(xy), bool)
+            out[ok] = mask[j[ok], i[ok]]
+            return out
+        return inside
+    inside = mask_lookup(roof)
+
+    def wall_under(p, d, nrm, L, off, h_roof):
+        """Returns per metre of edge standing as a wall under a roof's end:
+        from 1 m inside it to 0.5 m outside, from 3 m above the ground to
+        1.5 m below the roof, over the middle 70% of the edge."""
+        rel = xyz[:, :2] - p
+        along, across = rel @ d, rel @ nrm
+        m = ((along >= 0.15 * L) & (along <= 0.85 * L) & (across >= off - 1.0) & (across <= off + 0.5)
+             & (xyz[:, 2] >= B["ground_z"] + 3.0) & (xyz[:, 2] <= h_roof - 1.5))
+        return float(m.sum()) / max(0.7 * L, 1.0)
     ring = np.asarray(ov.exterior.coords)
     def height_at(xy):
         i = ((xy[:, 0] - x0) / c).astype(int)
@@ -299,7 +356,7 @@ def measure_building(job) -> Optional[dict]:
         out = np.full(len(xy), np.nan)
         out[ok] = g[j[ok], i[ok]]
         return out
-    new_ring, edges = move_edges(ring, inside, height_at, others_u, a)
+    new_ring, edges = move_edges(ring, inside, height_at, others_u, a, inside_plain=mask_lookup(roof_plain), wall_under=wall_under)
     new = Polygon(new_ring)
     roof_poly = traced if traced is not None else Polygon()
     roof_area = float(roof.sum() * c * c)
@@ -1174,6 +1231,12 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--cell-m", type=float, default=0.5)
     p.add_argument("--min-height-m", type=float, default=2.5, help="roof is at least this far above the ground")
     p.add_argument("--max-step-m", type=float, default=1.5, help="a height change this big between cells ends the roof")
+    p.add_argument("--lower-roof-m", type=float, default=10.0,
+                   help="a step down of any size is crossed onto a roof at least this far above the ground ...")
+    p.add_argument("--lower-roof-share", type=float, default=0.5,
+                   help="... and at least this share of the height of the roof it steps down from")
+    p.add_argument("--min-wall-returns-per-m", type=float, default=3.0,
+                   help="a lower roof's end is taken only over a wall with at least this many returns per metre of edge")
     p.add_argument("--reach-m", type=float, default=3.0, help="the furthest the outline may run past Overture's")
     p.add_argument("--min-support", type=float, default=0.5, help="share of an edge the roof's end must be found along")
     p.add_argument("--gap-m", type=float, default=1.0, help="gaps in the roof this short are stepped over")

@@ -982,8 +982,18 @@ def main() -> int:
     lv_opts = dict(class_strategy(args.building).get("levels") or {})
     if lv_opts:
         print(f"  levels as the class sets them: {lv_opts}")
-    levels = building_levels(b_xyz, ring_m, ground_z, **lv_opts) if args.levels else \
-        [{"level": 0, "ring": ring_m, "z_lo": ground_z, "z_hi": roof_z}]
+    # fallback_only: the class's way is tried only where the tower tracing finds one level
+    fallback_only = bool(lv_opts.pop("fallback_only", False))
+    if not args.levels:
+        levels = [{"level": 0, "ring": ring_m, "z_lo": ground_z, "z_hi": roof_z}]
+    elif fallback_only:
+        levels = building_levels(b_xyz, ring_m, ground_z)
+        if len(levels) == 1:
+            levels = building_levels(b_xyz, ring_m, ground_z, **lv_opts)
+            if len(levels) > 1:
+                print(f"  levels: one by the tower tracing; {len(levels)} by the class's way")
+    else:
+        levels = building_levels(b_xyz, ring_m, ground_z, **lv_opts)
     lidar_tower_levels: set[int] = set()                    # levels whose outline is the LiDAR's tower edge
     if args.lidar_outline and entry.get("towers_local") and len(levels) > 1:
         # each tower the colourise found takes the LiDAR's outline of it (footprint_lidar.json, lidar_outline.py
@@ -1308,7 +1318,15 @@ def main() -> int:
             # (Only when the building is one level: with the tower split
             # out, its walls are its own faces.)
             top_seen = max((b.z_hi for b in bands if b.status in ("observed", "bridged", "extended")), default=0.0)
-            if len(levels) == 1 and top_seen < 0.4 * (roof_z - ground_z) and not is_arc[plane.face]:
+            # ... and only where the roof just inside the wall is well below the
+            # top, as at Humana's podium edge: where the roof reaches the edge
+            # the wall is there, unseen, and looking 60% across found the far wall
+            # (the Galt House's face 7, drawn 37 m in)
+            def roof_inside_low(pl=plane):
+                a_, o_ = pl.local(lv_xyz[:, :2])
+                m_ = (a_ >= 0.2 * pl.length_m) & (a_ <= 0.8 * pl.length_m) & (o_ <= -0.25) & (o_ >= -2.0)
+                return m_.sum() < 10 or float(np.percentile(lv_xyz[m_, 2], 90)) < ground_z + 0.6 * (roof_z - ground_z)
+            if len(levels) == 1 and top_seen < 0.4 * (roof_z - ground_z) and not is_arc[plane.face] and roof_inside_low():
                 depth = float(max(-((ring_m - plane.p0) @ plane.normal).min(), 8.0))
                 deep = face_profile(plane, lv_xyz, band_m=args.profile_band_m,
                                     offset_window_m=(-0.6 * depth, 3.0), min_returns=20)

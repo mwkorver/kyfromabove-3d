@@ -3090,7 +3090,7 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
                     upper_fraction: float = 0.4, min_cover: float = 0.05, max_cover: float = 0.7,
                     min_step_m: float = 12.0, min_area_m2: float = 150.0,
                     max_vertices: int = 16, from_tiers: bool = False,
-                    min_tier_share: float = 0.10, straighten: bool = False,
+                    min_tier_share: float = 0.10, below_main: bool = False, straighten: bool = False,
                     fine_cell_m: float = 0.5, smooth_m: float = 1.0) -> List[Dict[str, Any]]:
     """The bodies a footprint holds, from the roof returns inside it.
 
@@ -3157,7 +3157,16 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
     top_h = float(np.percentile(h[valid], 99))
     upper = valid & (h >= upper_fraction * top_h)
     split_h = upper_fraction * top_h
-    if from_tiers:
+    if below_main:
+        # the upper body is everything near the roof's main height: lower wings
+        # spread over several heights (the Galt House's at 12-24 m beside its
+        # 50 m block) make no tier of their own in 1 m steps, and the upper body
+        # may cover most of the footprint (max_cover)
+        hv = h[valid]
+        hist, edges = np.histogram(hv, bins=np.arange(np.floor(hv.min()), np.ceil(hv.max()) + 1.01, 1.0))
+        main_h = float(edges[int(np.argmax(hist))] + 0.5)
+        upper = valid & (h >= main_h - max(min_step_m, 0.2 * top_h))
+    elif from_tiers:
         hv = h[valid]
         hist, edges = np.histogram(hv, bins=np.arange(np.floor(hv.min()), np.ceil(hv.max()) + 1.01, 1.0))
         share = hist / max(hist.sum(), 1)

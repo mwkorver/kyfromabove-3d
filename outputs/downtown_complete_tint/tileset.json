@@ -261,29 +261,29 @@
       "extras": {
        "name": "The Seelbach Hilton Hotel",
        "gers": "c5fe3ad2-ffa0-4800-9240-410277f7b332",
-       "triangles": 8698,
+       "triangles": 8706,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 7,
-        "prism": 3,
+        "profile": 8,
+        "prism": 2,
         "party": 0
        },
        "n_frames": 15,
        "texels": {
-        "n": 745517,
-        "seen": 0.5076,
-        "near": 0.0738,
-        "plain": 0.4186
+        "n": 779748,
+        "seen": 0.4995,
+        "near": 0.0771,
+        "plain": 0.4234
        },
        "fill": {
-        "n": 745517,
-        "seen": 0.5076,
-        "near": 0.0738,
-        "plain": 0.1893,
+        "n": 779748,
+        "seen": 0.4995,
+        "near": 0.0771,
+        "plain": 0.181,
         "twin": 0.0,
-        "rhythm": 0.1682,
-        "patch": 0.0612
+        "rhythm": 0.1839,
+        "patch": 0.0585
        }
       }
      }
@@ -724,13 +724,13 @@
        "texels": {
         "n": 340331,
         "seen": 0.6972,
-        "near": 0.0863,
+        "near": 0.0864,
         "plain": 0.2164
        },
        "fill": {
         "n": 340331,
         "seen": 0.6972,
-        "near": 0.0863,
+        "near": 0.0864,
         "plain": 0.079,
         "twin": 0.0,
         "rhythm": 0.024,
@@ -1225,8 +1225,8 @@
      "sphere": [
       51.6396500543633,
       215.32222287985496,
-      27.816322477301583,
-      121.33565467990209
+      27.81633250042796,
+      121.33565725303214
      ]
     },
     "geometricError": 8.0,
@@ -1338,15 +1338,15 @@
        "n_frames": 15,
        "texels": {
         "n": 377489,
-        "seen": 0.4951,
-        "near": 0.0464,
-        "plain": 0.4585
+        "seen": 0.4954,
+        "near": 0.0463,
+        "plain": 0.4583
        },
        "fill": {
         "n": 377489,
-        "seen": 0.4951,
-        "near": 0.0464,
-        "plain": 0.3268,
+        "seen": 0.4954,
+        "near": 0.0463,
+        "plain": 0.3266,
         "twin": 0.0,
         "rhythm": 0.0552,
         "patch": 0.0765
@@ -1375,9 +1375,9 @@
       "boundingVolume": {
        "sphere": [
         -1.0056164380034005,
-        0.36857251944645064,
+        -0.20373148916715955,
         49.79515000000001,
-        80.05285080614931
+        79.36972694022295
        ]
       },
       "geometricError": 0.0,
@@ -1387,29 +1387,29 @@
       "extras": {
        "name": "Waterfront Plaza",
        "gers": "be45685f-7b19-4e65-a4e4-4fad66f6bd62",
-       "triangles": 16459,
+       "triangles": 17368,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 7,
-        "prism": 4,
-        "party": 0
+        "profile": 27,
+        "prism": 7,
+        "party": 1
        },
        "n_frames": 15,
        "texels": {
-        "n": 1130103,
-        "seen": 0.6672,
-        "near": 0.08,
-        "plain": 0.2528
+        "n": 1971089,
+        "seen": 0.7077,
+        "near": 0.0943,
+        "plain": 0.198
        },
        "fill": {
-        "n": 1130103,
-        "seen": 0.6672,
-        "near": 0.08,
-        "plain": 0.0694,
+        "n": 1971089,
+        "seen": 0.7077,
+        "near": 0.0943,
+        "plain": 0.09,
         "twin": 0.0,
-        "rhythm": 0.1399,
-        "patch": 0.0435
+        "rhythm": 0.086,
+        "patch": 0.0221
        }
       }
      },
@@ -1533,18 +1533,18 @@
        "n_frames": 16,
        "texels": {
         "n": 19209,
-        "seen": 0.5269,
-        "near": 0.0865,
-        "plain": 0.3866
+        "seen": 0.5216,
+        "near": 0.0848,
+        "plain": 0.3936
        },
        "fill": {
         "n": 19209,
-        "seen": 0.5269,
-        "near": 0.0865,
-        "plain": 0.1847,
+        "seen": 0.5216,
+        "near": 0.0848,
+        "plain": 0.1944,
         "twin": 0.0,
         "rhythm": 0.017,
-        "patch": 0.1849
+        "patch": 0.1822
        }
       }
      },
@@ -1601,10 +1601,10 @@
         "n": 130913,
         "seen": 0.4585,
         "near": 0.0765,
-        "plain": 0.3168,
+        "plain": 0.3178,
         "twin": 0.0,
-        "rhythm": 0.0936,
-        "patch": 0.0546
+        "rhythm": 0.0839,
+        "patch": 0.0632
        }
       }
      },
@@ -1653,18 +1653,18 @@
        "n_frames": 14,
        "texels": {
         "n": 145586,
-        "seen": 0.4208,
-        "near": 0.0697,
-        "plain": 0.5095
+        "seen": 0.4225,
+        "near": 0.0684,
+        "plain": 0.5092
        },
        "fill": {
         "n": 145586,
-        "seen": 0.4208,
-        "near": 0.0697,
+        "seen": 0.4225,
+        "near": 0.0684,
         "plain": 0.3112,
         "twin": 0.0,
-        "rhythm": 0.0168,
-        "patch": 0.1814
+        "rhythm": 0.0161,
+        "patch": 0.1818
        }
       }
      },
@@ -1713,18 +1713,18 @@
        "n_frames": 13,
        "texels": {
         "n": 263263,
-        "seen": 0.571,
-        "near": 0.0818,
-        "plain": 0.3472
+        "seen": 0.5714,
+        "near": 0.0817,
+        "plain": 0.347
        },
        "fill": {
         "n": 263263,
-        "seen": 0.571,
-        "near": 0.0818,
+        "seen": 0.5714,
+        "near": 0.0817,
         "plain": 0.1556,
         "twin": 0.0,
         "rhythm": 0.0293,
-        "patch": 0.1623
+        "patch": 0.1621
        }
       }
      },
@@ -1762,7 +1762,7 @@
       "extras": {
        "name": "2870eeb0-4053-48b7-828f-a88356676ce4",
        "gers": "2870eeb0-4053-48b7-828f-a88356676ce4",
-       "triangles": 17893,
+       "triangles": 17896,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -1773,17 +1773,17 @@
        "n_frames": 14,
        "texels": {
         "n": 486265,
-        "seen": 0.6947,
-        "near": 0.0379,
-        "plain": 0.2674
+        "seen": 0.6946,
+        "near": 0.0396,
+        "plain": 0.2658
        },
        "fill": {
         "n": 486265,
-        "seen": 0.6947,
-        "near": 0.0379,
+        "seen": 0.6946,
+        "near": 0.0396,
         "plain": 0.1165,
         "twin": 0.0,
-        "rhythm": 0.0731,
+        "rhythm": 0.0716,
         "patch": 0.0777
        }
       }
@@ -1954,13 +1954,13 @@
        "texels": {
         "n": 94454,
         "seen": 0.5557,
-        "near": 0.0394,
+        "near": 0.0393,
         "plain": 0.4049
        },
        "fill": {
         "n": 94454,
         "seen": 0.5557,
-        "near": 0.0394,
+        "near": 0.0393,
         "plain": 0.2578,
         "twin": 0.0,
         "rhythm": 0.0,
@@ -2073,14 +2073,14 @@
        "n_frames": 15,
        "texels": {
         "n": 527547,
-        "seen": 0.6299,
-        "near": 0.0529,
+        "seen": 0.6302,
+        "near": 0.0527,
         "plain": 0.3172
        },
        "fill": {
         "n": 527547,
-        "seen": 0.6299,
-        "near": 0.0529,
+        "seen": 0.6302,
+        "near": 0.0527,
         "plain": 0.2088,
         "twin": 0.0,
         "rhythm": 0.0144,
@@ -2133,17 +2133,17 @@
        "n_frames": 14,
        "texels": {
         "n": 307713,
-        "seen": 0.5271,
-        "near": 0.0645,
-        "plain": 0.4084
+        "seen": 0.5295,
+        "near": 0.0654,
+        "plain": 0.4051
        },
        "fill": {
         "n": 307713,
-        "seen": 0.5271,
-        "near": 0.0645,
+        "seen": 0.5295,
+        "near": 0.0654,
         "plain": 0.258,
         "twin": 0.0,
-        "rhythm": 0.0606,
+        "rhythm": 0.0573,
         "patch": 0.0898
        }
       }
@@ -2253,18 +2253,18 @@
        "n_frames": 16,
        "texels": {
         "n": 44827,
-        "seen": 0.5435,
-        "near": 0.0493,
-        "plain": 0.4071
+        "seen": 0.5899,
+        "near": 0.0243,
+        "plain": 0.3858
        },
        "fill": {
         "n": 44827,
-        "seen": 0.5435,
-        "near": 0.0493,
+        "seen": 0.5899,
+        "near": 0.0243,
         "plain": 0.2484,
         "twin": 0.0,
-        "rhythm": 0.0172,
-        "patch": 0.1415
+        "rhythm": 0.0002,
+        "patch": 0.1371
        }
       }
      }
@@ -2747,17 +2747,17 @@
        "n_frames": 18,
        "texels": {
         "n": 1437596,
-        "seen": 0.9146,
-        "near": 0.036,
-        "plain": 0.0494
+        "seen": 0.9223,
+        "near": 0.0328,
+        "plain": 0.045
        },
        "fill": {
         "n": 1437596,
-        "seen": 0.9146,
-        "near": 0.036,
+        "seen": 0.9223,
+        "near": 0.0328,
         "plain": 0.0117,
         "twin": 0.0,
-        "rhythm": 0.0251,
+        "rhythm": 0.0207,
         "patch": 0.0126
        }
       }
@@ -2942,13 +2942,13 @@
        "n_frames": 15,
        "texels": {
         "n": 23848,
-        "seen": 0.5259,
+        "seen": 0.526,
         "near": 0.0985,
-        "plain": 0.3756
+        "plain": 0.3755
        },
        "fill": {
         "n": 23848,
-        "seen": 0.5259,
+        "seen": 0.526,
         "near": 0.0985,
         "plain": 0.0655,
         "twin": 0.0,
@@ -3558,18 +3558,18 @@
        "n_frames": 18,
        "texels": {
         "n": 455553,
-        "seen": 0.7861,
-        "near": 0.0626,
-        "plain": 0.1513
+        "seen": 0.7857,
+        "near": 0.0627,
+        "plain": 0.1516
        },
        "fill": {
         "n": 455553,
-        "seen": 0.7861,
-        "near": 0.0626,
+        "seen": 0.7857,
+        "near": 0.0627,
         "plain": 0.0386,
         "twin": 0.0,
         "rhythm": 0.0507,
-        "patch": 0.062
+        "patch": 0.0623
        }
       }
      },
@@ -3932,15 +3932,15 @@
        "n_frames": 19,
        "texels": {
         "n": 181323,
-        "seen": 0.4055,
-        "near": 0.0712,
-        "plain": 0.5234
+        "seen": 0.4056,
+        "near": 0.0711,
+        "plain": 0.5233
        },
        "fill": {
         "n": 181323,
-        "seen": 0.4055,
-        "near": 0.0712,
-        "plain": 0.3645,
+        "seen": 0.4056,
+        "near": 0.0711,
+        "plain": 0.3644,
         "twin": 0.0,
         "rhythm": 0.0055,
         "patch": 0.1534
@@ -3992,18 +3992,18 @@
        "n_frames": 19,
        "texels": {
         "n": 247280,
-        "seen": 0.7116,
-        "near": 0.1046,
-        "plain": 0.1838
+        "seen": 0.7127,
+        "near": 0.1049,
+        "plain": 0.1824
        },
        "fill": {
         "n": 247280,
-        "seen": 0.7116,
-        "near": 0.1046,
+        "seen": 0.7127,
+        "near": 0.1049,
         "plain": 0.0509,
         "twin": 0.0,
         "rhythm": 0.033,
-        "patch": 0.0999
+        "patch": 0.0985
        }
       }
      },
@@ -5139,8 +5139,8 @@
        "sphere": [
         2.65278677439528,
         -0.2508998582478985,
-        10.9955,
-        19.46274026653283
+        21.395500000000002,
+        26.68809334389751
        ]
       },
       "geometricError": 0.0,
@@ -5150,7 +5150,7 @@
       "extras": {
        "name": "68b1aaad-6d1e-4586-b7e1-2738e53db5fd",
        "gers": "68b1aaad-6d1e-4586-b7e1-2738e53db5fd",
-       "triangles": 960,
+       "triangles": 994,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -5160,19 +5160,19 @@
        },
        "n_frames": 19,
        "texels": {
-        "n": 65028,
-        "seen": 0.2787,
-        "near": 0.0523,
-        "plain": 0.6691
+        "n": 113490,
+        "seen": 0.2108,
+        "near": 0.0279,
+        "plain": 0.7613
        },
        "fill": {
-        "n": 65028,
-        "seen": 0.2787,
-        "near": 0.0523,
-        "plain": 0.4046,
+        "n": 113490,
+        "seen": 0.2108,
+        "near": 0.0279,
+        "plain": 0.6683,
         "twin": 0.0,
-        "rhythm": 0.1653,
-        "patch": 0.0991
+        "rhythm": 0.0055,
+        "patch": 0.0875
        }
       }
      },
@@ -5341,18 +5341,18 @@
        "n_frames": 16,
        "texels": {
         "n": 171428,
-        "seen": 0.3115,
-        "near": 0.0332,
-        "plain": 0.6554
+        "seen": 0.3095,
+        "near": 0.0318,
+        "plain": 0.6587
        },
        "fill": {
         "n": 171428,
-        "seen": 0.3115,
-        "near": 0.0332,
-        "plain": 0.5032,
+        "seen": 0.3095,
+        "near": 0.0318,
+        "plain": 0.513,
         "twin": 0.0,
         "rhythm": 0.0036,
-        "patch": 0.1486
+        "patch": 0.1421
        }
       }
      },
@@ -6389,17 +6389,17 @@
        "n_frames": 18,
        "texels": {
         "n": 252530,
-        "seen": 0.4582,
-        "near": 0.131,
-        "plain": 0.4107
+        "seen": 0.4597,
+        "near": 0.1306,
+        "plain": 0.4097
        },
        "fill": {
         "n": 252530,
-        "seen": 0.4582,
-        "near": 0.131,
+        "seen": 0.4597,
+        "near": 0.1306,
         "plain": 0.2462,
         "twin": 0.0,
-        "rhythm": 0.0197,
+        "rhythm": 0.0187,
         "patch": 0.1448
        }
       }
@@ -6569,14 +6569,14 @@
        "n_frames": 18,
        "texels": {
         "n": 43104,
-        "seen": 0.5864,
-        "near": 0.0278,
+        "seen": 0.5865,
+        "near": 0.0277,
         "plain": 0.3858
        },
        "fill": {
         "n": 43104,
-        "seen": 0.5864,
-        "near": 0.0278,
+        "seen": 0.5865,
+        "near": 0.0277,
         "plain": 0.1293,
         "twin": 0.0,
         "rhythm": 0.0007,
@@ -7049,18 +7049,18 @@
        "n_frames": 19,
        "texels": {
         "n": 34104,
-        "seen": 0.6589,
-        "near": 0.102,
-        "plain": 0.2392
+        "seen": 0.6703,
+        "near": 0.1014,
+        "plain": 0.2282
        },
        "fill": {
         "n": 34104,
-        "seen": 0.6589,
-        "near": 0.102,
-        "plain": 0.0221,
+        "seen": 0.6703,
+        "near": 0.1014,
+        "plain": 0.0218,
         "twin": 0.0,
-        "rhythm": 0.0031,
-        "patch": 0.2139
+        "rhythm": 0.0037,
+        "patch": 0.2027
        }
       }
      },
@@ -7687,10 +7687,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        1.7070330826053732,
-        3.6403702112703353,
+        1.6080053649354307,
+        3.654035846780335,
         9.7895,
-        23.28160676404932
+        23.2557286979487
        ]
       },
       "geometricError": 0.0,
@@ -7700,29 +7700,29 @@
       "extras": {
        "name": "Normandy Building",
        "gers": "e3f947c1-96a7-4650-a818-5c98a4a87cef",
-       "triangles": 1739,
+       "triangles": 1742,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 2,
+        "profile": 1,
         "prism": 1,
-        "party": 1
+        "party": 2
        },
        "n_frames": 18,
        "texels": {
-        "n": 89156,
-        "seen": 0.6183,
-        "near": 0.0524,
-        "plain": 0.3293
+        "n": 72482,
+        "seen": 0.768,
+        "near": 0.0644,
+        "plain": 0.1675
        },
        "fill": {
-        "n": 89156,
-        "seen": 0.6183,
-        "near": 0.0524,
-        "plain": 0.2333,
+        "n": 72482,
+        "seen": 0.768,
+        "near": 0.0644,
+        "plain": 0.0494,
         "twin": 0.0,
         "rhythm": 0.0,
-        "patch": 0.096
+        "patch": 0.1181
        }
       }
      },
@@ -8325,18 +8325,18 @@
        "n_frames": 16,
        "texels": {
         "n": 155898,
-        "seen": 0.5355,
-        "near": 0.0271,
-        "plain": 0.4373
+        "seen": 0.537,
+        "near": 0.0273,
+        "plain": 0.4357
        },
        "fill": {
         "n": 155898,
-        "seen": 0.5355,
-        "near": 0.0271,
-        "plain": 0.2896,
+        "seen": 0.537,
+        "near": 0.0273,
+        "plain": 0.2888,
         "twin": 0.0,
-        "rhythm": 0.0128,
-        "patch": 0.1349
+        "rhythm": 0.0116,
+        "patch": 0.1353
        }
       }
      },
@@ -8406,9 +8406,9 @@
     "boundingVolume": {
      "sphere": [
       -242.9974732604751,
-      215.50611572759226,
+      215.5114031266421,
       34.113066606456414,
-      145.0086328493839
+      145.01166365087667
      ]
     },
     "geometricError": 8.0,
@@ -8795,10 +8795,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        -8.325000000000003,
-        -3.773718511804386,
+        -8.097148293815032,
+        -3.7631375438771286,
         13.4485,
-        70.56660941708057
+        70.40468220306136
        ]
       },
       "geometricError": 0.0,
@@ -8808,29 +8808,29 @@
       "extras": {
        "name": "The Kentucky Center",
        "gers": "9da70723-692c-4609-b19e-b4e3e3ae2522",
-       "triangles": 24679,
+       "triangles": 26403,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 14,
-        "prism": 37,
+        "profile": 42,
+        "prism": 73,
         "party": 0
        },
        "n_frames": 19,
        "texels": {
-        "n": 726391,
-        "seen": 0.6125,
-        "near": 0.0537,
-        "plain": 0.3338
+        "n": 958998,
+        "seen": 0.694,
+        "near": 0.0493,
+        "plain": 0.2567
        },
        "fill": {
-        "n": 726391,
-        "seen": 0.6125,
-        "near": 0.0537,
-        "plain": 0.2256,
+        "n": 958998,
+        "seen": 0.694,
+        "near": 0.0493,
+        "plain": 0.1709,
         "twin": 0.0,
-        "rhythm": 0.0059,
-        "patch": 0.1023
+        "rhythm": 0.0098,
+        "patch": 0.076
        }
       }
      },
@@ -8879,18 +8879,18 @@
        "n_frames": 18,
        "texels": {
         "n": 73011,
-        "seen": 0.3749,
-        "near": 0.0818,
-        "plain": 0.5433
+        "seen": 0.3898,
+        "near": 0.0965,
+        "plain": 0.5137
        },
        "fill": {
         "n": 73011,
-        "seen": 0.3749,
-        "near": 0.0818,
-        "plain": 0.2379,
+        "seen": 0.3898,
+        "near": 0.0965,
+        "plain": 0.2084,
         "twin": 0.0,
-        "rhythm": 0.0004,
-        "patch": 0.305
+        "rhythm": 0.0441,
+        "patch": 0.2612
        }
       }
      },
@@ -8915,10 +8915,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        -0.688557453969008,
-        -5.530570686946341,
-        12.5,
-        30.73796580575409
+        -1.2879999999999998,
+        -5.452999999999999,
+        10.852500000000001,
+        30.0418831342178
        ]
       },
       "geometricError": 0.0,
@@ -8928,29 +8928,29 @@
       "extras": {
        "name": "cc3f65d1-ce9d-4636-9787-ff24161c8e7e",
        "gers": "cc3f65d1-ce9d-4636-9787-ff24161c8e7e",
-       "triangles": 459,
+       "triangles": 485,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 1,
-        "prism": 2,
+        "profile": 4,
+        "prism": 3,
         "party": 1
        },
        "n_frames": 18,
        "texels": {
-        "n": 146803,
-        "seen": 0.1005,
-        "near": 0.0028,
-        "plain": 0.8967
+        "n": 91880,
+        "seen": 0.2612,
+        "near": 0.0336,
+        "plain": 0.7052
        },
        "fill": {
-        "n": 146803,
-        "seen": 0.1005,
-        "near": 0.0028,
-        "plain": 0.8129,
+        "n": 91880,
+        "seen": 0.2612,
+        "near": 0.0336,
+        "plain": 0.5284,
         "twin": 0.0,
-        "rhythm": 0.0,
-        "patch": 0.0838
+        "rhythm": 0.0352,
+        "patch": 0.1416
        }
       }
      },
@@ -9060,16 +9060,16 @@
        "texels": {
         "n": 42758,
         "seen": 0.5273,
-        "near": 0.0179,
-        "plain": 0.4548
+        "near": 0.0177,
+        "plain": 0.4549
        },
        "fill": {
         "n": 42758,
         "seen": 0.5273,
-        "near": 0.0179,
-        "plain": 0.1604,
+        "near": 0.0177,
+        "plain": 0.1605,
         "twin": 0.0,
-        "rhythm": 0.0004,
+        "rhythm": 0.0003,
         "patch": 0.2941
        }
       }
@@ -9139,10 +9139,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      218.8794013086299,
+      219.0882707874407,
       -239.94767406443134,
-      16.953493841458112,
-      156.78986080082677
+      16.95348907308653,
+      156.30763476684365
      ]
     },
     "geometricError": 8.0,
@@ -9433,18 +9433,18 @@
        "n_frames": 15,
        "texels": {
         "n": 333746,
-        "seen": 0.3886,
-        "near": 0.0508,
-        "plain": 0.5606
+        "seen": 0.3895,
+        "near": 0.0538,
+        "plain": 0.5566
        },
        "fill": {
         "n": 333746,
-        "seen": 0.3886,
-        "near": 0.0508,
-        "plain": 0.4271,
+        "seen": 0.3895,
+        "near": 0.0538,
+        "plain": 0.4218,
         "twin": 0.0,
         "rhythm": 0.0021,
-        "patch": 0.1314
+        "patch": 0.1327
        }
       }
      },
@@ -9469,10 +9469,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        8.285791154559881,
+        8.703530112322909,
         -15.945014947653192,
         29.585252142014248,
-        76.13990845649764
+        75.82538873892057
        ]
       },
       "geometricError": 0.0,
@@ -9482,29 +9482,29 @@
       "extras": {
        "name": "Louisville Marriott Downtown",
        "gers": "d683e785-f8c8-475c-a0a3-c3b476924098",
-       "triangles": 7216,
+       "triangles": 7178,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 27,
-        "prism": 6,
+        "profile": 26,
+        "prism": 7,
         "party": 0
        },
        "n_frames": 13,
        "texels": {
-        "n": 1204945,
-        "seen": 0.76,
-        "near": 0.0655,
-        "plain": 0.1745
+        "n": 1203867,
+        "seen": 0.7668,
+        "near": 0.0609,
+        "plain": 0.1723
        },
        "fill": {
-        "n": 1204945,
-        "seen": 0.76,
-        "near": 0.0655,
-        "plain": 0.0659,
+        "n": 1203867,
+        "seen": 0.7668,
+        "near": 0.0609,
+        "plain": 0.0673,
         "twin": 0.0,
-        "rhythm": 0.0582,
-        "patch": 0.0504
+        "rhythm": 0.0514,
+        "patch": 0.0536
        }
       }
      },
@@ -9796,29 +9796,29 @@
       "extras": {
        "name": "SpringHill Suites Louisville Downtown",
        "gers": "93cfbc0a-8780-4992-89fd-5a5c3d69369d",
-       "triangles": 1878,
+       "triangles": 1893,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 1,
-        "prism": 7,
+        "profile": 3,
+        "prism": 5,
         "party": 4
        },
        "n_frames": 18,
        "texels": {
-        "n": 290460,
-        "seen": 0.4965,
-        "near": 0.065,
-        "plain": 0.4385
+        "n": 269786,
+        "seen": 0.6075,
+        "near": 0.0365,
+        "plain": 0.356
        },
        "fill": {
-        "n": 290460,
-        "seen": 0.4965,
-        "near": 0.065,
-        "plain": 0.3055,
+        "n": 269786,
+        "seen": 0.6075,
+        "near": 0.0365,
+        "plain": 0.2477,
         "twin": 0.0,
-        "rhythm": 0.0059,
-        "patch": 0.1271
+        "rhythm": 0.0103,
+        "patch": 0.0979
        }
       }
      },
@@ -10050,29 +10050,29 @@
       "extras": {
        "name": "Hall of Justice",
        "gers": "36610eb4-e929-4e81-95d5-bb33f1300d87",
-       "triangles": 23229,
+       "triangles": 24339,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 18,
-        "prism": 10,
+        "profile": 28,
+        "prism": 20,
         "party": 0
        },
        "n_frames": 17,
        "texels": {
-        "n": 644296,
-        "seen": 0.7099,
-        "near": 0.0477,
-        "plain": 0.2424
+        "n": 747540,
+        "seen": 0.74,
+        "near": 0.0474,
+        "plain": 0.2126
        },
        "fill": {
-        "n": 644296,
-        "seen": 0.7099,
-        "near": 0.0477,
-        "plain": 0.1479,
+        "n": 747540,
+        "seen": 0.74,
+        "near": 0.0474,
+        "plain": 0.1288,
         "twin": 0.0,
-        "rhythm": 0.0121,
-        "patch": 0.0824
+        "rhythm": 0.013,
+        "patch": 0.0709
        }
       }
      },
@@ -10110,7 +10110,7 @@
       "extras": {
        "name": "Louisville City Hall",
        "gers": "3f31ce15-69e3-4fe5-b424-deb83061f42e",
-       "triangles": 5984,
+       "triangles": 5963,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -10120,19 +10120,19 @@
        },
        "n_frames": 19,
        "texels": {
-        "n": 229966,
-        "seen": 0.6904,
-        "near": 0.0834,
-        "plain": 0.2262
+        "n": 224211,
+        "seen": 0.6861,
+        "near": 0.081,
+        "plain": 0.2329
        },
        "fill": {
-        "n": 229966,
-        "seen": 0.6904,
-        "near": 0.0834,
-        "plain": 0.1055,
+        "n": 224211,
+        "seen": 0.6861,
+        "near": 0.081,
+        "plain": 0.1,
         "twin": 0.0,
-        "rhythm": 0.0197,
-        "patch": 0.101
+        "rhythm": 0.0321,
+        "patch": 0.1008
        }
       }
      },
@@ -10241,15 +10241,15 @@
        "n_frames": 19,
        "texels": {
         "n": 1930,
-        "seen": 0.5917,
-        "near": 0.1275,
-        "plain": 0.2808
+        "seen": 0.5959,
+        "near": 0.1337,
+        "plain": 0.2705
        },
        "fill": {
         "n": 1930,
-        "seen": 0.5917,
-        "near": 0.1275,
-        "plain": 0.2808,
+        "seen": 0.5959,
+        "near": 0.1337,
+        "plain": 0.2705,
         "twin": 0.0,
         "rhythm": 0.0,
         "patch": 0.0
@@ -10965,10 +10965,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        -2.26131586991157,
+        -1.8898592716282927,
         5.8733686608799545,
         8.6443,
-        22.039464655231225
+        22.312996383338806
        ]
       },
       "geometricError": 0.0,
@@ -10978,29 +10978,29 @@
       "extras": {
        "name": "a629ead2-02f3-4c6b-9d8b-c3d444f48437",
        "gers": "a629ead2-02f3-4c6b-9d8b-c3d444f48437",
-       "triangles": 2483,
+       "triangles": 2524,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 8,
-        "prism": 10,
+        "profile": 7,
+        "prism": 11,
         "party": 2
        },
        "n_frames": 19,
        "texels": {
-        "n": 106001,
-        "seen": 0.433,
-        "near": 0.0965,
-        "plain": 0.4705
+        "n": 146257,
+        "seen": 0.3315,
+        "near": 0.0879,
+        "plain": 0.5807
        },
        "fill": {
-        "n": 106001,
-        "seen": 0.433,
-        "near": 0.0965,
-        "plain": 0.2734,
+        "n": 146257,
+        "seen": 0.3315,
+        "near": 0.0879,
+        "plain": 0.4224,
         "twin": 0.0,
-        "rhythm": 0.0339,
-        "patch": 0.1632
+        "rhythm": 0.0293,
+        "patch": 0.1289
        }
       }
      },
@@ -11289,14 +11289,14 @@
        "n_frames": 19,
        "texels": {
         "n": 343946,
-        "seen": 0.5453,
-        "near": 0.053,
+        "seen": 0.5454,
+        "near": 0.0529,
         "plain": 0.4017
        },
        "fill": {
         "n": 343946,
-        "seen": 0.5453,
-        "near": 0.053,
+        "seen": 0.5454,
+        "near": 0.0529,
         "plain": 0.2751,
         "twin": 0.0,
         "rhythm": 0.013,
@@ -11503,10 +11503,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      356.8532879536506,
+      356.8532857692917,
       59.783596106106415,
-      9.18917573359795,
-      88.25577140243453
+      9.189175081439316,
+      88.24596153783601
      ]
     },
     "geometricError": 8.0,
@@ -12382,9 +12382,9 @@
       "boundingVolume": {
        "sphere": [
         2.363090649217037,
-        -0.1579841063423313,
+        -0.06819032894337163,
         14.947500000000002,
-        36.7008530370452
+        36.63443649491504
        ]
       },
       "geometricError": 0.0,
@@ -12394,29 +12394,29 @@
       "extras": {
        "name": "Aloft Louisville Downtown",
        "gers": "e6eecaf6-813b-47a9-ae76-909d29c58f83",
-       "triangles": 1380,
+       "triangles": 1381,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 4,
+        "profile": 2,
         "prism": 1,
-        "party": 2
+        "party": 4
        },
        "n_frames": 17,
        "texels": {
-        "n": 262356,
-        "seen": 0.6767,
-        "near": 0.0593,
-        "plain": 0.264
+        "n": 230816,
+        "seen": 0.699,
+        "near": 0.0459,
+        "plain": 0.2551
        },
        "fill": {
-        "n": 262356,
-        "seen": 0.6767,
-        "near": 0.0593,
-        "plain": 0.1042,
+        "n": 230816,
+        "seen": 0.699,
+        "near": 0.0459,
+        "plain": 0.1184,
         "twin": 0.0,
-        "rhythm": 0.0827,
-        "patch": 0.0771
+        "rhythm": 0.0573,
+        "patch": 0.0793
        }
       }
      },
@@ -12839,17 +12839,17 @@
        "n_frames": 17,
        "texels": {
         "n": 346636,
-        "seen": 0.7774,
-        "near": 0.0658,
-        "plain": 0.1569
+        "seen": 0.7776,
+        "near": 0.066,
+        "plain": 0.1563
        },
        "fill": {
         "n": 346636,
-        "seen": 0.7774,
-        "near": 0.0658,
+        "seen": 0.7776,
+        "near": 0.066,
         "plain": 0.0429,
         "twin": 0.0,
-        "rhythm": 0.0495,
+        "rhythm": 0.0489,
         "patch": 0.0645
        }
       }
@@ -13262,29 +13262,29 @@
       "extras": {
        "name": "Presbyterian Church (U.S.A.) Headquarters",
        "gers": "464787e1-68a8-4cb7-bc79-820a329ac120",
-       "triangles": 21317,
+       "triangles": 22329,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 8,
-        "prism": 10,
+        "profile": 14,
+        "prism": 11,
         "party": 0
        },
        "n_frames": 15,
        "texels": {
-        "n": 607721,
-        "seen": 0.6814,
-        "near": 0.0394,
-        "plain": 0.2792
+        "n": 731709,
+        "seen": 0.7192,
+        "near": 0.0601,
+        "plain": 0.2207
        },
        "fill": {
-        "n": 607721,
-        "seen": 0.6814,
-        "near": 0.0394,
-        "plain": 0.2022,
+        "n": 731709,
+        "seen": 0.7192,
+        "near": 0.0601,
+        "plain": 0.1395,
         "twin": 0.0,
-        "rhythm": 0.005,
-        "patch": 0.072
+        "rhythm": 0.0039,
+        "patch": 0.0774
        }
       }
      },
@@ -13322,29 +13322,29 @@
       "extras": {
        "name": "77a5935b-0fd6-4749-9e54-e2640138c45d",
        "gers": "77a5935b-0fd6-4749-9e54-e2640138c45d",
-       "triangles": 1963,
+       "triangles": 2233,
        "path": "profile",
-       "archetype": "complex_roof",
+       "archetype": "sculpted_facade",
        "faces": {
-        "profile": 0,
+        "profile": 5,
         "prism": 2,
         "party": 2
        },
        "n_frames": 18,
        "texels": {
-        "n": 48718,
-        "seen": 0.4747,
-        "near": 0.0102,
-        "plain": 0.5151
+        "n": 69903,
+        "seen": 0.4013,
+        "near": 0.0832,
+        "plain": 0.5155
        },
        "fill": {
-        "n": 48718,
-        "seen": 0.4747,
-        "near": 0.0102,
-        "plain": 0.22,
+        "n": 69903,
+        "seen": 0.4013,
+        "near": 0.0832,
+        "plain": 0.1927,
         "twin": 0.0,
-        "rhythm": 0.0001,
-        "patch": 0.295
+        "rhythm": 0.0269,
+        "patch": 0.296
        }
       }
      },
@@ -13575,18 +13575,18 @@
        "n_frames": 19,
        "texels": {
         "n": 87355,
-        "seen": 0.5814,
-        "near": 0.1561,
-        "plain": 0.2625
+        "seen": 0.5828,
+        "near": 0.1551,
+        "plain": 0.2621
        },
        "fill": {
         "n": 87355,
-        "seen": 0.5814,
-        "near": 0.1561,
+        "seen": 0.5828,
+        "near": 0.1551,
         "plain": 0.0847,
         "twin": 0.0,
         "rhythm": 0.0079,
-        "patch": 0.1698
+        "patch": 0.1695
        }
       }
      },
@@ -13695,17 +13695,17 @@
        "n_frames": 16,
        "texels": {
         "n": 66034,
-        "seen": 0.5857,
-        "near": 0.0549,
-        "plain": 0.3594
+        "seen": 0.5867,
+        "near": 0.0543,
+        "plain": 0.359
        },
        "fill": {
         "n": 66034,
-        "seen": 0.5857,
-        "near": 0.0549,
+        "seen": 0.5867,
+        "near": 0.0543,
         "plain": 0.2798,
         "twin": 0.0,
-        "rhythm": 0.0022,
+        "rhythm": 0.0018,
         "patch": 0.0774
        }
       }
@@ -13936,17 +13936,17 @@
        "texels": {
         "n": 514121,
         "seen": 0.6645,
-        "near": 0.0986,
-        "plain": 0.2369
+        "near": 0.0988,
+        "plain": 0.2367
        },
        "fill": {
         "n": 514121,
         "seen": 0.6645,
-        "near": 0.0986,
-        "plain": 0.1587,
+        "near": 0.0988,
+        "plain": 0.1583,
         "twin": 0.0,
         "rhythm": 0.0047,
-        "patch": 0.0735
+        "patch": 0.0737
        }
       }
      },
@@ -14228,7 +14228,7 @@
         6.920921669631299,
         2.853255116896448,
         12.9509,
-        24.467894385427105
+        24.79278930465474
        ]
       },
       "geometricError": 0.0,
@@ -14238,29 +14238,29 @@
       "extras": {
        "name": "River City Bank",
        "gers": "4405303a-984f-4828-9544-a2fb4caccb31",
-       "triangles": 2846,
+       "triangles": 3112,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 5,
-        "prism": 3,
+        "profile": 9,
+        "prism": 9,
         "party": 0
        },
        "n_frames": 18,
        "texels": {
-        "n": 153905,
-        "seen": 0.8259,
-        "near": 0.0471,
-        "plain": 0.127
+        "n": 173116,
+        "seen": 0.887,
+        "near": 0.0211,
+        "plain": 0.092
        },
        "fill": {
-        "n": 153905,
-        "seen": 0.8259,
-        "near": 0.0471,
-        "plain": 0.0274,
+        "n": 173116,
+        "seen": 0.887,
+        "near": 0.0211,
+        "plain": 0.0322,
         "twin": 0.0,
-        "rhythm": 0.0337,
-        "patch": 0.0659
+        "rhythm": 0.0,
+        "patch": 0.0598
        }
       }
      },
@@ -14309,18 +14309,18 @@
        "n_frames": 19,
        "texels": {
         "n": 561932,
-        "seen": 0.6721,
-        "near": 0.0388,
-        "plain": 0.2891
+        "seen": 0.6719,
+        "near": 0.0387,
+        "plain": 0.2894
        },
        "fill": {
         "n": 561932,
-        "seen": 0.6721,
-        "near": 0.0388,
-        "plain": 0.1893,
+        "seen": 0.6719,
+        "near": 0.0387,
+        "plain": 0.1898,
         "twin": 0.0,
         "rhythm": 0.0239,
-        "patch": 0.0759
+        "patch": 0.0758
        }
       }
      }
@@ -14503,18 +14503,18 @@
        "n_frames": 14,
        "texels": {
         "n": 795913,
-        "seen": 0.788,
-        "near": 0.0663,
-        "plain": 0.1457
+        "seen": 0.7906,
+        "near": 0.067,
+        "plain": 0.1423
        },
        "fill": {
         "n": 795913,
-        "seen": 0.788,
-        "near": 0.0663,
-        "plain": 0.0707,
+        "seen": 0.7906,
+        "near": 0.067,
+        "plain": 0.0705,
         "twin": 0.0,
-        "rhythm": 0.0182,
-        "patch": 0.0568
+        "rhythm": 0.0168,
+        "patch": 0.055
        }
       }
      },
@@ -16716,7 +16716,7 @@
         -7.690552846543799,
         -7.4986229194575085,
         40.31125,
-        55.2350953450375
+        55.39529256770963
        ]
       },
       "geometricError": 0.0,
@@ -16726,25 +16726,25 @@
       "extras": {
        "name": "Truist Tower - One Riverfront Plaza",
        "gers": "3158c676-4406-43e9-8a71-183312badbb5",
-       "triangles": 9102,
+       "triangles": 9096,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
         "profile": 10,
-        "prism": 8,
+        "prism": 7,
         "party": 0
        },
        "n_frames": 14,
        "texels": {
-        "n": 653923,
-        "seen": 0.7666,
-        "near": 0.1273,
+        "n": 654021,
+        "seen": 0.7676,
+        "near": 0.1264,
         "plain": 0.1061
        },
        "fill": {
-        "n": 653923,
-        "seen": 0.7666,
-        "near": 0.1273,
+        "n": 654021,
+        "seen": 0.7676,
+        "near": 0.1264,
         "plain": 0.0233,
         "twin": 0.0,
         "rhythm": 0.0462,
@@ -16991,17 +16991,17 @@
        "n_frames": 16,
        "texels": {
         "n": 988165,
-        "seen": 0.5676,
-        "near": 0.0815,
-        "plain": 0.3509
+        "seen": 0.5669,
+        "near": 0.0819,
+        "plain": 0.3512
        },
        "fill": {
         "n": 988165,
-        "seen": 0.5676,
-        "near": 0.0815,
+        "seen": 0.5669,
+        "near": 0.0819,
         "plain": 0.1202,
         "twin": 0.0,
-        "rhythm": 0.1847,
+        "rhythm": 0.1849,
         "patch": 0.046
        }
       }
@@ -17231,14 +17231,14 @@
        "n_frames": 16,
        "texels": {
         "n": 117741,
-        "seen": 0.6834,
-        "near": 0.0584,
+        "seen": 0.6836,
+        "near": 0.0582,
         "plain": 0.2582
        },
        "fill": {
         "n": 117741,
-        "seen": 0.6834,
-        "near": 0.0584,
+        "seen": 0.6836,
+        "near": 0.0582,
         "plain": 0.0802,
         "twin": 0.0,
         "rhythm": 0.0732,
@@ -17251,10 +17251,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      -365.4055923325359,
-      344.3981638196856,
-      8.708335061557591,
-      108.37229335018603
+      -365.4055921836116,
+      344.38453735550866,
+      8.694585860008374,
+      108.20069193241967
      ]
     },
     "geometricError": 8.0,
@@ -17342,9 +17342,9 @@
       "boundingVolume": {
        "sphere": [
         5.949255264055747,
-        6.4624975701933955,
-        18.64225,
-        43.37303407782583
+        6.435246253292295,
+        18.61475,
+        43.20902716503771
        ]
       },
       "geometricError": 0.0,
@@ -17354,29 +17354,29 @@
       "extras": {
        "name": "Muhammad Ali Center",
        "gers": "c88a24c5-68c5-4adb-846f-8e99185bd386",
-       "triangles": 8515,
+       "triangles": 9522,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 10,
-        "prism": 8,
+        "profile": 19,
+        "prism": 18,
         "party": 0
        },
        "n_frames": 18,
        "texels": {
-        "n": 311337,
-        "seen": 0.7587,
-        "near": 0.0653,
-        "plain": 0.176
+        "n": 381729,
+        "seen": 0.7705,
+        "near": 0.0593,
+        "plain": 0.1701
        },
        "fill": {
-        "n": 311337,
-        "seen": 0.7587,
-        "near": 0.0653,
-        "plain": 0.0766,
+        "n": 381729,
+        "seen": 0.7705,
+        "near": 0.0593,
+        "plain": 0.0668,
         "twin": 0.0,
-        "rhythm": 0.0172,
-        "patch": 0.0822
+        "rhythm": 0.0165,
+        "patch": 0.0868
        }
       }
      }
@@ -17439,18 +17439,18 @@
        "n_frames": 20,
        "texels": {
         "n": 198633,
-        "seen": 0.3561,
+        "seen": 0.3567,
         "near": 0.0676,
-        "plain": 0.5762
+        "plain": 0.5758
        },
        "fill": {
         "n": 198633,
-        "seen": 0.3561,
+        "seen": 0.3567,
         "near": 0.0676,
-        "plain": 0.3994,
+        "plain": 0.3992,
         "twin": 0.0,
         "rhythm": 0.0003,
-        "patch": 0.1765
+        "patch": 0.1762
        }
       }
      },
@@ -18113,14 +18113,14 @@
        "n_frames": 14,
        "texels": {
         "n": 1076397,
-        "seen": 0.7631,
-        "near": 0.0966,
-        "plain": 0.1403
+        "seen": 0.7637,
+        "near": 0.0961,
+        "plain": 0.1402
        },
        "fill": {
         "n": 1076397,
-        "seen": 0.7631,
-        "near": 0.0966,
+        "seen": 0.7637,
+        "near": 0.0961,
         "plain": 0.0608,
         "twin": 0.0,
         "rhythm": 0.0341,
@@ -18193,10 +18193,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      103.46052193458308,
-      342.0178224546835,
-      15.77415062719956,
-      133.97730948751226
+      103.64776872785296,
+      342.12627739133313,
+      15.71625091531314,
+      134.16180289410855
      ]
     },
     "geometricError": 8.0,
@@ -18247,13 +18247,13 @@
        "n_frames": 14,
        "texels": {
         "n": 643701,
-        "seen": 0.3512,
+        "seen": 0.3511,
         "near": 0.0287,
         "plain": 0.6201
        },
        "fill": {
         "n": 643701,
-        "seen": 0.3512,
+        "seen": 0.3511,
         "near": 0.0287,
         "plain": 0.5198,
         "twin": 0.0,
@@ -18283,10 +18283,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        7.4308028804863895,
-        -13.202500000000004,
-        30.97615,
-        94.33723768617533
+        7.80880288048639,
+        -12.98558093794919,
+        30.99365,
+        94.71988300837131
        ]
       },
       "geometricError": 0.0,
@@ -18296,29 +18296,29 @@
       "extras": {
        "name": "Galt House Hotel",
        "gers": "a7757e8c-6cc8-4b59-8ba1-3eaf193c15cc",
-       "triangles": 24090,
+       "triangles": 24900,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 15,
-        "prism": 5,
+        "profile": 28,
+        "prism": 13,
         "party": 0
        },
        "n_frames": 14,
        "texels": {
-        "n": 1817250,
-        "seen": 0.5021,
-        "near": 0.0679,
-        "plain": 0.4301
+        "n": 1796310,
+        "seen": 0.5738,
+        "near": 0.0763,
+        "plain": 0.3499
        },
        "fill": {
-        "n": 1817250,
-        "seen": 0.5021,
-        "near": 0.0679,
-        "plain": 0.2926,
+        "n": 1796310,
+        "seen": 0.5738,
+        "near": 0.0763,
+        "plain": 0.2818,
         "twin": 0.0,
-        "rhythm": 0.0862,
-        "patch": 0.0513
+        "rhythm": 0.0205,
+        "patch": 0.0476
        }
       }
      },
@@ -18343,10 +18343,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        1.0353661610899891,
+        1.0318661610899884,
         2.7317191001752423,
-        14.234570000000001,
-        33.31645885085167
+        14.0043,
+        33.216889206132244
        ]
       },
       "geometricError": 0.0,
@@ -18356,29 +18356,29 @@
       "extras": {
        "name": "Substation",
        "gers": "c77a9ee8-6f11-4777-b341-314a3c0ba269",
-       "triangles": 5279,
+       "triangles": 5450,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 2,
-        "prism": 6,
+        "profile": 8,
+        "prism": 8,
         "party": 0
        },
        "n_frames": 14,
        "texels": {
-        "n": 209461,
-        "seen": 0.3514,
-        "near": 0.0383,
-        "plain": 0.6103
+        "n": 252907,
+        "seen": 0.4268,
+        "near": 0.0774,
+        "plain": 0.4959
        },
        "fill": {
-        "n": 209461,
-        "seen": 0.3514,
-        "near": 0.0383,
-        "plain": 0.4157,
+        "n": 252907,
+        "seen": 0.4268,
+        "near": 0.0774,
+        "plain": 0.3184,
         "twin": 0.0,
-        "rhythm": 0.1108,
-        "patch": 0.0838
+        "rhythm": 0.0819,
+        "patch": 0.0955
        }
       }
      }
@@ -19249,17 +19249,17 @@
        "n_frames": 18,
        "texels": {
         "n": 496610,
-        "seen": 0.5508,
-        "near": 0.0809,
-        "plain": 0.3683
+        "seen": 0.5513,
+        "near": 0.0807,
+        "plain": 0.368
        },
        "fill": {
         "n": 496610,
-        "seen": 0.5508,
-        "near": 0.0809,
+        "seen": 0.5513,
+        "near": 0.0807,
         "plain": 0.1424,
         "twin": 0.0,
-        "rhythm": 0.1601,
+        "rhythm": 0.1598,
         "patch": 0.0658
        }
       }
@@ -19309,14 +19309,14 @@
        "n_frames": 19,
        "texels": {
         "n": 24628,
-        "seen": 0.6259,
-        "near": 0.0337,
+        "seen": 0.6263,
+        "near": 0.0333,
         "plain": 0.3404
        },
        "fill": {
         "n": 24628,
-        "seen": 0.6259,
-        "near": 0.0337,
+        "seen": 0.6263,
+        "near": 0.0333,
         "plain": 0.1165,
         "twin": 0.0,
         "rhythm": 0.0,
@@ -19429,18 +19429,18 @@
        "n_frames": 18,
        "texels": {
         "n": 4224,
-        "seen": 0.8984,
-        "near": 0.0367,
-        "plain": 0.0649
+        "seen": 0.9067,
+        "near": 0.0369,
+        "plain": 0.0563
        },
        "fill": {
         "n": 4224,
-        "seen": 0.8984,
-        "near": 0.0367,
+        "seen": 0.9067,
+        "near": 0.0369,
         "plain": 0.0237,
         "twin": 0.0,
         "rhythm": 0.0,
-        "patch": 0.0412
+        "patch": 0.0327
        }
       }
      },
@@ -19669,17 +19669,17 @@
        "n_frames": 19,
        "texels": {
         "n": 33513,
-        "seen": 0.3476,
-        "near": 0.0997,
-        "plain": 0.5527
+        "seen": 0.346,
+        "near": 0.1004,
+        "plain": 0.5536
        },
        "fill": {
         "n": 33513,
-        "seen": 0.3476,
-        "near": 0.0997,
-        "plain": 0.3588,
+        "seen": 0.346,
+        "near": 0.1004,
+        "plain": 0.3589,
         "twin": 0.0,
-        "rhythm": 0.0818,
+        "rhythm": 0.0826,
         "patch": 0.112
        }
       }
@@ -19863,18 +19863,18 @@
        "n_frames": 14,
        "texels": {
         "n": 96079,
-        "seen": 0.5512,
-        "near": 0.0708,
-        "plain": 0.378
+        "seen": 0.5514,
+        "near": 0.0707,
+        "plain": 0.3779
        },
        "fill": {
         "n": 96079,
-        "seen": 0.5512,
-        "near": 0.0708,
+        "seen": 0.5514,
+        "near": 0.0707,
         "plain": 0.1858,
         "twin": 0.0,
         "rhythm": 0.0905,
-        "patch": 0.1017
+        "patch": 0.1016
        }
       }
      },
@@ -20043,18 +20043,18 @@
        "n_frames": 13,
        "texels": {
         "n": 323740,
-        "seen": 0.6427,
-        "near": 0.046,
-        "plain": 0.3114
+        "seen": 0.6428,
+        "near": 0.0461,
+        "plain": 0.3111
        },
        "fill": {
         "n": 323740,
-        "seen": 0.6427,
-        "near": 0.046,
-        "plain": 0.2042,
+        "seen": 0.6428,
+        "near": 0.0461,
+        "plain": 0.2036,
         "twin": 0.0,
         "rhythm": 0.0098,
-        "patch": 0.0973
+        "patch": 0.0976
        }
       }
      }
@@ -20237,15 +20237,15 @@
        "n_frames": 15,
        "texels": {
         "n": 440951,
-        "seen": 0.6264,
+        "seen": 0.6263,
         "near": 0.0374,
-        "plain": 0.3362
+        "plain": 0.3363
        },
        "fill": {
         "n": 440951,
-        "seen": 0.6264,
+        "seen": 0.6263,
         "near": 0.0374,
-        "plain": 0.1939,
+        "plain": 0.194,
         "twin": 0.0,
         "rhythm": 0.0256,
         "patch": 0.1167
@@ -20925,14 +20925,14 @@
        "n_frames": 19,
        "texels": {
         "n": 2723,
-        "seen": 0.722,
-        "near": 0.0599,
+        "seen": 0.7352,
+        "near": 0.0466,
         "plain": 0.2181
        },
        "fill": {
         "n": 2723,
-        "seen": 0.722,
-        "near": 0.0599,
+        "seen": 0.7352,
+        "near": 0.0466,
         "plain": 0.0,
         "twin": 0.0,
         "rhythm": 0.0,
@@ -21105,18 +21105,18 @@
        "n_frames": 19,
        "texels": {
         "n": 15240,
-        "seen": 0.8889,
-        "near": 0.0286,
-        "plain": 0.0825
+        "seen": 0.8932,
+        "near": 0.0269,
+        "plain": 0.0799
        },
        "fill": {
         "n": 15240,
-        "seen": 0.8889,
-        "near": 0.0286,
+        "seen": 0.8932,
+        "near": 0.0269,
         "plain": 0.0074,
         "twin": 0.0,
         "rhythm": 0.0,
-        "patch": 0.0751
+        "patch": 0.0725
        }
       }
      }
@@ -21179,15 +21179,15 @@
        "n_frames": 16,
        "texels": {
         "n": 13712,
-        "seen": 0.4409,
-        "near": 0.0616,
-        "plain": 0.4975
+        "seen": 0.439,
+        "near": 0.06,
+        "plain": 0.501
        },
        "fill": {
         "n": 13712,
-        "seen": 0.4409,
-        "near": 0.0616,
-        "plain": 0.1095,
+        "seen": 0.439,
+        "near": 0.06,
+        "plain": 0.113,
         "twin": 0.0,
         "rhythm": 0.0888,
         "patch": 0.2992
@@ -21707,10 +21707,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      -547.0874467728427,
+      -547.1075462271983,
       -75.68706667004153,
       15.287622170289978,
-      145.4397849712608
+      145.4383976841592
      ]
     },
     "geometricError": 8.0,
@@ -21761,14 +21761,14 @@
        "n_frames": 16,
        "texels": {
         "n": 26062,
-        "seen": 0.8023,
-        "near": 0.0218,
-        "plain": 0.1758
+        "seen": 0.8022,
+        "near": 0.0219,
+        "plain": 0.1759
        },
        "fill": {
         "n": 26062,
-        "seen": 0.8023,
-        "near": 0.0218,
+        "seen": 0.8022,
+        "near": 0.0219,
         "plain": 0.0299,
         "twin": 0.0,
         "rhythm": 0.0002,
@@ -21797,10 +21797,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        4.348123256969508,
+        4.3079243479483225,
         2.412561145109674,
         7.5066,
-        41.25560928823255
+        41.27316698974814
        ]
       },
       "geometricError": 0.0,
@@ -21810,7 +21810,7 @@
       "extras": {
        "name": "Louisville Metro Youth Detention Services",
        "gers": "4ec78a7d-eb75-40d8-8a24-ba0d561a652a",
-       "triangles": 11342,
+       "triangles": 11331,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -21820,19 +21820,19 @@
        },
        "n_frames": 16,
        "texels": {
-        "n": 324559,
-        "seen": 0.5795,
-        "near": 0.0436,
-        "plain": 0.3769
+        "n": 323735,
+        "seen": 0.5793,
+        "near": 0.0441,
+        "plain": 0.3766
        },
        "fill": {
-        "n": 324559,
-        "seen": 0.5795,
-        "near": 0.0436,
-        "plain": 0.2342,
+        "n": 323735,
+        "seen": 0.5793,
+        "near": 0.0441,
+        "plain": 0.2346,
         "twin": 0.0,
         "rhythm": 0.0262,
-        "patch": 0.1166
+        "patch": 0.1157
        }
       }
      },
@@ -21941,18 +21941,18 @@
        "n_frames": 15,
        "texels": {
         "n": 788586,
-        "seen": 0.6254,
-        "near": 0.0731,
-        "plain": 0.3015
+        "seen": 0.6251,
+        "near": 0.0725,
+        "plain": 0.3024
        },
        "fill": {
         "n": 788586,
-        "seen": 0.6254,
-        "near": 0.0731,
-        "plain": 0.137,
+        "seen": 0.6251,
+        "near": 0.0725,
+        "plain": 0.1394,
         "twin": 0.0,
-        "rhythm": 0.0935,
-        "patch": 0.071
+        "rhythm": 0.093,
+        "patch": 0.0701
        }
       }
      },
@@ -22155,10 +22155,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      98.15666037745541,
-      -60.20402643503621,
-      18.79678603587672,
-      148.8772856509489
+      98.17440104827983,
+      -60.17695728689432,
+      18.80678606731817,
+      148.8782281619066
      ]
     },
     "geometricError": 8.0,
@@ -22185,10 +22185,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        18.871448895306877,
-        -1.3155000000000001,
-        17.895500000000002,
-        148.8772856509489
+        18.88918970706637,
+        -1.2884309332515116,
+        17.9055,
+        148.8782281619066
        ]
       },
       "geometricError": 0.0,
@@ -22198,29 +22198,29 @@
       "extras": {
        "name": "Kentucky International Convention Center",
        "gers": "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7",
-       "triangles": 127445,
+       "triangles": 129626,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 16,
-        "prism": 102,
+        "profile": 40,
+        "prism": 149,
         "party": 0
        },
        "n_frames": 14,
        "texels": {
-        "n": 2659232,
-        "seen": 0.7469,
-        "near": 0.0241,
-        "plain": 0.2289
+        "n": 2816875,
+        "seen": 0.7294,
+        "near": 0.0354,
+        "plain": 0.2352
        },
        "fill": {
-        "n": 2659232,
-        "seen": 0.7469,
-        "near": 0.0241,
-        "plain": 0.1813,
+        "n": 2816875,
+        "seen": 0.7294,
+        "near": 0.0354,
+        "plain": 0.1789,
         "twin": 0.0,
-        "rhythm": 0.0074,
-        "patch": 0.0402
+        "rhythm": 0.0112,
+        "patch": 0.0451
        }
       }
      }
@@ -22594,7 +22594,7 @@
         "plain": 0.1219,
         "twin": 0.0,
         "rhythm": 0.0265,
-        "patch": 0.1183
+        "patch": 0.1184
        }
       }
      }
@@ -23467,10 +23467,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      227.49795855913544,
-      307.3240100699477,
-      17.246566927526146,
-      123.1031586414329
+      227.4956180184381,
+      307.7327171978541,
+      17.242047825362533,
+      122.78520576576383
      ]
     },
     "geometricError": 8.0,
@@ -23497,10 +23497,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        -9.884305846178258,
-        8.704551786821114,
-        22.5617,
-        123.1031586414329
+        -9.886634240357253,
+        9.113259195593116,
+        22.557199999999998,
+        122.78520576576383
        ]
       },
       "geometricError": 0.0,
@@ -23510,29 +23510,29 @@
       "extras": {
        "name": "KFC Yum! Center",
        "gers": "893e88ee-626a-4d1c-a8b1-529ec062d9db",
-       "triangles": 76995,
+       "triangles": 79991,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 17,
-        "prism": 14,
+        "profile": 28,
+        "prism": 26,
         "party": 0
        },
        "n_frames": 12,
        "texels": {
-        "n": 2857785,
-        "seen": 0.7647,
-        "near": 0.0545,
-        "plain": 0.1808
+        "n": 2724884,
+        "seen": 0.7551,
+        "near": 0.0454,
+        "plain": 0.1996
        },
        "fill": {
-        "n": 2857785,
-        "seen": 0.7647,
-        "near": 0.0545,
-        "plain": 0.1191,
+        "n": 2724884,
+        "seen": 0.7551,
+        "near": 0.0454,
+        "plain": 0.1386,
         "twin": 0.0,
-        "rhythm": 0.0103,
-        "patch": 0.0514
+        "rhythm": 0.0167,
+        "patch": 0.0443
        }
       }
      }
@@ -23863,17 +23863,17 @@
        "n_frames": 18,
        "texels": {
         "n": 369039,
-        "seen": 0.755,
-        "near": 0.0472,
+        "seen": 0.7551,
+        "near": 0.0471,
         "plain": 0.1978
        },
        "fill": {
         "n": 369039,
-        "seen": 0.755,
-        "near": 0.0472,
+        "seen": 0.7551,
+        "near": 0.0471,
         "plain": 0.0781,
         "twin": 0.0,
-        "rhythm": 0.0459,
+        "rhythm": 0.0458,
         "patch": 0.0739
        }
       }
@@ -23923,18 +23923,18 @@
        "n_frames": 19,
        "texels": {
         "n": 333312,
-        "seen": 0.6413,
-        "near": 0.0829,
-        "plain": 0.2758
+        "seen": 0.6416,
+        "near": 0.083,
+        "plain": 0.2755
        },
        "fill": {
         "n": 333312,
-        "seen": 0.6413,
-        "near": 0.0829,
-        "plain": 0.1085,
+        "seen": 0.6416,
+        "near": 0.083,
+        "plain": 0.1061,
         "twin": 0.0,
-        "rhythm": 0.0446,
-        "patch": 0.1228
+        "rhythm": 0.0469,
+        "patch": 0.1224
        }
       }
      },
@@ -24325,18 +24325,18 @@
        "n_frames": 16,
        "texels": {
         "n": 979008,
-        "seen": 0.7345,
-        "near": 0.0136,
-        "plain": 0.2519
+        "seen": 0.7343,
+        "near": 0.0137,
+        "plain": 0.252
        },
        "fill": {
         "n": 979008,
-        "seen": 0.7345,
-        "near": 0.0136,
+        "seen": 0.7343,
+        "near": 0.0137,
         "plain": 0.1825,
         "twin": 0.0,
-        "rhythm": 0.004,
-        "patch": 0.0655
+        "rhythm": 0.0036,
+        "patch": 0.0659
        }
       }
      }
@@ -24462,7 +24462,7 @@
       "extras": {
        "name": "e46cfd38-45a3-4603-acde-afc1b1047ad6",
        "gers": "e46cfd38-45a3-4603-acde-afc1b1047ad6",
-       "triangles": 2923,
+       "triangles": 2927,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -24472,19 +24472,19 @@
        },
        "n_frames": 20,
        "texels": {
-        "n": 284299,
-        "seen": 0.66,
-        "near": 0.0107,
-        "plain": 0.3293
+        "n": 287851,
+        "seen": 0.6667,
+        "near": 0.0098,
+        "plain": 0.3235
        },
        "fill": {
-        "n": 284299,
-        "seen": 0.66,
-        "near": 0.0107,
-        "plain": 0.2311,
+        "n": 287851,
+        "seen": 0.6667,
+        "near": 0.0098,
+        "plain": 0.2283,
         "twin": 0.0,
         "rhythm": 0.0,
-        "patch": 0.0982
+        "patch": 0.0952
        }
       }
      }
@@ -24499,7 +24499,7 @@
   "name": "Downtown Louisville",
   "kind": "mesh",
   "buildings": 392,
-  "triangles": 1450305,
+  "triangles": 1462820,
   "paths": {
    "profile": 361,
    "box": 31

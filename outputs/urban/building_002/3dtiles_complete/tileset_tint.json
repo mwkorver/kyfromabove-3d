@@ -46,9 +46,9 @@
   "archetype": "sculpted_facade",
   "texels": {
    "n": 1437596,
-   "seen": 0.9146,
-   "near": 0.036,
-   "plain": 0.0494
+   "seen": 0.9223,
+   "near": 0.0328,
+   "plain": 0.045
   },
   "faces": {
    "profile": 4,
@@ -64,11 +64,11 @@
   "product": "completed",
   "fill": {
    "n": 1437596,
-   "seen": 0.9146,
-   "near": 0.036,
+   "seen": 0.9223,
+   "near": 0.0328,
    "plain": 0.0117,
    "twin": 0.0,
-   "rhythm": 0.0251,
+   "rhythm": 0.0207,
    "patch": 0.0126
   }
  }

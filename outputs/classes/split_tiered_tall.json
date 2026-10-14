@@ -2,16 +2,19 @@
  "class": "tiered/tall",
  "development": [
   "3158c676-4406-43e9-8a71-183312badbb5",
+  "36610eb4-e929-4e81-95d5-bb33f1300d87",
+  "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7",
+  "893e88ee-626a-4d1c-a8b1-529ec062d9db",
   "8ab5c0ec-896c-4cb3-aece-2a5510b34a88",
   "9e9df280-ccae-46bd-b450-354e7d5e2fcf",
   "a1f393cc-05c9-43cb-a726-34aa92a2016a",
-  "cfb7194a-2889-4b49-942f-7beaabbd2cf4",
-  "d683e785-f8c8-475c-a0a3-c3b476924098",
-  "ec790737-7929-4a57-8ba7-ad8843bbef4f",
-  "36610eb4-e929-4e81-95d5-bb33f1300d87",
+  "a7757e8c-6cc8-4b59-8ba1-3eaf193c15cc",
   "be45685f-7b19-4e65-a4e4-4fad66f6bd62",
   "cb53b84f-a244-4541-b2f0-4d5d4877b595",
-  "df0fdc75-602d-4f11-a82d-16f8a3af316d"
+  "cfb7194a-2889-4b49-942f-7beaabbd2cf4",
+  "d683e785-f8c8-475c-a0a3-c3b476924098",
+  "df0fdc75-602d-4f11-a82d-16f8a3af316d",
+  "ec790737-7929-4a57-8ba7-ad8843bbef4f"
  ],
  "held_out": [
   "464787e1-68a8-4cb7-bc79-820a329ac120",
@@ -21,5 +24,11 @@
   "c88a24c5-68c5-4adb-846f-8e99185bd386"
  ],
  "seed": 20261015,
- "note": "the 7 reference buildings are development by construction"
+ "note": "the 7 reference buildings are development by construction",
+ "changes": [
+  {
+   "date": "2026-10-14",
+   "why": "tiers counted over the whole roof (classify_buildings lower_share)"
+  }
+ ]
 }

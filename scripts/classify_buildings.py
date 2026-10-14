@@ -125,8 +125,20 @@ def measure_one(job) -> dict:
                     tiers.append(lvl)
         rec["tiers"] = len(tiers)
         rec["tier_span_m"] = round(max(tiers) - min(tiers), 1) if len(tiers) >= 2 else 0.0
+        # A lower part of the roof spread over several heights (the Galt House's
+        # wings at 12-24 m beside a 50 m block) makes no single 1 m level of 10%,
+        # and the tiers above missed it: the share of the roof's cells standing
+        # well below its main height -- 4 m, or a fifth of the building's height,
+        # whichever is more -- counts too (not on a pitched roof, whose eaves
+        # stand below its ridge; the wings' roofs are not flat enough to count
+        # flat cells alone: 4.5% of the Galt House's roof).
+        hist_all, e_all = np.histogram(g[ok], bins=np.arange(np.floor(g[ok].min()), np.ceil(g[ok].max()) + 1.01, 1.0))
+        main = float(e_all[int(np.argmax(hist_all))] + 0.5)
+        low = ok & (g >= a.min_roof_m) & (g <= main - max(4.0, 0.2 * height))
+        rec["main_roof_m"] = round(main, 1)
+        rec["lower_share"] = round(float(low.sum() / n_ok), 3)
     else:
-        rec.update(flat_share=None, pitched_share=None, tiers=0, tier_span_m=0.0)
+        rec.update(flat_share=None, pitched_share=None, tiers=0, tier_span_m=0.0, main_roof_m=None, lower_share=None)
     # returns getting into the building
     core = poly.buffer(-2.0)
     if not core.is_empty and height > 5.0:
@@ -201,7 +213,8 @@ def classify(r: dict, a) -> dict:
         return {"height_class": height_class, "footprint_class": "tiny", "architecture": "none",
                 "see_through": False, "class": "none"}
     size = "thin" if w < a.thin_m else ("small" if area < 300 else ("medium" if area < 2000 else "large"))
-    if r.get("tiers", 0) >= 2 and r.get("tier_span_m", 0) >= max(4.0, 0.2 * h):
+    if (r.get("tiers", 0) >= 2 and r.get("tier_span_m", 0) >= max(4.0, 0.2 * h)) or \
+            ((r.get("lower_share") or 0) >= a.lower_share and (r.get("pitched_share") or 0) < a.pitched_share):
         arch = "tiered"
     elif (r.get("pitched_share") or 0) >= a.pitched_share:
         arch = "pitched"
@@ -409,6 +422,8 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         p.add_argument("--thin-m", type=float, default=5.0, help="narrower than this across: a thin part")
         p.add_argument("--open-share", type=float, default=0.15, help="returns in under the roof for the see-through (glass) hint")
         p.add_argument("--pitched-share", type=float, default=0.35, help="sloping roof cells for 'pitched'")
+        p.add_argument("--lower-share", type=float, default=0.10,
+                       help="roof well below the main roof, as a share of the roof, for 'tiered'")
         p.add_argument("--side-share", type=float, default=0.4, help="share of a side's length against a neighbour to count it shared")
         p.add_argument("--tiny-m2", type=float, default=40.0, help="a footprint smaller than this is not a building to model")
         p.add_argument("--min-height-m", type=float, default=2.5, help="... nor one lower than this")

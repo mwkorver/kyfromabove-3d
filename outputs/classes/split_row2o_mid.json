@@ -16,7 +16,6 @@
   "603254af-f84b-45fa-8991-01fe4f77f567",
   "644a6ecb-7f2f-4867-be8b-94b635e6e377",
   "661eeb05-7991-473d-9079-193ea2ee9ab4",
-  "77a5935b-0fd6-4749-9e54-e2640138c45d",
   "7fa11668-b4bb-48f6-8203-cffe8ecf2111",
   "8979cfc6-004b-4198-bc28-8dd46b5511bc",
   "8a91054f-af47-4411-87eb-14e7b512f9fc",
@@ -29,7 +28,6 @@
   "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
   "ba25ba58-deba-4749-93be-86e723c5b17b",
   "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
-  "cc3f65d1-ce9d-4636-9787-ff24161c8e7e",
   "deddcb4d-1b37-42c9-8f0d-3706db714905",
   "dfbd6629-aad6-4703-8ad5-73a808ddc896",
   "e2c5dc4d-7830-4a77-be94-841cfe9629db"
@@ -40,7 +38,6 @@
   "1e9c551d-461f-4d0b-ba70-ef57877f17ce",
   "29932134-b528-4c88-8555-d7b2a982950f",
   "43383377-1e7c-49a1-a623-e4ac41826b55",
-  "46703a31-1a7c-40e2-b2b4-d65987a899b6",
   "4ef85a45-0731-46b4-a6c9-a070aaaa4a79",
   "59fb10c4-5ced-43f8-874c-edc29f7b1fcd",
   "81679d52-3757-4267-8959-a1063e890cd6",
@@ -52,5 +49,11 @@
   "f96de311-5fba-4a38-9f33-858ed5cbf24d",
   "fae16346-196b-4eca-9ca8-b6433f888038"
  ],
- "seed": 20261013
+ "seed": 20261013,
+ "changes": [
+  {
+   "date": "2026-10-14",
+   "why": "tiers counted over the whole roof (classify_buildings lower_share)"
+  }
+ ]
 }

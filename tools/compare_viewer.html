@@ -65,7 +65,6 @@
           <span class="muted" style="font-size: 11px;">Basemap:</span>
           <button id="btn-osm" class="layer-btn active" title="OpenStreetMap vector basemap">OpenStreetMap</button>
           <button id="btn-usgs" class="layer-btn" title="USGS Imagery Only basemap: tiles cut in advance, fast; mostly NAIP in the US, not always its newest year (left globe only)">USGS imagery</button>
-          <button id="btn-naip" class="layer-btn" title="USGS NAIP itself, each tile drawn on request by the ImageServer: slower; to 0.6 m (level 18), left globe only">USGS NAIP</button>
           <span class="muted" style="font-size: 11px; margin-left: 6px;">Mesh:</span>
           <button id="btn-mesh-solid" class="layer-btn active" title="Textured solid 3D mesh">Solid</button>
           <button id="btn-mesh-wireframe" class="layer-btn" title="Wireframe mode">Wireframe</button>
@@ -159,18 +158,6 @@
         url: "https://tile.openstreetmap.org/",
         maximumLevel: 19
       }));
-      // NAIP is 0.6 m imagery, about level 18: deeper levels asked the
-      // ImageServer to draw 16 times the tiles for no more detail. Each WMS
-      // tile is drawn on request, so 512 px tiles: a quarter of the requests.
-      const naipLayer = new Cesium.ImageryLayer(new Cesium.WebMapServiceImageryProvider({
-        url: "https://imagery.nationalmap.gov/arcgis/services/USGSNAIPImagery/ImageServer/WMSServer",
-        layers: "USGSNAIPImagery:NaturalColor",
-        parameters: { format: "image/jpeg", transparent: false },
-        tilingScheme: new Cesium.WebMercatorTilingScheme(),
-        tileWidth: 512, tileHeight: 512,
-        maximumLevel: 18
-      }));
-      naipLayer.show = false;
       // The USGS Imagery Only basemap: the same kind of picture, as tiles cut
       // in advance, so they come back at once rather than being drawn per request.
       const usgsLayer = new Cesium.ImageryLayer(new Cesium.UrlTemplateImageryProvider({
@@ -191,9 +178,7 @@
       // aerial imagery on the left globe only: two globes each asking for it doubled the work
       if (id === "left") {
         v.imageryLayers.add(usgsLayer);
-        v.imageryLayers.add(naipLayer);
         v._usgsLayer = usgsLayer;
-        v._naipLayer = naipLayer;
       }
       v._osmLayer = osmLayer;
       v.scene.globe.depthTestAgainstTerrain = false;
@@ -206,14 +191,12 @@
       // the right globe (Overture) keeps OpenStreetMap; the left takes the choice
       if (left._osmLayer) left._osmLayer.show = (type === "osm");
       if (left._usgsLayer) left._usgsLayer.show = (type === "usgs");
-      if (left._naipLayer) left._naipLayer.show = (type === "naip");
       if (right._osmLayer) right._osmLayer.show = true;
-      for (const [btn, t] of [["btn-osm", "osm"], ["btn-usgs", "usgs"], ["btn-naip", "naip"]])
+      for (const [btn, t] of [["btn-osm", "osm"], ["btn-usgs", "usgs"]])
         document.getElementById(btn).classList.toggle("active", type === t);
     }
     document.getElementById("btn-osm").addEventListener("click", () => setBasemap("osm"));
     document.getElementById("btn-usgs").addEventListener("click", () => setBasemap("usgs"));
-    document.getElementById("btn-naip").addEventListener("click", () => setBasemap("naip"));
 
     // Left Mesh Mode (Solid vs Wireframe)
     let leftTilesets = [];

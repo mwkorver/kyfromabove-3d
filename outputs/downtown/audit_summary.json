@@ -12,7 +12,7 @@
     {
      "building": "93cfbc0a-8780-4992-89fd-5a5c3d69369d",
      "name": "SpringHill Suites Louisville Downtown",
-     "hole_m2": 1642.8
+     "hole_m2": 1603.5
     },
     {
      "building": "b7daf154-da79-4a42-b938-a973aa1111b5",
@@ -90,11 +90,6 @@
      "hole_m2": 643.5
     },
     {
-     "building": "1d61a3de-97d4-4034-a3a0-0fb76d20881d",
-     "name": "1d61a3de-97d4-4034-a3a0-0fb76d20881d",
-     "hole_m2": 638.5
-    },
-    {
      "building": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
      "name": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
      "hole_m2": 630.0
@@ -103,6 +98,11 @@
      "building": "c3e024c2-0422-4e87-a37d-20a63ed15997",
      "name": "1st & Main Garage",
      "hole_m2": 615.2
+    },
+    {
+     "building": "c88a24c5-68c5-4adb-846f-8e99185bd386",
+     "name": "Muhammad Ali Center",
+     "hole_m2": 555.5
     }
    ]
   },
@@ -118,11 +118,6 @@
      "building": "c88a24c5-68c5-4adb-846f-8e99185bd386",
      "name": "Muhammad Ali Center",
      "roof_wall_m2": 111.0
-    },
-    {
-     "building": "16886442-2551-4b80-988d-f2db8cdf8cc5",
-     "name": "16886442-2551-4b80-988d-f2db8cdf8cc5",
-     "roof_wall_m2": 84.5
     },
     {
      "building": "4ec78a7d-eb75-40d8-8a24-ba0d561a652a",
@@ -207,6 +202,11 @@
     {
      "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4-a",
      "name": "01192eea-7db8-4392-bb85-e20bc3c59bb4-a",
+     "roof_wall_m2": 0.0
+    },
+    {
+     "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4-b",
+     "name": "01192eea-7db8-4392-bb85-e20bc3c59bb4-b",
      "roof_wall_m2": 0.0
     }
    ]
@@ -1416,13 +1416,13 @@
   {
    "building": "16886442-2551-4b80-988d-f2db8cdf8cc5",
    "name": "16886442-2551-4b80-988d-f2db8cdf8cc5",
-   "hole_m2": 146.5,
+   "hole_m2": 124.8,
    "worst_face": "18",
-   "worst_face_m2": 107.8,
-   "roof_wall_m2": 84.5,
+   "worst_face_m2": 107.2,
+   "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 4.7,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.5888,
+   "blank_share": 0.5623,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 85.1,
@@ -1596,13 +1596,13 @@
   {
    "building": "1d61a3de-97d4-4034-a3a0-0fb76d20881d",
    "name": "1d61a3de-97d4-4034-a3a0-0fb76d20881d",
-   "hole_m2": 638.5,
-   "worst_face": "3",
-   "worst_face_m2": 461.8,
+   "hole_m2": 0.0,
+   "worst_face": null,
+   "worst_face_m2": null,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 5.2,
+   "mesh_minus_lidar_m": 4.8,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.3442,
+   "blank_share": 0.003,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,
@@ -4236,13 +4236,13 @@
   {
    "building": "93cfbc0a-8780-4992-89fd-5a5c3d69369d",
    "name": "SpringHill Suites Louisville Downtown",
-   "hole_m2": 1642.8,
+   "hole_m2": 1603.5,
    "worst_face": "10",
    "worst_face_m2": 1603.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.1,
    "product1_minus_lidar_m": -0.0,
-   "blank_share": 0.3389,
+   "blank_share": 0.2948,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,
@@ -5571,13 +5571,13 @@
   {
    "building": "c8052539-1bd1-40ba-86a8-95c2b82f853e",
    "name": "c8052539-1bd1-40ba-86a8-95c2b82f853e",
-   "hole_m2": 324.0,
+   "hole_m2": 332.2,
    "worst_face": "0",
-   "worst_face_m2": 319.0,
+   "worst_face_m2": 299.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.0,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.4665,
+   "blank_share": 0.5275,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,

@@ -6547,8 +6547,8 @@
        "sphere": [
         -0.5387851318965504,
         -4.943472793070773,
-        16.35725,
-        32.12735068760239
+        16.14835,
+        32.00469025727614
        ]
       },
       "geometricError": 0.0,
@@ -6558,29 +6558,29 @@
       "extras": {
        "name": "1d61a3de-97d4-4034-a3a0-0fb76d20881d",
        "gers": "1d61a3de-97d4-4034-a3a0-0fb76d20881d",
-       "triangles": 1472,
+       "triangles": 1473,
        "path": "profile",
        "archetype": "complex_roof",
        "faces": {
-        "profile": 2,
+        "profile": 0,
         "prism": 2,
-        "party": 0
+        "party": 2
        },
        "n_frames": 18,
        "texels": {
-        "n": 78804,
-        "seen": 0.5189,
-        "near": 0.0705,
-        "plain": 0.4106
+        "n": 43104,
+        "seen": 0.5864,
+        "near": 0.0278,
+        "plain": 0.3858
        },
        "fill": {
-        "n": 78804,
-        "seen": 0.5189,
-        "near": 0.0705,
-        "plain": 0.111,
+        "n": 43104,
+        "seen": 0.5864,
+        "near": 0.0278,
+        "plain": 0.1293,
         "twin": 0.0,
-        "rhythm": 0.0004,
-        "patch": 0.2992
+        "rhythm": 0.0007,
+        "patch": 0.2558
        }
       }
      },
@@ -7568,9 +7568,9 @@
       "boundingVolume": {
        "sphere": [
         -1.4837165058805732,
-        -4.529848679255975,
+        -4.507578163370351,
         17.0063,
-        33.1335328041805
+        33.08600606508516
        ]
       },
       "geometricError": 0.0,
@@ -7580,29 +7580,29 @@
       "extras": {
        "name": "c8052539-1bd1-40ba-86a8-95c2b82f853e",
        "gers": "c8052539-1bd1-40ba-86a8-95c2b82f853e",
-       "triangles": 2803,
+       "triangles": 2811,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 3,
+        "profile": 2,
         "prism": 1,
-        "party": 0
+        "party": 1
        },
        "n_frames": 18,
        "texels": {
-        "n": 165270,
-        "seen": 0.4868,
-        "near": 0.0749,
-        "plain": 0.4383
+        "n": 142110,
+        "seen": 0.4753,
+        "near": 0.0518,
+        "plain": 0.4729
        },
        "fill": {
-        "n": 165270,
-        "seen": 0.4868,
-        "near": 0.0749,
-        "plain": 0.2429,
+        "n": 142110,
+        "seen": 0.4753,
+        "near": 0.0518,
+        "plain": 0.2825,
         "twin": 0.0,
-        "rhythm": 0.0651,
-        "patch": 0.1303
+        "rhythm": 0.0757,
+        "patch": 0.1147
        }
       }
      },
@@ -9796,29 +9796,29 @@
       "extras": {
        "name": "SpringHill Suites Louisville Downtown",
        "gers": "93cfbc0a-8780-4992-89fd-5a5c3d69369d",
-       "triangles": 1875,
+       "triangles": 1878,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 3,
+        "profile": 1,
         "prism": 7,
-        "party": 2
+        "party": 4
        },
        "n_frames": 18,
        "texels": {
-        "n": 341562,
-        "seen": 0.4838,
-        "near": 0.077,
-        "plain": 0.4392
+        "n": 290460,
+        "seen": 0.4965,
+        "near": 0.065,
+        "plain": 0.4385
        },
        "fill": {
-        "n": 341562,
-        "seen": 0.4838,
-        "near": 0.077,
-        "plain": 0.2964,
+        "n": 290460,
+        "seen": 0.4965,
+        "near": 0.065,
+        "plain": 0.3055,
         "twin": 0.0,
-        "rhythm": 0.0128,
-        "patch": 0.13
+        "rhythm": 0.0059,
+        "patch": 0.1271
        }
       }
      },
@@ -14372,29 +14372,29 @@
       "extras": {
        "name": "16886442-2551-4b80-988d-f2db8cdf8cc5",
        "gers": "16886442-2551-4b80-988d-f2db8cdf8cc5",
-       "triangles": 46115,
+       "triangles": 46131,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 16,
+        "profile": 12,
         "prism": 22,
-        "party": 9
+        "party": 13
        },
        "n_frames": 14,
        "texels": {
-        "n": 1353136,
-        "seen": 0.5028,
-        "near": 0.0275,
-        "plain": 0.4697
+        "n": 1310333,
+        "seen": 0.5157,
+        "near": 0.0253,
+        "plain": 0.4589
        },
        "fill": {
-        "n": 1353136,
-        "seen": 0.5028,
-        "near": 0.0275,
-        "plain": 0.3816,
+        "n": 1310333,
+        "seen": 0.5157,
+        "near": 0.0253,
+        "plain": 0.3736,
         "twin": 0.0,
-        "rhythm": 0.0103,
-        "patch": 0.0778
+        "rhythm": 0.0106,
+        "patch": 0.0747
        }
       }
      },
@@ -24499,7 +24499,7 @@
   "name": "Downtown Louisville",
   "kind": "mesh",
   "buildings": 392,
-  "triangles": 1449604,
+  "triangles": 1449632,
   "paths": {
    "profile": 361,
    "box": 31

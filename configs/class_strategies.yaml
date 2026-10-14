@@ -19,6 +19,9 @@
 row2o/mid:
   party_walls: whole
 
+row2o/tall:
+  party_walls: whole
+
 tiered/mid:
   party_walls: whole
   # upper_levels / tower_foot: on again (2026-10-14) once the tiers are traced

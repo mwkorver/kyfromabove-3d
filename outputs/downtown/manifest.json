@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-14T10:03:43",
+ "updated": "2026-10-14T10:30:40",
  "counts": {
   "meshed": 389,
   "landmark": 3
@@ -254,9 +254,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 5357,
-   "t_total": 19.1,
+   "t_total": 23.1,
    "error": null,
-   "attempts": 19
+   "attempts": 20
   },
   {
    "gers": "25165719-a97b-463c-96be-8bccace09ad0",
@@ -298,9 +298,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 863,
-   "t_total": 15.8,
+   "t_total": 19.6,
    "error": null,
-   "attempts": 26
+   "attempts": 27
   },
   {
    "gers": "b144a5d2-079d-41e5-b52d-b36d264ce44e",
@@ -1805,9 +1805,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 6537,
-   "t_total": 26.3,
+   "t_total": 26.7,
    "error": null,
-   "attempts": 19
+   "attempts": 20
   },
   {
    "gers": "092a4bdc-fd3a-4ce7-9076-969057126159",
@@ -2872,9 +2872,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 4373,
-   "t_total": 20.7,
+   "t_total": 21.0,
    "error": null,
-   "attempts": 18
+   "attempts": 19
   },
   {
    "gers": "72fecbb6-01e5-4ea5-bfc1-88fd4829b7bc",
@@ -3400,9 +3400,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 66542,
-   "t_total": 71.2,
+   "t_total": 42.6,
    "error": null,
-   "attempts": 18
+   "attempts": 19
   },
   {
    "gers": "497b51e0-a1d1-484d-8c82-44bf03bf61e5",
@@ -3829,9 +3829,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 2373,
-   "t_total": 27.9,
+   "t_total": 21.1,
    "error": null,
-   "attempts": 15
+   "attempts": 16
   },
   {
    "gers": "a2810a9d-3809-4d01-b6e2-e38bf97d5ef5",

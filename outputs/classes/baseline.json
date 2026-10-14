@@ -1,21 +1,5 @@
 [
  {
-  "building": "00864b23-f484-4ea6-9d48-99cb5fe2aade-a",
-  "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.3532,
-  "roof_gap_m2": 1.2,
-  "roof_gap_share": 0.012,
-  "class": "row2c/mid",
-  "architecture": "row2c",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 813.1
- },
- {
   "building": "00864b23-f484-4ea6-9d48-99cb5fe2aade-b",
   "status": "ok",
   "holes_views_m2": 42.0,
@@ -32,20 +16,36 @@
   "wall_m2": 650.4
  },
  {
-  "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4",
+  "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4-a",
   "status": "ok",
-  "holes_views_m2": 75.5,
+  "holes_views_m2": 151.8,
+  "inside_m2": 321.2,
+  "outside_m2": 0.0,
+  "above_m2": 268.0,
+  "blank_share": 0.474,
+  "roof_gap_m2": 0.7,
+  "roof_gap_share": 0.008,
+  "class": "row2c/mid",
+  "architecture": "row2c",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 484.5
+ },
+ {
+  "building": "00864b23-f484-4ea6-9d48-99cb5fe2aade-a",
+  "status": "ok",
+  "holes_views_m2": 0,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": null,
-  "roof_gap_m2": 36.3,
-  "roof_gap_share": 0.31,
-  "class": "tiered/mid",
-  "architecture": "tiered",
+  "blank_share": 0.3532,
+  "roof_gap_m2": 1.2,
+  "roof_gap_share": 0.012,
+  "class": "row2c/mid",
+  "architecture": "row2c",
   "height_class": "mid",
   "name": null,
-  "wall_m2": 802.5
+  "wall_m2": 813.1
  },
  {
   "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4-b",
@@ -64,20 +64,20 @@
   "wall_m2": 214.9
  },
  {
-  "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4-a",
+  "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4",
   "status": "ok",
-  "holes_views_m2": 151.8,
-  "inside_m2": 321.2,
+  "holes_views_m2": 75.5,
+  "inside_m2": 0.0,
   "outside_m2": 0.0,
-  "above_m2": 268.0,
-  "blank_share": 0.474,
-  "roof_gap_m2": 0.7,
-  "roof_gap_share": 0.008,
-  "class": "row2c/mid",
-  "architecture": "row2c",
+  "above_m2": 0.0,
+  "blank_share": null,
+  "roof_gap_m2": 36.3,
+  "roof_gap_share": 0.31,
+  "class": "tiered/mid",
+  "architecture": "tiered",
   "height_class": "mid",
   "name": null,
-  "wall_m2": 484.5
+  "wall_m2": 802.5
  },
  {
   "building": "00864b23-f484-4ea6-9d48-99cb5fe2aade",
@@ -128,22 +128,6 @@
   "wall_m2": 753.2
  },
  {
-  "building": "0389e60e-2f68-453f-abfa-29e8e0278b47",
-  "status": "ok",
-  "holes_views_m2": 7.8,
-  "inside_m2": 35.5,
-  "outside_m2": 182.4,
-  "above_m2": 0.0,
-  "blank_share": 0.4335,
-  "roof_gap_m2": 2.2,
-  "roof_gap_share": 0.028,
-  "class": "row1/mid",
-  "architecture": "row1",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 408.8
- },
- {
   "building": "01d171dc-9f10-4767-9e34-24b922c0014a",
   "status": "ok",
   "holes_views_m2": 267.8,
@@ -158,6 +142,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 1598.3
+ },
+ {
+  "building": "0389e60e-2f68-453f-abfa-29e8e0278b47",
+  "status": "ok",
+  "holes_views_m2": 7.8,
+  "inside_m2": 35.5,
+  "outside_m2": 182.4,
+  "above_m2": 0.0,
+  "blank_share": 0.4335,
+  "roof_gap_m2": 2.2,
+  "roof_gap_share": 0.028,
+  "class": "row1/mid",
+  "architecture": "row1",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 408.8
  },
  {
   "building": "01495e86-1171-481e-a308-a2e6c230e7c4",
@@ -224,22 +224,6 @@
   "wall_m2": 2552.4
  },
  {
-  "building": "03a5005c-01d0-4284-b3cd-a7073f77885e",
-  "status": "ok",
-  "holes_views_m2": 927.6,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 12.5,
-  "blank_share": 0.5373,
-  "roof_gap_m2": 32.2,
-  "roof_gap_share": 0.162,
-  "class": "row2c/tall",
-  "architecture": "row2c",
-  "height_class": "tall",
-  "name": null,
-  "wall_m2": 2457.8
- },
- {
   "building": "05f6f87b-7be5-4dfd-8c75-b24769a79f35",
   "status": "ok",
   "holes_views_m2": 17.0,
@@ -270,6 +254,22 @@
   "height_class": "mid",
   "name": "Meteosafe Building",
   "wall_m2": 5613.0
+ },
+ {
+  "building": "03a5005c-01d0-4284-b3cd-a7073f77885e",
+  "status": "ok",
+  "holes_views_m2": 927.6,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 12.5,
+  "blank_share": 0.5373,
+  "roof_gap_m2": 32.2,
+  "roof_gap_share": 0.162,
+  "class": "row2c/tall",
+  "architecture": "row2c",
+  "height_class": "tall",
+  "name": null,
+  "wall_m2": 2457.8
  },
  {
   "building": "089c07b9-0770-4021-9c41-9ce5a2e1bb11",
@@ -336,22 +336,6 @@
   "wall_m2": 2205.6
  },
  {
-  "building": "0c67c97b-ba59-41c4-8633-037da61a1f0c",
-  "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.0173,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 109.4
- },
- {
   "building": "0a2aa729-0cdb-4cdb-a982-66b52e546134",
   "status": "ok",
   "holes_views_m2": 21.5,
@@ -366,6 +350,22 @@
   "height_class": "mid",
   "name": "Holiday Inn",
   "wall_m2": 3145.9
+ },
+ {
+  "building": "0c67c97b-ba59-41c4-8633-037da61a1f0c",
+  "status": "ok",
+  "holes_views_m2": 0,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.0173,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "row2o/mid",
+  "architecture": "row2o",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 109.4
  },
  {
   "building": "06aa6713-bd4a-440b-9b2c-aa061dc01071",
@@ -448,22 +448,6 @@
   "wall_m2": 1910.8
  },
  {
-  "building": "0fb3ea06-2e7a-45d9-ad47-c42c053665c4",
-  "status": "ok",
-  "holes_views_m2": 111.7,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.2166,
-  "roof_gap_m2": 7.6,
-  "roof_gap_share": 0.037,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": "Old Forester Distillery",
-  "wall_m2": 367.3
- },
- {
   "building": "129c2580-3493-4243-86d2-94e65b6d1e07",
   "status": "ok",
   "holes_views_m2": 11.0,
@@ -512,20 +496,20 @@
   "wall_m2": 449.6
  },
  {
-  "building": "13257c02-7f12-4ce0-b4de-959153b4c2c7",
+  "building": "0fb3ea06-2e7a-45d9-ad47-c42c053665c4",
   "status": "ok",
-  "holes_views_m2": 121.5,
+  "holes_views_m2": 111.7,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.0039,
-  "roof_gap_m2": 0.2,
-  "roof_gap_share": 0.001,
+  "blank_share": 0.2166,
+  "roof_gap_m2": 7.6,
+  "roof_gap_share": 0.037,
   "class": "row2o/mid",
   "architecture": "row2o",
   "height_class": "mid",
-  "name": "The Alley Theater",
-  "wall_m2": 230.6
+  "name": "Old Forester Distillery",
+  "wall_m2": 367.3
  },
  {
   "building": "187f28ac-42db-4221-9182-c2fbf462242e",
@@ -544,6 +528,22 @@
   "wall_m2": 733.5
  },
  {
+  "building": "13257c02-7f12-4ce0-b4de-959153b4c2c7",
+  "status": "ok",
+  "holes_views_m2": 121.5,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.0039,
+  "roof_gap_m2": 0.2,
+  "roof_gap_share": 0.001,
+  "class": "row2o/mid",
+  "architecture": "row2o",
+  "height_class": "mid",
+  "name": "The Alley Theater",
+  "wall_m2": 230.6
+ },
+ {
   "building": "1bddff9f-0265-43a4-b564-146bdcf26d18",
   "status": "ok",
   "holes_views_m2": 182.2,
@@ -558,22 +558,6 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 808.9
- },
- {
-  "building": "1a2744ba-b4e8-4b63-b852-49f2cbfc8022",
-  "status": "ok",
-  "holes_views_m2": 1151.8,
-  "inside_m2": 233.8,
-  "outside_m2": 43.3,
-  "above_m2": 0.0,
-  "blank_share": 0.4815,
-  "roof_gap_m2": 7.2,
-  "roof_gap_share": 0.062,
-  "class": "row3/mid",
-  "architecture": "row3",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 187.1
  },
  {
   "building": "18382333-6e97-4564-b705-f46bff2173b8",
@@ -592,20 +576,20 @@
   "wall_m2": 223.0
  },
  {
-  "building": "1bddff9f-0265-43a4-b564-146bdcf26d18-a",
+  "building": "1a2744ba-b4e8-4b63-b852-49f2cbfc8022",
   "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
+  "holes_views_m2": 1151.8,
+  "inside_m2": 233.8,
+  "outside_m2": 43.3,
   "above_m2": 0.0,
-  "blank_share": 0.0,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "row2c/mid",
-  "architecture": "row2c",
+  "blank_share": 0.4815,
+  "roof_gap_m2": 7.2,
+  "roof_gap_share": 0.062,
+  "class": "row3/mid",
+  "architecture": "row3",
   "height_class": "mid",
   "name": null,
-  "wall_m2": 388.0
+  "wall_m2": 187.1
  },
  {
   "building": "1bddff9f-0265-43a4-b564-146bdcf26d18-b",
@@ -624,20 +608,20 @@
   "wall_m2": 138.2
  },
  {
-  "building": "02cac8a2-6af7-41a7-bab6-36e8a7722a67",
+  "building": "1bddff9f-0265-43a4-b564-146bdcf26d18-a",
   "status": "ok",
-  "holes_views_m2": 1281.8,
+  "holes_views_m2": 0,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.1624,
-  "roof_gap_m2": 37.8,
-  "roof_gap_share": 0.159,
-  "class": "box/tall",
-  "architecture": "box",
-  "height_class": "tall",
-  "name": "Kentucky Towers Apartments",
-  "wall_m2": 10641.5
+  "blank_share": 0.0,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "row2c/mid",
+  "architecture": "row2c",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 388.0
  },
  {
   "building": "125d7d2a-c01c-4cd2-9650-1394dd36e93b",
@@ -688,6 +672,22 @@
   "wall_m2": 553.8
  },
  {
+  "building": "02cac8a2-6af7-41a7-bab6-36e8a7722a67",
+  "status": "ok",
+  "holes_views_m2": 1281.8,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.1624,
+  "roof_gap_m2": 37.8,
+  "roof_gap_share": 0.159,
+  "class": "box/tall",
+  "architecture": "box",
+  "height_class": "tall",
+  "name": "Kentucky Towers Apartments",
+  "wall_m2": 10641.5
+ },
+ {
   "building": "1d2be68c-c15c-4483-b046-f48e37704531",
   "status": "ok",
   "holes_views_m2": 0,
@@ -736,38 +736,6 @@
   "wall_m2": 1949.0
  },
  {
-  "building": "1d61a3de-97d4-4034-a3a0-0fb76d20881d",
-  "status": "ok",
-  "holes_views_m2": 1642.8,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 50.0,
-  "blank_share": 0.3442,
-  "roof_gap_m2": 37.4,
-  "roof_gap_share": 0.227,
-  "class": "row2o/tall",
-  "architecture": "row2o",
-  "height_class": "tall",
-  "name": null,
-  "wall_m2": 368.5
- },
- {
-  "building": "1e9c551d-461f-4d0b-ba70-ef57877f17ce",
-  "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.3891,
-  "roof_gap_m2": 4.9,
-  "roof_gap_share": 0.027,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": "Whitestone Building",
-  "wall_m2": 311.8
- },
- {
   "building": "1c38b0a7-204c-4199-9e17-e99605bdf5df",
   "status": "ok",
   "holes_views_m2": 73.5,
@@ -784,6 +752,22 @@
   "wall_m2": 2146.4
  },
  {
+  "building": "1d61a3de-97d4-4034-a3a0-0fb76d20881d",
+  "status": "ok",
+  "holes_views_m2": 0,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.003,
+  "roof_gap_m2": 37.4,
+  "roof_gap_share": 0.227,
+  "class": "row2o/tall",
+  "architecture": "row2o",
+  "height_class": "tall",
+  "name": null,
+  "wall_m2": 368.5
+ },
+ {
   "building": "2122e810-ebcd-463f-8a9b-930abbc2989b",
   "status": "ok",
   "holes_views_m2": 0,
@@ -798,6 +782,22 @@
   "height_class": "low",
   "name": null,
   "wall_m2": 701.2
+ },
+ {
+  "building": "1e9c551d-461f-4d0b-ba70-ef57877f17ce",
+  "status": "ok",
+  "holes_views_m2": 0,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.3891,
+  "roof_gap_m2": 4.9,
+  "roof_gap_share": 0.027,
+  "class": "row2o/mid",
+  "architecture": "row2o",
+  "height_class": "mid",
+  "name": "Whitestone Building",
+  "wall_m2": 311.8
  },
  {
   "building": "211041a1-2636-4bff-8a60-c41f5e30651c",
@@ -1104,22 +1104,6 @@
   "wall_m2": 10989.3
  },
  {
-  "building": "2870eeb0-4053-48b7-828f-a88356676ce4",
-  "status": "ok",
-  "holes_views_m2": 44.2,
-  "inside_m2": 0.0,
-  "outside_m2": 22.6,
-  "above_m2": 1117.0,
-  "blank_share": 0.2818,
-  "roof_gap_m2": 20.4,
-  "roof_gap_share": 0.046,
-  "class": "box/mid",
-  "architecture": "box",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 6977.2
- },
- {
   "building": "30cf5ef9-ef48-487b-b907-fde40d4e64a7",
   "status": "ok",
   "holes_views_m2": 804.0,
@@ -1136,20 +1120,20 @@
   "wall_m2": 73.2
  },
  {
-  "building": "30cf5ef9-ef48-487b-b907-fde40d4e64a7-b",
+  "building": "2fa249bb-48ce-4dda-838b-69280fdde876",
   "status": "ok",
   "holes_views_m2": 0,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 1.0,
-  "roof_gap_m2": 2.7,
-  "roof_gap_share": 0.042,
-  "class": "row3/low",
-  "architecture": "row3",
-  "height_class": "low",
+  "blank_share": 0.1478,
+  "roof_gap_m2": 0.5,
+  "roof_gap_share": 0.003,
+  "class": "tiered/mid",
+  "architecture": "tiered",
+  "height_class": "mid",
   "name": null,
-  "wall_m2": 1.0
+  "wall_m2": 241.9
  },
  {
   "building": "30cf5ef9-ef48-487b-b907-fde40d4e64a7-a",
@@ -1168,20 +1152,36 @@
   "wall_m2": 76.0
  },
  {
-  "building": "2fa249bb-48ce-4dda-838b-69280fdde876",
+  "building": "2870eeb0-4053-48b7-828f-a88356676ce4",
+  "status": "ok",
+  "holes_views_m2": 44.2,
+  "inside_m2": 0.0,
+  "outside_m2": 22.6,
+  "above_m2": 1117.0,
+  "blank_share": 0.2818,
+  "roof_gap_m2": 20.4,
+  "roof_gap_share": 0.046,
+  "class": "box/mid",
+  "architecture": "box",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 6977.2
+ },
+ {
+  "building": "30cf5ef9-ef48-487b-b907-fde40d4e64a7-b",
   "status": "ok",
   "holes_views_m2": 0,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.1478,
-  "roof_gap_m2": 0.5,
-  "roof_gap_share": 0.003,
-  "class": "tiered/mid",
-  "architecture": "tiered",
-  "height_class": "mid",
+  "blank_share": 1.0,
+  "roof_gap_m2": 2.7,
+  "roof_gap_share": 0.042,
+  "class": "row3/low",
+  "architecture": "row3",
+  "height_class": "low",
   "name": null,
-  "wall_m2": 241.9
+  "wall_m2": 1.0
  },
  {
   "building": "34efd3fb-a2f8-4ed3-9ad0-c45f3d88954f",
@@ -1216,22 +1216,6 @@
   "wall_m2": 286.8
  },
  {
-  "building": "2ad5fd7b-6078-4d50-b8da-d19586a05033",
-  "status": "ok",
-  "holes_views_m2": 958.8,
-  "inside_m2": 0.0,
-  "outside_m2": 36.7,
-  "above_m2": 0.0,
-  "blank_share": 0.8202,
-  "roof_gap_m2": 15.8,
-  "roof_gap_share": 0.034,
-  "class": "row1/mid",
-  "architecture": "row1",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 5625.4
- },
- {
   "building": "2dc587c6-4db0-41ce-9b54-24489d37274a",
   "status": "ok",
   "holes_views_m2": 125.8,
@@ -1246,6 +1230,22 @@
   "height_class": "mid",
   "name": "6th & Main Garage",
   "wall_m2": 6498.2
+ },
+ {
+  "building": "2ad5fd7b-6078-4d50-b8da-d19586a05033",
+  "status": "ok",
+  "holes_views_m2": 958.8,
+  "inside_m2": 0.0,
+  "outside_m2": 36.7,
+  "above_m2": 0.0,
+  "blank_share": 0.8202,
+  "roof_gap_m2": 15.8,
+  "roof_gap_share": 0.034,
+  "class": "row1/mid",
+  "architecture": "row1",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 5625.4
  },
  {
   "building": "353ee894-e772-43e7-882a-aeb20b38c4e7",
@@ -1296,22 +1296,6 @@
   "wall_m2": 132.1
  },
  {
-  "building": "37e97999-0088-4a8c-956b-d32d276bc6b4",
-  "status": "ok",
-  "holes_views_m2": 2687.9,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": null,
-  "roof_gap_m2": 100.1,
-  "roof_gap_share": 0.502,
-  "class": "tiered/mid",
-  "architecture": "tiered",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 609.9
- },
- {
   "building": "37e97999-0088-4a8c-956b-d32d276bc6b4-b",
   "status": "ok",
   "holes_views_m2": 0,
@@ -1326,6 +1310,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 1.0
+ },
+ {
+  "building": "37e97999-0088-4a8c-956b-d32d276bc6b4",
+  "status": "ok",
+  "holes_views_m2": 2687.9,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": null,
+  "roof_gap_m2": 100.1,
+  "roof_gap_share": 0.502,
+  "class": "tiered/mid",
+  "architecture": "tiered",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 609.9
  },
  {
   "building": "38266a6d-577e-43db-90d6-053c6a4bb13f",
@@ -1474,11 +1474,11 @@
  {
   "building": "16886442-2551-4b80-988d-f2db8cdf8cc5",
   "status": "ok",
-  "holes_views_m2": 431.7,
-  "inside_m2": 158.7,
+  "holes_views_m2": 327.8,
+  "inside_m2": 0.0,
   "outside_m2": 81.9,
-  "above_m2": 214.1,
-  "blank_share": 0.5888,
+  "above_m2": 161.8,
+  "blank_share": 0.5623,
   "roof_gap_m2": 78.8,
   "roof_gap_share": 0.071,
   "class": "row2o/tall",
@@ -1486,22 +1486,6 @@
   "height_class": "tall",
   "name": null,
   "wall_m2": 16131.8
- },
- {
-  "building": "3cdc0d6f-3e66-459e-a0d9-0c6ac9df9521",
-  "status": "ok",
-  "holes_views_m2": 33.5,
-  "inside_m2": 0.0,
-  "outside_m2": 125.4,
-  "above_m2": 0.0,
-  "blank_share": 0.0363,
-  "roof_gap_m2": 5.4,
-  "roof_gap_share": 0.019,
-  "class": "box/low",
-  "architecture": "box",
-  "height_class": "low",
-  "name": "WDRB/WMYO Studios",
-  "wall_m2": 1811.9
  },
  {
   "building": "3e6ac482-3d32-45c7-b127-56c33f068067",
@@ -1520,20 +1504,20 @@
   "wall_m2": 1712.1
  },
  {
-  "building": "3eb58f1a-7a41-4dfb-89e5-ad5f26a19f0c",
+  "building": "3cdc0d6f-3e66-459e-a0d9-0c6ac9df9521",
   "status": "ok",
-  "holes_views_m2": 56.6,
+  "holes_views_m2": 33.5,
   "inside_m2": 0.0,
-  "outside_m2": 0.0,
+  "outside_m2": 125.4,
   "above_m2": 0.0,
-  "blank_share": 0.3588,
-  "roof_gap_m2": 9.8,
-  "roof_gap_share": 0.07,
-  "class": "tiered/mid",
-  "architecture": "tiered",
-  "height_class": "mid",
-  "name": "Metro Hall Annex",
-  "wall_m2": 2318.0
+  "blank_share": 0.0363,
+  "roof_gap_m2": 5.4,
+  "roof_gap_share": 0.019,
+  "class": "box/low",
+  "architecture": "box",
+  "height_class": "low",
+  "name": "WDRB/WMYO Studios",
+  "wall_m2": 1811.9
  },
  {
   "building": "3e5b3435-7300-4e19-9ac3-f4f4cf6640d8",
@@ -1550,6 +1534,22 @@
   "height_class": "tall",
   "name": null,
   "wall_m2": 3923.2
+ },
+ {
+  "building": "3eb58f1a-7a41-4dfb-89e5-ad5f26a19f0c",
+  "status": "ok",
+  "holes_views_m2": 56.6,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.3588,
+  "roof_gap_m2": 9.8,
+  "roof_gap_share": 0.07,
+  "class": "tiered/mid",
+  "architecture": "tiered",
+  "height_class": "mid",
+  "name": "Metro Hall Annex",
+  "wall_m2": 2318.0
  },
  {
   "building": "3158c676-4406-43e9-8a71-183312badbb5",
@@ -1584,22 +1584,6 @@
   "wall_m2": 1943.3
  },
  {
-  "building": "408e913a-6d6a-4193-a026-ced28a2e5745",
-  "status": "ok",
-  "holes_views_m2": 658.5,
-  "inside_m2": 0.0,
-  "outside_m2": 53.7,
-  "above_m2": 0.0,
-  "blank_share": 0.0891,
-  "roof_gap_m2": 7.6,
-  "roof_gap_share": 0.026,
-  "class": "row1/mid",
-  "architecture": "row1",
-  "height_class": "mid",
-  "name": "Jefferson Centre Garage",
-  "wall_m2": 3829.1
- },
- {
   "building": "428bb4d9-ec50-4f8e-be98-d55c5798049b",
   "status": "ok",
   "holes_views_m2": 11.0,
@@ -1632,20 +1616,20 @@
   "wall_m2": 331.6
  },
  {
-  "building": "40ead71b-7947-4e87-ab44-b3f11d755957",
+  "building": "408e913a-6d6a-4193-a026-ced28a2e5745",
   "status": "ok",
-  "holes_views_m2": 142.0,
+  "holes_views_m2": 658.5,
   "inside_m2": 0.0,
-  "outside_m2": 225.0,
+  "outside_m2": 53.7,
   "above_m2": 0.0,
-  "blank_share": 0.0887,
-  "roof_gap_m2": 57.7,
-  "roof_gap_share": 0.125,
-  "class": "tiered/mid",
-  "architecture": "tiered",
+  "blank_share": 0.0891,
+  "roof_gap_m2": 7.6,
+  "roof_gap_share": 0.026,
+  "class": "row1/mid",
+  "architecture": "row1",
   "height_class": "mid",
-  "name": "Hampton Inn Louisville Downtown",
-  "wall_m2": 6121.1
+  "name": "Jefferson Centre Garage",
+  "wall_m2": 3829.1
  },
  {
   "building": "3f31ce15-69e3-4fe5-b424-deb83061f42e",
@@ -1662,6 +1646,22 @@
   "height_class": "tall",
   "name": "Louisville City Hall",
   "wall_m2": 4874.5
+ },
+ {
+  "building": "40ead71b-7947-4e87-ab44-b3f11d755957",
+  "status": "ok",
+  "holes_views_m2": 142.0,
+  "inside_m2": 0.0,
+  "outside_m2": 225.0,
+  "above_m2": 0.0,
+  "blank_share": 0.0887,
+  "roof_gap_m2": 57.7,
+  "roof_gap_share": 0.125,
+  "class": "tiered/mid",
+  "architecture": "tiered",
+  "height_class": "mid",
+  "name": "Hampton Inn Louisville Downtown",
+  "wall_m2": 6121.1
  },
  {
   "building": "36610eb4-e929-4e81-95d5-bb33f1300d87",
@@ -1696,22 +1696,6 @@
   "wall_m2": 108.9
  },
  {
-  "building": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
-  "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.0179,
-  "roof_gap_m2": 8.4,
-  "roof_gap_share": 0.046,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 264.6
- },
- {
   "building": "4405303a-984f-4828-9544-a2fb4caccb31",
   "status": "ok",
   "holes_views_m2": 223.0,
@@ -1726,6 +1710,22 @@
   "height_class": "mid",
   "name": "River City Bank",
   "wall_m2": 3106.1
+ },
+ {
+  "building": "44236a40-e6c2-46a7-8fe0-afe6791e2a99",
+  "status": "ok",
+  "holes_views_m2": 0,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.0179,
+  "roof_gap_m2": 8.4,
+  "roof_gap_share": 0.046,
+  "class": "row2o/mid",
+  "architecture": "row2o",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 264.6
  },
  {
   "building": "489a33b7-4406-48bb-986f-57691079a936",
@@ -1792,22 +1792,6 @@
   "wall_m2": 1551.8
  },
  {
-  "building": "43a72043-c26f-48bc-880a-aa7df3381d2d",
-  "status": "ok",
-  "holes_views_m2": 618.3,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.4744,
-  "roof_gap_m2": 2.5,
-  "roof_gap_share": 0.008,
-  "class": "row1/mid",
-  "architecture": "row1",
-  "height_class": "mid",
-  "name": "Fourth Street Live Garage",
-  "wall_m2": 3685.9
- },
- {
   "building": "4aa4b14b-3509-4b8c-bb72-e5860338ac43",
   "status": "ok",
   "holes_views_m2": 0,
@@ -1822,22 +1806,6 @@
   "height_class": "low",
   "name": "OVRDRIVE",
   "wall_m2": 687.2
- },
- {
-  "building": "47603cef-ece6-4f63-ae2d-7a19750a951f",
-  "status": "ok",
-  "holes_views_m2": 76.2,
-  "inside_m2": 14.8,
-  "outside_m2": 96.7,
-  "above_m2": 0.0,
-  "blank_share": 0.0808,
-  "roof_gap_m2": 50.6,
-  "roof_gap_share": 0.166,
-  "class": "tiered/mid",
-  "architecture": "tiered",
-  "height_class": "mid",
-  "name": "Holiday Inn Express & Suites - Downtown Louisville",
-  "wall_m2": 4258.3
  },
  {
   "building": "4d4b4e2e-e365-403e-9283-cd81f9d76a61",
@@ -1856,20 +1824,52 @@
   "wall_m2": 525.7
  },
  {
-  "building": "4de2d4ed-a044-4d64-91a0-efc829f4c9cb",
+  "building": "4bacf443-4386-41f9-866b-cefb401ec759",
   "status": "ok",
-  "holes_views_m2": 18.3,
+  "holes_views_m2": 0,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.5765,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "box/mid",
-  "architecture": "box",
-  "height_class": "mid",
+  "blank_share": 0.0044,
+  "roof_gap_m2": 9.3,
+  "roof_gap_share": 0.126,
+  "class": "row2c/tall",
+  "architecture": "row2c",
+  "height_class": "tall",
   "name": null,
-  "wall_m2": 1146.6
+  "wall_m2": 1662.5
+ },
+ {
+  "building": "47603cef-ece6-4f63-ae2d-7a19750a951f",
+  "status": "ok",
+  "holes_views_m2": 76.2,
+  "inside_m2": 14.8,
+  "outside_m2": 96.7,
+  "above_m2": 0.0,
+  "blank_share": 0.0808,
+  "roof_gap_m2": 50.6,
+  "roof_gap_share": 0.166,
+  "class": "tiered/mid",
+  "architecture": "tiered",
+  "height_class": "mid",
+  "name": "Holiday Inn Express & Suites - Downtown Louisville",
+  "wall_m2": 4258.3
+ },
+ {
+  "building": "43a72043-c26f-48bc-880a-aa7df3381d2d",
+  "status": "ok",
+  "holes_views_m2": 618.3,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.4744,
+  "roof_gap_m2": 2.5,
+  "roof_gap_share": 0.008,
+  "class": "row1/mid",
+  "architecture": "row1",
+  "height_class": "mid",
+  "name": "Fourth Street Live Garage",
+  "wall_m2": 3685.9
  },
  {
   "building": "4ef85a45-0731-46b4-a6c9-a070aaaa4a79",
@@ -1888,20 +1888,20 @@
   "wall_m2": 316.2
  },
  {
-  "building": "4bacf443-4386-41f9-866b-cefb401ec759",
+  "building": "4de2d4ed-a044-4d64-91a0-efc829f4c9cb",
   "status": "ok",
-  "holes_views_m2": 0,
+  "holes_views_m2": 18.3,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.0044,
-  "roof_gap_m2": 9.3,
-  "roof_gap_share": 0.126,
-  "class": "row2c/tall",
-  "architecture": "row2c",
-  "height_class": "tall",
+  "blank_share": 0.5765,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "box/mid",
+  "architecture": "box",
+  "height_class": "mid",
   "name": null,
-  "wall_m2": 1662.5
+  "wall_m2": 1146.6
  },
  {
   "building": "504f873f-2424-4476-8680-7b93e1f9d52a",
@@ -1952,20 +1952,20 @@
   "wall_m2": 3998.6
  },
  {
-  "building": "529b29ec-660d-40af-ade4-509957888774",
+  "building": "52d652db-d97e-47f9-9694-7ab2189d600e",
   "status": "ok",
-  "holes_views_m2": 382.7,
+  "holes_views_m2": 26.0,
   "inside_m2": 0.0,
-  "outside_m2": 197.1,
+  "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.4605,
-  "roof_gap_m2": 25.6,
-  "roof_gap_share": 0.078,
-  "class": "row2c/tall",
-  "architecture": "row2c",
-  "height_class": "tall",
-  "name": "Courtyard Louisville Downtown",
-  "wall_m2": 3954.2
+  "blank_share": 0.0,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "row2o/mid",
+  "architecture": "row2o",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 316.5
  },
  {
   "building": "464787e1-68a8-4cb7-bc79-820a329ac120",
@@ -1984,20 +1984,20 @@
   "wall_m2": 10179.0
  },
  {
-  "building": "52d652db-d97e-47f9-9694-7ab2189d600e",
+  "building": "529b29ec-660d-40af-ade4-509957888774",
   "status": "ok",
-  "holes_views_m2": 26.0,
+  "holes_views_m2": 382.7,
   "inside_m2": 0.0,
-  "outside_m2": 0.0,
+  "outside_m2": 197.1,
   "above_m2": 0.0,
-  "blank_share": 0.0,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 316.5
+  "blank_share": 0.4605,
+  "roof_gap_m2": 25.6,
+  "roof_gap_share": 0.078,
+  "class": "row2c/tall",
+  "architecture": "row2c",
+  "height_class": "tall",
+  "name": "Courtyard Louisville Downtown",
+  "wall_m2": 3954.2
  },
  {
   "building": "54226994-eaae-4a3b-9b13-58c1300f3862",
@@ -2016,20 +2016,20 @@
   "wall_m2": 613.5
  },
  {
-  "building": "4373d0c3-a02d-4052-98d4-977c6fcc2f0b",
+  "building": "53eb5fc6-8823-4152-aec8-1b5659f67bb1",
   "status": "ok",
-  "holes_views_m2": 892.2,
+  "holes_views_m2": 14.4,
   "inside_m2": 0.0,
-  "outside_m2": 38.6,
+  "outside_m2": 66.8,
   "above_m2": 0.0,
-  "blank_share": 0.3783,
-  "roof_gap_m2": 14.6,
-  "roof_gap_share": 0.042,
-  "class": "row1/tall",
-  "architecture": "row1",
-  "height_class": "tall",
-  "name": "Starks Building",
-  "wall_m2": 11418.8
+  "blank_share": 0.4688,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "row2o/mid",
+  "architecture": "row2o",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 214.1
  },
  {
   "building": "55548167-9284-4631-889a-2da8f710bbc0",
@@ -2048,20 +2048,20 @@
   "wall_m2": 1104.7
  },
  {
-  "building": "53eb5fc6-8823-4152-aec8-1b5659f67bb1",
+  "building": "4373d0c3-a02d-4052-98d4-977c6fcc2f0b",
   "status": "ok",
-  "holes_views_m2": 14.4,
+  "holes_views_m2": 892.2,
   "inside_m2": 0.0,
-  "outside_m2": 66.8,
+  "outside_m2": 38.6,
   "above_m2": 0.0,
-  "blank_share": 0.4688,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 214.1
+  "blank_share": 0.3783,
+  "roof_gap_m2": 14.6,
+  "roof_gap_share": 0.042,
+  "class": "row1/tall",
+  "architecture": "row1",
+  "height_class": "tall",
+  "name": "Starks Building",
+  "wall_m2": 11418.8
  },
  {
   "building": "570f753c-bedc-4d17-9039-b3fb4bde78d9",
@@ -2096,20 +2096,20 @@
   "wall_m2": 503.5
  },
  {
-  "building": "596c5427-ce35-4409-9774-36341fd89822",
+  "building": "57f59aea-3292-4e02-8bba-f7c697c982d4",
   "status": "ok",
-  "holes_views_m2": 0,
+  "holes_views_m2": 9.5,
   "inside_m2": 0.0,
-  "outside_m2": 0.0,
+  "outside_m2": 101.1,
   "above_m2": 0.0,
-  "blank_share": 0.3023,
-  "roof_gap_m2": 2.6,
-  "roof_gap_share": 0.03,
-  "class": "row1/low",
-  "architecture": "row1",
+  "blank_share": 0.0,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "row2o/low",
+  "architecture": "row2o",
   "height_class": "low",
-  "name": "Papa John's",
-  "wall_m2": 436.8
+  "name": null,
+  "wall_m2": 617.4
  },
  {
   "building": "57439b2e-dbb7-4152-9d1e-1e50d585d3ce",
@@ -2128,20 +2128,20 @@
   "wall_m2": 206.8
  },
  {
-  "building": "57f59aea-3292-4e02-8bba-f7c697c982d4",
+  "building": "596c5427-ce35-4409-9774-36341fd89822",
   "status": "ok",
-  "holes_views_m2": 9.5,
+  "holes_views_m2": 0,
   "inside_m2": 0.0,
-  "outside_m2": 101.1,
+  "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.0,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "row2o/low",
-  "architecture": "row2o",
+  "blank_share": 0.3023,
+  "roof_gap_m2": 2.6,
+  "roof_gap_share": 0.03,
+  "class": "row1/low",
+  "architecture": "row1",
   "height_class": "low",
-  "name": null,
-  "wall_m2": 617.4
+  "name": "Papa John's",
+  "wall_m2": 436.8
  },
  {
   "building": "59fb10c4-5ced-43f8-874c-edc29f7b1fcd",
@@ -2304,22 +2304,6 @@
   "wall_m2": 207.2
  },
  {
-  "building": "5d3cd155-ce8e-4039-9471-0b80513e439a",
-  "status": "ok",
-  "holes_views_m2": 1679.6,
-  "inside_m2": 0.0,
-  "outside_m2": 177.4,
-  "above_m2": 0.0,
-  "blank_share": 0.1078,
-  "roof_gap_m2": 3.5,
-  "roof_gap_share": 0.008,
-  "class": "box/mid",
-  "architecture": "box",
-  "height_class": "mid",
-  "name": "Jewish Hospital Employee Parking Garage",
-  "wall_m2": 8086.7
- },
- {
   "building": "66e94c2b-9e23-4afa-8cba-5d151f301cb6",
   "status": "ok",
   "holes_views_m2": 934.0,
@@ -2334,6 +2318,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 1839.8
+ },
+ {
+  "building": "5d3cd155-ce8e-4039-9471-0b80513e439a",
+  "status": "ok",
+  "holes_views_m2": 1679.6,
+  "inside_m2": 0.0,
+  "outside_m2": 177.4,
+  "above_m2": 0.0,
+  "blank_share": 0.1078,
+  "roof_gap_m2": 3.5,
+  "roof_gap_share": 0.008,
+  "class": "box/mid",
+  "architecture": "box",
+  "height_class": "mid",
+  "name": "Jewish Hospital Employee Parking Garage",
+  "wall_m2": 8086.7
  },
  {
   "building": "682009fc-5ad7-40dc-9fe6-5971a877aab0",
@@ -2656,6 +2656,22 @@
   "wall_m2": 917.8
  },
  {
+  "building": "72fecbb6-01e5-4ea5-bfc1-88fd4829b7bc",
+  "status": "ok",
+  "holes_views_m2": 1226.0,
+  "inside_m2": 0.0,
+  "outside_m2": 251.2,
+  "above_m2": 0.0,
+  "blank_share": 0.3339,
+  "roof_gap_m2": 5.4,
+  "roof_gap_share": 0.025,
+  "class": "row1/tall",
+  "architecture": "row1",
+  "height_class": "tall",
+  "name": "Brown and Williamson Tower",
+  "wall_m2": 12438.4
+ },
+ {
   "building": "7ed2305d-a61c-4dc3-b4a6-e7b86095a4d8",
   "status": "ok",
   "holes_views_m2": 0,
@@ -2672,20 +2688,20 @@
   "wall_m2": 298.8
  },
  {
-  "building": "72fecbb6-01e5-4ea5-bfc1-88fd4829b7bc",
+  "building": "7d14268b-8323-4acc-9108-42be7654c293",
   "status": "ok",
-  "holes_views_m2": 1226.0,
+  "holes_views_m2": 39.0,
   "inside_m2": 0.0,
-  "outside_m2": 251.2,
+  "outside_m2": 162.4,
   "above_m2": 0.0,
-  "blank_share": 0.3339,
-  "roof_gap_m2": 5.4,
-  "roof_gap_share": 0.025,
-  "class": "row1/tall",
-  "architecture": "row1",
-  "height_class": "tall",
-  "name": "Brown and Williamson Tower",
-  "wall_m2": 12438.4
+  "blank_share": 0.1506,
+  "roof_gap_m2": 3.0,
+  "roof_gap_share": 0.012,
+  "class": "box/mid",
+  "architecture": "box",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 2224.5
  },
  {
   "building": "7f106f35-d279-4409-a17f-72d0d87da31f",
@@ -2720,20 +2736,20 @@
   "wall_m2": 139.8
  },
  {
-  "building": "7d14268b-8323-4acc-9108-42be7654c293",
+  "building": "770f2fa2-b709-40b5-9343-2fe63f5d5249",
   "status": "ok",
-  "holes_views_m2": 39.0,
+  "holes_views_m2": 36.2,
   "inside_m2": 0.0,
-  "outside_m2": 162.4,
+  "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.1506,
-  "roof_gap_m2": 3.0,
-  "roof_gap_share": 0.012,
+  "blank_share": 0.3202,
+  "roof_gap_m2": 8.9,
+  "roof_gap_share": 0.015,
   "class": "box/mid",
   "architecture": "box",
   "height_class": "mid",
   "name": null,
-  "wall_m2": 2224.5
+  "wall_m2": 8413.1
  },
  {
   "building": "81679d52-3757-4267-8959-a1063e890cd6",
@@ -2750,22 +2766,6 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 652.9
- },
- {
-  "building": "770f2fa2-b709-40b5-9343-2fe63f5d5249",
-  "status": "ok",
-  "holes_views_m2": 36.2,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.3202,
-  "roof_gap_m2": 8.9,
-  "roof_gap_share": 0.015,
-  "class": "box/mid",
-  "architecture": "box",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 8413.1
  },
  {
   "building": "85cf1659-10ca-4bb5-9005-bbd2654e9e59",
@@ -2880,22 +2880,6 @@
   "wall_m2": 645.9
  },
  {
-  "building": "8a91054f-af47-4411-87eb-14e7b512f9fc",
-  "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.1052,
-  "roof_gap_m2": 0.1,
-  "roof_gap_share": 0.001,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 187.5
- },
- {
   "building": "84659867-b81d-412b-816d-f4a0788dcbeb",
   "status": "ok",
   "holes_views_m2": 900.2,
@@ -2910,6 +2894,22 @@
   "height_class": "mid",
   "name": "Stevens School",
   "wall_m2": 4249.7
+ },
+ {
+  "building": "8a91054f-af47-4411-87eb-14e7b512f9fc",
+  "status": "ok",
+  "holes_views_m2": 0,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.1052,
+  "roof_gap_m2": 0.1,
+  "roof_gap_share": 0.001,
+  "class": "row2o/mid",
+  "architecture": "row2o",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 187.5
  },
  {
   "building": "8bcb7393-6d50-462f-91cb-0d2200f21cf2-a",
@@ -2976,22 +2976,6 @@
   "wall_m2": 276.4
  },
  {
-  "building": "7c0e2eb6-96e6-4fa2-85b4-0ef2ae590026",
-  "status": "ok",
-  "holes_views_m2": 2795.5,
-  "inside_m2": 0.0,
-  "outside_m2": 307.5,
-  "above_m2": 77.7,
-  "blank_share": 0.1559,
-  "roof_gap_m2": 55.9,
-  "roof_gap_share": 0.149,
-  "class": "box/tall",
-  "architecture": "box",
-  "height_class": "tall",
-  "name": "Jefferson County Judicial Center",
-  "wall_m2": 14559.1
- },
- {
   "building": "8c47a2dd-d7bc-4162-8e08-bea1b994a526-a",
   "status": "ok",
   "holes_views_m2": 316.6,
@@ -3022,6 +3006,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 123.1
+ },
+ {
+  "building": "7c0e2eb6-96e6-4fa2-85b4-0ef2ae590026",
+  "status": "ok",
+  "holes_views_m2": 2795.5,
+  "inside_m2": 0.0,
+  "outside_m2": 307.5,
+  "above_m2": 77.7,
+  "blank_share": 0.1559,
+  "roof_gap_m2": 55.9,
+  "roof_gap_share": 0.149,
+  "class": "box/tall",
+  "architecture": "box",
+  "height_class": "tall",
+  "name": "Jefferson County Judicial Center",
+  "wall_m2": 14559.1
  },
  {
   "building": "8d301b22-19ae-45fc-8cc9-1f3a6c28c152",
@@ -3136,22 +3136,6 @@
   "wall_m2": 384.5
  },
  {
-  "building": "8ab5c0ec-896c-4cb3-aece-2a5510b34a88",
-  "status": "ok",
-  "holes_views_m2": 1535.3,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.0335,
-  "roof_gap_m2": 95.6,
-  "roof_gap_share": 0.193,
-  "class": "tiered/tall",
-  "architecture": "tiered",
-  "height_class": "tall",
-  "name": "Louisville Gas & Electric",
-  "wall_m2": 22129.5
- },
- {
   "building": "964b2adf-77e0-4cb0-ab9e-8217979f8aaa",
   "status": "ok",
   "holes_views_m2": 0,
@@ -3168,20 +3152,36 @@
   "wall_m2": 248.9
  },
  {
-  "building": "96518b8d-cb35-420a-95d0-d38b98138105",
+  "building": "8ab5c0ec-896c-4cb3-aece-2a5510b34a88",
   "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 86.1,
+  "holes_views_m2": 1535.3,
+  "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.2117,
-  "roof_gap_m2": 0.1,
-  "roof_gap_share": 0.001,
-  "class": "pitched/mid",
-  "architecture": "pitched",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 568.4
+  "blank_share": 0.0335,
+  "roof_gap_m2": 95.6,
+  "roof_gap_share": 0.193,
+  "class": "tiered/tall",
+  "architecture": "tiered",
+  "height_class": "tall",
+  "name": "Louisville Gas & Electric",
+  "wall_m2": 22129.5
+ },
+ {
+  "building": "93cfbc0a-8780-4992-89fd-5a5c3d69369d",
+  "status": "ok",
+  "holes_views_m2": 4015.8,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.2948,
+  "roof_gap_m2": 8.1,
+  "roof_gap_share": 0.023,
+  "class": "row2o/tall",
+  "architecture": "row2o",
+  "height_class": "tall",
+  "name": "SpringHill Suites Louisville Downtown",
+  "wall_m2": 5362.8
  },
  {
   "building": "941b6e8b-5b4c-4aa7-9ba7-f1d0bdd2b249",
@@ -3200,36 +3200,20 @@
   "wall_m2": 2737.6
  },
  {
-  "building": "93cfbc0a-8780-4992-89fd-5a5c3d69369d",
+  "building": "96518b8d-cb35-420a-95d0-d38b98138105",
   "status": "ok",
-  "holes_views_m2": 5117.5,
-  "inside_m2": 6.4,
-  "outside_m2": 0.0,
-  "above_m2": 15.5,
-  "blank_share": 0.3389,
-  "roof_gap_m2": 8.1,
-  "roof_gap_share": 0.023,
-  "class": "row2o/tall",
-  "architecture": "row2o",
-  "height_class": "tall",
-  "name": "SpringHill Suites Louisville Downtown",
-  "wall_m2": 5362.8
- },
- {
-  "building": "96f855e3-046e-45bb-b3ca-defd0bc88d08",
-  "status": "ok",
-  "holes_views_m2": 72.0,
-  "inside_m2": 0.0,
+  "holes_views_m2": 0,
+  "inside_m2": 86.1,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.0933,
-  "roof_gap_m2": 5.1,
-  "roof_gap_share": 0.034,
-  "class": "row1/mid",
-  "architecture": "row1",
+  "blank_share": 0.2117,
+  "roof_gap_m2": 0.1,
+  "roof_gap_share": 0.001,
+  "class": "pitched/mid",
+  "architecture": "pitched",
   "height_class": "mid",
-  "name": "Fort Nelson Building",
-  "wall_m2": 1432.3
+  "name": null,
+  "wall_m2": 568.4
  },
  {
   "building": "9a955f39-c901-4097-a83e-e5d3d7e145ec",
@@ -3248,6 +3232,22 @@
   "wall_m2": 172.2
  },
  {
+  "building": "96f855e3-046e-45bb-b3ca-defd0bc88d08",
+  "status": "ok",
+  "holes_views_m2": 72.0,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.0933,
+  "roof_gap_m2": 5.1,
+  "roof_gap_share": 0.034,
+  "class": "row1/mid",
+  "architecture": "row1",
+  "height_class": "mid",
+  "name": "Fort Nelson Building",
+  "wall_m2": 1432.3
+ },
+ {
   "building": "97e9b001-ae40-4d5f-aec1-708045b84b2a",
   "status": "ok",
   "holes_views_m2": 4.0,
@@ -3264,22 +3264,6 @@
   "wall_m2": 1790.7
  },
  {
-  "building": "9bc0d16f-9a2c-4235-990d-801eef71c8cf-a",
-  "status": "ok",
-  "holes_views_m2": 235.1,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.2778,
-  "roof_gap_m2": 0.4,
-  "roof_gap_share": 0.008,
-  "class": "pitched/mid",
-  "architecture": "pitched",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 1.0
- },
- {
   "building": "9bc0d16f-9a2c-4235-990d-801eef71c8cf",
   "status": "ok",
   "holes_views_m2": 403.2,
@@ -3294,6 +3278,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 1010.8
+ },
+ {
+  "building": "9bc0d16f-9a2c-4235-990d-801eef71c8cf-a",
+  "status": "ok",
+  "holes_views_m2": 235.1,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.2778,
+  "roof_gap_m2": 0.4,
+  "roof_gap_share": 0.008,
+  "class": "pitched/mid",
+  "architecture": "pitched",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 1.0
  },
  {
   "building": "9bc0d16f-9a2c-4235-990d-801eef71c8cf-b",
@@ -3488,22 +3488,6 @@
   "wall_m2": 13974.7
  },
  {
-  "building": "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7",
-  "status": "ok",
-  "holes_views_m2": 3115.6,
-  "inside_m2": 39.2,
-  "outside_m2": 86.2,
-  "above_m2": 0.0,
-  "blank_share": 0.2604,
-  "roof_gap_m2": 54.9,
-  "roof_gap_share": 0.045,
-  "class": "box/tall",
-  "architecture": "box",
-  "height_class": "tall",
-  "name": "Kentucky International Convention Center",
-  "wall_m2": 29672.5
- },
- {
   "building": "a37bdab8-d45f-49ff-b2dd-340f8d3722f8",
   "status": "ok",
   "holes_views_m2": 376.1,
@@ -3536,6 +3520,22 @@
   "wall_m2": 222.6
  },
  {
+  "building": "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7",
+  "status": "ok",
+  "holes_views_m2": 3115.6,
+  "inside_m2": 39.2,
+  "outside_m2": 86.2,
+  "above_m2": 0.0,
+  "blank_share": 0.2604,
+  "roof_gap_m2": 54.9,
+  "roof_gap_share": 0.045,
+  "class": "box/tall",
+  "architecture": "box",
+  "height_class": "tall",
+  "name": "Kentucky International Convention Center",
+  "wall_m2": 29672.5
+ },
+ {
   "building": "a4a97e1c-cb08-4e3e-992f-91929566b043",
   "status": "ok",
   "holes_views_m2": 24.3,
@@ -3552,20 +3552,20 @@
   "wall_m2": 3200.6
  },
  {
-  "building": "a629ead2-02f3-4c6b-9d8b-c3d444f48437",
+  "building": "a6b0b98c-ccde-4c25-be24-ed460829a2ee",
   "status": "ok",
-  "holes_views_m2": 1558.0,
+  "holes_views_m2": 0,
   "inside_m2": 0.0,
-  "outside_m2": 0.0,
+  "outside_m2": 10.6,
   "above_m2": 0.0,
-  "blank_share": 0.5181,
-  "roof_gap_m2": 5.5,
-  "roof_gap_share": 0.027,
-  "class": "tiered/mid",
-  "architecture": "tiered",
-  "height_class": "mid",
+  "blank_share": 0.0065,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "pitched/low",
+  "architecture": "pitched",
+  "height_class": "low",
   "name": null,
-  "wall_m2": 2268.7
+  "wall_m2": 327.7
  },
  {
   "building": "a57cc5d2-81e9-4f33-8cae-c5eca6000736",
@@ -3584,20 +3584,20 @@
   "wall_m2": 3667.2
  },
  {
-  "building": "a6b0b98c-ccde-4c25-be24-ed460829a2ee",
+  "building": "a629ead2-02f3-4c6b-9d8b-c3d444f48437",
   "status": "ok",
-  "holes_views_m2": 0,
+  "holes_views_m2": 1558.0,
   "inside_m2": 0.0,
-  "outside_m2": 10.6,
+  "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.0065,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "pitched/low",
-  "architecture": "pitched",
-  "height_class": "low",
+  "blank_share": 0.5181,
+  "roof_gap_m2": 5.5,
+  "roof_gap_share": 0.027,
+  "class": "tiered/mid",
+  "architecture": "tiered",
+  "height_class": "mid",
   "name": null,
-  "wall_m2": 327.7
+  "wall_m2": 2268.7
  },
  {
   "building": "9e9df280-ccae-46bd-b450-354e7d5e2fcf",
@@ -3744,22 +3744,6 @@
   "wall_m2": 4183.2
  },
  {
-  "building": "893e88ee-626a-4d1c-a8b1-529ec062d9db",
-  "status": "ok",
-  "holes_views_m2": 2982.3,
-  "inside_m2": 79.3,
-  "outside_m2": 0.0,
-  "above_m2": 46.1,
-  "blank_share": 0.0754,
-  "roof_gap_m2": 128.2,
-  "roof_gap_share": 0.138,
-  "class": "box/tall",
-  "architecture": "box",
-  "height_class": "tall",
-  "name": "KFC Yum! Center",
-  "wall_m2": 29673.7
- },
- {
   "building": "ad53e9d8-feff-4a23-8543-8052080a04e1",
   "status": "ok",
   "holes_views_m2": 197.0,
@@ -3822,6 +3806,22 @@
   "height_class": "mid",
   "name": "NACM Building",
   "wall_m2": 1267.4
+ },
+ {
+  "building": "893e88ee-626a-4d1c-a8b1-529ec062d9db",
+  "status": "ok",
+  "holes_views_m2": 2982.3,
+  "inside_m2": 79.3,
+  "outside_m2": 0.0,
+  "above_m2": 46.1,
+  "blank_share": 0.0754,
+  "roof_gap_m2": 128.2,
+  "roof_gap_share": 0.138,
+  "class": "box/tall",
+  "architecture": "box",
+  "height_class": "tall",
+  "name": "KFC Yum! Center",
+  "wall_m2": 29673.7
  },
  {
   "building": "b11061e6-5ce6-4f4b-a970-45c4b5618f36",
@@ -3904,6 +3904,22 @@
   "wall_m2": 322.1
  },
  {
+  "building": "acae9611-3dc6-43ca-b80b-df086f66d867",
+  "status": "ok",
+  "holes_views_m2": 337.0,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 255.4,
+  "blank_share": 0.2472,
+  "roof_gap_m2": 9.0,
+  "roof_gap_share": 0.029,
+  "class": "row1/mid",
+  "architecture": "row1",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 3520.8
+ },
+ {
   "building": "b5362a25-49e3-46c1-b4de-e06603159b1b",
   "status": "ok",
   "holes_views_m2": 0,
@@ -3934,22 +3950,6 @@
   "height_class": "mid",
   "name": "G & K Shoe",
   "wall_m2": 156.0
- },
- {
-  "building": "acae9611-3dc6-43ca-b80b-df086f66d867",
-  "status": "ok",
-  "holes_views_m2": 337.0,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 255.4,
-  "blank_share": 0.2472,
-  "roof_gap_m2": 9.0,
-  "roof_gap_share": 0.029,
-  "class": "row1/mid",
-  "architecture": "row1",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 3520.8
  },
  {
   "building": "b4dd701f-b61c-4ebc-bb1c-06410b1b7525",
@@ -3984,22 +3984,6 @@
   "wall_m2": 677.3
  },
  {
-  "building": "b7729875-5f96-4157-b945-9827abe4bb33-a",
-  "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 0.0,
-  "outside_m2": 102.3,
-  "above_m2": 116.1,
-  "blank_share": 0.507,
-  "roof_gap_m2": 0.4,
-  "roof_gap_share": 0.007,
-  "class": "row3/tall",
-  "architecture": "row3",
-  "height_class": "tall",
-  "name": null,
-  "wall_m2": 119.6
- },
- {
   "building": "b575ad92-0c52-4322-b99c-5edd2d3e36f8",
   "status": "ok",
   "holes_views_m2": 71.5,
@@ -4014,6 +3998,22 @@
   "height_class": "mid",
   "name": "Red7e Advertising",
   "wall_m2": 167.8
+ },
+ {
+  "building": "b7729875-5f96-4157-b945-9827abe4bb33-a",
+  "status": "ok",
+  "holes_views_m2": 0,
+  "inside_m2": 0.0,
+  "outside_m2": 102.3,
+  "above_m2": 116.1,
+  "blank_share": 0.507,
+  "roof_gap_m2": 0.4,
+  "roof_gap_share": 0.007,
+  "class": "row3/tall",
+  "architecture": "row3",
+  "height_class": "tall",
+  "name": null,
+  "wall_m2": 119.6
  },
  {
   "building": "b7729875-5f96-4157-b945-9827abe4bb33-b",
@@ -4096,22 +4096,6 @@
   "wall_m2": 2666.7
  },
  {
-  "building": "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
-  "status": "ok",
-  "holes_views_m2": 4.5,
-  "inside_m2": 0.0,
-  "outside_m2": 17.4,
-  "above_m2": 0.0,
-  "blank_share": 0.609,
-  "roof_gap_m2": 17.0,
-  "roof_gap_share": 0.207,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 190.6
- },
- {
   "building": "bcd55982-9235-439f-88ab-70fe64310578",
   "status": "ok",
   "holes_views_m2": 0,
@@ -4126,6 +4110,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 444.2
+ },
+ {
+  "building": "bf105ac2-58bc-4f5e-b523-96225e8cad1b",
+  "status": "ok",
+  "holes_views_m2": 4.5,
+  "inside_m2": 0.0,
+  "outside_m2": 17.4,
+  "above_m2": 0.0,
+  "blank_share": 0.609,
+  "roof_gap_m2": 17.0,
+  "roof_gap_share": 0.207,
+  "class": "row2o/mid",
+  "architecture": "row2o",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 190.6
  },
  {
   "building": "a7757e8c-6cc8-4b59-8ba1-3eaf193c15cc",
@@ -4160,22 +4160,6 @@
   "wall_m2": 13181.8
  },
  {
-  "building": "bf3b5ab9-0c80-49f7-a2ce-11e6cbe4acd2",
-  "status": "ok",
-  "holes_views_m2": 329.1,
-  "inside_m2": 0.0,
-  "outside_m2": 24.0,
-  "above_m2": 20.1,
-  "blank_share": 0.1613,
-  "roof_gap_m2": 4.5,
-  "roof_gap_share": 0.016,
-  "class": "tiered/mid",
-  "architecture": "tiered",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 2115.0
- },
- {
   "building": "bfccb9ab-bbfe-46bf-a2e8-111f8ffc0f5c",
   "status": "ok",
   "holes_views_m2": 586.2,
@@ -4190,6 +4174,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 1932.5
+ },
+ {
+  "building": "bf3b5ab9-0c80-49f7-a2ce-11e6cbe4acd2",
+  "status": "ok",
+  "holes_views_m2": 329.1,
+  "inside_m2": 0.0,
+  "outside_m2": 24.0,
+  "above_m2": 20.1,
+  "blank_share": 0.1613,
+  "roof_gap_m2": 4.5,
+  "roof_gap_share": 0.016,
+  "class": "tiered/mid",
+  "architecture": "tiered",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 2115.0
  },
  {
   "building": "bfe23e58-4b1f-487d-898d-9bf7bdba92d7",
@@ -4240,22 +4240,6 @@
   "wall_m2": 543.8
  },
  {
-  "building": "bf3923af-34d6-4fdb-b867-2a9f533bef4e",
-  "status": "ok",
-  "holes_views_m2": 1203.9,
-  "inside_m2": 0.0,
-  "outside_m2": 80.1,
-  "above_m2": 0.0,
-  "blank_share": 0.2115,
-  "roof_gap_m2": 27.4,
-  "roof_gap_share": 0.128,
-  "class": "row2c/tall",
-  "architecture": "row2c",
-  "height_class": "tall",
-  "name": "Kentucky Home Life Building",
-  "wall_m2": 6203.4
- },
- {
   "building": "c0ccbda0-8ea8-482c-a3a6-6ee8f9c4d438",
   "status": "ok",
   "holes_views_m2": 0,
@@ -4286,6 +4270,22 @@
   "height_class": "low",
   "name": null,
   "wall_m2": 139.2
+ },
+ {
+  "building": "bf3923af-34d6-4fdb-b867-2a9f533bef4e",
+  "status": "ok",
+  "holes_views_m2": 1203.9,
+  "inside_m2": 0.0,
+  "outside_m2": 80.1,
+  "above_m2": 0.0,
+  "blank_share": 0.2115,
+  "roof_gap_m2": 27.4,
+  "roof_gap_share": 0.128,
+  "class": "row2c/tall",
+  "architecture": "row2c",
+  "height_class": "tall",
+  "name": "Kentucky Home Life Building",
+  "wall_m2": 6203.4
  },
  {
   "building": "c35b66ea-b334-4e1f-b86d-1af8caa4673a-a",
@@ -4386,11 +4386,11 @@
  {
   "building": "c8052539-1bd1-40ba-86a8-95c2b82f853e",
   "status": "ok",
-  "holes_views_m2": 740.9,
+  "holes_views_m2": 740.8,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.4665,
+  "blank_share": 0.5275,
   "roof_gap_m2": 6.3,
   "roof_gap_share": 0.034,
   "class": "row2o/tall",
@@ -4464,22 +4464,6 @@
   "wall_m2": 723.9
  },
  {
-  "building": "ccba47de-b4db-498b-95c9-63e4e1997ac7",
-  "status": "ok",
-  "holes_views_m2": 27.5,
-  "inside_m2": 0.0,
-  "outside_m2": 12.8,
-  "above_m2": 0.0,
-  "blank_share": 0.0606,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "pitched/low",
-  "architecture": "pitched",
-  "height_class": "low",
-  "name": null,
-  "wall_m2": 413.9
- },
- {
   "building": "c88a24c5-68c5-4adb-846f-8e99185bd386",
   "status": "ok",
   "holes_views_m2": 2341.8,
@@ -4496,6 +4480,22 @@
   "wall_m2": 8243.1
  },
  {
+  "building": "ccba47de-b4db-498b-95c9-63e4e1997ac7",
+  "status": "ok",
+  "holes_views_m2": 27.5,
+  "inside_m2": 0.0,
+  "outside_m2": 12.8,
+  "above_m2": 0.0,
+  "blank_share": 0.0606,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "pitched/low",
+  "architecture": "pitched",
+  "height_class": "low",
+  "name": null,
+  "wall_m2": 413.9
+ },
+ {
   "building": "ccf38907-1c0f-4442-b146-38c432f80cf0",
   "status": "ok",
   "holes_views_m2": 16.8,
@@ -4510,22 +4510,6 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 241.9
- },
- {
-  "building": "be45685f-7b19-4e65-a4e4-4fad66f6bd62",
-  "status": "ok",
-  "holes_views_m2": 5918.0,
-  "inside_m2": 701.0,
-  "outside_m2": 268.6,
-  "above_m2": 146.0,
-  "blank_share": 0.2373,
-  "roof_gap_m2": 85.9,
-  "roof_gap_share": 0.187,
-  "class": "tiered/tall",
-  "architecture": "tiered",
-  "height_class": "tall",
-  "name": "Waterfront Plaza",
-  "wall_m2": 25983.2
  },
  {
   "building": "ce0bb96d-9a3a-4d68-b7be-3485e01b8791",
@@ -4560,6 +4544,22 @@
   "wall_m2": 433.8
  },
  {
+  "building": "be45685f-7b19-4e65-a4e4-4fad66f6bd62",
+  "status": "ok",
+  "holes_views_m2": 5918.0,
+  "inside_m2": 701.0,
+  "outside_m2": 268.6,
+  "above_m2": 146.0,
+  "blank_share": 0.2373,
+  "roof_gap_m2": 85.9,
+  "roof_gap_share": 0.187,
+  "class": "tiered/tall",
+  "architecture": "tiered",
+  "height_class": "tall",
+  "name": "Waterfront Plaza",
+  "wall_m2": 25983.2
+ },
+ {
   "building": "cf388b63-6239-4f22-816e-d4127dc3ea46",
   "status": "ok",
   "holes_views_m2": 0,
@@ -4574,22 +4574,6 @@
   "height_class": "low",
   "name": null,
   "wall_m2": 146.6
- },
- {
-  "building": "cf2c19b7-d7cb-49ab-a951-f570d2f87377",
-  "status": "ok",
-  "holes_views_m2": 9.5,
-  "inside_m2": 0.0,
-  "outside_m2": 39.3,
-  "above_m2": 0.0,
-  "blank_share": 0.9271,
-  "roof_gap_m2": 4.7,
-  "roof_gap_share": 0.066,
-  "class": "row2c/mid",
-  "architecture": "row2c",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 482.0
  },
  {
   "building": "ceabdbb3-7de1-4a2c-a27d-fc01496a3b55",
@@ -4624,20 +4608,20 @@
   "wall_m2": 2391.9
  },
  {
-  "building": "cb53b84f-a244-4541-b2f0-4d5d4877b595",
+  "building": "cf2c19b7-d7cb-49ab-a951-f570d2f87377",
   "status": "ok",
-  "holes_views_m2": 1716.4,
-  "inside_m2": 365.9,
-  "outside_m2": 41.6,
-  "above_m2": 106.2,
-  "blank_share": 0.3363,
-  "roof_gap_m2": 64.6,
-  "roof_gap_share": 0.139,
-  "class": "tiered/tall",
-  "architecture": "tiered",
-  "height_class": "tall",
-  "name": "Actors Theatre of Louisville",
-  "wall_m2": 7257.9
+  "holes_views_m2": 9.5,
+  "inside_m2": 0.0,
+  "outside_m2": 39.3,
+  "above_m2": 0.0,
+  "blank_share": 0.9271,
+  "roof_gap_m2": 4.7,
+  "roof_gap_share": 0.066,
+  "class": "row2c/mid",
+  "architecture": "row2c",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 482.0
  },
  {
   "building": "d53e34c9-5157-48a5-974e-235af2b3bf9b",
@@ -4670,6 +4654,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 256.0
+ },
+ {
+  "building": "cb53b84f-a244-4541-b2f0-4d5d4877b595",
+  "status": "ok",
+  "holes_views_m2": 1716.4,
+  "inside_m2": 365.9,
+  "outside_m2": 41.6,
+  "above_m2": 106.2,
+  "blank_share": 0.3363,
+  "roof_gap_m2": 64.6,
+  "roof_gap_share": 0.139,
+  "class": "tiered/tall",
+  "architecture": "tiered",
+  "height_class": "tall",
+  "name": "Actors Theatre of Louisville",
+  "wall_m2": 7257.9
  },
  {
   "building": "d1659605-783a-4bfc-8e52-4aa22d7451d8",
@@ -4736,20 +4736,20 @@
   "wall_m2": 645.8
  },
  {
-  "building": "cfb7194a-2889-4b49-942f-7beaabbd2cf4",
+  "building": "d8f1f2c3-f379-4390-94aa-a7aa302bf363",
   "status": "ok",
-  "holes_views_m2": 638.4,
-  "inside_m2": 779.3,
-  "outside_m2": 33.0,
-  "above_m2": 35.6,
-  "blank_share": 0.1613,
-  "roof_gap_m2": 48.5,
-  "roof_gap_share": 0.1,
-  "class": "tiered/tall",
-  "architecture": "tiered",
+  "holes_views_m2": 1360.5,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 128.4,
+  "blank_share": 0.1242,
+  "roof_gap_m2": 43.2,
+  "roof_gap_share": 0.154,
+  "class": "box/tall",
+  "architecture": "box",
   "height_class": "tall",
-  "name": null,
-  "wall_m2": 6494.7
+  "name": "Homewood Suites by Hilton - Louisville Downtown",
+  "wall_m2": 5775.8
  },
  {
   "building": "dd1ee2f6-335c-43db-893c-435f9ccd0841",
@@ -4768,20 +4768,20 @@
   "wall_m2": 934.5
  },
  {
-  "building": "d8f1f2c3-f379-4390-94aa-a7aa302bf363",
+  "building": "cfb7194a-2889-4b49-942f-7beaabbd2cf4",
   "status": "ok",
-  "holes_views_m2": 1360.5,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 128.4,
-  "blank_share": 0.1242,
-  "roof_gap_m2": 43.2,
-  "roof_gap_share": 0.154,
-  "class": "box/tall",
-  "architecture": "box",
+  "holes_views_m2": 638.4,
+  "inside_m2": 779.3,
+  "outside_m2": 33.0,
+  "above_m2": 35.6,
+  "blank_share": 0.1613,
+  "roof_gap_m2": 48.5,
+  "roof_gap_share": 0.1,
+  "class": "tiered/tall",
+  "architecture": "tiered",
   "height_class": "tall",
-  "name": "Homewood Suites by Hilton - Louisville Downtown",
-  "wall_m2": 5775.8
+  "name": null,
+  "wall_m2": 6494.7
  },
  {
   "building": "da636439-9fa2-483b-9d51-87b6d77332d8",
@@ -4800,22 +4800,6 @@
   "wall_m2": 4838.9
  },
  {
-  "building": "ddfb4632-30b0-450c-8ecb-8643f278850b",
-  "status": "ok",
-  "holes_views_m2": 438.4,
-  "inside_m2": 0.0,
-  "outside_m2": 394.8,
-  "above_m2": 150.0,
-  "blank_share": 0.0603,
-  "roof_gap_m2": 0.2,
-  "roof_gap_share": 0.001,
-  "class": "box/mid",
-  "architecture": "box",
-  "height_class": "mid",
-  "name": "Extra Space Storage",
-  "wall_m2": 3759.3
- },
- {
   "building": "deddcb4d-1b37-42c9-8f0d-3706db714905",
   "status": "ok",
   "holes_views_m2": 71.0,
@@ -4830,6 +4814,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 146.6
+ },
+ {
+  "building": "ddfb4632-30b0-450c-8ecb-8643f278850b",
+  "status": "ok",
+  "holes_views_m2": 438.4,
+  "inside_m2": 0.0,
+  "outside_m2": 394.8,
+  "above_m2": 150.0,
+  "blank_share": 0.0603,
+  "roof_gap_m2": 0.2,
+  "roof_gap_share": 0.001,
+  "class": "box/mid",
+  "architecture": "box",
+  "height_class": "mid",
+  "name": "Extra Space Storage",
+  "wall_m2": 3759.3
  },
  {
   "building": "deb68b17-3ee8-40d9-a56b-555d5aebe444",
@@ -4928,22 +4928,6 @@
   "wall_m2": 6545.4
  },
  {
-  "building": "e2f5e712-adfa-420a-b9fd-8c75305d1f85",
-  "status": "ok",
-  "holes_views_m2": 113.7,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.2117,
-  "roof_gap_m2": 22.9,
-  "roof_gap_share": 0.095,
-  "class": "row1/mid",
-  "architecture": "row1",
-  "height_class": "mid",
-  "name": "Republic Bank Plaza",
-  "wall_m2": 2961.1
- },
- {
   "building": "e3f947c1-96a7-4650-a818-5c98a4a87cef",
   "status": "ok",
   "holes_views_m2": 857.8,
@@ -4958,6 +4942,22 @@
   "height_class": "mid",
   "name": "Normandy Building",
   "wall_m2": 1037.2
+ },
+ {
+  "building": "e2f5e712-adfa-420a-b9fd-8c75305d1f85",
+  "status": "ok",
+  "holes_views_m2": 113.7,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.2117,
+  "roof_gap_m2": 22.9,
+  "roof_gap_share": 0.095,
+  "class": "row1/mid",
+  "architecture": "row1",
+  "height_class": "mid",
+  "name": "Republic Bank Plaza",
+  "wall_m2": 2961.1
  },
  {
   "building": "d683e785-f8c8-475c-a0a3-c3b476924098",
@@ -4976,20 +4976,20 @@
   "wall_m2": 25032.5
  },
  {
-  "building": "d9393025-cdc4-486f-8d37-c70d8bc91ebc",
+  "building": "e5214ab7-800d-46bf-88d0-6ca360684484",
   "status": "ok",
-  "holes_views_m2": 102.8,
+  "holes_views_m2": 17.0,
   "inside_m2": 0.0,
-  "outside_m2": 68.6,
+  "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.1292,
-  "roof_gap_m2": 20.5,
-  "roof_gap_share": 0.027,
-  "class": "box/mid",
-  "architecture": "box",
+  "blank_share": 0.1258,
+  "roof_gap_m2": 26.7,
+  "roof_gap_share": 0.128,
+  "class": "tiered/mid",
+  "architecture": "tiered",
   "height_class": "mid",
-  "name": "Witherspoon Parking Garage",
-  "wall_m2": 5913.2
+  "name": "The DeLor Building",
+  "wall_m2": 1886.1
  },
  {
   "building": "e46cfd38-45a3-4603-acde-afc1b1047ad6",
@@ -5008,20 +5008,20 @@
   "wall_m2": 2424.0
  },
  {
-  "building": "e5214ab7-800d-46bf-88d0-6ca360684484",
+  "building": "d9393025-cdc4-486f-8d37-c70d8bc91ebc",
   "status": "ok",
-  "holes_views_m2": 17.0,
+  "holes_views_m2": 102.8,
   "inside_m2": 0.0,
-  "outside_m2": 0.0,
+  "outside_m2": 68.6,
   "above_m2": 0.0,
-  "blank_share": 0.1258,
-  "roof_gap_m2": 26.7,
-  "roof_gap_share": 0.128,
-  "class": "tiered/mid",
-  "architecture": "tiered",
+  "blank_share": 0.1292,
+  "roof_gap_m2": 20.5,
+  "roof_gap_share": 0.027,
+  "class": "box/mid",
+  "architecture": "box",
   "height_class": "mid",
-  "name": "The DeLor Building",
-  "wall_m2": 1886.1
+  "name": "Witherspoon Parking Garage",
+  "wall_m2": 5913.2
  },
  {
   "building": "e5c1f01e-1cad-4548-804a-0a3f6976df9c",
@@ -5216,22 +5216,6 @@
   "wall_m2": 852.3
  },
  {
-  "building": "e33e3cb0-42e9-4b6a-b83c-f74d394c74eb",
-  "status": "ok",
-  "holes_views_m2": 402.2,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.1577,
-  "roof_gap_m2": 5.2,
-  "roof_gap_share": 0.012,
-  "class": "box/tall",
-  "architecture": "box",
-  "height_class": "tall",
-  "name": "Humana Waterside Building",
-  "wall_m2": 19097.0
- },
- {
   "building": "f48393b0-5fcc-4e8a-b602-393d0631c824",
   "status": "ok",
   "holes_views_m2": 0,
@@ -5262,6 +5246,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 1242.1
+ },
+ {
+  "building": "e33e3cb0-42e9-4b6a-b83c-f74d394c74eb",
+  "status": "ok",
+  "holes_views_m2": 402.2,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.1577,
+  "roof_gap_m2": 5.2,
+  "roof_gap_share": 0.012,
+  "class": "box/tall",
+  "architecture": "box",
+  "height_class": "tall",
+  "name": "Humana Waterside Building",
+  "wall_m2": 19097.0
  },
  {
   "building": "f72fccef-48ab-408e-8b72-5eba5b58d579",
@@ -5312,22 +5312,6 @@
   "wall_m2": 1026.2
  },
  {
-  "building": "f96de311-5fba-4a38-9f33-858ed5cbf24d",
-  "status": "ok",
-  "holes_views_m2": 44.3,
-  "inside_m2": 0.0,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.0075,
-  "roof_gap_m2": 24.2,
-  "roof_gap_share": 0.136,
-  "class": "row2o/mid",
-  "architecture": "row2o",
-  "height_class": "mid",
-  "name": "National Society, Sons of the American Revolution",
-  "wall_m2": 383.8
- },
- {
   "building": "f449a7c8-43a6-4555-afd4-c67c3115abc6",
   "status": "ok",
   "holes_views_m2": 176.5,
@@ -5344,20 +5328,20 @@
   "wall_m2": 4214.4
  },
  {
-  "building": "fa2a341b-423e-4c87-aa21-10ad538f152a",
+  "building": "f96de311-5fba-4a38-9f33-858ed5cbf24d",
   "status": "ok",
-  "holes_views_m2": 15.8,
+  "holes_views_m2": 44.3,
   "inside_m2": 0.0,
   "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.6784,
-  "roof_gap_m2": 10.4,
-  "roof_gap_share": 0.101,
-  "class": "tiered/mid",
-  "architecture": "tiered",
+  "blank_share": 0.0075,
+  "roof_gap_m2": 24.2,
+  "roof_gap_share": 0.136,
+  "class": "row2o/mid",
+  "architecture": "row2o",
   "height_class": "mid",
-  "name": null,
-  "wall_m2": 385.1
+  "name": "National Society, Sons of the American Revolution",
+  "wall_m2": 383.8
  },
  {
   "building": "f3713773-937a-4098-9f57-918dc89dc897",
@@ -5374,6 +5358,22 @@
   "height_class": "mid",
   "name": null,
   "wall_m2": 4233.3
+ },
+ {
+  "building": "fa2a341b-423e-4c87-aa21-10ad538f152a",
+  "status": "ok",
+  "holes_views_m2": 15.8,
+  "inside_m2": 0.0,
+  "outside_m2": 0.0,
+  "above_m2": 0.0,
+  "blank_share": 0.6784,
+  "roof_gap_m2": 10.4,
+  "roof_gap_share": 0.101,
+  "class": "tiered/mid",
+  "architecture": "tiered",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 385.1
  },
  {
   "building": "fae16346-196b-4eca-9ca8-b6433f888038",
@@ -5456,22 +5456,6 @@
   "wall_m2": 740.9
  },
  {
-  "building": "fb099a5d-d36a-4cdb-bf42-d1cfcfbb7586",
-  "status": "ok",
-  "holes_views_m2": 357.5,
-  "inside_m2": 592.3,
-  "outside_m2": 0.0,
-  "above_m2": 0.0,
-  "blank_share": 0.3871,
-  "roof_gap_m2": 0.0,
-  "roof_gap_share": 0.0,
-  "class": "box/low",
-  "architecture": "box",
-  "height_class": "low",
-  "name": null,
-  "wall_m2": 633.6
- },
- {
   "building": "fc058955-94a4-45eb-8e4b-ebf50e31e4d9",
   "status": "ok",
   "holes_views_m2": 6.8,
@@ -5488,20 +5472,20 @@
   "wall_m2": 107.8
  },
  {
-  "building": "fd765aa8-eeb9-4a63-8217-391833116460-a",
+  "building": "fb099a5d-d36a-4cdb-bf42-d1cfcfbb7586",
   "status": "ok",
-  "holes_views_m2": 0,
-  "inside_m2": 10.3,
-  "outside_m2": 22.4,
+  "holes_views_m2": 357.5,
+  "inside_m2": 592.3,
+  "outside_m2": 0.0,
   "above_m2": 0.0,
-  "blank_share": 0.1077,
-  "roof_gap_m2": 0.4,
-  "roof_gap_share": 0.006,
-  "class": "row1/low",
-  "architecture": "row1",
+  "blank_share": 0.3871,
+  "roof_gap_m2": 0.0,
+  "roof_gap_share": 0.0,
+  "class": "box/low",
+  "architecture": "box",
   "height_class": "low",
   "name": null,
-  "wall_m2": 401.1
+  "wall_m2": 633.6
  },
  {
   "building": "fd765aa8-eeb9-4a63-8217-391833116460-b",
@@ -5520,6 +5504,22 @@
   "wall_m2": 257.9
  },
  {
+  "building": "fd765aa8-eeb9-4a63-8217-391833116460-a",
+  "status": "ok",
+  "holes_views_m2": 0,
+  "inside_m2": 10.3,
+  "outside_m2": 22.4,
+  "above_m2": 0.0,
+  "blank_share": 0.1077,
+  "roof_gap_m2": 0.4,
+  "roof_gap_share": 0.006,
+  "class": "row1/low",
+  "architecture": "row1",
+  "height_class": "low",
+  "name": null,
+  "wall_m2": 401.1
+ },
+ {
   "building": "feea4c38-e30e-4a79-bbf8-1b72399e5be0",
   "status": "ok",
   "holes_views_m2": 0,
@@ -5536,22 +5536,6 @@
   "wall_m2": 361.2
  },
  {
-  "building": "fe156133-be8c-4e61-abd0-26fd5c6c0790",
-  "status": "ok",
-  "holes_views_m2": 26.2,
-  "inside_m2": 0.0,
-  "outside_m2": 34.7,
-  "above_m2": 147.1,
-  "blank_share": 0.2686,
-  "roof_gap_m2": 12.0,
-  "roof_gap_share": 0.121,
-  "class": "row1/mid",
-  "architecture": "row1",
-  "height_class": "mid",
-  "name": null,
-  "wall_m2": 578.3
- },
- {
   "building": "ec790737-7929-4a57-8ba7-ad8843bbef4f",
   "status": "ok",
   "holes_views_m2": 465.9,
@@ -5566,6 +5550,22 @@
   "height_class": "tall",
   "name": "Chase Bank Plaza",
   "wall_m2": 10102.3
+ },
+ {
+  "building": "fe156133-be8c-4e61-abd0-26fd5c6c0790",
+  "status": "ok",
+  "holes_views_m2": 26.2,
+  "inside_m2": 0.0,
+  "outside_m2": 34.7,
+  "above_m2": 147.1,
+  "blank_share": 0.2686,
+  "roof_gap_m2": 12.0,
+  "roof_gap_share": 0.121,
+  "class": "row1/mid",
+  "architecture": "row1",
+  "height_class": "mid",
+  "name": null,
+  "wall_m2": 578.3
  },
  {
   "building": "fb24c7f8-8969-490f-a883-22b17223e910",

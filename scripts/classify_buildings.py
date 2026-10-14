@@ -347,7 +347,8 @@ def audit_one(job) -> dict:
             "inside_m2": (r.get("inside_walls") or {}).get("m2"),
             "outside_m2": (r.get("stray_walls") or {}).get("outside_m2"),
             "above_m2": (r.get("stray_walls") or {}).get("above_m2"),
-            "blank_share": (r.get("texture") or {}).get("blank_share")}
+            "blank_share": (r.get("texture") or {}).get("blank_share"),
+            "roof_gap_m2": (r.get("roof_gap") or {}).get("m2"), "roof_gap_share": (r.get("roof_gap") or {}).get("share")}
 
 
 def cmd_baseline(a) -> int:

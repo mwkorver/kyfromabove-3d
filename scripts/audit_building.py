@@ -142,6 +142,8 @@ def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: s
     rec["roof_walls"] = A.roof_walls(V, T, m["xs"], m["ys"], m["Z"], m["valid"], np.asarray(m["levels"][0]["ring"]))
     # wall drawn where the LiDAR has no building
     rec["stray_walls"] = A.stray_walls(V, T, m["xs"], m["ys"], m["Z"], m["valid"])
+    # the strip just inside the walls that the roof leaves open, from above
+    rec["roof_gap"] = A.roof_gap(V, T, [lv["ring"] for lv in m["levels"]])
     # wall drawn inside the building, under an unbroken roof
     rec["inside_walls"] = A.inside_walls(V, T, m["xs"], m["ys"], m["Z"], m["valid"], np.asarray(m["levels"][0]["ring"]))
 

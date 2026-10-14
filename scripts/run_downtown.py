@@ -196,6 +196,8 @@ def worker(args) -> int:
             cmd.append("--match-walls")
         if args.lidar_outline:
             cmd.append("--lidar-outline")
+        if getattr(args, "roof_edge", None):
+            cmd += ["--roof-edge", args.roof_edge]
         if args.complete:
             cmd.append("--complete")
         t = time.time()
@@ -412,6 +414,8 @@ def run(args) -> int:
             cmd.append("--match-walls")
         if args.lidar_outline:
             cmd.append("--lidar-outline")
+        if getattr(args, "roof_edge", None):
+            cmd += ["--roof-edge", args.roof_edge]
         if args.check_sheets:
             cmd.append("--check-sheets")
         if args.complete:
@@ -512,6 +516,8 @@ def main() -> int:
     common.add_argument("--no-prism-occluders", action="store_true",
                         help="texture with LiDAR-point occlusion alone (neighbours' facades mostly missing)")
     common.add_argument("--check-sheets", action="store_true", help="the check also draws texture_check.jpg")
+    common.add_argument("--roof-edge", choices=("outline", "grid"), default=None,
+                        help="the roof cut along the outlines (build_mesh's default) or the height field's grid (before)")
     common.add_argument("--lidar-outline", action="store_true",
                         help="the colourise uses each building's footprint_lidar.json where it has one (scripts/lidar_outline.py)")
     common.add_argument("--match-walls", action="store_true",

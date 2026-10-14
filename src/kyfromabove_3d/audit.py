@@ -68,6 +68,36 @@ def sample_mesh(V: np.ndarray, T: np.ndarray, per_m2: float = 48.0, seed: int = 
     return a + r1[:, None] * (b - a) + r2[:, None] * (c - a), tri
 
 
+def sample_mesh_fixed(V: np.ndarray, T: np.ndarray, per_m2: float = 8.0):
+    """Points over each triangle on a fixed pattern of its own (a Halton
+    sequence folded into the triangle, ``per_m2`` per square metre, at least
+    one), so a triangle's points do not depend on what other triangles the
+    mesh has: with random points, a 92 m2 wall triangle on Chase flipped
+    between "outside" and not when only the roof's triangles changed.
+    Returns (points (P, 3), triangle index of each (P,))."""
+    if not len(T):
+        return np.zeros((0, 3)), np.zeros(0, dtype=np.int64)
+    _, area = triangle_normals_areas(V, T)
+    n = np.maximum(1, np.ceil(area * per_m2).astype(np.int64))
+    tri = np.repeat(np.arange(len(T)), n)
+    start = np.repeat(np.cumsum(n) - n, n)
+    k = np.arange(len(tri)) - start + 1                         # 1.. within each triangle
+
+    def halton(i, base):
+        f, r = 1.0, np.zeros(len(i))
+        i = i.astype(float)
+        while (i > 0).any():
+            f = f / base
+            r = r + f * (i % base)
+            i = np.floor(i / base)
+        return r
+    r1, r2 = halton(k, 2), halton(k, 3)
+    flip = r1 + r2 > 1.0
+    r1[flip], r2[flip] = 1.0 - r1[flip], 1.0 - r2[flip]
+    a, b, c = V[T[tri, 0]], V[T[tri, 1]], V[T[tri, 2]]
+    return a + r1[:, None] * (b - a) + r2[:, None] * (c - a), tri
+
+
 @dataclass
 class Solid:
     """The LiDAR as a solid: surface points and, for each, the face it lies
@@ -314,7 +344,7 @@ def stray_walls(V: np.ndarray, T: np.ndarray, xs, ys, Z, valid, near_m: float = 
     none = {"m2": 0.0, "outside_m2": 0.0, "above_m2": 0.0}
     if not vert.any() or not valid.any():
         return none
-    pts, tri = sample_mesh(V, T[vert], per_m2=per_m2, seed=2)
+    pts, tri = sample_mesh_fixed(V, T[vert], per_m2=per_m2)
     if not len(pts):
         return none
     cell = float(xs[1] - xs[0])
@@ -355,7 +385,7 @@ def inside_walls(V: np.ndarray, T: np.ndarray, xs, ys, Z, valid, outline, inside
     vert = (np.abs(n[:, 2]) < 0.2) & (area > 0.01)
     if not vert.any() or not valid.any():
         return {"m2": 0.0, "n_triangles": 0}
-    pts, tri = sample_mesh(V, T[vert], per_m2=per_m2, seed=3)
+    pts, tri = sample_mesh_fixed(V, T[vert], per_m2=per_m2)
     if not len(pts):
         return {"m2": 0.0, "n_triangles": 0}
     cell = float(xs[1] - xs[0])
@@ -374,6 +404,34 @@ def inside_walls(V: np.ndarray, T: np.ndarray, xs, ys, Z, valid, outline, inside
     share = np.bincount(tri, weights=bad, minlength=nt) / np.maximum(np.bincount(tri, minlength=nt), 1)
     flagged = share >= 0.5
     return {"m2": round(float(area[vert][flagged].sum()), 1), "n_triangles": int(flagged.sum())}
+
+
+def roof_gap(V: np.ndarray, T: np.ndarray, rings, strip_m: float = 1.5) -> Dict[str, Any]:
+    """How much of the strip just inside the walls the roof leaves open, seen
+    from above: the area within ``strip_m`` inside each level's outline that
+    no upward-facing triangle covers. The roof was two triangles per square
+    of a north-south grid, and on a building set at an angle its edge
+    stepped along the walls (8c47a2dd), a saw-tooth the holes never showed,
+    the audit's own solid stepping the same way. Returns {"m2", "share"}."""
+    import shapely
+    n, area = triangle_normals_areas(V, T)
+    up = (n[:, 2] > 0.3) & (area > 1e-4)
+    strips = []
+    for ring in rings:
+        poly = shapely.Polygon(np.asarray(ring, dtype=float)[:, :2])
+        if not poly.is_valid:
+            poly = poly.buffer(0)
+        inner = poly.buffer(-strip_m)
+        strips.append(poly.difference(inner) if not inner.is_empty else poly)
+    strip = shapely.union_all(strips)
+    if strip.is_empty or not up.any():
+        return {"m2": round(float(strip.area), 1), "share": 1.0 if not strip.is_empty else 0.0}
+    tri = V[T[up]][:, :, :2]
+    polys = shapely.polygons(np.concatenate([tri, tri[:, :1]], axis=1))
+    near = shapely.intersects(polys, strip)
+    cover = shapely.union_all(polys[near].tolist() + [shapely.Polygon()]).buffer(0.01)
+    gap = strip.difference(cover)
+    return {"m2": round(float(gap.area), 1), "share": round(float(gap.area / max(strip.area, 1e-9)), 3)}
 
 
 # ------------------------------------------------------------------ texture

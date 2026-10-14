@@ -821,27 +821,108 @@ def outside_modelled_wall(cen: np.ndarray, planes, profiles, slack_m: float = 1.
     return out
 
 
-def roof_mesh(xs, ys, Z, valid, wall_quads, planes=(), profiles=None, max_slope_deg: float = 75.0,
-              min_step_m: float = 2.0, levels=None):
-    """Two triangles per cell of four valid corners, split into the flat
-    ones (the roof, textured from the plan view) and the steep ones (a step
-    or a wall the LiDAR saw that no band models -- Humana's bulging north
-    side); a steep triangle standing where a wall quad already is gets
-    dropped."""
-    ny, nx = Z.shape
-    vid = -np.ones((ny, nx), dtype=int)
-    vid[valid] = np.arange(valid.sum())
-    X, Y = np.meshgrid(xs, ys)
-    verts = np.column_stack([X[valid], Y[valid], Z[valid]])
-    tris = []
-    for iy in range(ny - 1):
-        for ix in range(nx - 1):
-            a, b, c, d = vid[iy, ix], vid[iy, ix + 1], vid[iy + 1, ix], vid[iy + 1, ix + 1]
-            if min(a, b, c, d) < 0:
+def roof_from_outline(xs, ys, Z, valid, rings):
+    """The roof as triangles cut along the outlines: points every half a cell
+    along each level's outline -- the ground level's at the height of the
+    field's cell nearest it; an upper level's twice, a few centimetres inside at its
+    own roof's height and outside at the one below, the step between them
+    left to the steep triangles -- and the field's cells inside it,
+    triangulated and kept within the ground level's outline.
+    Two triangles per cell of a north-south grid stepped along every wall set
+    at an angle (8c47a2dd's roof left 57% of the strip inside its walls open).
+    Returns (verts (V, 3), tris (T, 3))."""
+    import shapely
+    from scipy.ndimage import distance_transform_edt
+    from scipy.spatial import Delaunay
+
+    cell = float(xs[1] - xs[0]) if len(xs) > 1 else 1.0
+    _, (iy, ix) = distance_transform_edt(~valid, return_indices=True)
+    Zf = Z[iy, ix]
+
+    def z_at(xy):
+        gx = np.clip(np.round((xy[:, 0] - xs[0]) / cell).astype(int), 0, len(xs) - 1)
+        gy = np.clip(np.round((xy[:, 1] - ys[0]) / cell).astype(int), 0, len(ys) - 1)
+        return Zf[gy, gx]
+
+    def ccw(r):
+        r = np.asarray(r, dtype=float)[:, :2]
+        if not np.allclose(r[0], r[-1]):
+            r = np.vstack([r, r[:1]])
+        a2 = np.sum(r[:-1, 0] * r[1:, 1] - r[1:, 0] * r[:-1, 1])
+        return r if a2 > 0 else r[::-1]
+
+    pts, zs = [], []
+    for k, ring in enumerate(rings):
+        R = ccw(ring)
+        for p0, p1 in zip(R[:-1], R[1:]):
+            L = float(np.hypot(*(p1 - p0)))
+            if L < 1e-6:
                 continue
-            tris.append((a, b, d))
-            tris.append((a, d, c))
-    tris = np.array(tris, dtype=np.int64).reshape(-1, 3)
+            n = max(1, int(np.ceil(L / (0.5 * cell))))
+            P = p0[None, :] + (p1 - p0)[None, :] * (np.arange(n) / n)[:, None]
+            inward = np.array([-(p1 - p0)[1], (p1 - p0)[0]]) / L          # left of travel on a counter-clockwise ring
+            if k == 0:
+                # the nearest cell's height to the point itself: taken half a cell in,
+                # RIVUE's edge points stood at its podium's 9 m over a 4.4 m canopy at
+                # the edge, a sliver of roof standing up as wall
+                pts.append(P); zs.append(z_at(P))
+            else:
+                pts.append(P + 0.05 * inward); zs.append(z_at(P + 0.5 * cell * inward))
+                pts.append(P - 0.05 * inward); zs.append(z_at(P - 0.5 * cell * inward))
+    outer = shapely.Polygon(ccw(rings[0]))
+    if not outer.is_valid:
+        outer = outer.buffer(0)
+    X, Y = np.meshgrid(xs, ys)
+    # every cell inside the outline, bar those almost on it: leaving out the
+    # half-cell strip, a canopy one cell wide lost its cells and the roof
+    # sloped from its edge straight up to the podium's (RIVUE)
+    keep = valid & shapely.contains_xy(outer.buffer(-0.15 * cell), X, Y)
+    for ring in rings[1:]:
+        keep &= shapely.distance(shapely.LinearRing(ccw(ring)), shapely.points(X, Y)) > 0.5 * cell
+    pts.append(np.column_stack([X[keep], Y[keep]])); zs.append(Z[keep])
+    P, z = np.vstack(pts), np.concatenate(zs)
+    P, first = np.unique(np.round(P, 3), axis=0, return_index=True)
+    z = z[first]
+    if len(P) < 3:
+        return np.zeros((0, 3)), np.zeros((0, 3), dtype=np.int64)
+    tri = Delaunay(P).simplices
+    polys = shapely.polygons(np.concatenate([P[tri], P[tri][:, :1]], axis=1))
+    ok = shapely.within(polys, outer.buffer(0.05))
+    # no slivers: along a straight edge with no cell close inside, three of its
+    # points made a triangle 105 m long and centimetres wide that stood up as a
+    # wall (RIVUE); a roof triangle has some width from above
+    a, b, c = P[tri[:, 0]], P[tri[:, 1]], P[tri[:, 2]]
+    plan = 0.5 * np.abs((b[:, 0] - a[:, 0]) * (c[:, 1] - a[:, 1]) - (c[:, 0] - a[:, 0]) * (b[:, 1] - a[:, 1]))
+    longest = np.max(np.stack([np.hypot(*(b - a).T), np.hypot(*(c - b).T), np.hypot(*(a - c).T)]), axis=0)
+    ok &= plan >= 0.05 * cell * longest
+    return np.column_stack([P, z]), tri[ok].astype(np.int64)
+
+
+def roof_mesh(xs, ys, Z, valid, wall_quads, planes=(), profiles=None, max_slope_deg: float = 75.0,
+              min_step_m: float = 2.0, levels=None, outline: bool = True):
+    """The roof's triangles, split into the flat ones (the roof, textured
+    from the plan view) and the steep ones (a step or a wall the LiDAR saw
+    that no band models -- Humana's bulging north side); a steep triangle
+    standing where a wall quad already is gets dropped. With ``outline``
+    (and levels) the triangles are cut along the levels' outlines
+    (roof_from_outline); otherwise two per cell of four valid corners."""
+    if outline and levels:
+        verts, tris = roof_from_outline(xs, ys, Z, valid, [lv["ring"] for lv in levels])
+    else:
+        ny, nx = Z.shape
+        vid = -np.ones((ny, nx), dtype=int)
+        vid[valid] = np.arange(valid.sum())
+        X, Y = np.meshgrid(xs, ys)
+        verts = np.column_stack([X[valid], Y[valid], Z[valid]])
+        tris = []
+        for iy in range(ny - 1):
+            for ix in range(nx - 1):
+                a, b, c, d = vid[iy, ix], vid[iy, ix + 1], vid[iy + 1, ix], vid[iy + 1, ix + 1]
+                if min(a, b, c, d) < 0:
+                    continue
+                tris.append((a, b, d))
+                tris.append((a, d, c))
+        tris = np.array(tris, dtype=np.int64).reshape(-1, 3)
     if not len(tris):
         return verts, tris, tris
     v0, v1, v2 = verts[tris[:, 0]], verts[tris[:, 1]], verts[tris[:, 2]]
@@ -881,13 +962,15 @@ def roof_mesh(xs, ys, Z, valid, wall_quads, planes=(), profiles=None, max_slope_
     return verts, tris[~steep], tris[steep]
 
 
-def roof_texture(xs, ys, Z, valid, poly, cams, texel_m: float = TEXEL_M):
+def roof_texture(xs, ys, Z, valid, poly, cams, texel_m: float = TEXEL_M, outline=None):
     """Plan-view texture of the roof sampled through the camera models."""
     from scipy.ndimage import distance_transform_edt
     from shapely import contains_xy
 
     from colorize_building import sample_colour
 
+    if outline is not None:
+        poly = outline.union(poly)                      # the texture's extent covers both
     minx, miny, maxx, maxy = poly.bounds
     W = _mult4(min(MAX_TEX_PX, int(np.ceil((maxx - minx) / texel_m))))
     H = _mult4(min(MAX_TEX_PX, int(np.ceil((maxy - miny) / texel_m))))
@@ -901,7 +984,10 @@ def roof_texture(xs, ys, Z, valid, poly, cams, texel_m: float = TEXEL_M):
     gx = np.clip(((TX - xs[0]) / cell + 0.5).astype(int), 0, len(xs) - 1)
     gy = np.clip(((TY - ys[0]) / cell + 0.5).astype(int), 0, len(ys) - 1)
     tz = Zf[gy, gx]
-    inside = contains_xy(poly, TX.ravel(), TY.ravel()) & valid[gy, gx].ravel()
+    # with the roof cut along the outline, all of it inside the outline is
+    # painted (heights from the nearest cell), not only the field's cells
+    inside = (contains_xy(outline, TX.ravel(), TY.ravel()) if outline is not None
+              else contains_xy(poly, TX.ravel(), TY.ravel()) & valid[gy, gx].ravel())
     pts = np.column_stack([TX.ravel(), TY.ravel(), tz.ravel()])[inside]
     up = np.repeat(np.array([[0.0, 0.0, 1.0]]), len(pts), axis=0)
     rgb, seen, _, _ = sample_colour(pts, up, cams, min_facing_cos=0.3, occlusion_slack_m=1.5)
@@ -1417,6 +1503,8 @@ def main() -> int:
     ap.add_argument("--footprint-csv", type=Path, default=Path("data/derived/ky_facade_tiled_wkt.csv"))
     ap.add_argument("--name", default=None, help="display name (default: from the footprint)")
     ap.add_argument("--texel-m", type=float, default=TEXEL_M)
+    ap.add_argument("--roof-edge", choices=("outline", "grid"), default="outline",
+                    help="the roof's triangles cut along the levels' outlines, or two per cell of the height field (before)")
     ap.add_argument("--roof-cell-m", type=float, default=0.0,
                     help="roof height-field cell; 0 = 0.75 m where the returns are dense (>= 4/m2), else 1.5 m")
     ap.add_argument("--out", type=Path, default=None, help="default <building>/3dtiles_mesh/")
@@ -1841,7 +1929,8 @@ def main() -> int:
 
     # Roof
     if valid.any():
-        verts, tris, steep = roof_mesh(xs, ys, Z, valid, all_wall_quads, [by_face[f] for f in used_bands], used_bands, levels=levels)
+        verts, tris, steep = roof_mesh(xs, ys, Z, valid, all_wall_quads, [by_face[f] for f in used_bands], used_bands, levels=levels,
+                                       outline=args.roof_edge == "outline")
     else:
         from overture_boxes import extrude
         P_, N_, I_ = extrude(ring_m, ground_z, roof_top)
@@ -1875,7 +1964,9 @@ def main() -> int:
     source_desc = ""
     if cams and len(verts):
         if valid.any():
-            tex, bbox, n_seen, n_tex = roof_texture(xs, ys, Z, valid, poly, cams, args.texel_m)
+            from shapely.geometry import Polygon as _RoofPoly
+            roof_outline = _RoofPoly(np.asarray(levels[0]["ring"], dtype=float)[:, :2]).buffer(0) if args.roof_edge == "outline" else None
+            tex, bbox, n_seen, n_tex = roof_texture(xs, ys, Z, valid, poly, cams, args.texel_m, outline=roof_outline)
         else:
             flat_valid = np.ones_like(valid); Zf = np.full(Z.shape, ground_z + roof_top)
             tex, bbox, n_seen, n_tex = roof_texture(xs, ys, Zf, flat_valid, poly, cams, args.texel_m)

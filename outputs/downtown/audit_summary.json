@@ -30,11 +30,6 @@
      "hole_m2": 1358.8
     },
     {
-     "building": "47603cef-ece6-4f63-ae2d-7a19750a951f",
-     "name": "Holiday Inn Express & Suites - Downtown Louisville",
-     "hole_m2": 1178.5
-    },
-    {
      "building": "ccf3f1a7-02db-4270-a812-203e7e9d12dd",
      "name": "ccf3f1a7-02db-4270-a812-203e7e9d12dd",
      "hole_m2": 1046.5
@@ -95,14 +90,19 @@
      "hole_m2": 713.2
     },
     {
-     "building": "facdf3d7-0288-42b3-859a-c563c1eea758",
-     "name": "facdf3d7-0288-42b3-859a-c563c1eea758",
-     "hole_m2": 691.5
-    },
-    {
      "building": "7c0e2eb6-96e6-4fa2-85b4-0ef2ae590026",
      "name": "Jefferson County Judicial Center",
      "hole_m2": 650.5
+    },
+    {
+     "building": "e3f947c1-96a7-4650-a818-5c98a4a87cef",
+     "name": "Normandy Building",
+     "hole_m2": 647.2
+    },
+    {
+     "building": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
+     "name": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
+     "hole_m2": 631.0
     }
    ]
   },
@@ -130,11 +130,6 @@
      "roof_wall_m2": 84.5
     },
     {
-     "building": "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a",
-     "name": "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a",
-     "roof_wall_m2": 66.5
-    },
-    {
      "building": "cb53b84f-a244-4541-b2f0-4d5d4877b595",
      "name": "Actors Theatre of Louisville",
      "roof_wall_m2": 65.7
@@ -143,11 +138,6 @@
      "building": "8bcb7393-6d50-462f-91cb-0d2200f21cf2-b",
      "name": "Merlle's Whiskey Kitchen (b)",
      "roof_wall_m2": 62.5
-    },
-    {
-     "building": "bf3b5ab9-0c80-49f7-a2ce-11e6cbe4acd2",
-     "name": "bf3b5ab9-0c80-49f7-a2ce-11e6cbe4acd2",
-     "roof_wall_m2": 54.3
     },
     {
      "building": "4ec78a7d-eb75-40d8-8a24-ba0d561a652a",
@@ -160,24 +150,9 @@
      "roof_wall_m2": 36.4
     },
     {
-     "building": "6b0a5aa3-70ae-4f4e-9001-f0c946df2571",
-     "name": "Louisville City Hall Annex",
-     "roof_wall_m2": 34.2
-    },
-    {
      "building": "9da70723-692c-4609-b19e-b4e3e3ae2522",
      "name": "The Kentucky Center",
      "roof_wall_m2": 33.7
-    },
-    {
-     "building": "47603cef-ece6-4f63-ae2d-7a19750a951f",
-     "name": "Holiday Inn Express & Suites - Downtown Louisville",
-     "roof_wall_m2": 30.3
-    },
-    {
-     "building": "013d65e6-f338-4737-b9da-38297b319a2c",
-     "name": "013d65e6-f338-4737-b9da-38297b319a2c",
-     "roof_wall_m2": 16.7
     },
     {
      "building": "b2ef5b08-8689-4a48-9391-5989c512a8d2",
@@ -195,11 +170,6 @@
      "roof_wall_m2": 6.2
     },
     {
-     "building": "f60dbc1c-58b3-41d7-b5ce-a9093859c007",
-     "name": "f60dbc1c-58b3-41d7-b5ce-a9093859c007",
-     "roof_wall_m2": 4.9
-    },
-    {
      "building": "00864b23-f484-4ea6-9d48-99cb5fe2aade-a",
      "name": "00864b23-f484-4ea6-9d48-99cb5fe2aade-a",
      "roof_wall_m2": 0.0
@@ -207,6 +177,36 @@
     {
      "building": "00864b23-f484-4ea6-9d48-99cb5fe2aade-b",
      "name": "00864b23-f484-4ea6-9d48-99cb5fe2aade-b",
+     "roof_wall_m2": 0.0
+    },
+    {
+     "building": "00e298eb-8eab-4220-9ea1-3f13d84b8711",
+     "name": "Meteosafe Building",
+     "roof_wall_m2": 0.0
+    },
+    {
+     "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4",
+     "name": "01192eea-7db8-4392-bb85-e20bc3c59bb4",
+     "roof_wall_m2": 0.0
+    },
+    {
+     "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4-a",
+     "name": "01192eea-7db8-4392-bb85-e20bc3c59bb4-a",
+     "roof_wall_m2": 0.0
+    },
+    {
+     "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4-b",
+     "name": "01192eea-7db8-4392-bb85-e20bc3c59bb4-b",
+     "roof_wall_m2": 0.0
+    },
+    {
+     "building": "013d65e6-f338-4737-b9da-38297b319a2c",
+     "name": "013d65e6-f338-4737-b9da-38297b319a2c",
+     "roof_wall_m2": 0.0
+    },
+    {
+     "building": "01495e86-1171-481e-a308-a2e6c230e7c4",
+     "name": "Bluegrass Brewing Company",
      "roof_wall_m2": 0.0
     }
    ]
@@ -891,9 +891,9 @@
   {
    "building": "00e298eb-8eab-4220-9ea1-3f13d84b8711",
    "name": "Meteosafe Building",
-   "hole_m2": 172.8,
+   "hole_m2": 334.2,
    "worst_face": "6",
-   "worst_face_m2": 165.2,
+   "worst_face_m2": 165.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 2.0,
    "product1_minus_lidar_m": 0.0,
@@ -951,11 +951,11 @@
   {
    "building": "013d65e6-f338-4737-b9da-38297b319a2c",
    "name": "013d65e6-f338-4737-b9da-38297b319a2c",
-   "hole_m2": 224.2,
-   "worst_face": "0",
-   "worst_face_m2": 224.2,
-   "roof_wall_m2": 16.7,
-   "mesh_minus_lidar_m": 1.3,
+   "hole_m2": 116.2,
+   "worst_face": "1001",
+   "worst_face_m2": 105.2,
+   "roof_wall_m2": 0.0,
+   "mesh_minus_lidar_m": -0.5,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.4052,
    "dots": 0,
@@ -981,9 +981,9 @@
   {
    "building": "01d171dc-9f10-4767-9e34-24b922c0014a",
    "name": "01d171dc-9f10-4767-9e34-24b922c0014a",
-   "hole_m2": 207.8,
-   "worst_face": "3",
-   "worst_face_m2": 198.8,
+   "hole_m2": 106.5,
+   "worst_face": "1001",
+   "worst_face_m2": 54.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 4.5,
    "product1_minus_lidar_m": 0.0,
@@ -1101,9 +1101,9 @@
   {
    "building": "05f6f87b-7be5-4dfd-8c75-b24769a79f35",
    "name": "05f6f87b-7be5-4dfd-8c75-b24769a79f35",
-   "hole_m2": 576.2,
-   "worst_face": "1",
-   "worst_face_m2": 576.2,
+   "hole_m2": 81.8,
+   "worst_face": "1006",
+   "worst_face_m2": 81.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 1.0,
    "product1_minus_lidar_m": 0.0,
@@ -1146,9 +1146,9 @@
   {
    "building": "06d1eafc-bd51-49dd-818e-70d030636f6c",
    "name": "Evan Williams Bourbon Experience",
-   "hole_m2": 531.2,
-   "worst_face": "3",
-   "worst_face_m2": 501.2,
+   "hole_m2": 225.2,
+   "worst_face": "1005",
+   "worst_face_m2": 220.2,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.1,
    "product1_minus_lidar_m": -0.0,
@@ -1311,11 +1311,11 @@
   {
    "building": "0dfdd460-bd58-4f0a-9a54-d1471e96fa37",
    "name": "0dfdd460-bd58-4f0a-9a54-d1471e96fa37",
-   "hole_m2": 591.8,
-   "worst_face": "1",
-   "worst_face_m2": 591.8,
+   "hole_m2": 13.8,
+   "worst_face": "1005",
+   "worst_face_m2": 13.8,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 0.0,
+   "mesh_minus_lidar_m": -2.5,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.4526,
    "dots": 0,
@@ -1371,9 +1371,9 @@
   {
    "building": "129c2580-3493-4243-86d2-94e65b6d1e07",
    "name": "129c2580-3493-4243-86d2-94e65b6d1e07",
-   "hole_m2": 38.0,
-   "worst_face": "5",
-   "worst_face_m2": 38.0,
+   "hole_m2": 11.5,
+   "worst_face": "corner",
+   "worst_face_m2": 11.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.4,
    "product1_minus_lidar_m": 0.0,
@@ -1761,11 +1761,11 @@
   {
    "building": "24bc6e4e-9992-42d8-a196-1bd01ab45575",
    "name": "24bc6e4e-9992-42d8-a196-1bd01ab45575",
-   "hole_m2": 140.0,
-   "worst_face": "1",
-   "worst_face_m2": 110.2,
+   "hole_m2": 18.5,
+   "worst_face": "0",
+   "worst_face_m2": 18.5,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 0.6,
+   "mesh_minus_lidar_m": 0.1,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.549,
    "dots": 0,
@@ -2196,11 +2196,11 @@
   {
    "building": "3528b547-231d-4dd7-9892-1fe1111a80fb",
    "name": "3528b547-231d-4dd7-9892-1fe1111a80fb",
-   "hole_m2": 10.5,
-   "worst_face": "corner",
-   "worst_face_m2": 10.5,
+   "hole_m2": 25.5,
+   "worst_face": "1013",
+   "worst_face_m2": 17.8,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 0.4,
+   "mesh_minus_lidar_m": 1.0,
    "product1_minus_lidar_m": -0.0,
    "blank_share": 0.4509,
    "dots": 0,
@@ -2466,9 +2466,9 @@
   {
    "building": "3e6ac482-3d32-45c7-b127-56c33f068067",
    "name": "3e6ac482-3d32-45c7-b127-56c33f068067",
-   "hole_m2": 36.0,
-   "worst_face": "corner",
-   "worst_face_m2": 36.0,
+   "hole_m2": 35.8,
+   "worst_face": "1006",
+   "worst_face_m2": 22.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.1,
    "product1_minus_lidar_m": -0.0,
@@ -2483,9 +2483,9 @@
    "name": "Metro Hall Annex",
    "hole_m2": 18.8,
    "worst_face": "3",
-   "worst_face_m2": 13.8,
+   "worst_face_m2": 14.0,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": -0.0,
+   "mesh_minus_lidar_m": 0.0,
    "product1_minus_lidar_m": -0.0,
    "blank_share": 0.4442,
    "dots": 0,
@@ -2556,7 +2556,7 @@
   {
    "building": "40ead71b-7947-4e87-ab44-b3f11d755957",
    "name": "Hampton Inn Louisville Downtown",
-   "hole_m2": 29.2,
+   "hole_m2": 29.8,
    "worst_face": "1006",
    "worst_face_m2": 22.2,
    "roof_wall_m2": 0.0,
@@ -2571,9 +2571,9 @@
   {
    "building": "428bb4d9-ec50-4f8e-be98-d55c5798049b",
    "name": "428bb4d9-ec50-4f8e-be98-d55c5798049b",
-   "hole_m2": 132.5,
-   "worst_face": "1",
-   "worst_face_m2": 132.5,
+   "hole_m2": 6.5,
+   "worst_face": "1005",
+   "worst_face_m2": 6.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.0,
    "product1_minus_lidar_m": 0.0,
@@ -2706,10 +2706,10 @@
   {
    "building": "47603cef-ece6-4f63-ae2d-7a19750a951f",
    "name": "Holiday Inn Express & Suites - Downtown Louisville",
-   "hole_m2": 1178.5,
-   "worst_face": "1",
-   "worst_face_m2": 1178.5,
-   "roof_wall_m2": 30.3,
+   "hole_m2": 41.2,
+   "worst_face": "corner",
+   "worst_face_m2": 24.8,
+   "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.0,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.6691,
@@ -3216,9 +3216,9 @@
   {
    "building": "6182fd4f-7acf-4276-9da6-66efd74cc6a5",
    "name": "Waterfront Development Corporation Office",
-   "hole_m2": 37.0,
-   "worst_face": "13",
-   "worst_face_m2": 24.8,
+   "hole_m2": 24.0,
+   "worst_face": "6",
+   "worst_face_m2": 24.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.1,
    "product1_minus_lidar_m": -0.0,
@@ -3411,10 +3411,10 @@
   {
    "building": "6b0a5aa3-70ae-4f4e-9001-f0c946df2571",
    "name": "Louisville City Hall Annex",
-   "hole_m2": 74.5,
-   "worst_face": "29",
-   "worst_face_m2": 65.5,
-   "roof_wall_m2": 34.2,
+   "hole_m2": 41.0,
+   "worst_face": "corner",
+   "worst_face_m2": 36.5,
+   "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 2.1,
    "product1_minus_lidar_m": -0.0,
    "blank_share": 0.3168,
@@ -3501,10 +3501,10 @@
   {
    "building": "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a",
    "name": "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a",
-   "hole_m2": 540.5,
-   "worst_face": "1005",
-   "worst_face_m2": 540.5,
-   "roof_wall_m2": 66.5,
+   "hole_m2": 250.2,
+   "worst_face": "1003",
+   "worst_face_m2": 220.2,
+   "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.0,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.1179,
@@ -3741,9 +3741,9 @@
   {
    "building": "7c308aa7-8362-4f34-aa30-f1513ee0293d",
    "name": "7c308aa7-8362-4f34-aa30-f1513ee0293d",
-   "hole_m2": 104.8,
+   "hole_m2": 104.5,
    "worst_face": "2",
-   "worst_face_m2": 81.2,
+   "worst_face_m2": 82.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.1,
    "product1_minus_lidar_m": 0.0,
@@ -3936,11 +3936,11 @@
   {
    "building": "8686db7a-94c4-4288-ae91-5877257e9d94",
    "name": "8686db7a-94c4-4288-ae91-5877257e9d94",
-   "hole_m2": 159.8,
-   "worst_face": "3",
-   "worst_face_m2": 123.8,
+   "hole_m2": 112.8,
+   "worst_face": "1",
+   "worst_face_m2": 112.8,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 1.1,
+   "mesh_minus_lidar_m": 0.9,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.7504,
    "dots": 0,
@@ -3951,11 +3951,11 @@
   {
    "building": "86b51d43-8907-45c4-a00e-6e93f23b8cc0",
    "name": "86b51d43-8907-45c4-a00e-6e93f23b8cc0",
-   "hole_m2": 94.0,
-   "worst_face": "8",
-   "worst_face_m2": 94.0,
+   "hole_m2": 0.0,
+   "worst_face": null,
+   "worst_face_m2": null,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 0.2,
+   "mesh_minus_lidar_m": 0.1,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.5833,
    "dots": 0,
@@ -4056,9 +4056,9 @@
   {
    "building": "8bcb7393-6d50-462f-91cb-0d2200f21cf2-a",
    "name": "Merlle's Whiskey Kitchen (a)",
-   "hole_m2": 9.5,
-   "worst_face": "5",
-   "worst_face_m2": 9.5,
+   "hole_m2": 10.0,
+   "worst_face": "1",
+   "worst_face_m2": 10.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.2,
    "product1_minus_lidar_m": 0.0,
@@ -4176,9 +4176,9 @@
   {
    "building": "8f42ffd8-1023-4582-9a98-610dcbd1d397",
    "name": "8f42ffd8-1023-4582-9a98-610dcbd1d397",
-   "hole_m2": 601.0,
-   "worst_face": "1",
-   "worst_face_m2": 601.0,
+   "hole_m2": 127.8,
+   "worst_face": "2006",
+   "worst_face_m2": 119.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.1,
    "product1_minus_lidar_m": 0.0,
@@ -4836,9 +4836,9 @@
   {
    "building": "a8cb3ba8-668d-4392-ab18-16b3e68ec846",
    "name": "a8cb3ba8-668d-4392-ab18-16b3e68ec846",
-   "hole_m2": 0.0,
-   "worst_face": null,
-   "worst_face_m2": null,
+   "hole_m2": 6.0,
+   "worst_face": "1005",
+   "worst_face_m2": 6.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.2,
    "product1_minus_lidar_m": -0.0,
@@ -5106,9 +5106,9 @@
   {
    "building": "b575ad92-0c52-4322-b99c-5edd2d3e36f8",
    "name": "Red7e Advertising",
-   "hole_m2": 21.5,
+   "hole_m2": 49.8,
    "worst_face": "corner",
-   "worst_face_m2": 16.0,
+   "worst_face_m2": 29.2,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 3.1,
    "product1_minus_lidar_m": 0.0,
@@ -5361,10 +5361,10 @@
   {
    "building": "bf3b5ab9-0c80-49f7-a2ce-11e6cbe4acd2",
    "name": "bf3b5ab9-0c80-49f7-a2ce-11e6cbe4acd2",
-   "hole_m2": 263.0,
+   "hole_m2": 133.2,
    "worst_face": "2",
-   "worst_face_m2": 263.0,
-   "roof_wall_m2": 54.3,
+   "worst_face_m2": 133.2,
+   "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.1,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.3172,
@@ -5406,9 +5406,9 @@
   {
    "building": "c0ccbda0-8ea8-482c-a3a6-6ee8f9c4d438",
    "name": "c0ccbda0-8ea8-482c-a3a6-6ee8f9c4d438",
-   "hole_m2": 567.2,
+   "hole_m2": 6.0,
    "worst_face": "5",
-   "worst_face_m2": 567.2,
+   "worst_face_m2": 6.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 4.4,
    "product1_minus_lidar_m": 0.0,
@@ -5661,7 +5661,7 @@
   {
    "building": "cc5c3fed-e6de-4913-9a00-a92dc831b398",
    "name": "cc5c3fed-e6de-4913-9a00-a92dc831b398",
-   "hole_m2": 79.0,
+   "hole_m2": 19.2,
    "worst_face": "0",
    "worst_face_m2": 19.2,
    "roof_wall_m2": 0.0,
@@ -5721,11 +5721,11 @@
   {
    "building": "ccf38907-1c0f-4442-b146-38c432f80cf0",
    "name": "ccf38907-1c0f-4442-b146-38c432f80cf0",
-   "hole_m2": 5.5,
-   "worst_face": "1",
-   "worst_face_m2": 5.5,
+   "hole_m2": 6.5,
+   "worst_face": "roof",
+   "worst_face_m2": 6.5,
    "roof_wall_m2": 0.0,
-   "mesh_minus_lidar_m": 1.1,
+   "mesh_minus_lidar_m": 0.1,
    "product1_minus_lidar_m": -0.0,
    "blank_share": 0.0618,
    "dots": 0,
@@ -6246,9 +6246,9 @@
   {
    "building": "e5214ab7-800d-46bf-88d0-6ca360684484",
    "name": "The DeLor Building",
-   "hole_m2": 271.5,
-   "worst_face": "4",
-   "worst_face_m2": 196.8,
+   "hole_m2": 36.8,
+   "worst_face": "1004",
+   "worst_face_m2": 30.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.4,
    "product1_minus_lidar_m": 0.0,
@@ -6276,9 +6276,9 @@
   {
    "building": "e6295f45-8d38-4144-9d0a-25722703e378",
    "name": "e6295f45-8d38-4144-9d0a-25722703e378",
-   "hole_m2": 0.0,
-   "worst_face": null,
-   "worst_face_m2": null,
+   "hole_m2": 4.0,
+   "worst_face": "corner",
+   "worst_face_m2": 4.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.4,
    "product1_minus_lidar_m": 0.0,
@@ -6546,10 +6546,10 @@
   {
    "building": "f60dbc1c-58b3-41d7-b5ce-a9093859c007",
    "name": "f60dbc1c-58b3-41d7-b5ce-a9093859c007",
-   "hole_m2": 254.5,
-   "worst_face": "3",
-   "worst_face_m2": 254.5,
-   "roof_wall_m2": 4.9,
+   "hole_m2": 4.5,
+   "worst_face": "corner",
+   "worst_face_m2": 4.5,
+   "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 4.7,
    "product1_minus_lidar_m": 0.0,
    "blank_share": 0.2773,
@@ -6636,9 +6636,9 @@
   {
    "building": "fa2a341b-423e-4c87-aa21-10ad538f152a",
    "name": "fa2a341b-423e-4c87-aa21-10ad538f152a",
-   "hole_m2": 45.5,
-   "worst_face": "0",
-   "worst_face_m2": 45.5,
+   "hole_m2": 42.0,
+   "worst_face": "1003",
+   "worst_face_m2": 37.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 1.8,
    "product1_minus_lidar_m": -0.0,
@@ -6666,9 +6666,9 @@
   {
    "building": "facdf3d7-0288-42b3-859a-c563c1eea758",
    "name": "facdf3d7-0288-42b3-859a-c563c1eea758",
-   "hole_m2": 691.5,
-   "worst_face": "3",
-   "worst_face_m2": 691.5,
+   "hole_m2": 21.0,
+   "worst_face": "1",
+   "worst_face_m2": 21.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.0,
    "product1_minus_lidar_m": 0.0,

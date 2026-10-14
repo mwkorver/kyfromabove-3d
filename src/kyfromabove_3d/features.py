@@ -3089,7 +3089,8 @@ LEVEL_FACE_STRIDE = 1000     # faces of level k are numbered k * 1000 + i
 def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m: float = 1.0,
                     upper_fraction: float = 0.4, min_cover: float = 0.05, max_cover: float = 0.7,
                     min_step_m: float = 12.0, min_area_m2: float = 150.0,
-                    max_vertices: int = 16) -> List[Dict[str, Any]]:
+                    max_vertices: int = 16, from_tiers: bool = False,
+                    min_tier_share: float = 0.10) -> List[Dict[str, Any]]:
     """The bodies a footprint holds, from the roof returns inside it.
 
     A height field of the returns inside the footprint (the top of each
@@ -3108,6 +3109,14 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
     tower above it otherwise. Level ``k``'s faces are numbered from
     ``k * LEVEL_FACE_STRIDE`` so every face of the building keeps a unique
     index across the profiles.
+
+    With ``from_tiers`` the upper body is what stands above the midpoint
+    between the roof's two highest tiers (flat levels holding
+    ``min_tier_share`` of the roof each, ``min_step_m`` or more apart),
+    not above ``upper_fraction`` of the top: a 25 m building with roofs at 17
+    and 25 m has both above 40% of its top, and was one level. The settings
+    made for towers (a 12 m step, 150 m2) are a class's to change
+    (configs/class_strategies.yaml).
     """
     from scipy.ndimage import label
     from scipy.stats import binned_statistic_2d
@@ -3139,6 +3148,21 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
     h = Z - ground_z
     top_h = float(np.percentile(h[valid], 99))
     upper = valid & (h >= upper_fraction * top_h)
+    if from_tiers:
+        hv = h[valid]
+        hist, edges = np.histogram(hv, bins=np.arange(np.floor(hv.min()), np.ceil(hv.max()) + 1.01, 1.0))
+        share = hist / max(hist.sum(), 1)
+        tiers = []
+        for k in np.argsort(-share):
+            if share[k] < min_tier_share:
+                break
+            lvl = float(edges[k] + 0.5)
+            if all(abs(lvl - t) >= min_step_m for t in tiers):
+                tiers.append(lvl)
+        if len(tiers) < 2:
+            return whole
+        tiers.sort()
+        upper = valid & (h >= 0.5 * (tiers[-1] + tiers[-2]))
     cover = upper.sum() / max(valid.sum(), 1)
     # Returns from a taller neighbour's wall spill a metre or two over the
     # footprint's edge and read as a sliver of "upper" roof; the building's

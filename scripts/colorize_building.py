@@ -970,7 +970,12 @@ def main() -> int:
 
     from kyfromabove_3d.features import LEVEL_FACE_STRIDE, building_levels
     roof_z = float(np.percentile(b_xyz[:, 2], 99))
-    levels = building_levels(b_xyz, ring_m, ground_z) if args.levels else \
+    # the building's class may set how its levels are found (configs/class_strategies.yaml)
+    from kyfromabove_3d.strategy import class_strategy
+    lv_opts = dict(class_strategy(args.building).get("levels") or {})
+    if lv_opts:
+        print(f"  levels as the class sets them: {lv_opts}")
+    levels = building_levels(b_xyz, ring_m, ground_z, **lv_opts) if args.levels else \
         [{"level": 0, "ring": ring_m, "z_lo": ground_z, "z_hi": roof_z}]
     lidar_tower_levels: set[int] = set()                    # levels whose outline is the LiDAR's tower edge
     if args.lidar_outline and entry.get("towers_local") and len(levels) > 1:

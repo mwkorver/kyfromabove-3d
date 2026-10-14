@@ -799,6 +799,8 @@ def main() -> int:
                          "finer than that invents detail the geometry cannot "
                          "place")
     ap.add_argument("--min-face-m", type=float, default=4.0)
+    ap.add_argument("--look-in-share", type=float, default=0.45,
+                    help="a face looks inside its level at most this share of the level's narrowest width (and 8 m); 0 for the fixed 8 m")
     ap.add_argument("--max-offset-m", type=float, default=2.0)
     ap.add_argument("--tile-m", type=float, default=12.0,
                     help="side of the square a plane is fitted to. One plane per "
@@ -1265,7 +1267,22 @@ def main() -> int:
     mirrored: dict[int, dict] = {}
     if args.extrude == "profile":
         from kyfromabove_3d.features import clip_profiles_by_neighbours, extrude_profile, face_profile, profile_keeps
-        # Pass 1: every face's profile.
+        # Pass 1: every face's profile. Each face looks inside its level at most
+        # --look-in-share of the level's narrowest width (and at most 8 m): with
+        # 8 m regardless, on a tier or a row building 7-8 m across a face took
+        # the far wall's returns for its own wall "7 m in" (e5214ab7); 200 of
+        # the downtown's 350 buildings are under 16 m across.
+        from shapely import maximum_inscribed_circle
+        from shapely.geometry import Polygon as _LvPoly
+        level_width = {lv["level"]: 2.0 * float(maximum_inscribed_circle(_LvPoly(np.asarray(lv["ring"], dtype=float)[:, :2]).buffer(0)).length)
+                       for lv in levels}
+
+        def look_in_window(plane):
+            if args.look_in_share <= 0:
+                return None                                   # the fixed 8 m (before)
+            w = level_width.get(level_of[plane.face])
+            inner = 8.0 if w is None else min(8.0, max(2.0, args.look_in_share * w))
+            return (-inner, 3.0)
         for plane in nominal_planes:
             # a level's profile reads only the returns of its own height
             # range (a little over), so the podium's bands do not see the
@@ -1276,7 +1293,7 @@ def main() -> int:
                 # of the arc's radius brought into its flat frame
                 near = np.abs(np.hypot(*(lv_xyz[:, :2] - plane.centre).T) - plane.radius) <= 12.0
                 lv_xyz = np.column_stack([plane.unroll(lv_xyz[near, :2]), lv_xyz[near, 2]])
-            bands = face_profile(plane, lv_xyz, band_m=args.profile_band_m)
+            bands = face_profile(plane, lv_xyz, band_m=args.profile_band_m, offset_window_m=look_in_window(plane))
             # A tower can stand well back from the edge its podium was traced
             # along: Humana's north wall is 25 m inside the Main Street edge,
             # seen by a thin column of returns the 8 m window never reaches.

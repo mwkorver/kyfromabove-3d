@@ -3090,7 +3090,8 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
                     upper_fraction: float = 0.4, min_cover: float = 0.05, max_cover: float = 0.7,
                     min_step_m: float = 12.0, min_area_m2: float = 150.0,
                     max_vertices: int = 16, from_tiers: bool = False,
-                    min_tier_share: float = 0.10) -> List[Dict[str, Any]]:
+                    min_tier_share: float = 0.10, straighten: bool = False,
+                    fine_cell_m: float = 0.5, smooth_m: float = 1.0) -> List[Dict[str, Any]]:
     """The bodies a footprint holds, from the roof returns inside it.
 
     A height field of the returns inside the footprint (the top of each
@@ -3117,6 +3118,13 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
     and 25 m has both above 40% of its top, and was one level. The settings
     made for towers (a 12 m step, 150 m2) are a class's to change
     (configs/class_strategies.yaml).
+
+    With ``straighten`` an upper body's outline is traced as the LiDAR
+    towers are (scripts/lidar_outline.py): on a ``fine_cell_m`` grid of the
+    highest returns, closed and opened by ``smooth_m``, straightened to the
+    footprint's directions (kyfromabove_3d.outlines.regularize) and clipped
+    to the footprint -- the 1 m trace cut to 16 corners wobbled, and on
+    e5214ab7 ran onto the neighbour.
     """
     from scipy.ndimage import label
     from scipy.stats import binned_statistic_2d
@@ -3148,6 +3156,7 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
     h = Z - ground_z
     top_h = float(np.percentile(h[valid], 99))
     upper = valid & (h >= upper_fraction * top_h)
+    split_h = upper_fraction * top_h
     if from_tiers:
         hv = h[valid]
         hist, edges = np.histogram(hv, bins=np.arange(np.floor(hv.min()), np.ceil(hv.max()) + 1.01, 1.0))
@@ -3162,7 +3171,8 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
         if len(tiers) < 2:
             return whole
         tiers.sort()
-        upper = valid & (h >= 0.5 * (tiers[-1] + tiers[-2]))
+        split_h = 0.5 * (tiers[-1] + tiers[-2])
+        upper = valid & (h >= split_h)
     cover = upper.sum() / max(valid.sum(), 1)
     # Returns from a taller neighbour's wall spill a metre or two over the
     # footprint's edge and read as a sliver of "upper" roof; the building's
@@ -3195,11 +3205,67 @@ def building_levels(xyz: np.ndarray, ring_m: np.ndarray, ground_z: float, cell_m
         return capped_at_lower() or whole
     levels = [{"level": 0, "ring": ring, "z_lo": float(ground_z), "z_hi": podium_top}]
     for j, (m, z_top) in enumerate(sorted(towers, key=lambda t: -t[0].sum()), start=1):
-        tower_ring = _mask_to_ring(m, cx, cy, cell_m, max_vertices)
+        tower_ring = _straight_upper_ring(p, poly, ground_z + split_h, m, cx, cy, cell_m, fine_cell_m, smooth_m) \
+            if straighten else None
+        if tower_ring is None:
+            tower_ring = _mask_to_ring(m, cx, cy, cell_m, max_vertices)
         if tower_ring is None:
             continue
         levels.append({"level": j, "ring": tower_ring, "z_lo": podium_top, "z_hi": z_top})
     return levels if len(levels) > 1 else whole
+
+
+def _straight_upper_ring(p: np.ndarray, poly, z_min: float, patch: np.ndarray, cx: np.ndarray, cy: np.ndarray,
+                         cell_m: float, fine_cell_m: float, smooth_m: float) -> Optional[np.ndarray]:
+    """An upper body's outline traced finely and straightened: the cells of a
+    ``fine_cell_m`` grid of the highest returns ``p`` (inside the footprint)
+    at ``z_min`` or above, closed and opened by ``smooth_m``, the piece most
+    overlapping the coarse ``patch`` (on the ``cell_m`` grid at ``cx``,
+    ``cy``) traced, straightened to the footprint's directions and clipped to
+    the footprint. None when it cannot be made."""
+    import rasterio.features
+    from affine import Affine
+    from scipy.ndimage import binary_closing, binary_opening, label
+    from shapely.geometry import Polygon, shape
+
+    from .outlines import main_directions, regularize
+
+    minx, miny, maxx, maxy = poly.bounds
+    nx, ny = int(np.ceil((maxx - minx) / fine_cell_m)) + 1, int(np.ceil((maxy - miny) / fine_cell_m)) + 1
+    ix = np.clip(((p[:, 0] - minx) / fine_cell_m).astype(int), 0, nx - 1)
+    iy = np.clip(((p[:, 1] - miny) / fine_cell_m).astype(int), 0, ny - 1)
+    g = np.full((ny, nx), -np.inf)
+    np.maximum.at(g, (iy, ix), p[:, 2])
+    mask = g >= z_min
+    k = max(1, int(round(smooth_m / fine_cell_m)))
+    st = np.ones((2 * k + 1, 2 * k + 1), dtype=bool)
+    mask = binary_opening(binary_closing(mask, st), st)
+    lab, n = label(mask)
+    if n == 0:
+        return None
+    # the piece the coarse patch is: count its cells' centres in each piece
+    py, px = np.nonzero(patch)
+    fx = np.clip(((cx[px] - minx) / fine_cell_m).astype(int), 0, nx - 1)
+    fy = np.clip(((cy[py] - miny) / fine_cell_m).astype(int), 0, ny - 1)
+    votes = np.bincount(lab[fy, fx], minlength=n + 1)
+    votes[0] = 0
+    if votes.max() == 0:
+        return None
+    piece = lab == int(np.argmax(votes))
+    tr = Affine(fine_cell_m, 0, minx, 0, fine_cell_m, miny)
+    polys = [shape(geom) for geom, v in rasterio.features.shapes(piece.astype(np.uint8), mask=piece, transform=tr) if v == 1]
+    if not polys:
+        return None
+    traced = max(polys, key=lambda q: q.area)
+    ring = regularize(traced, main_directions(np.asarray(poly.exterior.coords)))
+    if ring is None:
+        return None
+    clipped = Polygon(ring).buffer(0).intersection(poly)
+    if clipped.geom_type == "MultiPolygon":
+        clipped = max(clipped.geoms, key=lambda q: q.area)
+    if clipped.geom_type != "Polygon" or clipped.area < 0.5 * traced.area:
+        return None
+    return np.asarray(clipped.exterior.coords)
 
 
 def _along_edge(mask: np.ndarray, X: np.ndarray, Y: np.ndarray, poly, within_m: float = 2.0,

@@ -351,9 +351,9 @@
   "hole_m2": 0.0,
   "by_face": {},
   "roof_wall_m2": 0.0,
-  "mesh_minus_lidar_m": 0.5,
+  "mesh_minus_lidar_m": 0.6,
   "stray_wall_m2": 0.0,
-  "blank_share": 0.0336,
+  "blank_share": 0.0139,
   "dots": 0,
   "lines": 0,
   "min_corner_deg": 89.0,
@@ -418,12 +418,14 @@
  },
  "39a33bd6-59b1-4edc-bd76-ffe26f85a868-c": {
   "name": "39a33bd6-59b1-4edc-bd76-ffe26f85a868-c",
-  "hole_m2": 0.0,
-  "by_face": {},
+  "hole_m2": 5.8,
+  "by_face": {
+   "corner": 5.8
+  },
   "roof_wall_m2": 0.0,
   "mesh_minus_lidar_m": 3.7,
-  "stray_wall_m2": 94.0,
-  "blank_share": 0.127,
+  "stray_wall_m2": 181.7,
+  "blank_share": 0.0667,
   "dots": 0,
   "lines": 0,
   "min_corner_deg": 89.4,
@@ -435,7 +437,7 @@
    "from NW": 0.0,
    "from N": 0.0,
    "from NE": 0.0,
-   "from E": 0.0,
+   "from E": 5.8,
    "from SE": 0.0,
    "from above": 0.0
   },
@@ -446,7 +448,9 @@
    "from NW": [],
    "from N": [],
    "from NE": [],
-   "from E": [],
+   "from E": [
+    "corner"
+   ],
    "from SE": [],
    "from above": []
   }
@@ -522,33 +526,32 @@
  },
  "bcbc0005-cfe4-4719-8b90-7e9c69dc9782": {
   "name": "Marmaduke Building",
-  "hole_m2": 892.5,
+  "hole_m2": 873.5,
   "by_face": {
-   "2": 792.0,
-   "corner": 171.8,
-   "0": 167.0,
-   "1": 8.5,
-   "3": 5.0,
-   "roof": 4.0
+   "2": 610.8,
+   "corner": 173.0,
+   "0": 168.0,
+   "1": 10.0,
+   "3": 5.0
   },
   "roof_wall_m2": 0.0,
   "mesh_minus_lidar_m": 23.5,
   "stray_wall_m2": 25.0,
-  "blank_share": 0.4661,
+  "blank_share": 0.5404,
   "dots": 0,
   "lines": 0,
   "min_corner_deg": 89.9,
   "min_width_m": 15.3,
   "views": {
-   "from S": 248.2,
-   "from SW": 175.8,
-   "from W": 28.0,
-   "from NW": 480.2,
-   "from N": 892.5,
-   "from NE": 696.5,
-   "from E": 171.8,
-   "from SE": 124.8,
-   "from above": 4.0
+   "from S": 247.0,
+   "from SW": 177.2,
+   "from W": 27.5,
+   "from NW": 475.8,
+   "from N": 873.5,
+   "from NE": 697.0,
+   "from E": 173.0,
+   "from SE": 127.2,
+   "from above": 0.0
   },
   "faces_in_view": {
    "from S": [
@@ -581,9 +584,7 @@
     "1",
     "corner"
    ],
-   "from above": [
-    "roof"
-   ]
+   "from above": []
   }
  },
  "ec790737-7929-4a57-8ba7-ad8843bbef4f": {
@@ -1017,18 +1018,18 @@
  },
  "40ead71b-7947-4e87-ab44-b3f11d755957": {
   "name": "Hampton Inn Louisville Downtown",
-  "hole_m2": 43.0,
+  "hole_m2": 45.8,
   "by_face": {
-   "1006": 22.2,
-   "roof": 17.2,
-   "corner": 12.0,
+   "corner": 18.0,
+   "1001": 14.5,
+   "roof": 14.5,
    "3": 6.0,
    "1": 4.5
   },
   "roof_wall_m2": 0.0,
   "mesh_minus_lidar_m": 0.0,
   "stray_wall_m2": 225.0,
-  "blank_share": 0.1641,
+  "blank_share": 0.0887,
   "dots": 0,
   "lines": 0,
   "min_corner_deg": 89.8,
@@ -1036,25 +1037,26 @@
   "views": {
    "from S": 0.0,
    "from SW": 0.0,
-   "from W": 29.8,
-   "from NW": 21.8,
-   "from N": 0.0,
+   "from W": 11.2,
+   "from NW": 14.5,
+   "from N": 16.0,
    "from NE": 0.0,
-   "from E": 12.0,
+   "from E": 44.0,
    "from SE": 10.5,
-   "from above": 43.0
+   "from above": 45.8
   },
   "faces_in_view": {
    "from S": [],
    "from SW": [],
    "from W": [
-    "1006",
     "corner"
    ],
    "from NW": [
-    "1006"
+    "1001"
    ],
-   "from N": [],
+   "from N": [
+    "corner"
+   ],
    "from NE": [],
    "from E": [
     "corner"
@@ -1163,58 +1165,58 @@
  },
  "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a": {
   "name": "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a",
-  "hole_m2": 254.2,
+  "hole_m2": 246.0,
   "by_face": {
    "1003": 220.5,
-   "corner": 115.5,
-   "1007": 68.0,
-   "1006": 51.0,
-   "13": 47.0,
+   "corner": 112.8,
+   "1004": 72.8,
+   "1007": 72.2,
+   "1006": 55.2,
+   "13": 41.0,
+   "1000": 25.0,
    "1002": 20.5,
-   "1001": 11.2,
-   "1008": 8.0,
-   "1000": 5.0
+   "1008": 15.8,
+   "1009": 14.0
   },
   "roof_wall_m2": 0.0,
   "mesh_minus_lidar_m": -0.0,
   "stray_wall_m2": 44.0,
-  "blank_share": 0.0692,
+  "blank_share": 0.0913,
   "dots": 0,
   "lines": 0,
   "min_corner_deg": 65.2,
   "min_width_m": 32.3,
   "views": {
-   "from S": 96.8,
+   "from S": 81.2,
    "from SW": 140.8,
-   "from W": 61.8,
-   "from NW": 149.0,
-   "from N": 166.5,
-   "from NE": 235.0,
-   "from E": 254.2,
-   "from SE": 189.2,
+   "from W": 61.5,
+   "from NW": 163.0,
+   "from N": 168.0,
+   "from NE": 225.8,
+   "from E": 246.0,
+   "from SE": 196.0,
    "from above": 0.0
   },
   "faces_in_view": {
    "from S": [
     "1002",
+    "1008",
     "13",
     "corner"
    ],
    "from SW": [
-    "1001",
     "1007",
-    "1008",
+    "1009",
     "13"
    ],
    "from W": [
-    "1000",
     "1007",
-    "corner"
+    "1009"
    ],
    "from NW": [
+    "1004",
     "1006",
-    "1007",
-    "corner"
+    "1007"
    ],
    "from N": [
     "1006",
@@ -1228,9 +1230,9 @@
     "1003"
    ],
    "from SE": [
+    "1000",
     "1003",
-    "1008",
-    "13"
+    "1008"
    ],
    "from above": []
   }
@@ -1255,7 +1257,7 @@
   "roof_wall_m2": 0.0,
   "mesh_minus_lidar_m": -0.1,
   "stray_wall_m2": 68.6,
-  "blank_share": 0.1614,
+  "blank_share": 0.1613,
   "dots": 0,
   "lines": 0,
   "min_corner_deg": 89.6,

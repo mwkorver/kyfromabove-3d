@@ -21,10 +21,13 @@ row2o/mid:
 
 tiered/mid:
   party_walls: whole
-  # upper_levels / tower_foot are off here: the tiers are traced on a 1 m grid
-  # to 16 corners, and where the real wall stands metres inside that outline
-  # (e5214ab7, 7 m) the rule drew it on the outline and its open bands behind;
-  # development 6,576 -> 7,689 m2, held out 7,621 -> 6,894 m2 (2026-10-14)
+  # upper_levels / tower_foot: on again (2026-10-14) once the tiers are traced
+  # like the towers (straighten, below) and a face looks in at most 45% of
+  # its level's width; the 1 m tiers and the fixed 8 m window had made it worse
+  # on the development set. With both: development 5,231 -> 4,621 m2, held
+  # out 7,189 -> 6,410 m2 (holes over the nine views).
+  upper_levels: roof_edge
+  tower_foot: down_to_roof
   # levels: the upper body is what stands above the midpoint between the roof's
   # two highest tiers, 4 m or more apart; the tower settings (12 m, 150 m2,
   # 70% cover) found an upper level on 2 of the class's 29 development buildings
@@ -33,6 +36,8 @@ tiered/mid:
     min_step_m: 4.0
     min_area_m2: 50.0
     max_cover: 0.9
+    # traced as the towers are: 0.5 m, smoothed by 1 m, straightened, clipped to the footprint
+    straighten: true
 
 tiered/tall:
   upper_levels: roof_edge

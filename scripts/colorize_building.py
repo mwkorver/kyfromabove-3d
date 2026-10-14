@@ -897,6 +897,11 @@ def main() -> int:
     # entry when the lookup missed, and coloured 400 West Market against Tractor
     # Supply's footprint without saying so.
     from kyfromabove_3d.footprints import resolve_footprint
+    # a class may be built on the LiDAR outline (configs/class_strategies.yaml: outline: lidar)
+    from kyfromabove_3d.strategy import class_strategy as _cs
+    if _cs(args.building).get("outline") == "lidar" and not args.lidar_outline:
+        args.lidar_outline = True
+        print("footprint: the class builds on the LiDAR outline")
     fp_case, fp_gers, fp_file = args.case, args.gers, args.footprint
     if args.lidar_outline and (args.building / "footprint_lidar.json").exists():
         # the outline from our own data; Overture's polygon stays in the record as outline.overture_wkt

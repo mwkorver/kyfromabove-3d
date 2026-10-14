@@ -7,17 +7,12 @@
     {
      "building": "a7757e8c-6cc8-4b59-8ba1-3eaf193c15cc",
      "name": "Galt House Hotel",
-     "hole_m2": 1842.8
+     "hole_m2": 1809.2
     },
     {
      "building": "93cfbc0a-8780-4992-89fd-5a5c3d69369d",
      "name": "SpringHill Suites Louisville Downtown",
      "hole_m2": 1603.5
-    },
-    {
-     "building": "b7daf154-da79-4a42-b938-a973aa1111b5",
-     "name": "Omni Louisville Hotel",
-     "hole_m2": 1499.8
     },
     {
      "building": "36610eb4-e929-4e81-95d5-bb33f1300d87",
@@ -40,11 +35,6 @@
      "hole_m2": 998.2
     },
     {
-     "building": "893e88ee-626a-4d1c-a8b1-529ec062d9db",
-     "name": "KFC Yum! Center",
-     "hole_m2": 892.2
-    },
-    {
      "building": "bcbc0005-cfe4-4719-8b90-7e9c69dc9782",
      "name": "Marmaduke Building",
      "hole_m2": 873.5
@@ -57,7 +47,7 @@
     {
      "building": "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7",
      "name": "Kentucky International Convention Center",
-     "hole_m2": 858.8
+     "hole_m2": 860.5
     },
     {
      "building": "50394bd4-2b29-4e51-828c-8c704fdb3f08",
@@ -70,9 +60,14 @@
      "hole_m2": 810.8
     },
     {
+     "building": "b7daf154-da79-4a42-b938-a973aa1111b5",
+     "name": "Omni Louisville Hotel",
+     "hole_m2": 803.5
+    },
+    {
      "building": "3158c676-4406-43e9-8a71-183312badbb5",
      "name": "Truist Tower - One Riverfront Plaza",
-     "hole_m2": 767.2
+     "hole_m2": 770.5
     },
     {
      "building": "62347f3b-0859-40ac-9eca-fa6440cafc15",
@@ -85,11 +80,6 @@
      "hole_m2": 699.0
     },
     {
-     "building": "7c0e2eb6-96e6-4fa2-85b4-0ef2ae590026",
-     "name": "Jefferson County Judicial Center",
-     "hole_m2": 643.5
-    },
-    {
      "building": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
      "name": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
      "hole_m2": 630.0
@@ -100,9 +90,19 @@
      "hole_m2": 615.2
     },
     {
+     "building": "893e88ee-626a-4d1c-a8b1-529ec062d9db",
+     "name": "KFC Yum! Center",
+     "hole_m2": 573.2
+    },
+    {
      "building": "c88a24c5-68c5-4adb-846f-8e99185bd386",
      "name": "Muhammad Ali Center",
      "hole_m2": 555.5
+    },
+    {
+     "building": "cb53b84f-a244-4541-b2f0-4d5d4877b595",
+     "name": "Actors Theatre of Louisville",
+     "hole_m2": 546.8
     }
    ]
   },
@@ -138,11 +138,6 @@
      "building": "9da70723-692c-4609-b19e-b4e3e3ae2522",
      "name": "The Kentucky Center",
      "roof_wall_m2": 33.7
-    },
-    {
-     "building": "b7daf154-da79-4a42-b938-a973aa1111b5",
-     "name": "Omni Louisville Hotel",
-     "roof_wall_m2": 33.0
     },
     {
      "building": "f72fccef-48ab-408e-8b72-5eba5b58d579",
@@ -207,6 +202,11 @@
     {
      "building": "01192eea-7db8-4392-bb85-e20bc3c59bb4-b",
      "name": "01192eea-7db8-4392-bb85-e20bc3c59bb4-b",
+     "roof_wall_m2": 0.0
+    },
+    {
+     "building": "013d65e6-f338-4737-b9da-38297b319a2c",
+     "name": "013d65e6-f338-4737-b9da-38297b319a2c",
      "roof_wall_m2": 0.0
     }
    ]
@@ -1011,13 +1011,13 @@
   {
    "building": "02cac8a2-6af7-41a7-bab6-36e8a7722a67",
    "name": "Kentucky Towers Apartments",
-   "hole_m2": 396.8,
+   "hole_m2": 384.0,
    "worst_face": "corner",
-   "worst_face_m2": 304.5,
+   "worst_face_m2": 292.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.0,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.1624,
+   "blank_share": 0.1628,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,
@@ -1821,13 +1821,13 @@
   {
    "building": "279fc975-28cd-4f49-a3d5-3e5e746d1265",
    "name": "The Old Spaghetti Factory",
-   "hole_m2": 401.5,
-   "worst_face": "5",
-   "worst_face_m2": 401.5,
+   "hole_m2": 46.0,
+   "worst_face": "2",
+   "worst_face_m2": 45.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 2.0,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.3379,
+   "blank_share": 0.3414,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 88.7,
@@ -2121,9 +2121,9 @@
   {
    "building": "3158c676-4406-43e9-8a71-183312badbb5",
    "name": "Truist Tower - One Riverfront Plaza",
-   "hole_m2": 767.2,
+   "hole_m2": 770.5,
    "worst_face": "1008",
-   "worst_face_m2": 378.8,
+   "worst_face_m2": 382.2,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.1,
    "product1_minus_lidar_m": 0.0,
@@ -2886,13 +2886,13 @@
   {
    "building": "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7",
    "name": "Kentucky International Convention Center",
-   "hole_m2": 858.8,
+   "hole_m2": 860.5,
    "worst_face": "30",
-   "worst_face_m2": 374.0,
+   "worst_face_m2": 376.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 1.1,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.2604,
+   "blank_share": 0.1609,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 53.4,
@@ -3486,13 +3486,13 @@
   {
    "building": "6ef926fd-6663-45dd-8436-50d33b3469b6",
    "name": "6ef926fd-6663-45dd-8436-50d33b3469b6",
-   "hole_m2": 86.2,
+   "hole_m2": 95.8,
    "worst_face": "0",
-   "worst_face_m2": 86.2,
+   "worst_face_m2": 95.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.0,
    "product1_minus_lidar_m": -0.0,
-   "blank_share": 0.0784,
+   "blank_share": 0.0868,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 90.0,
@@ -3726,13 +3726,13 @@
   {
    "building": "7c0e2eb6-96e6-4fa2-85b4-0ef2ae590026",
    "name": "Jefferson County Judicial Center",
-   "hole_m2": 643.5,
-   "worst_face": "39",
-   "worst_face_m2": 552.8,
+   "hole_m2": 116.0,
+   "worst_face": "corner",
+   "worst_face_m2": 116.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.9,
    "product1_minus_lidar_m": -0.0,
-   "blank_share": 0.1559,
+   "blank_share": 0.1622,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 62.6,
@@ -3981,13 +3981,13 @@
   {
    "building": "893e88ee-626a-4d1c-a8b1-529ec062d9db",
    "name": "KFC Yum! Center",
-   "hole_m2": 892.2,
+   "hole_m2": 573.2,
    "worst_face": "14",
-   "worst_face_m2": 611.2,
+   "worst_face_m2": 359.2,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.2,
    "product1_minus_lidar_m": -0.0,
-   "blank_share": 0.0754,
+   "blank_share": 0.1007,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 79.1,
@@ -4161,13 +4161,13 @@
   {
    "building": "8dbef9a8-1413-406c-88ed-2d519d726eba",
    "name": "Fiscal Courts Building",
-   "hole_m2": 79.0,
-   "worst_face": "5",
-   "worst_face_m2": 44.0,
+   "hole_m2": 35.0,
+   "worst_face": "1",
+   "worst_face_m2": 26.2,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.3,
    "product1_minus_lidar_m": -0.0,
-   "blank_share": 0.2414,
+   "blank_share": 0.2394,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.8,
@@ -4731,13 +4731,13 @@
   {
    "building": "a57cc5d2-81e9-4f33-8cae-c5eca6000736",
    "name": "Medical Plaza I",
-   "hole_m2": 16.5,
+   "hole_m2": 17.2,
    "worst_face": "1",
-   "worst_face_m2": 16.5,
+   "worst_face_m2": 17.2,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.3,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.0487,
+   "blank_share": 0.0277,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,
@@ -4776,13 +4776,13 @@
   {
    "building": "a7757e8c-6cc8-4b59-8ba1-3eaf193c15cc",
    "name": "Galt House Hotel",
-   "hole_m2": 1842.8,
+   "hole_m2": 1809.2,
    "worst_face": "7",
-   "worst_face_m2": 1346.5,
+   "worst_face_m2": 951.8,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.1,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.3664,
+   "blank_share": 0.3423,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 85.9,
@@ -5181,13 +5181,13 @@
   {
    "building": "b7daf154-da79-4a42-b938-a973aa1111b5",
    "name": "Omni Louisville Hotel",
-   "hole_m2": 1499.8,
-   "worst_face": "1",
-   "worst_face_m2": 914.8,
-   "roof_wall_m2": 33.0,
+   "hole_m2": 803.5,
+   "worst_face": "1001",
+   "worst_face_m2": 422.5,
+   "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 1.1,
    "product1_minus_lidar_m": -0.0,
-   "blank_share": 0.0746,
+   "blank_share": 0.0205,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 88.0,
@@ -5331,13 +5331,13 @@
   {
    "building": "bf11a8fe-1089-4b1b-9972-9d7cb734c378",
    "name": "Embassy Suites - Louisville Downtown",
-   "hole_m2": 193.8,
+   "hole_m2": 167.2,
    "worst_face": "3",
-   "worst_face_m2": 147.8,
+   "worst_face_m2": 149.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.5,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.4416,
+   "blank_share": 0.4063,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,
@@ -5547,7 +5547,7 @@
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.0,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.3616,
+   "blank_share": 0.3689,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,
@@ -5847,7 +5847,7 @@
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": -0.1,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.1613,
+   "blank_share": 0.2357,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.6,
@@ -5922,7 +5922,7 @@
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.0,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.1286,
+   "blank_share": 0.1293,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.7,
@@ -5946,13 +5946,13 @@
   {
    "building": "d8f1f2c3-f379-4390-94aa-a7aa302bf363",
    "name": "Homewood Suites by Hilton - Louisville Downtown",
-   "hole_m2": 252.2,
-   "worst_face": "0",
-   "worst_face_m2": 174.0,
+   "hole_m2": 176.2,
+   "worst_face": "1",
+   "worst_face_m2": 137.0,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.2,
    "product1_minus_lidar_m": -0.0,
-   "blank_share": 0.1242,
+   "blank_share": 0.0954,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,
@@ -6111,13 +6111,13 @@
   {
    "building": "df2943f4-7e47-42f6-b050-ed22f99be7a9",
    "name": "Louisville Gardens Garage",
-   "hole_m2": 76.5,
-   "worst_face": "corner",
-   "worst_face_m2": 69.5,
+   "hole_m2": 128.2,
+   "worst_face": "17",
+   "worst_face_m2": 128.2,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 4.2,
    "product1_minus_lidar_m": 0.0,
-   "blank_share": 0.4464,
+   "blank_share": 0.3628,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 67.2,
@@ -6186,13 +6186,13 @@
   {
    "building": "e33e3cb0-42e9-4b6a-b83c-f74d394c74eb",
    "name": "Humana Waterside Building",
-   "hole_m2": 106.2,
+   "hole_m2": 142.5,
    "worst_face": "0",
-   "worst_face_m2": 92.0,
+   "worst_face_m2": 122.5,
    "roof_wall_m2": 0.0,
    "mesh_minus_lidar_m": 0.2,
    "product1_minus_lidar_m": -0.0,
-   "blank_share": 0.1577,
+   "blank_share": 0.131,
    "dots": 0,
    "lines": 0,
    "min_corner_deg": 89.9,

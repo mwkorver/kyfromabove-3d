@@ -10,6 +10,9 @@
 #   (features.fill_under_roof_edge), and an unseen one takes no twin's depth.
 # tower_foot: down_to_roof -- an upper level's lowest wall reaches down to the
 #   roof beside it where that is lower than the level's foot.
+# outline: lidar -- the class is built on its LiDAR outline (footprint_lidar.json,
+#   lidar_outline.py), and every edge whose roof end the LiDAR found gets the
+#   roof-edge rule, as with --lidar-outline.
 # party_walls: whole -- a face that is a party wall over half its length or
 #   more is drawn on the outline from the ground to the roof's edge, plain up
 #   to the neighbour's roof and textured above it, whatever the colourise saw
@@ -45,6 +48,9 @@ tiered/mid:
 tiered/tall:
   upper_levels: roof_edge
   tower_foot: down_to_roof
+
+box/tall:
+  outline: lidar
 
 # A footprint the LiDAR shows no building on (under 40 m2, under 2.5 m, or under
 # 30% roof): from 150 m2 up, a box at its recorded height coloured from the

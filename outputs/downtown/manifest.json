@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-14T10:30:40",
+ "updated": "2026-10-14T11:13:18",
  "counts": {
   "meshed": 389,
   "landmark": 3
@@ -320,9 +320,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 13258,
-   "t_total": 23.8,
+   "t_total": 63.4,
    "error": null,
-   "attempts": 19
+   "attempts": 22
   },
   {
    "gers": "fa2a341b-423e-4c87-aa21-10ad538f152a",
@@ -595,9 +595,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 17232,
-   "t_total": 32.9,
+   "t_total": 82.7,
    "error": null,
-   "attempts": 19
+   "attempts": 22
   },
   {
    "gers": "4bacf443-4386-41f9-866b-cefb401ec759",
@@ -947,9 +947,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 813,
-   "t_total": 16.3,
+   "t_total": 26.2,
    "error": null,
-   "attempts": 62
+   "attempts": 63
   },
   {
    "gers": "39a33bd6-59b1-4edc-bd76-ffe26f85a868-b",
@@ -958,9 +958,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 420,
-   "t_total": 15.7,
+   "t_total": 25.4,
    "error": null,
-   "attempts": 65
+   "attempts": 66
   },
   {
    "gers": "39a33bd6-59b1-4edc-bd76-ffe26f85a868-c",
@@ -969,9 +969,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 493,
-   "t_total": 16.2,
+   "t_total": 26.5,
    "error": null,
-   "attempts": 63
+   "attempts": 64
   },
   {
    "gers": "187f28ac-42db-4221-9182-c2fbf462242e",
@@ -1035,9 +1035,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 5494,
-   "t_total": 19.2,
+   "t_total": 31.8,
    "error": null,
-   "attempts": 75
+   "attempts": 76
   },
   {
    "gers": "964b2adf-77e0-4cb0-ab9e-8217979f8aaa",
@@ -1079,9 +1079,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 13314,
-   "t_total": 28.7,
+   "t_total": 75.3,
    "error": null,
-   "attempts": 19
+   "attempts": 22
   },
   {
    "gers": "04b35415-357a-4542-9170-c1db948dd224",
@@ -1178,9 +1178,9 @@
    "path": "profile",
    "n_frames": 15,
    "n_on_footprint": 18269,
-   "t_total": 29.0,
+   "t_total": 49.4,
    "error": null,
-   "attempts": 74
+   "attempts": 75
   },
   {
    "gers": "7d14268b-8323-4acc-9108-42be7654c293",
@@ -1200,9 +1200,9 @@
    "path": "profile",
    "n_frames": 15,
    "n_on_footprint": 29103,
-   "t_total": 38.2,
+   "t_total": 83.1,
    "error": null,
-   "attempts": 19
+   "attempts": 22
   },
   {
    "gers": "4373d0c3-a02d-4052-98d4-977c6fcc2f0b",
@@ -1453,9 +1453,9 @@
    "path": "profile",
    "n_frames": 13,
    "n_on_footprint": 67226,
-   "t_total": 68.1,
+   "t_total": 159.1,
    "error": null,
-   "attempts": 96
+   "attempts": 100
   },
   {
    "gers": "7c308aa7-8362-4f34-aa30-f1513ee0293d",
@@ -1772,9 +1772,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 5850,
-   "t_total": 31.1,
+   "t_total": 46.3,
    "error": null,
-   "attempts": 73
+   "attempts": 74
   },
   {
    "gers": "f73638d0-30e4-41a1-a1d2-93869107c7ad",
@@ -1860,9 +1860,9 @@
    "path": "profile",
    "n_frames": 17,
    "n_on_footprint": 2654,
-   "t_total": 18.9,
+   "t_total": 46.7,
    "error": null,
-   "attempts": 19
+   "attempts": 22
   },
   {
    "gers": "051eee5a-2223-48a2-8261-6fbba964dde6",
@@ -1926,9 +1926,9 @@
    "path": "profile",
    "n_frames": 17,
    "n_on_footprint": 7442,
-   "t_total": 27.8,
+   "t_total": 41.6,
    "error": null,
-   "attempts": 73
+   "attempts": 74
   },
   {
    "gers": "1bddff9f-0265-43a4-b564-146bdcf26d18-a",
@@ -2135,9 +2135,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 18642,
-   "t_total": 45.8,
+   "t_total": 110.0,
    "error": null,
-   "attempts": 19
+   "attempts": 22
   },
   {
    "gers": "30cf5ef9-ef48-487b-b907-fde40d4e64a7-a",
@@ -2410,9 +2410,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 6296,
-   "t_total": 36.1,
+   "t_total": 50.2,
    "error": null,
-   "attempts": 74
+   "attempts": 75
   },
   {
    "gers": "9c52a24e-7bd9-4eac-8ff0-c87f80fcda61",
@@ -2476,9 +2476,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 50710,
-   "t_total": 58.9,
+   "t_total": 135.5,
    "error": null,
-   "attempts": 18
+   "attempts": 21
   },
   {
    "gers": "a1f393cc-05c9-43cb-a726-34aa92a2016a",
@@ -2487,9 +2487,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 51415,
-   "t_total": 45.4,
+   "t_total": 64.4,
    "error": null,
-   "attempts": 74
+   "attempts": 75
   },
   {
    "gers": "be45685f-7b19-4e65-a4e4-4fad66f6bd62",
@@ -2531,9 +2531,9 @@
    "path": "profile",
    "n_frames": 12,
    "n_on_footprint": 128471,
-   "t_total": 81.5,
+   "t_total": 170.5,
    "error": null,
-   "attempts": 19
+   "attempts": 22
   },
   {
    "gers": "3f2ba0f6-cde3-408a-bd9f-32510bede777",
@@ -2608,9 +2608,9 @@
    "path": "profile",
    "n_frames": 13,
    "n_on_footprint": 17393,
-   "t_total": 38.4,
+   "t_total": 55.1,
    "error": null,
-   "attempts": 69
+   "attempts": 70
   },
   {
    "gers": "da636439-9fa2-483b-9d51-87b6d77332d8",
@@ -2630,9 +2630,9 @@
    "path": "profile",
    "n_frames": 13,
    "n_on_footprint": 6974,
-   "t_total": 24.2,
+   "t_total": 65.8,
    "error": null,
-   "attempts": 18
+   "attempts": 21
   },
   {
    "gers": "8686db7a-94c4-4288-ae91-5877257e9d94",
@@ -2806,9 +2806,9 @@
    "path": "profile",
    "n_frames": 13,
    "n_on_footprint": 27493,
-   "t_total": 42.5,
+   "t_total": 67.4,
    "error": null,
-   "attempts": 69
+   "attempts": 70
   },
   {
    "gers": "acae9611-3dc6-43ca-b80b-df086f66d867",
@@ -2894,9 +2894,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 31829,
-   "t_total": 41.3,
+   "t_total": 65.0,
    "error": null,
-   "attempts": 78
+   "attempts": 79
   },
   {
    "gers": "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7",
@@ -2905,9 +2905,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 197537,
-   "t_total": 110.0,
+   "t_total": 182.1,
    "error": null,
-   "attempts": 30
+   "attempts": 33
   },
   {
    "gers": "deddcb4d-1b37-42c9-8f0d-3706db714905",
@@ -3345,9 +3345,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 24180,
-   "t_total": 42.4,
+   "t_total": 67.7,
    "error": null,
-   "attempts": 83
+   "attempts": 84
   },
   {
    "gers": "fa6e7a02-1308-4776-becf-b85901372acd",
@@ -3389,9 +3389,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 26326,
-   "t_total": 38.3,
+   "t_total": 60.1,
    "error": null,
-   "attempts": 74
+   "attempts": 75
   },
   {
    "gers": "16886442-2551-4b80-988d-f2db8cdf8cc5",
@@ -3466,9 +3466,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 8090,
-   "t_total": 24.7,
+   "t_total": 37.6,
    "error": null,
-   "attempts": 73
+   "attempts": 74
   },
   {
    "gers": "73233974-ac0e-40ae-945e-c638396efb35",
@@ -3576,9 +3576,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 15097,
-   "t_total": 38.4,
+   "t_total": 76.5,
    "error": null,
-   "attempts": 19
+   "attempts": 22
   },
   {
    "gers": "62347f3b-0859-40ac-9eca-fa6440cafc15",
@@ -3708,9 +3708,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 6800,
-   "t_total": 27.9,
+   "t_total": 69.1,
    "error": null,
-   "attempts": 18
+   "attempts": 21
   },
   {
    "gers": "4a668624-e760-4181-b4d5-4b51ee9cd677",
@@ -3730,9 +3730,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 9787,
-   "t_total": 30.5,
+   "t_total": 68.9,
    "error": null,
-   "attempts": 18
+   "attempts": 21
   },
   {
    "gers": "0a86bf0b-816e-4025-ac37-b2e1e3483e1a",
@@ -4159,9 +4159,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 22399,
-   "t_total": 23.2,
+   "t_total": 35.9,
    "error": null,
-   "attempts": 72
+   "attempts": 73
   },
   {
    "gers": "77c2f303-0d53-44d1-867b-8dcbed35c171",

@@ -376,9 +376,21 @@ def measure_building(job) -> Optional[dict]:
                 grid=dict(x0=x0, y0=y0, cell=c, shape=[ny, nx]))
 
 
+def buildings_of(a):
+    """The buildings to work on: the reference set, or with ``--class`` every
+    downtown building of that class (outputs/classes/building_classes.json,
+    scripts/classify_buildings.py)."""
+    if not getattr(a, "class_name", None):
+        return wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)
+    tr = wv.tileset_transforms(a.tileset)
+    recs = json.loads((ROOT / "outputs" / "classes" / "building_classes.json").read_text(encoding="utf-8"))
+    return [wv.Building(r["building"], r.get("name") or r["building"][:8], a.buildings / r["building"], r["building"], tr[r["building"]])
+            for r in recs if r.get("status") == "ok" and r.get("class") == a.class_name and r["building"] in tr]
+
+
 def cmd_measure(a) -> int:
     import multiprocessing as mp
-    blds = wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)
+    blds = buildings_of(a)
     recs = json.loads(a.footprints.read_text(encoding="utf-8"))["buildings"]
     out, t0 = [], time.time()
     with mp.Pool(a.workers) as pool:
@@ -892,8 +904,16 @@ def cmd_edge_sheet(a) -> int:
     import matplotlib.pyplot as plt
     from kyfromabove_3d.wall_match import bilinear_gray
     rows = {r["building"]: r for r in json.loads(a.out.read_text(encoding="utf-8")) if r["status"] == "ok"}
-    ref = {r["building"]: r for r in json.loads(a.refined_out.read_text(encoding="utf-8"))}
-    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    if a.unrefined:
+        # the LiDAR's outline alone, before any refinement in the frames (they need
+        # downloading): each edge as the measure step left it
+        ref = {k: dict(valid=True, ring=r["edges_moved"]["ring"],
+                       edges=[dict(edge=e["edge"], lidar_move_m=e.get("move_m", 0.0), refine_m=0.0,
+                                   status="not refined (no frames)", outline_status=e["status"]) for e in r["edges"]])
+               for k, r in rows.items()}
+    else:
+        ref = {r["building"]: r for r in json.loads(a.refined_out.read_text(encoding="utf-8"))}
+    blds = {b.key: b for b in buildings_of(a)}
     frames = wv.read_frames(a.frames)
     index = json.loads((a.nadir_cache / "index.json").read_text(encoding="utf-8"))
     picks = []
@@ -980,12 +1000,25 @@ def cmd_write_footprints(a) -> int:
     ``--lidar-outline``."""
     from kyfromabove_3d.footprints import footprint_wgs84_to_local, load_footprint_entry
     rows = {r["building"]: r for r in json.loads(a.out.read_text(encoding="utf-8")) if r["status"] == "ok"}
-    ref = {r["building"]: r for r in json.loads(a.refined_out.read_text(encoding="utf-8"))}
-    blds = {b.key: b for b in wv.reference_buildings(a.reference, a.landmarks, wv.tileset_transforms(a.tileset), a.buildings)}
+    if a.unrefined:
+        # the LiDAR's outline alone, before any refinement in the frames (they need
+        # downloading): each edge as the measure step left it
+        ref = {k: dict(valid=True, ring=r["edges_moved"]["ring"],
+                       edges=[dict(edge=e["edge"], lidar_move_m=e.get("move_m", 0.0), refine_m=0.0,
+                                   status="not refined (no frames)", outline_status=e["status"]) for e in r["edges"]])
+               for k, r in rows.items()}
+    else:
+        ref = {r["building"]: r for r in json.loads(a.refined_out.read_text(encoding="utf-8"))}
+    blds = {b.key: b for b in buildings_of(a)}
     towers = json.loads(a.towers_out.read_text(encoding="utf-8")) if a.towers_out.exists() else []
     n = 0
     for key, r in ref.items():
         b = blds[key]
+        prior = b.dir / "footprint_lidar.json"
+        if a.unrefined and prior.exists() and "refined in the straight-down frames" in \
+                json.loads(prior.read_text(encoding="utf-8")).get("outline", {}).get("source", ""):
+            print(f"  {b.name}: keeps its outline refined in the frames")
+            continue
         if not r["valid"]:
             print(f"  {b.name}: the refined outline crosses itself, not written")
             continue
@@ -997,7 +1030,8 @@ def cmd_write_footprints(a) -> int:
         err = float(np.max(np.abs(back[:-1] - np.asarray(r["ring"])[:-1]))) if len(back) == len(r["ring"]) else float("nan")
         moves = {e["edge"]: dict(lidar_m=e["lidar_move_m"], frames_m=e["refine_m"], status=e["status"], step1=e["outline_status"])
                  for e in r["edges"]}
-        out = dict(entry, wkt=wkt, outline=dict(source="the LiDAR roof's edge, refined in the straight-down frames (lidar_outline.py)",
+        out = dict(entry, wkt=wkt, outline=dict(source=("the LiDAR roof's edge (lidar_outline.py), not yet refined in the frames" if a.unrefined
+                                                        else "the LiDAR roof's edge, refined in the straight-down frames (lidar_outline.py)"),
                                                 overture_wkt=entry["wkt"], edges=moves, round_trip_error_m=round(err, 4)))
         tw = [t for t in towers if t["building"] == key]
         if tw:
@@ -1228,6 +1262,10 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "refined_out"):
             wf._add_action(act)
     wf.add_argument("--towers-out", type=Path, default=REF / "lidar_towers.json")
+    wf.add_argument("--unrefined", action="store_true", help="from the measure step alone, without the frames' refinement")
+    for q in (p, wf):
+        q.add_argument("--class", dest="class_name", default=None,
+                       help="every downtown building of this class (e.g. box/tall) instead of the reference set")
     tw = sub.add_parser("towers", help="each tower's outline from the LiDAR, and how stable it is")
     for act in p._actions[1:]:
         if act.dest in ("reference", "landmarks", "tileset", "buildings", "out", "cell_m", "max_step_m", "reach_m"):

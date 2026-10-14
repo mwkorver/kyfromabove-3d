@@ -4,6 +4,12 @@
 # on its development buildings and kept only if its held-out buildings agree
 # (outputs/classes/split_<class>.json).
 #
+# upper_levels: roof_edge -- every wall of an upper level (its outline traced
+#   from the LiDAR's roof) is under a measured roof edge: unseen bands, sloped
+#   ones holding the wall's line and open ones over a roof are drawn
+#   (features.fill_under_roof_edge), and an unseen one takes no twin's depth.
+# tower_foot: down_to_roof -- an upper level's lowest wall reaches down to the
+#   roof beside it where that is lower than the level's foot.
 # party_walls: whole -- a face that is a party wall over half its length or
 #   more is drawn on the outline from the ground to the roof's edge, plain up
 #   to the neighbour's roof and textured above it, whatever the colourise saw
@@ -15,6 +21,10 @@ row2o/mid:
 
 tiered/mid:
   party_walls: whole
+  # upper_levels / tower_foot are off here: the tiers are traced on a 1 m grid
+  # to 16 corners, and where the real wall stands metres inside that outline
+  # (e5214ab7, 7 m) the rule drew it on the outline and its open bands behind;
+  # development 6,576 -> 7,689 m2, held out 7,621 -> 6,894 m2 (2026-10-14)
   # levels: the upper body is what stands above the midpoint between the roof's
   # two highest tiers, 4 m or more apart; the tower settings (12 m, 150 m2,
   # 70% cover) found an upper level on 2 of the class's 29 development buildings
@@ -23,3 +33,15 @@ tiered/mid:
     min_step_m: 4.0
     min_area_m2: 50.0
     max_cover: 0.9
+
+tiered/tall:
+  upper_levels: roof_edge
+  tower_foot: down_to_roof
+
+# A footprint the LiDAR shows no building on (under 40 m2, under 2.5 m, or under
+# 30% roof): from 150 m2 up, a box at its recorded height coloured from the
+# frames, in the completed product only (Hotel Bourre Bonne, built after the
+# LiDAR was flown); smaller ones (kiosks, grass) are built as before.
+none:
+  lidar: absent
+  min_area_m2: 150

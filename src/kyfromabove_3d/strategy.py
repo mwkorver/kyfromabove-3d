@@ -14,9 +14,12 @@ from pathlib import Path
 CONFIG = Path(__file__).resolve().parents[2] / "configs" / "class_strategies.yaml"
 
 
-def class_strategy(building, config: Path = CONFIG) -> dict:
-    """The building's class's settings (``_class`` holds the class), or {}."""
+def class_strategy(building, config: Path = None) -> dict:
+    """The building's class's settings (``_class`` holds the class), or {}.
+    ``KFA_CLASS_STRATEGIES`` names another settings file (an A/B build)."""
+    import os
     import yaml
+    config = Path(config or os.environ.get("KFA_CLASS_STRATEGIES") or CONFIG)
     p = Path(building) / "building_class.json"
     if not p.exists() or not Path(config).exists():
         return {}

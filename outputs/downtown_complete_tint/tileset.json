@@ -2073,17 +2073,17 @@
        "n_frames": 15,
        "texels": {
         "n": 527547,
-        "seen": 0.6295,
-        "near": 0.053,
-        "plain": 0.3175
+        "seen": 0.6299,
+        "near": 0.0529,
+        "plain": 0.3172
        },
        "fill": {
         "n": 527547,
-        "seen": 0.6295,
-        "near": 0.053,
+        "seen": 0.6299,
+        "near": 0.0529,
         "plain": 0.2088,
         "twin": 0.0,
-        "rhythm": 0.0148,
+        "rhythm": 0.0144,
         "patch": 0.094
        }
       }
@@ -8085,18 +8085,18 @@
        "n_frames": 16,
        "texels": {
         "n": 43507,
-        "seen": 0.6526,
-        "near": 0.1178,
-        "plain": 0.2296
+        "seen": 0.6509,
+        "near": 0.1145,
+        "plain": 0.2346
        },
        "fill": {
         "n": 43507,
-        "seen": 0.6526,
-        "near": 0.1178,
-        "plain": 0.0581,
+        "seen": 0.6509,
+        "near": 0.1145,
+        "plain": 0.0614,
         "twin": 0.0,
         "rhythm": 0.0,
-        "patch": 0.1715
+        "patch": 0.1732
        }
       }
      },
@@ -9482,7 +9482,7 @@
       "extras": {
        "name": "Louisville Marriott Downtown",
        "gers": "d683e785-f8c8-475c-a0a3-c3b476924098",
-       "triangles": 7116,
+       "triangles": 7216,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -9492,19 +9492,19 @@
        },
        "n_frames": 13,
        "texels": {
-        "n": 1140199,
-        "seen": 0.7553,
-        "near": 0.0637,
-        "plain": 0.181
+        "n": 1204945,
+        "seen": 0.7604,
+        "near": 0.0655,
+        "plain": 0.1741
        },
        "fill": {
-        "n": 1140199,
-        "seen": 0.7553,
-        "near": 0.0637,
-        "plain": 0.0697,
+        "n": 1204945,
+        "seen": 0.7604,
+        "near": 0.0655,
+        "plain": 0.0659,
         "twin": 0.0,
-        "rhythm": 0.0588,
-        "patch": 0.0526
+        "rhythm": 0.058,
+        "patch": 0.0502
        }
       }
      },
@@ -13273,17 +13273,17 @@
        "n_frames": 15,
        "texels": {
         "n": 607721,
-        "seen": 0.6754,
-        "near": 0.0453,
-        "plain": 0.2793
+        "seen": 0.6814,
+        "near": 0.0394,
+        "plain": 0.2792
        },
        "fill": {
         "n": 607721,
-        "seen": 0.6754,
-        "near": 0.0453,
+        "seen": 0.6814,
+        "near": 0.0394,
         "plain": 0.2022,
         "twin": 0.0,
-        "rhythm": 0.0052,
+        "rhythm": 0.005,
         "patch": 0.072
        }
       }
@@ -13924,29 +13924,29 @@
       "extras": {
        "name": "cfb7194a-2889-4b49-942f-7beaabbd2cf4",
        "gers": "cfb7194a-2889-4b49-942f-7beaabbd2cf4",
-       "triangles": 2490,
+       "triangles": 2550,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 7,
-        "prism": 16,
+        "profile": 12,
+        "prism": 11,
         "party": 0
        },
        "n_frames": 18,
        "texels": {
-        "n": 425688,
-        "seen": 0.6828,
-        "near": 0.1353,
-        "plain": 0.1819
+        "n": 502371,
+        "seen": 0.7029,
+        "near": 0.1144,
+        "plain": 0.1827
        },
        "fill": {
-        "n": 425688,
-        "seen": 0.6828,
-        "near": 0.1353,
-        "plain": 0.0885,
+        "n": 502371,
+        "seen": 0.7029,
+        "near": 0.1144,
+        "plain": 0.086,
         "twin": 0.0,
-        "rhythm": 0.0319,
-        "patch": 0.0615
+        "rhythm": 0.0275,
+        "patch": 0.0692
        }
       }
      },
@@ -14329,10 +14329,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      -53.95941285864683,
-      -220.86540794209577,
+      -53.96436260428163,
+      -220.86540787410922,
       37.5588250067085,
-      171.265539483083
+      171.26409792065087
      ]
     },
     "geometricError": 8.0,
@@ -14492,29 +14492,29 @@
       "extras": {
        "name": "Hyatt Regency Louisville",
        "gers": "9e9df280-ccae-46bd-b450-354e7d5e2fcf",
-       "triangles": 19780,
+       "triangles": 19933,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 10,
-        "prism": 42,
+        "profile": 19,
+        "prism": 33,
         "party": 1
        },
        "n_frames": 14,
        "texels": {
-        "n": 554237,
-        "seen": 0.738,
-        "near": 0.0729,
-        "plain": 0.189
+        "n": 795913,
+        "seen": 0.788,
+        "near": 0.0663,
+        "plain": 0.1457
        },
        "fill": {
-        "n": 554237,
-        "seen": 0.738,
-        "near": 0.0729,
-        "plain": 0.1009,
+        "n": 795913,
+        "seen": 0.788,
+        "near": 0.0663,
+        "plain": 0.0707,
         "twin": 0.0,
-        "rhythm": 0.0108,
-        "patch": 0.0773
+        "rhythm": 0.0182,
+        "patch": 0.0568
        }
       }
      },
@@ -14539,10 +14539,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        8.620306476557438,
+        8.610406985233528,
         -13.669668886972675,
         20.06925,
-        53.32831199426171
+        53.32078650283341
        ]
       },
       "geometricError": 0.0,
@@ -14552,7 +14552,7 @@
       "extras": {
        "name": "Chase Bank Plaza",
        "gers": "ec790737-7929-4a57-8ba7-ad8843bbef4f",
-       "triangles": 17117,
+       "triangles": 17110,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -14562,19 +14562,19 @@
        },
        "n_frames": 16,
        "texels": {
-        "n": 677765,
-        "seen": 0.6987,
-        "near": 0.0692,
-        "plain": 0.2321
+        "n": 757904,
+        "seen": 0.7285,
+        "near": 0.0577,
+        "plain": 0.2138
        },
        "fill": {
-        "n": 677765,
-        "seen": 0.6987,
-        "near": 0.0692,
-        "plain": 0.0982,
+        "n": 757904,
+        "seen": 0.7285,
+        "near": 0.0577,
+        "plain": 0.0897,
         "twin": 0.0,
-        "rhythm": 0.0561,
-        "patch": 0.0778
+        "rhythm": 0.048,
+        "patch": 0.0761
        }
       }
      }
@@ -16726,7 +16726,7 @@
       "extras": {
        "name": "Truist Tower - One Riverfront Plaza",
        "gers": "3158c676-4406-43e9-8a71-183312badbb5",
-       "triangles": 9038,
+       "triangles": 9096,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
@@ -16736,19 +16736,19 @@
        },
        "n_frames": 14,
        "texels": {
-        "n": 527869,
-        "seen": 0.7713,
-        "near": 0.1293,
-        "plain": 0.0994
+        "n": 654021,
+        "seen": 0.7667,
+        "near": 0.1272,
+        "plain": 0.1061
        },
        "fill": {
-        "n": 527869,
-        "seen": 0.7713,
-        "near": 0.1293,
-        "plain": 0.0289,
+        "n": 654021,
+        "seen": 0.7667,
+        "near": 0.1272,
+        "plain": 0.0233,
         "twin": 0.0,
-        "rhythm": 0.0252,
-        "patch": 0.0453
+        "rhythm": 0.0462,
+        "patch": 0.0366
        }
       }
      },
@@ -18102,29 +18102,29 @@
       "extras": {
        "name": "RIVUE Tower",
        "gers": "a1f393cc-05c9-43cb-a726-34aa92a2016a",
-       "triangles": 24760,
+       "triangles": 24928,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 6,
-        "prism": 12,
+        "profile": 12,
+        "prism": 6,
         "party": 0
        },
        "n_frames": 14,
        "texels": {
-        "n": 930847,
-        "seen": 0.7394,
-        "near": 0.0974,
-        "plain": 0.1632
+        "n": 1076397,
+        "seen": 0.7635,
+        "near": 0.0962,
+        "plain": 0.1403
        },
        "fill": {
-        "n": 930847,
-        "seen": 0.7394,
-        "near": 0.0974,
-        "plain": 0.0945,
+        "n": 1076397,
+        "seen": 0.7635,
+        "near": 0.0962,
+        "plain": 0.0608,
         "twin": 0.0,
-        "rhythm": 0.025,
-        "patch": 0.0437
+        "rhythm": 0.0341,
+        "patch": 0.0454
        }
       }
      },
@@ -19689,10 +19689,10 @@
    {
     "boundingVolume": {
      "sphere": [
-      232.11989354284015,
+      232.11992753241793,
       75.16283362591639,
       30.122589085716754,
-      140.5780101826409
+      140.57803795274486
      ]
     },
     "geometricError": 8.0,
@@ -19719,10 +19719,10 @@
       ],
       "boundingVolume": {
        "sphere": [
-        -5.412840852576146,
-        -2.6834999999999987,
-        12.945500000000001,
-        46.14378779312231
+        -5.412822742235594,
+        -2.683366619803696,
+        13.990499999999999,
+        46.5480366263303
        ]
       },
       "geometricError": 0.0,
@@ -19732,29 +19732,29 @@
       "extras": {
        "name": "Hotel Bourr\u00e9 Bonne",
        "gers": "3173f26c-be55-43c2-8989-b3c06eaa1b0e",
-       "triangles": 973,
-       "path": "profile",
+       "triangles": 40,
+       "path": "box",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 2,
-        "prism": 7,
+        "profile": 0,
+        "prism": 14,
         "party": 0
        },
        "n_frames": 14,
        "texels": {
-        "n": 216854,
-        "seen": 0.4868,
-        "near": 0.0119,
-        "plain": 0.5013
+        "n": 264880,
+        "seen": 0.6381,
+        "near": 0.0102,
+        "plain": 0.3517
        },
        "fill": {
-        "n": 216854,
-        "seen": 0.4868,
-        "near": 0.0119,
-        "plain": 0.3823,
+        "n": 264880,
+        "seen": 0.6381,
+        "near": 0.0102,
+        "plain": 0.2455,
         "twin": 0.0,
-        "rhythm": 0.0,
-        "patch": 0.119
+        "rhythm": 0.011,
+        "patch": 0.0952
        }
       }
      },
@@ -19912,29 +19912,29 @@
       "extras": {
        "name": "Louisville Gas & Electric",
        "gers": "8ab5c0ec-896c-4cb3-aece-2a5510b34a88",
-       "triangles": 8469,
+       "triangles": 8871,
        "path": "profile",
        "archetype": "sculpted_facade",
        "faces": {
-        "profile": 3,
-        "prism": 32,
+        "profile": 17,
+        "prism": 18,
         "party": 0
        },
        "n_frames": 13,
        "texels": {
-        "n": 290034,
-        "seen": 0.7838,
-        "near": 0.0464,
-        "plain": 0.1698
+        "n": 753524,
+        "seen": 0.9013,
+        "near": 0.0262,
+        "plain": 0.0725
        },
        "fill": {
-        "n": 290034,
-        "seen": 0.7838,
-        "near": 0.0464,
-        "plain": 0.0571,
+        "n": 753524,
+        "seen": 0.9013,
+        "near": 0.0262,
+        "plain": 0.0235,
         "twin": 0.0,
-        "rhythm": 0.0169,
-        "patch": 0.0958
+        "rhythm": 0.0066,
+        "patch": 0.0424
        }
       }
      },
@@ -24499,10 +24499,10 @@
   "name": "Downtown Louisville",
   "kind": "mesh",
   "buildings": 392,
-  "triangles": 1448631,
+  "triangles": 1448632,
   "paths": {
-   "profile": 362,
-   "box": 30
+   "profile": 361,
+   "box": 31
   },
   "cells": 65,
   "origin_lon_lat_h": [

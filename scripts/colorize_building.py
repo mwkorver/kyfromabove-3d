@@ -1315,10 +1315,15 @@ def main() -> int:
         # symmetric across their middle, and the face in a neighbour's
         # shadow is best read from its twin.
         from kyfromabove_3d.features import mirror_hidden_bands
-        # the faces under a roof edge the LiDAR measured (only with the LiDAR outline):
+        # the faces under a roof edge the LiDAR measured -- with the LiDAR outline,
+        # or, where the class sets upper_levels: roof_edge, every face of an upper
+        # level, whose outline is traced from the LiDAR's roof (building_levels):
         # an unseen one takes the roof edge's word, not its twin's (pass 2a'')
-        under = (under_measured_edge(nominal_planes, is_arc, level_of, lidar_tower_levels, measured_edges)
-                 if args.lidar_outline else set())
+        from kyfromabove_3d.strategy import class_strategy
+        upper_measured = class_strategy(args.building).get("upper_levels") == "roof_edge"
+        measured_levels = set(lidar_tower_levels) | ({lv["level"] for lv in levels if lv["level"] > 0} if upper_measured else set())
+        under = (under_measured_edge(nominal_planes, is_arc, level_of, measured_levels, measured_edges if args.lidar_outline else [])
+                 if (args.lidar_outline or upper_measured) else set())
         mirrored = {}
         for lv in levels:
             lv_planes = [pl for pl in nominal_planes if level_of[pl.face] == lv["level"] and not is_arc[pl.face]]
@@ -1341,8 +1346,9 @@ def main() -> int:
         # Pass 2a'': a wall stands under a roof edge the LiDAR measured -- a
         # tower edge from the LiDAR's own outline of the tower, or an edge of
         # the outline whose roof end it found -- unless there is evidence of a
-        # gap. Only with the LiDAR outline: Overture's edge is not measured.
-        if args.lidar_outline:
+        # gap. Not on Overture's edge, which is not measured: only with the LiDAR
+        # outline, or on upper levels where the class says so.
+        if under:
             from kyfromabove_3d.features import fill_under_roof_edge
             n_faces = n_bands = 0
             for f in sorted(under):

@@ -83,9 +83,17 @@ VARIANTS = {None: ("3dtiles_mesh/tileset.json",),
 
 def building_tileset(d: Path, variant: str | None) -> Path | None:
     """The tileset of building dir ``d`` for ``variant``: the completed one
-    where built, else the measured one (nothing invented there)."""
+    where built, else the measured one (nothing invented there); none in the
+    measured product for a building marked not in the LiDAR."""
     for rel in VARIANTS[variant]:
         if (d / rel).exists():
+            if variant is None:
+                # the measured product holds only what the LiDAR measured: a
+                # building it shows nothing of (built after the flight) is in
+                # the completed product alone
+                extras = json.loads((d / rel).read_text(encoding="utf-8")).get("extras", {})
+                if extras.get("not_in_lidar"):
+                    return None
             return d / rel
     return None
 

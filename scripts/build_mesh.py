@@ -156,6 +156,19 @@ class RoofField:
                 top[j] = np.nanmax(H[(depths >= d0) & (depths <= d0 + depth_m), j])
         return st, top
 
+    def outside_along(self, plane, offset: float, a0: float, a1: float, near_m=(0.5, 2.5), step_m: float = 1.0):
+        """The roof's height just outside a wall line, from ``a0`` to ``a1``:
+        the median, per station, of the cells ``near_m`` outside it -- the
+        podium's roof beside a tower's wall; nan where there is none."""
+        if a1 - a0 < 1e-6:
+            return np.array([]), np.array([])
+        n = max(1, int(round((a1 - a0) / step_m)))
+        st = a0 + (np.arange(n) + 0.5) * (a1 - a0) / n
+        hs = np.array([self._near(plane.world(st, np.full(n, offset + d)), max(self.cell * 0.75, 0.6))
+                       for d in np.arange(near_m[0], near_m[1] + 1e-6, self.cell)])
+        with np.errstate(all="ignore"):
+            return st, np.nanmedian(np.where(np.isfinite(hs), hs, np.nan), axis=0)
+
     def capped_runs(self, plane, offset, z_lo, z_hi, a0, a1, min_run_m: float = 1.0, tol_m: float = 0.5):
         """[a0, a1] cut where the roof's height just inside changes, each
         stretch's wall top the roof there (at most ``z_hi``); stretches
@@ -294,7 +307,8 @@ def plane_bands(plane: WallPlane, bands: list[FaceBand], dense_per_m2: float = 0
 
 
 def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | None" = None,
-                  ground_field: "GroundField | None" = None, edge_face: int | None = None):
+                  ground_field: "GroundField | None" = None, edge_face: int | None = None,
+                  foot_to_roof: bool = False):
     """Quads for one face: (corners(4,3), normal(3), uv(4,2) or None, kind).
 
     ``kind`` is "wall" (textured with the face image), "ledge" or "return"
@@ -318,9 +332,13 @@ def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | No
     # drawn as a recess it stood a wall panel 3-7 m inboard on the roof of
     # every face of the Kentucky Home Life Building. A face with no solid
     # band at all takes the prism instead.
-    solid_tops = [b.z_lo for b in bands if b.status in WALL_STATUSES and b.offset_m is not None]
+    # (the wall above must have been seen: a band drawn under a roof edge
+    # because nothing said it was not there does not carry a colonnade --
+    # above RIVUE's open band it stood the wall behind the piers 7 m in, on
+    # the roof)
+    solid_tops = [b.z_lo for b in bands if b.status in WALL_STATUSES and b.status != "edge" and b.offset_m is not None]
     used = []
-    has_solid = bool(solid_tops)
+    has_solid = any(b.status in WALL_STATUSES and b.offset_m is not None for b in bands)
     for b in bands:
         if b.status in WALL_STATUSES and b.offset_m is not None:
             used.append(b)
@@ -333,6 +351,17 @@ def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | No
     z0 = min(b.z_lo for b in used)
     z1 = max(b.z_hi for b in used)
     quads = []
+    # An upper level's lowest band stands on the roof below it: where the
+    # podium's roof beside the wall is lower than the level's foot (RIVUE's
+    # tower starts at 9.4 m beside a 4.5 m podium roof) it reaches down to it,
+    # stretch by stretch; the face's picture is extended down to match.
+    z_first, foot_z = z0, None
+    if foot_to_roof and roof is not None and edge_face is not None and edge_face >= LEVEL_FACE_STRIDE:
+        b_low = min(used, key=lambda x: x.z_lo)
+        _, below = roof.outside_along(plane, b_low.offset_m, 0.0, L)
+        if len(below) and np.isfinite(below).any() and float(np.nanmin(below)) < z_first - 0.3:
+            foot_z = float(np.nanmin(below))
+            z0 = foot_z
     prev = None                                     # (runs, z_hi) of the band below
     for b in used:
         runs = _runs(plane, b, roof)
@@ -343,7 +372,22 @@ def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | No
         tops = ([(ra, rc, off, zt) for a, c, off in runs for ra, rc, zt in roof.capped_runs(plane, off, b.z_lo, b.z_hi, a, c)]
                 if b.status == "edge" and roof is not None else [(a, c, off, b.z_hi) for a, c, off in runs])
         runs = [(a, c, off) for a, c, off, _ in tops]
-        for a, c, off, z_top in tops:
+        foot = foot_z is not None and abs(b.z_lo - z_first) < 1e-3
+        if foot:
+            pieces = []
+            for a, c, off, z_top in tops:
+                st, below = roof.outside_along(plane, off, a, c)
+                lo = float(np.nanmin(below)) if len(below) and np.isfinite(below).any() else np.nan
+                pieces.append((a, c, off, z_top, max(lo, foot_z) if np.isfinite(lo) and lo < b.z_lo - 0.3 else b.z_lo))
+        else:
+            pieces = [(a, c, off, z_top, b.z_lo) for a, c, off, z_top in tops]
+        for a, c, off, z_top, z_bot in pieces:
+            if foot and z_bot < b.z_lo:
+                corners = np.array([P(a, off, z_bot), P(c, off, z_bot), P(c, off, z_top), P(a, off, z_top)])
+                uv = np.array([[a / L, (z_bot - z0) / (z1 - z0)], [c / L, (z_bot - z0) / (z1 - z0)],
+                               [c / L, (z_top - z0) / (z1 - z0)], [a / L, (z_top - z0) / (z1 - z0)]])
+                quads.append((corners, n3, uv, "wall"))
+                continue
             if is_bottom:
                 za = ground_field.elevation_along_edge(edge_face, a, L)
                 zc = ground_field.elevation_along_edge(edge_face, c, L)
@@ -1655,7 +1699,18 @@ def main() -> int:
     # (a shed under a tree, a kiosk) gets a box: its Overture/LiDAR height,
     # a flat roof, prism walls. Everything else takes the profile where the
     # returns gave one and a prism face at the roof's edge height where not.
-    path = "box" if (n_on < 30 or not height_m or colourise_failed) else "profile"
+    # A footprint the LiDAR shows no building on (its class says so: Hotel
+    # Bourre Bonne was built after the flight, its returns 78% ground) is a box
+    # at its recorded height, coloured from the frames and marked not from the
+    # LiDAR: the completed product holds it, the measured one leaves it out.
+    from kyfromabove_3d.strategy import class_strategy
+    strategy = class_strategy(b)
+    not_in_lidar = (strategy.get("lidar") == "absent" and bool(height_m)
+                    and poly.area >= float(strategy.get("min_area_m2", 0.0)))
+    if not_in_lidar:
+        print(f"  not in the LiDAR ({strategy['_class']}): a box at the recorded {float(height_m):.1f} m, "
+              f"for the completed product only")
+    path = "box" if (n_on < 30 or not height_m or colourise_failed or not_in_lidar) else "profile"
     # The bodies: the footprint alone, or the levels the colourise found (a
     # tower on a podium: the footprint up to the podium top and the tower's
     # own outline above it, its faces numbered from 100).
@@ -1703,8 +1758,6 @@ def main() -> int:
     by_face = {p.face: p for p in planes}
     party = party_edges(ring_m, neighbours, [e for e in edges if edge_level[e.face]["level"] == 0], tops=nb_tops)
     # the building's class and its strategy (classify_buildings.py, configs/class_strategies.yaml)
-    from kyfromabove_3d.strategy import class_strategy
-    strategy = class_strategy(b)
     whole_party = set()
     if strategy.get("party_walls") == "whole":
         for e in edges:
@@ -1775,7 +1828,7 @@ def main() -> int:
             bands = [b for b in bands if b.status != "matched"]
         quads, extent = (
             wall_geometry(plane, bands, roof, ground_field=(ArcGround(ground_field, arc) if arc is not None and ground_field is not None else ground_field),
-                          edge_face=edge.face)
+                          edge_face=edge.face, foot_to_roof=strategy.get("tower_foot") == "down_to_roof")
             if (plane is not None and path != "box")
             else ([], None)
         )
@@ -2023,7 +2076,10 @@ def main() -> int:
               "levels": len(levels), "n_frames": len(cams), "heads": heads,
               **({"parent_gers": fp_entry["parent_gers"], "split": fp_entry.get("split")} if fp_entry.get("parent_gers") else {}),
               "faces": {"profile": n_profile, "prism": n_prism, "party": n_party}, "height_m": roof_top,
-              "source": "KyFromAbove LiDAR and aerial frames (no photographs); Overture footprint",
+              "source": ("not in the LiDAR: a box at the recorded height, coloured from the KyFromAbove aerial frames; "
+                         "Overture footprint" if not_in_lidar else
+                         "KyFromAbove LiDAR and aerial frames (no photographs); Overture footprint"),
+              **({"not_in_lidar": True} if not_in_lidar else {}),
               **({"matched": {"faces": n_matched_faces, "area_m2": round(matched_m2, 1)}} if n_matched_faces else {})}
     size = glb.write(out / "building.glb", extras)
 
@@ -2044,7 +2100,8 @@ def main() -> int:
                    "faces": {"profile": n_profile, "prism": n_prism, "party": n_party}, "n_frames": len(cams),
                    "origin_lon_lat_h": origin_geo,
                    **({"parent_gers": fp_entry["parent_gers"]} if fp_entry.get("parent_gers") else {}),
-                   **({"matched": extras["matched"]} if "matched" in extras else {})},
+                   **({"matched": extras["matched"]} if "matched" in extras else {}),
+                   **({"not_in_lidar": True, "source": extras["source"]} if extras.get("not_in_lidar") else {})},
     }
     (out / "tileset.json").write_text(json.dumps(tileset, indent=1), encoding="utf-8")
     if n_matched_faces:

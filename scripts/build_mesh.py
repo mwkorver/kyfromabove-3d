@@ -60,6 +60,11 @@ from kyfromabove_3d.clouds import find_cloud, read_cloud               # noqa: E
 
 TEXEL_M = 0.15            # texture resolution, metres per pixel
 ROOF_CELL_M = 0.75        # roof height-field cell
+# wall bands the LiDAR did not see at their height: they stop at the roof just
+# inside the wall line instead of their band's top
+CAPPED_STATUSES = ("edge", "extended", "mirrored")
+# how far a wall the LiDAR saw may stand over the roof just inside it
+PARAPET_M = 1.5
 MAX_TEX_PX = 4096
 TEXTURE_FORMATS = ("ktx2", "webp", "jpeg", "png")
 # KTX2/Basis: the texture stays compressed on the GPU (about an eighth of a
@@ -169,19 +174,25 @@ class RoofField:
         with np.errstate(all="ignore"):
             return st, np.nanmedian(np.where(np.isfinite(hs), hs, np.nan), axis=0)
 
-    def capped_runs(self, plane, offset, z_lo, z_hi, a0, a1, min_run_m: float = 1.0, tol_m: float = 0.5):
+    def capped_runs(self, plane, offset, z_lo, z_hi, a0, a1, min_run_m: float = 1.0, tol_m: float = 0.5,
+                    above_m: float = 0.0, keep_unknown: bool = False):
         """[a0, a1] cut where the roof's height just inside changes, each
-        stretch's wall top the roof there (at most ``z_hi``); stretches
-        whose roof is not above ``z_lo`` are dropped. A wall drawn under a
-        roof edge (an ``edge`` band) stops at the roof, not at its band's top."""
+        stretch's wall top the roof there plus ``above_m`` (at most
+        ``z_hi``); stretches whose roof is not above ``z_lo`` are dropped. A
+        wall drawn under a roof edge (an ``edge`` band) stops at the roof,
+        not at its band's top. ``keep_unknown``: a stretch with no roof found
+        beside it, or none above ``z_lo``, keeps ``z_hi`` instead of going --
+        for a wall the LiDAR saw, which the field cannot overrule."""
         st, top = self.tops_along(plane, offset, a0, a1)
         if not len(st):
-            return []
+            return [(a0, a1, z_hi)] if keep_unknown else []
         half = 0.5 * (a1 - a0) / len(st)
         out = []
-        for s, t in zip(st, np.minimum(top, z_hi)):
+        for s, t in zip(st, np.minimum(top + above_m, z_hi)):
             if not np.isfinite(t) or t <= z_lo + 0.2:
-                continue
+                if not keep_unknown:
+                    continue
+                t = z_hi
             if out and abs(out[-1][1] - (s - half)) < 1e-6 and abs(out[-1][2] - t) <= tol_m:
                 out[-1][1] = s + half
                 out[-1][3].append(t)
@@ -367,10 +378,31 @@ def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | No
         runs = _runs(plane, b, roof)
         is_bottom = (ground_field is not None and edge_face is not None and
                      edge_face < LEVEL_FACE_STRIDE and abs(b.z_lo - z0) < 1e-3)
-        # a wall drawn under a roof edge because nothing says it is not there
-        # stops at the roof just inside, stretch by stretch
-        tops = ([(ra, rc, off, zt) for a, c, off in runs for ra, rc, zt in roof.capped_runs(plane, off, b.z_lo, b.z_hi, a, c)]
-                if b.status == "edge" and roof is not None else [(a, c, off, b.z_hi) for a, c, off in runs])
+        # a wall the LiDAR did not see at this height -- drawn under a roof
+        # edge because nothing says it is not there, carried up from the wall
+        # below, or copied from the face opposite -- stops at the roof just
+        # inside, stretch by stretch. Carried up to the band's top, 2b18f52d's
+        # east and west walls stood 3-7 m above the eave of its mansard, a
+        # panel in front of the slope.
+        # A wall it did see stops no higher than a parapet over that roof --
+        # the top band only: the returns of 2870eeb0's 1 m parapet put a band
+        # at 20-25 m, drawn to 24.6 m, 4 m over its 20.3 m roof. A seen band
+        # with wall above it is the wall: where an upper level's outline takes
+        # in a strip of the roof below (the Presbyterian Church headquarters'
+        # tower) the roof just inside reads low.
+        top_band = b.z_hi >= z1 - 1e-3
+        if roof is None or (b.status not in CAPPED_STATUSES and (PARAPET_M is None or not top_band)):
+            tops = [(a, c, off, b.z_hi) for a, c, off in runs]
+        # (a wall standing out past its outline holds the roof inside the
+        # outline: from the wall in, Chase Bank Plaza's tower face read its
+        # podium's roof 2 m out and lost its wall above 14 m)
+        elif b.status in CAPPED_STATUSES:
+            tops = [(ra, rc, off, zt) for a, c, off in runs
+                    for ra, rc, zt in roof.capped_runs(plane, min(off, 0.0), b.z_lo, b.z_hi, a, c)]
+        else:
+            tops = [(ra, rc, off, zt) for a, c, off in runs
+                    for ra, rc, zt in roof.capped_runs(plane, min(off, 0.0), b.z_lo, b.z_hi, a, c, min_run_m=0.0,
+                                                       above_m=PARAPET_M, keep_unknown=True)]
         runs = [(a, c, off) for a, c, off, _ in tops]
         foot = foot_z is not None and abs(b.z_lo - z_first) < 1e-3
         if foot:
@@ -812,6 +844,148 @@ def roof_heightfield(xyz: np.ndarray, poly, ground_z: float, cell: float = ROOF_
     smooth = valid & np.isfinite(Zs)
     Zf[smooth] = Zs[smooth]
     return xs, ys, Zf, valid
+
+
+def _lower_rooftop_boxes(Z, valid, cell, level, max_box_m2=40.0, max_box_h_m=2.5,
+                         min_h_m=0.9, ring_m=0.8) -> np.ndarray:
+    """Small boxes on a flat roof lowered to it: a patch of cells standing
+    ``min_h_m`` to ``max_box_h_m`` above the roof's main ``level``, up to
+    ``max_box_m2``, whose neighbouring cells are near that level (their
+    median within ``ring_m``), is set to the level. Its skirt, the cells the
+    field's smoothing left half-way up, is then near enough for the level
+    snap. Below ``min_h_m`` the skirts join box to box and to anything else
+    raised. A chimney or a lift room taller than ``max_box_h_m`` stays, with
+    the skirt round it, and so does a raised part bigger than ``max_box_m2``
+    (2b18f52d's 22.7 m strip along its north side)."""
+    from scipy.ndimage import binary_dilation, label
+    cand = valid & (Z >= level + min_h_m) & (Z <= level + max_box_h_m)
+    tall = valid & (Z > level + max_box_h_m)
+    # not at the roof's edge: a stretch of parapet is no box
+    rim = valid & binary_dilation(~valid)
+    Z = Z.copy()
+    regions, n = label(cand)
+    for r in range(1, n + 1):
+        m = regions == r
+        if m.sum() * cell * cell > max_box_m2 or (m & rim).any():
+            continue
+        near = binary_dilation(m)
+        ring = near & ~m & valid
+        if (near & tall).any() or not ring.any() or abs(float(np.median(Z[ring])) - level) > ring_m:
+            continue
+        Z[m] = level
+    return Z
+
+
+def tidy_roof_field(xyz: np.ndarray, poly, ground_z: float, xs, ys, Z, valid, level_bin_m: float = 0.25,
+                    min_level_share: float = 0.08, level_sep_m: float = 1.0, snap_m: float = 0.8,
+                    min_region_m2: float = 4.0, max_flat_deg: float = 15.0,
+                    max_box_m2: float = 40.0, max_box_h_m: float = 2.5, max_ramp_deg: float = 60.0) -> np.ndarray:
+    """The mesh's roof field made calm where the returns are sparse.
+
+    1. A cell with no returns of its own is filled by linear interpolation
+       between the cells that have some, not copied from the nearest one: a
+       slope the laser saw little of (2b18f52d's west side) was a flat shelf
+       at the eave's height and then a jump to the top; it is a ramp --
+       where it is no steeper than ``max_ramp_deg``.
+    2. A mostly flat roof is snapped to its levels: heights that hold
+       ``min_level_share`` of the roof each, ``level_sep_m`` apart; a cell
+       within ``snap_m`` of one takes it (by the majority of its 3 x 3
+       neighbours, so cells do not flicker), in patches of ``min_region_m2``
+       or more, where the roof around it slopes under ``max_flat_deg``, and
+       not on the roof's outermost cells, which hold its parapet. On
+       a 1.5 m grid over 3 returns per square metre, a top seen at 20.2 and
+       21.7 m jumped between the two from cell to cell, and the
+       roof's picture smeared over the waves. A pitched roof has no levels
+       and is left alone.
+
+    Between the two, a box on a flat roof -- an air-handling unit, a hatch,
+    under ``max_box_m2`` and ``max_box_h_m`` tall on the main level --
+    is lowered to it (_lower_rooftop_boxes): on a 1.5 m grid
+    each of 2b18f52d's seven 3 m units was a pyramid, and the slopes round
+    them were the lumps. The frames still paint them on the roof.
+
+    Only the mesh's copy: the audit's LiDAR solid is built from the field as
+    roof_heightfield returns it. Returns the new heights."""
+    from scipy.interpolate import griddata
+    from scipy.ndimage import generic_filter, label
+    from shapely import contains_xy
+
+    Z = np.array(Z, dtype=float, copy=True)
+    if valid.sum() < 8:
+        return Z
+    cell = float(xs[1] - xs[0])
+    inside = contains_xy(poly.buffer(0.3), xyz[:, 0], xyz[:, 1]) & (xyz[:, 2] > ground_z + 2.0)
+    p = xyz[inside]
+    ix = np.floor((p[:, 0] - (xs[0] - cell / 2)) / cell).astype(int)
+    iy = np.floor((p[:, 1] - (ys[0] - cell / 2)) / cell).astype(int)
+    ok = (ix >= 0) & (iy >= 0) & (ix < len(xs)) & (iy < len(ys))
+    cnt = np.zeros(Z.shape, dtype=int)
+    np.add.at(cnt, (iy[ok], ix[ok]), 1)
+    own = valid & (cnt >= 2)
+    X, Y = np.meshgrid(xs, ys)
+    fill = valid & ~own
+    if fill.any() and own.sum() >= 4:
+        zi = griddata((X[own], Y[own]), Z[own], (X[fill], Y[fill]), method="linear")
+        Zl = Z.copy()
+        Zl[fill] = np.where(np.isfinite(zi), zi, Z[fill])
+        # A ramp only where it is no steeper than ``max_ramp_deg``: beside a
+        # tall wall the strip the laser could not see is a shadow, not a
+        # slope, and a ramp down it from the tower's top to the roof below
+        # stood walls and slopes where there are none (9947f2b0, the Omni).
+        # (the steepest step to a neighbouring cell, so a cell on the
+        # outline is judged by the cells it has)
+        Zv = np.where(valid, Zl, np.nan)
+        P = np.pad(Zv, 1, constant_values=np.nan)
+        rise = np.zeros(Z.shape)
+        for dy, dx in ((0, 1), (1, 0), (2, 1), (1, 2)):
+            d = np.abs(P[dy:dy + Z.shape[0], dx:dx + Z.shape[1]] - Zv)
+            rise = np.fmax(rise, np.nan_to_num(d, nan=0.0))
+        steep = rise > cell * np.tan(np.radians(max_ramp_deg))
+        Z = np.where(fill & ~steep, Zl, Z)
+    zv = Z[valid]
+    hist, edges = np.histogram(zv, bins=np.arange(np.floor(zv.min()), np.ceil(zv.max()) + level_bin_m, level_bin_m))
+    # a level's share: the cells within a bin either side of a local peak
+    share = np.convolve(hist, np.ones(3), mode="same") / max(len(zv), 1)
+    levels = []
+    for k in np.argsort(-share):
+        if share[k] < min_level_share:
+            break
+        lvl = float(edges[k] + level_bin_m / 2)
+        if all(abs(lvl - q) >= level_sep_m for q in levels):
+            levels.append(lvl)
+    if not levels:
+        return Z
+    Z = _lower_rooftop_boxes(Z, valid, cell, levels[0], max_box_m2, max_box_h_m)
+    L = np.array(levels)
+    near = np.argmin(np.abs(Z[..., None] - L[None, None, :]), axis=-1)
+    d = np.abs(Z - L[near])
+    # only where the roof around the cell is nearly flat: a slope the laser
+    # saw (2b18f52d's east side, 20.5 down to 17 m over 4 m) is not a level
+    from scipy.ndimage import maximum_filter, minimum_filter
+    Zv = np.where(valid, Z, np.nan)
+    hi = maximum_filter(np.nan_to_num(Zv, nan=-1e9), size=3)
+    lo = minimum_filter(np.nan_to_num(Zv, nan=1e9), size=3)
+    flat = valid & ((hi - lo) <= 2.0 * cell * np.tan(np.radians(max_flat_deg)))
+    lab = np.where(valid & flat & (d <= snap_m), near + 1, 0)
+
+    def majority(v):
+        c = int(v[len(v) // 2])
+        if c == 0:
+            return 0
+        vals = v[v > 0].astype(int)
+        return int(np.bincount(vals).argmax()) if len(vals) else c
+    lab = generic_filter(lab, majority, size=3, mode="constant", cval=0).astype(int)
+    # the roof's outermost cells keep their heights: a parapet 0.5-1 m over
+    # the roof was snapped into it, and every roofline lost its lip
+    from scipy.ndimage import binary_dilation
+    lab[~valid | binary_dilation(~valid)] = 0
+    for k in range(1, len(L) + 1):
+        regions, n = label(lab == k)
+        for r in range(1, n + 1):
+            m = regions == r
+            if m.sum() * cell * cell >= min_region_m2:
+                Z[m] = L[k - 1]
+    return Z
 
 
 def roof_sloped_fraction(Z: np.ndarray, valid: np.ndarray, cell: float,
@@ -1547,6 +1721,11 @@ def main() -> int:
     ap.add_argument("--footprint-csv", type=Path, default=Path("data/derived/ky_facade_tiled_wkt.csv"))
     ap.add_argument("--name", default=None, help="display name (default: from the footprint)")
     ap.add_argument("--texel-m", type=float, default=TEXEL_M)
+    ap.add_argument("--no-roof-tidy", dest="roof_tidy", action="store_false",
+                    help="the roof field as measured: no ramps over empty cells, no snapping to flat levels (before)")
+    ap.add_argument("--no-wall-cap", dest="wall_cap", action="store_false",
+                    help="walls carried up or copied keep their band's top, and seen ones too; only a wall drawn "
+                         "under a roof edge stops at the roof (before)")
     ap.add_argument("--roof-edge", choices=("outline", "grid"), default="outline",
                     help="the roof's triangles cut along the levels' outlines, or two per cell of the height field (before)")
     ap.add_argument("--roof-cell-m", type=float, default=0.0,
@@ -1580,6 +1759,9 @@ def main() -> int:
     ap.add_argument("--scene-cloud", type=Path, default=None,
                     help="a cached occluder cloud (scripts/run_downtown.py writes one) passed on to the colourise")
     args = ap.parse_args()
+    if not args.wall_cap:
+        global CAPPED_STATUSES, PARAPET_M
+        CAPPED_STATUSES, PARAPET_M = ("edge",), None
 
     from colorize_building import load_cameras
 
@@ -1727,6 +1909,8 @@ def main() -> int:
         levels = [{"level": 0, "ring": ring_m.tolist(), "z_lo": ground_z, "z_hi": ground_z + roof_top}]
     cell = args.roof_cell_m if args.roof_cell_m > 0 else (0.75 if n_on / max(poly.area, 1.0) >= 4.0 else 1.5)
     xs, ys, Z, valid = roof_heightfield(xyz, poly, ground_z, cell, max_z=ground_z + roof_top + 1.5)
+    if args.roof_tidy and valid.sum() >= 8:
+        Z = tidy_roof_field(xyz, poly, ground_z, xs, ys, Z, valid)
     if path == "box" or valid.sum() < 4:
         # a flat roof at the building's height; the height field is not trusted
         valid[:] = False

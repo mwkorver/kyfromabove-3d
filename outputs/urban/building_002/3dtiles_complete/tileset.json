@@ -40,7 +40,7 @@
  "extras": {
   "name": "400 West Market",
   "gers": "df2fccca-d6bd-4d4d-b4bc-673cfb5245aa",
-  "triangles": 7024,
+  "triangles": 7040,
   "kind": "mesh",
   "path": "profile",
   "archetype": "sculpted_facade",

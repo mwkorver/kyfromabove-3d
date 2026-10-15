@@ -6,7 +6,7 @@
   "num_levels": 1,
   "plate_rms_m": 0.1236,
   "roof_plateau_frac": 0.797,
-  "sloped_fraction": 0.0387,
+  "sloped_fraction": 0.0497,
   "max_wall_offset_m": 1.75,
   "has_arcs": false,
   "has_open_bands": true,

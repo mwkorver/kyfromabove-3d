@@ -1,26 +1,24 @@
-# The landmark buildings: modelled one by one before the downtown run, each
-# with its own building directory. scripts/run_downtown.py merges their meshes
-# into the downtown tileset; scripts/intake_server.py shows them.
+# The landmark buildings, by name, for scripts/intake_server.py to show. They
+# are built as every other downtown building is (kyfromabove_3d.pipeline,
+# refactor step 2c, 2026-10-14); until then each was modelled on its own, in
+# its own folder, and merged into the downtown tileset.
 #
 #   key           a short name
 #   gers          Overture GERS id, what everything in the project is keyed on
-#   building_dir  where its obliques, LiDAR, meshes and QA live
-#   case          the survey case name, where it has one
+#   building_dir  its folder in the downtown run
 
 landmarks:
   - key: pnc_tower
     name: PNC Tower
     gers: 1614a997-3d6f-475f-9bc5-bb5a9dbc878d
-    building_dir: outputs/pnc_tower/pnc_tower
-    case: pnc_tower
+    building_dir: outputs/downtown/buildings/1614a997-3d6f-475f-9bc5-bb5a9dbc878d
 
   - key: 400_west_market
     name: 400 West Market
     gers: df2fccca-d6bd-4d4d-b4bc-673cfb5245aa
-    building_dir: outputs/urban/building_002
-    case: building_002
+    building_dir: outputs/downtown/buildings/df2fccca-d6bd-4d4d-b4bc-673cfb5245aa
 
   - key: humana
     name: Humana Building
     gers: d2786314-4fb3-4da6-8f81-621873d40c08
-    building_dir: outputs/humana/humana
+    building_dir: outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08

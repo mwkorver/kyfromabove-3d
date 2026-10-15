@@ -11,15 +11,10 @@ buildings:
   - id: b7daf154-da79-4a42-b938-a973aa1111b5
     name: Omni Louisville Hotel
     why: west tower wall hole 47-72 m up (face 1012); 57 m south wing without its south wall (faces 1000-1002)
-  # landmarks: built on their own (build_mesh.py --case), not by run_downtown
-  - id: building_002
-    dir: outputs/urban/building_002
-    case: building_002
+  - id: df2fccca-d6bd-4d4d-b4bc-673cfb5245aa
     name: 400 West Market
     why: the domed crown is right (September 2026); do not regress it
-  - id: pnc_tower
-    dir: outputs/pnc_tower/pnc_tower
-    case: pnc_tower
+  - id: 1614a997-3d6f-475f-9bc5-bb5a9dbc878d
     name: PNC Tower
     why: walls stopped at 152 m under a roof at 155-160 m (the crown band left open), a floating lid
   - id: bf3923af-34d6-4fdb-b867-2a9f533bef4e

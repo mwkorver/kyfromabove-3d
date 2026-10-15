@@ -86,6 +86,13 @@ class ColouriseSettings:
     # unseen band takes its twin's depth) or "roof_edge" (it takes the edge's)
     upper_levels: Literal["twin", "roof_edge"] = "twin"
     levels: LevelSettings = field(default_factory=LevelSettings)
+    # a return near the building's edge standing more than this over the top of
+    # its inside is a taller neighbour's wall, not this building's (0: kept)
+    neighbour_spill_m: float = 3.0
+    # an observed band's returns climb at least this share of the band in the
+    # median 2 m strip along the face (a roof's sit at one height); 0: the
+    # whole face's span only (before)
+    band_local_rise: float = 0.25
 
 
 @dataclass(frozen=True)
@@ -107,6 +114,46 @@ class MeshSettings:
     # recorded height in the completed product, from absent_min_area_m2 up
     lidar: Literal["present", "absent"] = "present"
     absent_min_area_m2: float = 0.0
+    # a face whose measured walls reach less than this share of the roof just
+    # inside it takes the full wall along the outline, as a face with nothing
+    # measured does (0: it keeps its short walls, before)
+    short_face_share: float = 0.5
+
+
+@dataclass(frozen=True)
+class ClassifySettings:
+    """The class by size and architecture (``kyfromabove_3d.classify``)."""
+    cell_m: float = 0.5               # the roof grid
+    min_roof_m: float = 2.0           # a roof cell is at least this far above the ground
+    thin_m: float = 5.0               # narrower than this across: a thin part
+    open_share: float = 0.15          # returns in under the roof, for the see-through (glass) hint
+    pitched_share: float = 0.35       # sloping roof cells for "pitched"
+    lower_share: float = 0.10         # roof well below the main roof, as a share of it, for "tiered"
+    side_share: float = 0.4           # share of a side's length against a neighbour to count it shared
+    tiny_m2: float = 40.0             # a footprint smaller than this is not a building to model,
+    min_height_m: float = 2.5         # ... nor one lower than this,
+    min_roof_cover: float = 0.3       # ... nor one with less roof than this share of it
+
+
+@dataclass(frozen=True)
+class OutlineSettings:
+    """The building's outline from the LiDAR (``scripts/lidar_outline.py``,
+    the measure step): Overture's edges moved to where the roof ends."""
+    cell_m: float = 0.5
+    min_height_m: float = 2.5             # roof is at least this far above the ground
+    max_step_m: float = 1.5               # a height change this big between cells ends the roof
+    lower_roof_m: float = 10.0            # a step down of any size is crossed onto a roof this far up ...
+    lower_roof_share: float = 0.5         # ... and at least this share of the height it steps down from
+    min_wall_returns_per_m: float = 3.0   # a lower roof's end is taken only over a wall this well seen
+    reach_m: float = 3.0                  # the furthest the outline may run past Overture's
+    min_support: float = 0.5              # share of an edge the roof's end must be found along
+    gap_m: float = 1.0                    # gaps in the roof this short are stepped over
+    max_corner_move_m: float = 4.0
+    simplify_m: float = 0.35
+    # a tower's own outline (lidar_outline.tower_outline), seeded by the level the colourise traced
+    tower_margin_m: float = 3.0           # a tower cell stands at least this above the podium
+    upper_fraction: float = 0.4           # ... and at least this share of the top height (as building_levels)
+    smooth_m: float = 1.0                 # the tower patch closed and opened by this much before tracing
 
 
 @dataclass(frozen=True)

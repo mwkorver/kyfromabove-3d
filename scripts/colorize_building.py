@@ -201,15 +201,21 @@ def depth_buffers(cams, scene_xyz, downscale=8, dilate=3):
     return cams
 
 
+#: a neighbour's levels as the building step measured them (kyfromabove_3d.pipeline.MEASURED_LEVELS)
+MEASURED_LEVELS = "levels_measured.json"
+
+
 def neighbour_prisms(b: Path, footprints: Path | None = FOOTPRINTS, radius_m: float = 250.0,
                      buildings_dir: Path | None = ROOT / "outputs" / "downtown" / "buildings"):
     """Every other building within ``radius_m`` of building dir ``b``, as solid
     prisms ``(ring (N, 2) closed, z_lo, z_hi)`` in ``b``'s local metres.
 
-    A neighbour the colourise has seen (``buildings_dir/<id>/levels.json``)
-    gives one prism per level -- a podium to its own top, the tower's traced
-    outline above it -- so a podium does not stand at its tower's height;
-    a level is capped at the footprint's LiDAR height.
+    A neighbour the building step has measured (``buildings_dir/<id>/
+    levels_measured.json``, kyfromabove_3d.pipeline: its levels as the LiDAR
+    shows them, written before any building is built, so the same whatever
+    order they are built in) gives one prism per level -- a podium to its own
+    top, the tower's traced outline above it -- so a podium does not stand at
+    its tower's height; a level is capped at the footprint's LiDAR height.
     Any other stands as its Overture footprint from the LiDAR ground to its
     LiDAR height (the 99th percentile of its returns). A footprint whose
     inside overlaps ``b``'s by more than a square metre (the building
@@ -241,7 +247,7 @@ def neighbour_prisms(b: Path, footprints: Path | None = FOOTPRINTS, radius_m: fl
         if poly.distance(Point(0.0, 0.0)) > radius_m or poly.intersection(me).area > 1.0:
             continue
         nb = Path(buildings_dir) / r["id"] if buildings_dir else None
-        if nb is not None and (nb / "levels.json").exists() and (nb / "coordinates.json").exists():
+        if nb is not None and (nb / MEASURED_LEVELS).exists() and (nb / "coordinates.json").exists():
             nx, ny, nz = json.loads((nb / "coordinates.json").read_text(encoding="utf-8"))["origin_source_xyz"]
             shift = np.array([(nx - ox) * FT, (ny - oy) * FT])
             dz = (nz - oz) * FT
@@ -251,7 +257,7 @@ def neighbour_prisms(b: Path, footprints: Path | None = FOOTPRINTS, radius_m: fl
             # building beside Humana, stood at 116 m and hid Humana's walls
             cap = (float(r["lidar_ground_z"]) - oz * FT + float(r["lidar_height_m"])) \
                 if r.get("lidar_ground_z") is not None and r.get("lidar_height_m") else np.inf
-            for lv in json.loads((nb / "levels.json").read_text(encoding="utf-8")):
+            for lv in json.loads((nb / MEASURED_LEVELS).read_text(encoding="utf-8")):
                 ring = np.asarray(lv["ring"], dtype=float)[:, :2] + shift
                 if not np.allclose(ring[0], ring[-1]):
                     ring = np.vstack([ring, ring[:1]])
@@ -867,6 +873,12 @@ def parser() -> argparse.ArgumentParser:
                     help="maximum RMS distance of tile centroids to fitted face plane")
     ap.add_argument("--extrude-max-normal-deg", type=float, default=D.extrude_max_normal_deg,
                     help="maximum angular deviation of tile normals from face normal")
+    ap.add_argument("--neighbour-spill-m", type=float, default=D.neighbour_spill_m,
+                    help="a return near the edge this far over the building's inside top is a taller neighbour's wall "
+                         "and is left out; 0 keeps them (before)")
+    ap.add_argument("--band-local-rise", type=float, default=D.band_local_rise,
+                    help="an observed band's returns climb this share of it in the median 2 m strip along the face; "
+                         "0 tests the whole face's span only (before)")
     ap.add_argument("--out", type=Path, default=None)
     return ap
 
@@ -883,24 +895,34 @@ def settings_from_args(args):
         occluder_radius_m=args.occluder_radius_m, occlusion=not args.no_occlusion, extrude=args.extrude,
         prism_min_ratio=args.prism_min_ratio, outline="lidar" if args.lidar_outline else "overture",
         match_walls=args.match_walls, profile_band_m=args.profile_band_m,
-        extrude_max_rms_m=args.extrude_max_rms_m, extrude_max_normal_deg=args.extrude_max_normal_deg)
+        extrude_max_rms_m=args.extrude_max_rms_m, extrude_max_normal_deg=args.extrude_max_normal_deg,
+        neighbour_spill_m=args.neighbour_spill_m, band_local_rise=args.band_local_rise)
 
 
-def main() -> int:
-    args = parser().parse_args()
-    import dataclasses
-    from kyfromabove_3d.settings import ColouriseSettings, changed_from_defaults, resolve
-    cli = settings_from_args(args)
-    # the defaults, then the building's class's, then what the command line changed
-    CS = resolve(args.building, colourise=changed_from_defaults(
-        {f.name: getattr(cli, f.name) for f in dataclasses.fields(cli)}, ColouriseSettings)).colourise
+class ColouriseFailure(Exception):
+    """The colourise cannot go on; ``code`` is its exit code."""
+
+    def __init__(self, code: int, message: str):
+        super().__init__(message)
+        self.code = code
 
 
-    started = time.time()
-    coords = json.loads((args.building / "coordinates.json").read_text(encoding="utf-8"))
+def footprint_and_levels(building: Path, CS, case=None, gers=None, footprint=None,
+                         footprints=Path("outputs/survey/case_footprints.json"),
+                         footprint_csv=Path("data/derived/ky_facade_tiled_wkt.csv"), cli_lidar_outline: bool = False):
+    """What the colourise finds before it looks at a frame: the building's
+    returns (``CS.drop_classes`` left out, its neighbours' footprints cut out),
+    its outline (Overture's, or the LiDAR's where the class or the command
+    line asks), the ground and its levels -- the towers with the LiDAR's
+    outlines, a level split under an overhang. The building step's measure
+    phase records these levels for the neighbours' occlusion
+    (``levels_measured.json``), the same whatever order the buildings are
+    built in. Raises ColouriseFailure."""
+    from types import SimpleNamespace
+    coords = json.loads((building / "coordinates.json").read_text(encoding="utf-8"))
     ox, oy, oz = coords["origin_source_xyz"]
 
-    lidar_path = find_cloud(args.building, "lidar_local")
+    lidar_path = find_cloud(building, "lidar_local")
     ply = read_cloud(lidar_path)
     xyz = np.column_stack([ply["x"], ply["y"], ply["z"]]).astype(np.float64)
     print(f"{len(xyz):,} LiDAR points from {lidar_path}")
@@ -913,35 +935,28 @@ def main() -> int:
             print(f"  {drop.sum():,} returns of class {CS.drop_classes} left out")
             xyz, cls = xyz[~drop], cls[~drop]
 
-    cams = load_cameras(args.building)
-    print(f"{len(cams)} cameras with crops: "
-          f"{', '.join(sorted({c['head'] for c in cams}))}")
-    if not cams:
-        print("[FAIL] no cameras with images on disk")
-        return 2
-
     # No fallback anywhere below. An earlier version quietly took the first
     # entry when the lookup missed, and coloured 400 West Market against Tractor
     # Supply's footprint without saying so.
     from kyfromabove_3d.footprints import resolve_footprint
     # a class may be built on the LiDAR outline (configs/class_strategies.yaml: outline: lidar)
     lidar_outline = CS.outline == "lidar"
-    if lidar_outline and not args.lidar_outline:
+    if lidar_outline and not cli_lidar_outline:
         print("footprint: the class builds on the LiDAR outline")
-    fp_case, fp_gers, fp_file = args.case, args.gers, args.footprint
-    if lidar_outline and (args.building / "footprint_lidar.json").exists():
+    fp_case, fp_gers, fp_file = case, gers, footprint
+    if lidar_outline and (building / "footprint_lidar.json").exists():
         # the outline from our own data; Overture's polygon stays in the record as outline.overture_wkt
-        fp_case, fp_gers, fp_file = None, None, args.building / "footprint_lidar.json"
+        fp_case, fp_gers, fp_file = None, None, building / "footprint_lidar.json"
         print("footprint: the LiDAR outline (footprint_lidar.json), not Overture's")
     elif lidar_outline:
         print("[warn] --lidar-outline: no footprint_lidar.json here; Overture's footprint used")
     try:
-        poly_local, entry = resolve_footprint(args.building, ox, oy, case=fp_case, gers=fp_gers,
-                                              footprint=fp_file, footprints_json=args.footprints,
-                                              footprint_csv=args.footprint_csv)
+        poly_local, entry = resolve_footprint(building, ox, oy, case=fp_case, gers=fp_gers,
+                                              footprint=fp_file, footprints_json=footprints,
+                                              footprint_csv=footprint_csv)
     except (KeyError, ValueError) as exc:
         print(f"[FAIL] {exc}")
-        return 1
+        raise ColouriseFailure(1, f"[FAIL] {exc}")
     ring_m = np.array(poly_local.exterior.coords, dtype=np.float64)
     # the outline's edges whose roof end the LiDAR found (a drop beyond it), in
     # the ring's own order: walls under them are drawn unless there is evidence
@@ -967,6 +982,36 @@ def main() -> int:
             xyz = xyz[keep]
             cls = cls[keep] if cls is not None else None
     print(f"footprint: {entry.get('overture_name')} ({len(ring_m) - 1} vertices)")
+    if CS.neighbour_spill_m > 0:
+        # A taller neighbour's wall stands on the shared edge, where the cut above
+        # leaves it, or a metre or two outside the outline: 9947f2b0, an 18 m
+        # building beside 400 West Market, read 43 m tall and drew the tower's
+        # wall as its own, as did 84 more downtown (cc3f65d1 50 m for 20 m, the
+        # Marmaduke Building 44 m for 21 m). A return within 4 m of the outline
+        # standing more than neighbour_spill_m over the top of the building's
+        # inside (2 m in) is left out where it is outside the outline, or inside
+        # it within 1.5 m of a neighbour's footprint. A wall of the building's own
+        # standing proud of its outline (Humana's south wall) is not taller than
+        # the building, and stays.
+        import shapely as _sh
+        from shapely.geometry import Polygon as _SP
+        _poly = _SP(ring_m) if _SP(ring_m).is_valid else _SP(ring_m).buffer(0)
+        _core = _poly.buffer(-2.0)
+        in_core = _sh.contains_xy(_core, xyz[:, 0], xyz[:, 1]) if not _core.is_empty else np.zeros(len(xyz), bool)
+        if in_core.sum() >= 50:
+            top = float(np.percentile(xyz[in_core, 2], 99))
+            pts = _sh.points(xyz[:, 0], xyz[:, 1])
+            near_nb = np.zeros(len(xyz), dtype=bool)
+            for nb in entry.get("neighbours") or []:
+                from kyfromabove_3d.footprints import footprint_wgs84_to_local
+                near_nb |= _sh.distance(footprint_wgs84_to_local(nb["wkt"], ox, oy), pts) < 1.5
+            spill = (_sh.contains_xy(_poly.buffer(4.0), xyz[:, 0], xyz[:, 1]) & (xyz[:, 2] > top + CS.neighbour_spill_m)
+                     & (~_sh.contains_xy(_poly, xyz[:, 0], xyz[:, 1]) | near_nb))
+            if spill.any():
+                print(f"  {spill.sum():,} returns of a taller neighbour's wall left out (over {top + CS.neighbour_spill_m:.1f} m, "
+                      f"the inside's top {top:.1f} m)")
+                xyz = xyz[~spill]
+                cls = cls[~spill] if cls is not None else None
 
     # The zone split must run on THIS building, not the AOI. The AOI is 110 m
     # of downtown around the tower, so its modal elevation is the street, every
@@ -980,21 +1025,17 @@ def main() -> int:
     print(f"{on_building.sum():,} of {len(xyz):,} points fall on the footprint")
     if on_building.sum() < 200:
         print("[FAIL] the footprint and the LiDAR do not overlap")
-        return 2
+        raise ColouriseFailure(2, "[FAIL] the footprint and the LiDAR do not overlap")
     b_xyz = xyz[on_building]
     # The profile looks 3 m outside the footprint edge and 8 m inside; the
     # 2 m clip above would cut off a wall standing 2-3 m proud of a
     # footprint traced along its podium (Humana's south wall does).
     profile_xyz = xyz[_contains(poly_local.buffer(4.0), xyz[:, 0], xyz[:, 1])]
-    zones = split_surface_zones(b_xyz)
-    if zones is None:
-        print("[FAIL] cannot split zones")
-        return 2
     # Ground elevation in the local frame. In the downtown/prepared frame, 0 is
     # the frame's ground level. Standalone cases use a robust lower percentile
     # so noise returns in cellars, river banks or pits (-10 m for RIVUE) do not
     # sit below street level and cause parking lots or plazas to count as roof.
-    if (args.building / "footprint.json").exists():
+    if (building / "footprint.json").exists():
         ground_z = 0.0
     elif cls is not None and (cls[on_building] == 2).sum() >= 20:
         ground_z = float(np.median(b_xyz[cls[on_building] == 2, 2]))
@@ -1062,12 +1103,51 @@ def main() -> int:
                 lv["level"] = k
             lidar_tower_levels = {k for old in lidar_tower_levels for k in old_to_new.get(old, [])}
             levels = split_levels
+    roof_z = max(float(lv["z_hi"]) for lv in levels)
+    return SimpleNamespace(ox=ox, oy=oy, oz=oz, xyz=xyz, ring_m=ring_m, entry=entry, measured_edges=measured_edges,
+                           on_building=on_building, b_xyz=b_xyz, profile_xyz=profile_xyz, ground_z=ground_z,
+                           levels=levels, lidar_tower_levels=lidar_tower_levels, overhangs=overhangs, roof_z=roof_z,
+                           lidar_outline=lidar_outline)
+
+
+def main() -> int:
+    args = parser().parse_args()
+    import dataclasses
+    from kyfromabove_3d.settings import ColouriseSettings, changed_from_defaults, resolve
+    cli = settings_from_args(args)
+    # the defaults, then the building's class's, then what the command line changed
+    CS = resolve(args.building, colourise=changed_from_defaults(
+        {f.name: getattr(cli, f.name) for f in dataclasses.fields(cli)}, ColouriseSettings)).colourise
+
+
+    started = time.time()
+    cams = load_cameras(args.building)
+    print(f"{len(cams)} cameras with crops: "
+          f"{', '.join(sorted({c['head'] for c in cams}))}")
+    if not cams:
+        print("[FAIL] no cameras with images on disk")
+        return 2
+
+    try:
+        F = footprint_and_levels(args.building, CS, args.case, args.gers, args.footprint, args.footprints,
+                                 args.footprint_csv, args.lidar_outline)
+    except ColouriseFailure as exc:
+        return exc.code
+    ox, oy, oz, xyz = F.ox, F.oy, F.oz, F.xyz
+    ring_m, entry, measured_edges, lidar_outline = F.ring_m, F.entry, F.measured_edges, F.lidar_outline
+    on_building, b_xyz, profile_xyz, ground_z = F.on_building, F.b_xyz, F.profile_xyz, F.ground_z
+    levels, lidar_tower_levels, overhangs, roof_z = F.levels, F.lidar_tower_levels, F.overhangs, F.roof_z
+    from kyfromabove_3d.features import LEVEL_FACE_STRIDE
+    from kyfromabove_3d.footprints import footprint_wgs84_to_local
+    zones = split_surface_zones(b_xyz)
+    if zones is None:
+        print("[FAIL] cannot split zones")
+        return 2
     oh_path = args.building / "overhangs.json"
     if overhangs:
         oh_path.write_text(json.dumps(overhangs, indent=1), encoding="utf-8")
     elif oh_path.exists():
         oh_path.unlink()
-    roof_z = max(float(lv["z_hi"]) for lv in levels)
     height_m = roof_z - ground_z
     print(f"zones: {zones.ground.sum():,} ground / {zones.wall.sum():,} wall / "
           f"{zones.roof.sum():,} roof;  height {height_m:.0f} m")
@@ -1334,7 +1414,8 @@ def main() -> int:
                 # of the arc's radius brought into its flat frame
                 near = np.abs(np.hypot(*(lv_xyz[:, :2] - plane.centre).T) - plane.radius) <= 12.0
                 lv_xyz = np.column_stack([plane.unroll(lv_xyz[near, :2]), lv_xyz[near, 2]])
-            bands = face_profile(plane, lv_xyz, band_m=CS.profile_band_m, offset_window_m=look_in_window(plane))
+            bands = face_profile(plane, lv_xyz, band_m=CS.profile_band_m, offset_window_m=look_in_window(plane),
+                                 local_rise=CS.band_local_rise)
             # A tower can stand well back from the edge its podium was traced
             # along: Humana's north wall is 25 m inside the Main Street edge,
             # seen by a thin column of returns the 8 m window never reaches.
@@ -1355,7 +1436,8 @@ def main() -> int:
             if len(levels) == 1 and top_seen < 0.4 * (roof_z - ground_z) and not is_arc[plane.face] and roof_inside_low():
                 depth = float(max(-((ring_m - plane.p0) @ plane.normal).min(), 8.0))
                 deep = face_profile(plane, lv_xyz, band_m=CS.profile_band_m,
-                                    offset_window_m=(-0.6 * depth, 3.0), min_returns=20)
+                                    offset_window_m=(-0.6 * depth, 3.0), min_returns=20,
+                                    local_rise=CS.band_local_rise)
                 found = [b for b in deep if b.status in ("observed", "bridged", "extended") and b.offset_m is not None and b.offset_m < -8.0]
                 if found:
                     print(f"    face {plane.face}: a wall set {-np.median([b.offset_m for b in found]):.0f} m back from the footprint edge, "

@@ -244,27 +244,10 @@ def main() -> int:
     ap.add_argument("--lidar-outline", action="store_true", help="rebuild with each building's LiDAR outline (footprint_lidar.json)")
     args = ap.parse_args()
     cfg = load_config()
-    ids = [b["id"] for b in cfg["buildings"] if not b.get("dir")]
-    landmarks = [b for b in cfg["buildings"] if b.get("dir")]
+    ids = [b["id"] for b in cfg["buildings"]]
 
     if args.action == "rebuild":
-        # landmarks first, on their own (their crops stay on disk), then the
-        # downtown ones, whose run also merges the tilesets with the landmarks
-        from audit_building import audit
         rc = 0
-        for b in landmarks:
-            d = ROOT / b["dir"]
-            print(f"landmark {b['name']}: colourise and mesh")
-            r = subprocess.run([sys.executable, str(SCRIPTS / "build_mesh.py"), "--building", str(d), "--case", b["case"],
-                                "--refresh", "--complete"] + (["--match-walls"] if args.match_walls else [])
-                               + (["--lidar-outline"] if args.lidar_outline else []), cwd=str(ROOT), stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, text=True)
-            (d / "log.txt").open("a", encoding="utf-8").write(r.stdout)
-            if r.returncode != 0:
-                print("\n".join(r.stdout.splitlines()[-6:])); rc = 1
-                continue
-            rec = audit(d, picture=d / "audit.png", case=b["case"])
-            (d / "audit.json").write_text(json.dumps(rec, indent=1, default=float), encoding="utf-8")
         cmd = [sys.executable, str(SCRIPTS / "run_downtown.py"), "run", "--only", *ids,
                "--force-step", "colorize", "mesh", "--complete", "--workers", str(args.workers)]
         if args.keep_crops:

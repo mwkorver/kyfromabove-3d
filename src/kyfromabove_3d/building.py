@@ -88,12 +88,15 @@ def chosen_from_piece(folder: Path) -> Optional[Dict[str, Any]]:
     """What :func:`prepare.cut_crops` needs, rebuilt from the piece alone:
     each chosen frame's camera from its own index record (``frames.json``),
     the building's volume (``check_features.json``), its local frame
-    (``coordinates.json``) and the coverage table (``frame_coverage.csv``).
-    None when no frame sees the building."""
+    (``coordinates.json``) and the coverage table (``frame_coverage.csv``),
+    the chosen frames' rows made again from their cameras as
+    :func:`prepare.select_cameras` made them: the CSV rounds their last digits,
+    and the crops' windows come from them. None when no frame sees the building."""
     import pandas as pd
 
     from .cameras import parse_camera_from_eo_record
     from .crops import BoundingVolume3D
+    from .sources import assess_frame_coverage
 
     folder = Path(folder)
     frames = json.loads((folder / "frames.json").read_text(encoding="utf-8")) \
@@ -105,6 +108,11 @@ def chosen_from_piece(folder: Path) -> Optional[Dict[str, Any]]:
                               ["volume_local_m"])
     cams = [parse_camera_from_eo_record(f["eo"], frame) for f in frames]
     table = pd.read_csv(folder / "frame_coverage.csv")
+    again = assess_frame_coverage(cams, volume).set_index("frame_id")
+    rows = table["frame_id"].isin(again.index)
+    for col in [c for c in again.columns if c in table.columns]:
+        table[col] = table[col].astype(again[col].dtype) if table[col].dtype != again[col].dtype else table[col]
+        table.loc[rows, col] = again.loc[table.loc[rows, "frame_id"], col].to_numpy()
     return {"cams": cams, "volume": volume, "frame": frame, "table": table}
 
 

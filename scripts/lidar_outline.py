@@ -285,7 +285,7 @@ def measure_building(job) -> Optional[dict]:
 
     from kyfromabove_3d.footprints import footprint_wgs84_to_local
     b, recs, a = job
-    B, why = load_building(b, a.footprints)
+    B, why = load_building(b, getattr(a, "footprints", FOOTPRINTS))     # (a building step's folder has its footprint.json)
     if B is None:
         return dict(building=b.key, name=b.name, status=why)
     ox, oy = B["origin"]
@@ -374,6 +374,61 @@ def measure_building(job) -> Optional[dict]:
                             area_m2=round(roof_poly.area, 1)),
                 edges=edges, neighbours=len(others),
                 grid=dict(x0=x0, y0=y0, cell=c, shape=[ny, nx]))
+
+
+def outline_for(bdir: Path, records: Sequence[dict], settings=None) -> dict:
+    """One building's outline from the LiDAR alone (the measure step), for the
+    building step: ``records`` are the area's footprints (the neighbours)."""
+    from kyfromabove_3d.settings import OutlineSettings
+    bdir = Path(bdir)
+    b = wv.Building(bdir.name, bdir.name, bdir, bdir.name, np.eye(4))
+    return measure_building((b, records, settings or OutlineSettings()))
+
+
+def towers_for(bdir: Path, levels: Sequence[dict], r: dict, settings=None) -> list:
+    """Each upper level's outline from the LiDAR (:func:`tower_outline`, seeded
+    by the level as the colourise traced it on the LiDAR outline), as
+    ``footprint_lidar.json`` holds them (``towers_local``)."""
+    from kyfromabove_3d.settings import OutlineSettings
+    a = settings or OutlineSettings()
+    bdir = Path(bdir)
+    B, _ = load_building(wv.Building(bdir.name, bdir.name, bdir, bdir.name, np.eye(4)))
+    fp = np.asarray(r["edges_moved"]["ring"])
+    out = []
+    for lv in levels[1:]:
+        ring, _ = tower_outline(B, lv, fp, a)
+        if ring is not None:
+            out.append(dict(ring=np.round(ring, 3).tolist(), z_lo=float(lv["z_lo"]), z_hi=float(lv["z_hi"]),
+                            source="the LiDAR tower's edge (lidar_outline.py tower_outline), not refined in the frames"))
+    return out
+
+
+def write_lidar_outline(bdir: Path, r: dict, towers: Optional[list] = None) -> Optional[Path]:
+    """``footprint_lidar.json`` from the measure step alone, as
+    ``write-footprints --unrefined`` writes it, with the towers' outlines
+    when given; None when there is no outline."""
+    from kyfromabove_3d.footprints import footprint_wgs84_to_local
+    bdir = Path(bdir)
+    if r.get("status") != "ok":
+        return None
+    ring = r["edges_moved"]["ring"]
+    from shapely.geometry import Polygon
+    if not Polygon(ring).is_valid:
+        return None
+    entry = json.loads((bdir / "footprint.json").read_text(encoding="utf-8"))
+    ox, oy = r["origin"]
+    wkt = local_to_wkt(ring, ox, oy)
+    back = np.asarray(footprint_wgs84_to_local(wkt, ox, oy).exterior.coords)
+    err = float(np.max(np.abs(back[:-1] - np.asarray(ring)[:-1]))) if len(back) == len(ring) else float("nan")
+    moves = {e["edge"]: dict(lidar_m=e.get("move_m", 0.0), frames_m=0.0, status="not refined (no frames)", step1=e["status"])
+             for e in r["edges"]}
+    out = dict(entry, wkt=wkt, outline=dict(source="the LiDAR roof's edge (lidar_outline.py), not yet refined in the frames",
+                                            overture_wkt=entry["wkt"], edges=moves, round_trip_error_m=round(err, 4)))
+    if towers:
+        out["towers_local"] = towers
+    path = bdir / "footprint_lidar.json"
+    path.write_text(json.dumps(out, indent=1), encoding="utf-8")
+    return path
 
 
 def buildings_of(a):

@@ -54,19 +54,6 @@ STEPS = ("prepare", "colorize", "mesh")
 
 # ---------------------------------------------------------------- the caches
 
-def landmark_gers(landmarks_yaml: Path) -> dict[str, Path]:
-    """GERS id -> building dir of the landmarks that already have meshes."""
-    import yaml
-
-    if not landmarks_yaml.exists():
-        return {}
-    out = {}
-    for t in yaml.safe_load(landmarks_yaml.read_text(encoding="utf-8")).get("landmarks", []):
-        if t.get("gers") and (ROOT / t["building_dir"] / "3dtiles_mesh" / "tileset.json").exists():
-            out[t["gers"]] = ROOT / t["building_dir"]
-    return out
-
-
 def area_bounds_ft(records, pad_m: float = 300.0):
     from pyproj import Transformer
     from shapely.ops import transform as shp_transform
@@ -151,40 +138,38 @@ def worker(args) -> int:
     force = set(args.force_step or [])
     t0 = time.time()
     try:
-        # prepare
-        # the crops are deleted after a mesh, and a mesh rebuild needs them
-        # back: prepare again (10 s) when images/ is gone
-        cams_file = bdir / "cameras_normalized.json"
-        coords_file = bdir / "coordinates.json"
-        old_origin = None
-        if coords_file.exists():
-            try:
-                old_origin = json.loads(coords_file.read_text(encoding="utf-8")).get("origin_source_xyz")
-            except Exception:
-                old_origin = None
-        need_crops = (not cams_file.exists()
-                      or (bool(json.loads(cams_file.read_text(encoding="utf-8"))) and not (bdir / "images").exists()))
-        if state.get("status") in (None, "pending", "failed") or "prepare" in force or need_crops:
-            grounds = [r["lidar_ground_z"] for r in records if r.get("lidar_ground_z") is not None]
-            frames = load_frames_index(args.out / "frames_2024s1.gpkg", area_bounds_ft(records, 300.0))
-            index = LidarTileIndex(ROOT / "data" / "raw", phases=("phase2",))
-            res = prepare_building(rec, bdir, frames, index, records, pad_ft=args.pad_ft,
-                                   max_per_head=args.max_per_head, min_frames=args.min_frames,
-                                   fallback_ground_m=float(np.median(grounds)) if grounds else None)
-            save(status="prepared", prepare=res, error=None)
-            new_origin = None
+        if args.phase == "measure":
+            # phase 1: the piece, the class, the LiDAR outline where the class asks, the levels
+            # (kyfromabove_3d.pipeline); every building of the run is measured before any is built
+            from kyfromabove_3d.pipeline import Area, measure
+            coords_file = bdir / "coordinates.json"
+            old_origin = None
             if coords_file.exists():
                 try:
-                    new_origin = json.loads(coords_file.read_text(encoding="utf-8")).get("origin_source_xyz")
+                    old_origin = json.loads(coords_file.read_text(encoding="utf-8")).get("origin_source_xyz")
                 except Exception:
-                    new_origin = None
+                    old_origin = None
+            grounds = [r["lidar_ground_z"] for r in records if r.get("lidar_ground_z") is not None]
+            area = Area(records=records,
+                        frames_gdf=load_frames_index(args.out / "frames_2024s1.gpkg", area_bounds_ft(records, 300.0)),
+                        index=LidarTileIndex(ROOT / "data" / "raw", phases=("phase2",)), pad_ft=args.pad_ft,
+                        max_per_head=args.max_per_head, min_frames=args.min_frames,
+                        fallback_ground_m=float(np.median(grounds)) if grounds else None)
+            res = measure(rec, bdir, area)
+            new_origin = json.loads(coords_file.read_text(encoding="utf-8")).get("origin_source_xyz") \
+                if coords_file.exists() else None
             if old_origin is not None and new_origin is not None and not np.allclose(old_origin, new_origin, atol=1e-3):
                 # Origin moved: invalidate old colourise outputs and profiles to avoid mixing frames
                 for fname in ("colorized_aerial.laz", "colorized_aerial.ply", "colorized_aerial_coverage.json",
                               "colorized.ply", "coverage.json",
                               "wall_planes.json", "wall_profiles.json", "levels.json"):
                     (bdir / fname).unlink(missing_ok=True)
-                force.add("colorize")
+            save(status="measured" if state.get("status") != "meshed" else "meshed", measure=res, error=None)
+            return 0
+        # phase 2: the crops of the frames the measure phase chose, when they are not on disk
+        if not (bdir / "images").exists() and (bdir / "frames.json").exists():
+            from kyfromabove_3d.pipeline import cut_crops_from_piece
+            save(crops=cut_crops_from_piece(bdir))
         # colourise (as part of the mesh: build_mesh runs it and takes the box path if it declines)
         cmd = [sys.executable, str(SCRIPTS / "build_mesh.py"), "--building", str(bdir),
                "--name", rec.get("name") or args.gers, "--scene-cloud", str(args.out / "scene_phase2.npz")]
@@ -291,12 +276,12 @@ def read_states(out: Path) -> dict[str, dict]:
     return states
 
 
-def write_manifest(out: Path, records, states: dict, landmarks: dict) -> dict:
+def write_manifest(out: Path, records, states: dict) -> dict:
     rows = []
     for r in records:
         s = states.get(r["id"], {})
         rows.append({"gers": r["id"], "name": r.get("name"),
-                     "status": "landmark" if r["id"] in landmarks else s.get("status", "pending"),
+                     "status": s.get("status", "pending"),
                      "path": s.get("path"), "n_frames": s.get("n_frames"),
                      "n_on_footprint": (s.get("prepare") or {}).get("n_on_footprint"),
                      "t_total": s.get("t_total"), "error": s.get("error"), "attempts": s.get("attempts", 0)})
@@ -357,19 +342,19 @@ def audit_summary(out: Path, n: int = 20, log=print) -> None:
             f"{r['name'] or r['building'][:8]} {r['hole_m2']:,.0f} m2" for r in worst["hole_m2"]["buildings"][:5]))
 
 
-def do_merge(out: Path, landmarks: dict, log=print) -> None:
+def do_merge(out: Path, log=print) -> None:
     sys.path.insert(0, str(SCRIPTS))
     from merge_downtown_tileset import merge
 
     boxes = ROOT / "outputs" / "overture_boxes" / "downtown_frame" / "tileset.json"
-    ex = merge(out, out / "buildings", list(landmarks.values()), boxes if boxes.exists() else None)
+    ex = merge(out, out / "buildings", [], boxes if boxes.exists() else None)
     log(f"merged: {ex['buildings']} buildings, {ex['triangles']:,} triangles, paths {ex['paths']}")
     # the completed product (and its tinted copy), where any building has one;
     # the others stand in it as measured
     if any((out / "buildings").glob("*/3dtiles_complete/tileset.json")):
         for variant in ("complete", "complete_tint"):
             vout = out.parent / f"{out.name}_{variant}"
-            merge(vout, out / "buildings", list(landmarks.values()), boxes if boxes.exists() else None, variant=variant)
+            merge(vout, out / "buildings", [], boxes if boxes.exists() else None, variant=variant)
         log(f"merged the completed product -> {out.parent / (out.name + '_complete')}")
     audit_summary(out, log=log)
 
@@ -377,29 +362,26 @@ def do_merge(out: Path, landmarks: dict, log=print) -> None:
 def run(args) -> int:
     data = json.loads(args.footprints.read_text(encoding="utf-8"))
     records = data["buildings"]
-    landmarks = landmark_gers(ROOT / "configs" / "landmarks.yaml")
     out = args.out
     caches = build_caches(out, records)
     mark_split_parents(out, records)
     states = read_states(out)
-    todo = [r for r in records if r["id"] not in landmarks]
+    todo = list(records)
     if args.only:
         todo = [r for r in todo if r["id"] in set(args.only)]
-    if not args.no_resume and not args.force_step:
-        todo = [r for r in todo if states.get(r["id"], {}).get("status") != "meshed"]
     if args.limit:
         todo = todo[:args.limit]
     log_path = out / "run.log"
-    print(f"{len(todo)} building(s) to run, {len(landmarks)} landmark(s) reused, {args.workers} worker(s); "
+    print(f"{len(todo)} building(s) to run, {args.workers} worker(s); "
           f"manifest -> {out / 'manifest.json'}")
-    write_manifest(out, records, states, landmarks)
+    write_manifest(out, records, states)
     if not todo:
-        do_merge(out, landmarks)
+        do_merge(out)
         return 0
 
-    def one(rec):
+    def one(rec, phase="build"):
         cmd = [sys.executable, str(Path(__file__).resolve()), "worker", "--footprints", str(args.footprints),
-               "--gers", rec["id"], "--out", str(out), "--pad-ft", str(args.pad_ft),
+               "--gers", rec["id"], "--phase", phase, "--out", str(out), "--pad-ft", str(args.pad_ft),
                "--max-per-head", str(args.max_per_head), "--min-frames", str(args.min_frames),
                "--timeout-min", str(args.timeout_min)]
         if args.keep_crops:
@@ -441,8 +423,29 @@ def run(args) -> int:
                 break
         return rec["id"], rc, time.time() - t
 
-    done = 0
+    # phase 1: every building to build, and any whose levels were never measured (a neighbour's
+    # occlusion reads them), is measured before any is built (kyfromabove_3d.pipeline)
+    from kyfromabove_3d.pipeline import MEASURED_LEVELS
+    ids = {r["id"] for r in todo}
+    to_measure = todo + [r for r in records if r["id"] not in ids
+                         and not (out / "buildings" / r["id"] / MEASURED_LEVELS).exists()]
     t_run = time.time()
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        bad = [g for g, rc, _ in pool.map(lambda r: one(r, "measure"), to_measure) if rc]
+    print(f"measured {len(to_measure)} building(s) in {(time.time() - t_run) / 60:.1f} min"
+          + (f"; {len(bad)} failed: {[g[:8] for g in bad[:8]]}" if bad else ""))
+    # a building already built from the same inputs, settings, neighbours and code is not built again
+    # (kyfromabove_3d.pipeline.fingerprint); --force-step builds it anyway
+    from kyfromabove_3d.pipeline import fingerprint
+    states = read_states(out)
+    prints = {r["id"]: fingerprint(out / "buildings" / r["id"], out / "buildings") for r in todo
+              if (out / "buildings" / r["id"] / "coordinates.json").exists()}
+    if not args.force_step and not args.no_resume:
+        same = [r for r in todo if states.get(r["id"], {}).get("status") == "meshed"
+                and states.get(r["id"], {}).get("fingerprint") == prints.get(r["id"])]
+        todo = [r for r in todo if r not in same]
+        print(f"{len(same)} building(s) unchanged since they were built; {len(todo)} to build")
+    done = 0
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {pool.submit(one, r): r for r in todo}
         for fut in as_completed(futures):
@@ -454,19 +457,22 @@ def run(args) -> int:
                 print(f"[FAIL] {gers}: {exc}")
             done += 1
             st = read_states(out).get(gers, {})
+            if rc == 0 and st.get("status") == "meshed" and gers in prints:
+                st["fingerprint"] = prints[gers]
+                (out / "buildings" / gers / "state.json").write_text(json.dumps(st, indent=1), encoding="utf-8")
             print(f"[{done}/{len(todo)}] {gers[:8]} {rec.get('name') or '':<32.32} {st.get('status', '?'):<8} "
                   f"{st.get('path') or '':<8} {dt:5.0f}s  {(st.get('error') or '')[:60]}")
             with open(log_path, "a", encoding="utf-8") as fh:
                 fh.write(f"{time.strftime('%H:%M:%S')} {gers} {st.get('status')} {st.get('path')} {dt:.0f}s {st.get('error') or ''}\n")
             if done % 10 == 0:
-                write_manifest(out, records, read_states(out), landmarks)
+                write_manifest(out, records, read_states(out))
             if args.merge_every and done % args.merge_every == 0:
                 try:
-                    do_merge(out, landmarks)
+                    do_merge(out)
                 except Exception as exc:                       # noqa: BLE001
                     print(f"[warn] merge failed: {exc}")
-    manifest = write_manifest(out, records, read_states(out), landmarks)
-    do_merge(out, landmarks)
+    manifest = write_manifest(out, records, read_states(out))
+    do_merge(out)
     print(f"done in {(time.time() - t_run) / 60:.1f} min: {manifest['counts']}")
     return 0
 
@@ -474,9 +480,8 @@ def run(args) -> int:
 def report(args) -> int:
     out = args.out
     data = json.loads(args.footprints.read_text(encoding="utf-8"))
-    landmarks = landmark_gers(ROOT / "configs" / "landmarks.yaml")
     states = read_states(out)
-    manifest = write_manifest(out, data["buildings"], states, landmarks)
+    manifest = write_manifest(out, data["buildings"], states)
     rows = manifest["buildings"]
     print(f"status: {manifest['counts']}")
     paths = {}
@@ -527,13 +532,15 @@ def main() -> int:
     r.add_argument("--limit", type=int, default=0); r.add_argument("--only", nargs="*", default=None)
     r.add_argument("--no-resume", action="store_true"); r.add_argument("--merge-every", type=int, default=25)
     w = sub.add_parser("worker", parents=[common]); w.add_argument("--gers", required=True)
+    w.add_argument("--phase", choices=("measure", "build"), default="build",
+                   help="measure: the piece, class, outline and levels; build: crops, colourise, mesh, check, audit")
     sub.add_parser("merge", parents=[common])
     sub.add_parser("report", parents=[common])
     args = ap.parse_args()
     if args.cmd == "worker":
         return worker(args)
     if args.cmd == "merge":
-        do_merge(args.out, landmark_gers(ROOT / "configs" / "landmarks.yaml"))
+        do_merge(args.out)
         return 0
     if args.cmd == "report":
         return report(args)

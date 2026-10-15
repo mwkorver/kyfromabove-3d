@@ -2037,6 +2037,19 @@ def main() -> int:
             if (plane is not None and path != "box")
             else ([], None)
         )
+        if quads and arc is None and roof is not None and M.short_face_share > 0 and edge.face not in whole_party:
+            # Measured walls that stop well short of the roof beside them, with
+            # nothing measured above: the face takes the full wall along the
+            # outline, as one with nothing measured at all does. SpringHill
+            # Suites' face 10 was seen 5-10 m up only; drawn to 10 m, it left a
+            # 20 m strip open under its 30 m roof (1,067 m2 of holes).
+            top_wall = max((float(q[0][:, 2].max()) for q in quads if q[3] == "wall"), default=None)
+            beside = [z for _, _, z in roof.top_along(edge) if np.isfinite(z)]
+            if top_wall is not None and beside and \
+                    top_wall < ground_z + M.short_face_share * (float(np.median(beside)) - ground_z):
+                print(f"  face {edge.face}: walls measured to {top_wall:.0f} m under a roof at {np.median(beside):.0f} m; "
+                      f"the full wall along the outline")
+                quads, extent = [], None
         if quads and arc is None and any(b.status == "matched" for b in bands):
             quads = quads + corner_returns(plane, bands, lambda end, z, pl=plane: neighbour_wall_at(pl, end, z), roof)
         if quads:

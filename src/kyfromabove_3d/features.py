@@ -2285,7 +2285,8 @@ def face_profile(plane: WallPlane, xyz: np.ndarray, band_m: float = 5.0,
                  offset_window_m: Optional[Tuple[float, float]] = None,
                  min_returns: int = 30, max_spread_m: float = 0.45,
                  min_along_fraction: float = 0.25,
-                 max_bridge_m: float = 80.0, max_step_m: float = 0.8) -> List[FaceBand]:
+                 max_bridge_m: float = 80.0, max_step_m: float = 0.8,
+                 local_rise: float = 0.25, local_strip_m: float = 2.0) -> List[FaceBand]:
     """Where a face's wall stands, band by band, from the returns near it.
 
     A single plane per face fits a slab tower and fails a building like the
@@ -2386,6 +2387,18 @@ def face_profile(plane: WallPlane, xyz: np.ndarray, band_m: float = 5.0,
                 # until this: its returns all lie within a metre of 101 m.
                 z_near = z[m][near]
                 tall = (np.percentile(z_near, 90) - np.percentile(z_near, 10)) >= 0.5 * (z1 - z0)
+                if tall and local_rise > 0:
+                    # ... and they do so where they are: in ``local_strip_m``
+                    # strips along the face, a wall's returns still climb the band
+                    # (by ``local_rise`` of it, in the median strip); a roof's sit at
+                    # one height. Over the whole face a roof that rises along it
+                    # passed for a wall: f60dbc1c's, 10 m at one end and 12.5 m at
+                    # the other, stood a wall 3 m inside its flat-roofed block.
+                    strip = np.floor(along[m][near] * L / local_strip_m).astype(int)
+                    rises = [float(np.percentile(z_near[strip == k], 90) - np.percentile(z_near[strip == k], 10))
+                             for k in np.unique(strip) if (strip == k).sum() >= 3]
+                    if len(rises) >= 3:
+                        tall = float(np.median(rises)) >= local_rise * (z1 - z0)
                 if spread <= max_spread_m and (hi - lo) >= min_along_fraction * L and tall:
                     band = FaceBand(z0, z1, offset, int(near.sum()), spread, lo, hi, "observed",
                                     segments=_band_segments(along[m] * L, o, offset, L, step_m=max_step_m))

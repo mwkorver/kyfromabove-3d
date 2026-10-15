@@ -77,3 +77,9 @@ def test_the_ab_switches_reach_their_settings():
     # what the command line changed wins over the class
     b = S.resolve(class_name="box/tall", config=S.CLASS_CONFIG, mesh=S.changed_from_defaults({"wall_cap": False}, S.MeshSettings))
     assert b.mesh.wall_cap is False and b.colourise.outline == "lidar"
+
+
+def test_the_building_lists_read():
+    import yaml
+    for f in ("safety_net.yaml", "audit_reference.yaml", "landmarks.yaml", "class_strategies.yaml"):
+        assert yaml.safe_load((ROOT / "configs" / f).read_text(encoding="utf-8"))

@@ -292,7 +292,9 @@ def _plain(v):
     if isinstance(v, float) and np.isnan(v):
         return None
     if hasattr(v, "isoformat"):
-        return v.isoformat()
+        # as str() writes it, which is what the camera keeps (cameras.parse_camera_from_eo_record):
+        # the frame rebuilt from frames.json is the frame the laptop chose, to the last character
+        return str(v)
     return v
 
 

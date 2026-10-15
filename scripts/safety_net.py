@@ -12,15 +12,12 @@ mesh on its own (so a texture-only difference can be told from a shape one),
 and the audit's measures (so a difference can be sized). ``check`` compares
 two records and names every building and output that differs.
 
-A landmark (``dir`` and ``case`` in the list) is built as it is today, on its
-own with ``build_mesh.py --case``; it joins the ordinary path in step 2 of
-the refactor.
-
 Usage::
 
     python scripts/safety_net.py record --label before          # rebuild, then record
     python scripts/safety_net.py record --label again --no-build # record what is on disk
     python scripts/safety_net.py check before again
+    python scripts/safety_net.py record --label downtown --all  # every downtown building
 """
 
 from __future__ import annotations
@@ -106,30 +103,27 @@ def record_one(b: dict) -> dict:
 
 def build(blist: list[dict], workers: int) -> int:
     """The whole chain for every building in the list, as the laptop builds it today."""
-    from audit_building import audit
     rc = 0
-    for b in [b for b in blist if b.get("dir")]:
-        d = building_dir(b)
-        print(f"landmark {b.get('name') or b['id']}: colourise and mesh", flush=True)
-        r = subprocess.run([sys.executable, str(SCRIPTS / "build_mesh.py"), "--building", str(d), "--case", b["case"],
-                            "--refresh", "--complete"], cwd=str(ROOT), stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT, text=True)
-        (d / "log.txt").open("a", encoding="utf-8").write(r.stdout)
-        if r.returncode != 0:
-            print("\n".join(r.stdout.splitlines()[-6:]))
-            rc = 1
-            continue
-        rec = audit(d, picture=d / "audit.png", case=b["case"])
-        (d / "audit.json").write_text(json.dumps(rec, indent=1, default=float), encoding="utf-8")
-    ids = [b["id"] for b in blist if not b.get("dir")]
+    ids = [b["id"] for b in blist]
     cmd = [sys.executable, str(SCRIPTS / "run_downtown.py"), "run", "--only", *ids,
            "--force-step", "prepare", "colorize", "mesh", "--complete", "--workers", str(workers)]
     r = subprocess.run(cmd, cwd=str(ROOT))
     return rc or r.returncode
 
 
+def all_downtown(blist: list[dict]) -> list[dict]:
+    """Every downtown building in the last run's manifest."""
+    man = json.loads((ROOT / "outputs" / "downtown" / "manifest.json").read_text(encoding="utf-8"))
+    recs = man.get("buildings", man) if isinstance(man, dict) else man
+    recs = recs.values() if isinstance(recs, dict) else recs
+    ids = sorted(r["gers"] for r in recs)
+    return [{"id": k} for k in ids]
+
+
 def cmd_record(a) -> int:
     blist = load_set(a.config)
+    if a.all:
+        blist = all_downtown(blist)
     t0 = time.time()
     if not a.no_build:
         rc = build(blist, a.workers)
@@ -148,11 +142,8 @@ def cmd_record(a) -> int:
 def compare(x: dict, y: dict) -> dict:
     """Per building, what differs between two records: {id: [lines]}."""
     out = {}
-    for k in sorted(set(x["buildings"]) | set(y["buildings"])):
-        bx, by = x["buildings"].get(k), y["buildings"].get(k)
-        if bx is None or by is None:
-            out[k] = ["only in one record"]
-            continue
+    for k in sorted(set(x["buildings"]) & set(y["buildings"])):        # (a set against all of downtown: the set)
+        bx, by = x["buildings"][k], y["buildings"][k]
         lines = []
         for m in sorted(set(bx["meshes"]) | set(by["meshes"])):
             mx, my = bx["meshes"].get(m), by["meshes"].get(m)
@@ -176,7 +167,7 @@ def cmd_check(a) -> int:
     x = json.loads((RECORDS / f"safety_net_{a.a}.json").read_text(encoding="utf-8"))
     y = json.loads((RECORDS / f"safety_net_{a.b}.json").read_text(encoding="utf-8"))
     diff = compare(x, y)
-    n = len(set(x["buildings"]) | set(y["buildings"]))
+    n = len(set(x["buildings"]) & set(y["buildings"]))
     for k, lines in diff.items():
         print(f"{k[:40]}:")
         for ln in lines:
@@ -193,6 +184,7 @@ def main() -> int:
     r.add_argument("--no-build", action="store_true", help="record what is on disk")
     r.add_argument("--workers", type=int, default=4)
     r.add_argument("--config", type=Path, default=CONFIG)
+    r.add_argument("--all", action="store_true", help="every downtown building, not only the set")
     c = sub.add_parser("check")
     c.add_argument("a")
     c.add_argument("b")

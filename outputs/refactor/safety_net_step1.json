@@ -1,0 +1,2141 @@
+{
+ "label": "step1",
+ "when": "2026-10-14T20:43:16",
+ "buildings": {
+  "b7daf154-da79-4a42-b938-a973aa1111b5": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "2037c6e7a34a892d5d08ea275ea9eeaff40729fee2cd84e5a78f73fe3f9086ea",
+     "geometry": "ad9cd7488830b83f89f45c1fe9457f92465c41607c556b8b618253f7b4e8cdea",
+     "triangles": 52455,
+     "vertices": 32968
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "163d760af90a6c420d5ea800bbe168365c79758f7ae2866ed60483364c1a9dfe",
+     "geometry": "ad9cd7488830b83f89f45c1fe9457f92465c41607c556b8b618253f7b4e8cdea",
+     "triangles": 52455,
+     "vertices": 32968
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "29151a06aac679206f971bbb32a940d09a116a0a32f0b95030fcf11b1ae12f37",
+     "geometry": "ad9cd7488830b83f89f45c1fe9457f92465c41607c556b8b618253f7b4e8cdea",
+     "triangles": 52455,
+     "vertices": 32968
+    }
+   },
+   "reports": {
+    "levels.json": "2fb8698c00aee9921c068fce8f37db833aee592a3b4b4357537f6d604c3b7741",
+    "wall_planes.json": "e067308189f7dba7825f19a1c765cc9e74aa8766f5cd163737fb24288d497ab3",
+    "wall_profiles.json": "138639dff0d1ddee300ad6e79cac0a66a55ca23f04adab61de2a84df52aeea56",
+    "mirror_report.json": "8eafcb64cd459430d6f5b70940233043297a459c3ebb17f49637456ec8fc6f9e",
+    "classification.json": "8ace0952a58796e5e10710fc1a51295fc774bbbd83b14f8ff5de183a31734993",
+    "colorized_aerial_coverage.json": "b39b31640f819a9f0667c4b4e6d0e1a217cfd7f55958856a7d1b7dec9be27b60",
+    "audit.json": "97eda09bfbb55d3a80e476fd39b7ad272dafa0c4aa5f41a34b2d9f13396c235b",
+    "texture_check.json": "ceede8209fc407ddf3ff75de36a68c2d936eaf733bcb95a2a47221d222b5e7ae",
+    "3dtiles_mesh/tileset.json": "684a353e3cddd8834a3d1beeb279f0a62baf2a80649e8fea9ef27e13f7f8a3ee",
+    "3dtiles_complete/tileset.json": "52ea5209c4e9ac8ac0b3ada958e994daf54fac24e940a9a4c628a023b77011c9"
+   },
+   "measures": {
+    "holes_m2": 807.0,
+    "holes_views_m2": 3610.6,
+    "above_m2": 19.2,
+    "outside_m2": 1014.2,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 244.0
+   }
+  },
+  "building_002": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "adc3523526f0f1bd054e06ee2422e6d3b5157a72a811e205bdd05b73d4a85d34",
+     "geometry": "d9e5ded2bb58691406de0850576fede17014618462c9022d5d26dc0ddcb7e560",
+     "triangles": 7040,
+     "vertices": 9154
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "a7ef62cb803f64bd78f0cfd5729358ba73d5ae8c094c7f3ca5adb2febab0d75b",
+     "geometry": "d9e5ded2bb58691406de0850576fede17014618462c9022d5d26dc0ddcb7e560",
+     "triangles": 7040,
+     "vertices": 9154
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "01687f191ae1707cd94ff64cdd7f42e13880532b4ac49d82378d1f20d510b1ea",
+     "geometry": "d9e5ded2bb58691406de0850576fede17014618462c9022d5d26dc0ddcb7e560",
+     "triangles": 7040,
+     "vertices": 9154
+    }
+   },
+   "reports": {
+    "levels.json": "f974d5f23f44b76db13da4cdce1049f8d08f9a419e129027b5dcc056fd46ffb2",
+    "wall_planes.json": "66c4a0ffad04d81b1f6c5203e7beae8b7c6937f25f97f32751f6153e194d8e6d",
+    "wall_profiles.json": "5b2fb09f025eb2acb2ce5246770e7e0da1d10f4d4347552862a71c7826bcd942",
+    "mirror_report.json": "8f59df185b1680a21e037334779eb21facb99e8d3cf76c554e1c9c499e4d3eac",
+    "classification.json": "1e34a6d78f3213ebc0c4ae4f2139dffd95de8a1e23f30d080a10a57e2f239def",
+    "colorized_aerial_coverage.json": "93aeaa5f243e6118797be241b1b488838314697aa6bea76e2e18a772f09c4635",
+    "audit.json": "8221e17f065efda4127ecc1b042d4a06817e9fed48ca1f6c3561463a84c9a538",
+    "texture_check.json": "a3b3bf13174ad3c4322ece94819d4ffca95b2ea2711a8473e7b7d63f8153e883",
+    "3dtiles_mesh/tileset.json": "0d2de55924a50787f0b966c064228ef05206ea41bd69fcb0612921b35e114e87",
+    "3dtiles_complete/tileset.json": "6f9d21f114fa1e9896a7bbeb6ae898611cdb5c1e469ddd92ce919b6f492c26ba"
+   },
+   "measures": {
+    "holes_m2": 150.0,
+    "holes_views_m2": 461.6,
+    "above_m2": 67.6,
+    "outside_m2": 966.1,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 45.2
+   }
+  },
+  "pnc_tower": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "f93360a2dce58f23bd270c7b4e1430bd51c1d7bde8f6af9770a6ddcbe767c2cf",
+     "geometry": "593940e3b93b6901bfc3a28805d0a30a6cc9c082f99e7d349082817a37faf4b4",
+     "triangles": 6927,
+     "vertices": 5056
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "2ca34cf8815aa4be687ece6947a8111cbb9a286dae42fd833f9cd86e82e53742",
+     "geometry": "593940e3b93b6901bfc3a28805d0a30a6cc9c082f99e7d349082817a37faf4b4",
+     "triangles": 6927,
+     "vertices": 5056
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "51731b954f0b58adb2d5f40810884ba0b4cb2eef552750861305ae0c4feda6b1",
+     "geometry": "593940e3b93b6901bfc3a28805d0a30a6cc9c082f99e7d349082817a37faf4b4",
+     "triangles": 6927,
+     "vertices": 5056
+    }
+   },
+   "reports": {
+    "levels.json": "8bc764204dac9f6d8374b400ccf55e95be354ca208aab8ae84202a3931238cbc",
+    "wall_planes.json": "c560f0f57ae6534651bc5a7b1a30a514e131817cfcfb5710d9cb13fa692ff3b4",
+    "wall_profiles.json": "f517ab9b989cfc0676ee75e2cb48649bfdf993817d01433d4bf8f23e60b2f2d1",
+    "mirror_report.json": "e6be9300e4447b2f83ed7cedbea36d1b86d988e107c7c9f3873a701033912ab4",
+    "classification.json": "9c9eb5849955d13c6583617f051685f4c5816b72576e0d54713cc136bf92bcb0",
+    "colorized_aerial_coverage.json": "5244c3f34769ed5457dac268709a05c7ade0922e2e7483b4591478a9d4ca156b",
+    "audit.json": "a25ca200e8fdb552bbd093bd802711d03bb673abd5a8e69af2995eedd354f552",
+    "texture_check.json": "bd3449a4631516783df3c1f7e17757b08745922445296b632e92b2732c64047b",
+    "3dtiles_mesh/tileset.json": "6ba3c793629d306893b82075b8d65e263db7abaa56c5f5aa6c7b4e2404972a6f",
+    "3dtiles_complete/tileset.json": "f7da62719185a27ed04269e332d224af05a03489738ad1eb75a17abd4daf4f73"
+   },
+   "measures": {
+    "holes_m2": 67.5,
+    "holes_views_m2": 309.8,
+    "above_m2": 0.4,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "bf3923af-34d6-4fdb-b867-2a9f533bef4e": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "08e5b3153b2293f713cac0dc0d777539020d92f7918b6bc91662ef2337778f35",
+     "geometry": "0417c97a1c62f7a8426b844ae8a5e7cc0fd9bcdc5a10a91d17d7ff72384ad454",
+     "triangles": 3641,
+     "vertices": 2931
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "cc40712af7b86d61f3703333c31e6de6cb1ccc180b357fd079f1745f4539de34",
+     "geometry": "0417c97a1c62f7a8426b844ae8a5e7cc0fd9bcdc5a10a91d17d7ff72384ad454",
+     "triangles": 3641,
+     "vertices": 2931
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "46382680e089ccabfdd30d52bf9fba2c2ed817910d5121d721da2ce84f7c9ae2",
+     "geometry": "0417c97a1c62f7a8426b844ae8a5e7cc0fd9bcdc5a10a91d17d7ff72384ad454",
+     "triangles": 3641,
+     "vertices": 2931
+    }
+   },
+   "reports": {
+    "levels.json": "b123c0aed05db57f0ee1b3e85d776eab790bd9a4f922c81494ab9add9b7fd6b2",
+    "wall_planes.json": "a6f8a6cd72b00064645e67c394557682b03806668e53858d65fc806f5df7f744",
+    "wall_profiles.json": "4bfc296e3664671dc363b60251d972f267e37812125561a8f384e5fa79151335",
+    "mirror_report.json": "ccc256343b9f25fd818b11c8d8edbb60bbff4c7310503ab59952252ec001130e",
+    "classification.json": "bf06254e0b84a1d3daaf7862df4c912005bb4b6686fbbc0b09be98f15ac8e76a",
+    "colorized_aerial_coverage.json": "e1f1d7c9acde5d6565f65bd34cc6d9f2ce870b7e9e9b801b3552f25d6c04e738",
+    "audit.json": "ea07d267192bcce3d6da0b3b190c4ad9ec7f5c1ed3e87200eb7ec119e97c7ed4",
+    "texture_check.json": "d282208340f8591a1968c34d9c058dfa162e7f1c34d6aeddd6fc13f9b38d8b21",
+    "3dtiles_mesh/tileset.json": "7d0c509f4985d042b30548fbdc07f31a647cad8e2337ffdddd03979311cf88cf",
+    "3dtiles_complete/tileset.json": "daf4a3498eebc98f4f0d28732ed90f28ab4cb0360327fb4b236bb504e9c56c01"
+   },
+   "measures": {
+    "holes_m2": 304.5,
+    "holes_views_m2": 1215.0,
+    "above_m2": 0.0,
+    "outside_m2": 80.1,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 27.6
+   }
+  },
+  "c5fe3ad2-ffa0-4800-9240-410277f7b332": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "3bc445004d9a4ea6c873dc16382f55e29a5356bffeec19eef38f70b9216a76f7",
+     "geometry": "a1b107bf9feac7dc3fe2e33ec0a1dbd835ac1aa7222db0b2e568396344ed25ea",
+     "triangles": 8708,
+     "vertices": 6676
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "f4df4fce8b273484427f1aaf53094a344415663d66b17ff6bf582e21345e7659",
+     "geometry": "a1b107bf9feac7dc3fe2e33ec0a1dbd835ac1aa7222db0b2e568396344ed25ea",
+     "triangles": 8708,
+     "vertices": 6676
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "9071671836879b16217c30c676791ff5d3c961252ccb1829671a07fbfb7add90",
+     "geometry": "a1b107bf9feac7dc3fe2e33ec0a1dbd835ac1aa7222db0b2e568396344ed25ea",
+     "triangles": 8708,
+     "vertices": 6676
+    }
+   },
+   "reports": {
+    "levels.json": "7b31d29d32fea4c06f2ebbe4bb57ebbe7a286fd7194ba3c7c325e772690163c7",
+    "wall_planes.json": "b8968975cf07bd0c60a18aba153d419ab2864995464846c2083e17d2f6a3740e",
+    "wall_profiles.json": "4e2dc311eabb831cc074eebb8e5fc443b83ba7485607395130d809d482e4b31d",
+    "mirror_report.json": "df95dd3f8a6408e39f2d524c922db7f95003c44e657455b3e737a7ce9da148cb",
+    "classification.json": "48b5ff04d3aa91483fbe4fef644fbbff246ff84f299a9cb2e3dbd60ff4c190d6",
+    "colorized_aerial_coverage.json": "7ffb4bafbc5bdd45975dd6c4b63e5032d9748b018da89902b7bb5f66439f685d",
+    "audit.json": "d7c6b8ba121e12682c9b39b309f763fe69ba9f3c1cb406549e937a2393a9b7dc",
+    "texture_check.json": "25e351aec8a3af18938b8433059088a12906275dcd404aa8bcbcb171064ff169",
+    "3dtiles_mesh/tileset.json": "156c68e5af45d0c83afa9623e089f01b34162163302397075712f822c2ca77b1",
+    "3dtiles_complete/tileset.json": "ca704c81e7441ddb84995a960c6e8e9c315a49926139383b3d491fc134e075dd"
+   },
+   "measures": {
+    "holes_m2": 415.2,
+    "holes_views_m2": 1841.0,
+    "above_m2": 0.0,
+    "outside_m2": 27.1,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 61.9
+   }
+  },
+  "39a33bd6-59b1-4edc-bd76-ffe26f85a868-a": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "3907713d4cb5564602d498540e09ece1d51fb9e3cb1343ad67f84d98a9f7713a",
+     "geometry": "a03e3a47279e6f1a8a4d89621b8853d11cbd3d8b35caaeb7b0de8e0da9809a31",
+     "triangles": 582,
+     "vertices": 413
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "bb4fd3f236af28c70b9b24a37983ef57a98c3c9810388a9da3333f462975cb34",
+     "geometry": "a03e3a47279e6f1a8a4d89621b8853d11cbd3d8b35caaeb7b0de8e0da9809a31",
+     "triangles": 582,
+     "vertices": 413
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "376d2e347e7222a5818f8594ecc9ef1e66e7b5843d6cd6b9052755fde5b2ae06",
+     "geometry": "a03e3a47279e6f1a8a4d89621b8853d11cbd3d8b35caaeb7b0de8e0da9809a31",
+     "triangles": 582,
+     "vertices": 413
+    }
+   },
+   "reports": {
+    "levels.json": "574a6adf4ee753aaab6ae4737556a8649c36e4976bd6f55fc2e945a4b1b8427d",
+    "wall_planes.json": "4eb69fde542855d15bee17e0d59604827446610e58223c1c523052e16498a7ed",
+    "wall_profiles.json": "d0e70c75b591720cea7b9ed9efbd128a1cb0aa30b5a1bda50d6c9994a2b77fa7",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "85edb2c9fdb007ac64635474ebea09d8e8baca5ccb6891e489616c55774a03fe",
+    "colorized_aerial_coverage.json": "aa3dda1d2058ed7a274006f87a6e8a308a3e64e348020ebc404df93b82b6b9a1",
+    "audit.json": "9e1b88e17a8dd85d93bebd20c8a0797f6c28237bfbba4f2d62ed19f7abbdde43",
+    "texture_check.json": "856ca54f1faa1e723485940a5ea3fc05aa5674a69a9b2c44a84f8579fb826bb7",
+    "3dtiles_mesh/tileset.json": "bdd7d4cb0874d546c89035a8e253bb7d8911f0dbb6eb76c8b919f2ed29162ed7",
+    "3dtiles_complete/tileset.json": "0c70d5cb774df3663dbb849eab8897c078aa92cdc2eb6fbe484465f72adfdb67"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "39a33bd6-59b1-4edc-bd76-ffe26f85a868-b": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "324cf4fbdf448551dd9c1e0665fd85dcf8c9678f24897dd703d6cf66f860cfa5",
+     "geometry": "f2d0ef638b5fde1574ffac5fcd2c1364bf71dfdec6aea8a42d89ae36694aca14",
+     "triangles": 359,
+     "vertices": 246
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "7b066517ce8d7e8eaadde8b05c5e6e2f2e97aded9cfc83e4aa41949904199a3d",
+     "geometry": "f2d0ef638b5fde1574ffac5fcd2c1364bf71dfdec6aea8a42d89ae36694aca14",
+     "triangles": 359,
+     "vertices": 246
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "d9cd725a9c7dd14f349464ede984fdb0050f81df7ce54bd67d752e5c8fc9338d",
+     "geometry": "f2d0ef638b5fde1574ffac5fcd2c1364bf71dfdec6aea8a42d89ae36694aca14",
+     "triangles": 359,
+     "vertices": 246
+    }
+   },
+   "reports": {
+    "levels.json": "9e16f22de89fdb9002f341bf406a94ff723fd749eb0cd1ca9df84598d4235003",
+    "wall_planes.json": "8d960a93cc9d5bc714cd857f44e22eb73a36566ba4f284e7327deb7612bf9129",
+    "wall_profiles.json": "c5533ce2017f33eea93db99e5f600ebf3f40c8fbf8d13d32cd3842d251a525a2",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "96552ac4f7d84db1fdd67f6dc3e11b757e9ed51c9265e411aa35904759c05a42",
+    "colorized_aerial_coverage.json": "c7597a09a1d7221ac4f39ff9f608a2b9fffc63574c1371f483abe41aa3bb7d4e",
+    "audit.json": "97e44c5ff8e499bdc7443df23be62e8c8f9a9aaf95abd6d7002afc067bb0f7b3",
+    "texture_check.json": "e152bfb67f1838e11208ce8fb2bab11c60c3d97cfffeccc53fe29a831c5812d7",
+    "3dtiles_mesh/tileset.json": "15e47426ad2dcf0d83a84e10226a91f441f4c7076ef850ed8c8d2f210fa8bde7",
+    "3dtiles_complete/tileset.json": "a4562c3ab45565ab0e286b47f480eaa39693ff3726caf22945d223b9dc1f172f"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.2
+   }
+  },
+  "39a33bd6-59b1-4edc-bd76-ffe26f85a868-c": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "e45a1ee719ff75e8ea03ac1ff195fe388eb37e26ae2158e16e99d9aa36721ffa",
+     "geometry": "f4bfaa280b117a57a89ef660a072e6aff89b463973b5c5ca9de9f197e2e5ea53",
+     "triangles": 238,
+     "vertices": 188
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "a431b9306751820fe75e914da4c61352ba2f91887bc76cc0207ef3f304bb8ed0",
+     "geometry": "f4bfaa280b117a57a89ef660a072e6aff89b463973b5c5ca9de9f197e2e5ea53",
+     "triangles": 238,
+     "vertices": 188
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "cd4ed9443daf9ebade6217932e43da058e618b4bb6c70ae0414a01323a2d7289",
+     "geometry": "f4bfaa280b117a57a89ef660a072e6aff89b463973b5c5ca9de9f197e2e5ea53",
+     "triangles": 238,
+     "vertices": 188
+    }
+   },
+   "reports": {
+    "levels.json": "ce8bf88c754a176ece7fdf607b8199d0571e43bc2456d3eb2c46405cfe821d06",
+    "wall_planes.json": "a881d3bb8327b97df620c70a28d6f956d3c379f092fa3ef570d12ec4ad3ee643",
+    "wall_profiles.json": "00ca8c9b72d8efdb7f49ab19411a4b1b582921a885fb9fb85d28fb95a4be414b",
+    "mirror_report.json": "525fc0328dba8083780611f66bc2c1e860513a90ed27c5d72b2236f432066614",
+    "classification.json": "e8e9101ff4f9a9fea16a2c58f0b00d497c6094224a61fc4b23e42aa9373b7d5c",
+    "colorized_aerial_coverage.json": "f12ffddc2ccc14b9d21abab9cdca0a4e00f627a1ca29935af53537397c82db0c",
+    "audit.json": "949c4c662ccb910981c6fc61f7ce3697bf8bc4f9d4fe932ef8cf0c95b473ce24",
+    "texture_check.json": "144510320f3e54ee5fd945e681939647c2b84133a31b418bc08502d20d3ca397",
+    "3dtiles_mesh/tileset.json": "1e2e6db68cb48815f8626f555e7971c54dda5af1dc05af599c247111df97c22c",
+    "3dtiles_complete/tileset.json": "84be97d9e35c06553ec3bdc75ff2ae78e15aa7c89a4ea669d4dd7ebc43fbd95f"
+   },
+   "measures": {
+    "holes_m2": 6.0,
+    "holes_views_m2": 6.0,
+    "above_m2": 0.0,
+    "outside_m2": 75.5,
+    "inside_m2": 50.6,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "9947f2b0-4b1e-41af-b68c-af6ae665b1a8": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "6684005e2d86f9975f5cc9f8f395399938dfe0abfe8cb6cce11b02db871cd151",
+     "geometry": "60fc196b3f895471febd0c0053fa9674649bcb6941f4b6f3d59f964666ad4d78",
+     "triangles": 18126,
+     "vertices": 11045
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "d061a3f2c6c48b6c9d4175d951a4998345a933477b63c3d4ff289fc5039eb3f8",
+     "geometry": "60fc196b3f895471febd0c0053fa9674649bcb6941f4b6f3d59f964666ad4d78",
+     "triangles": 18126,
+     "vertices": 11045
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "a6b9445edeebb5c08c7280345a10a6afe05e9b3a690c3883ffdfaeaa1999bba2",
+     "geometry": "60fc196b3f895471febd0c0053fa9674649bcb6941f4b6f3d59f964666ad4d78",
+     "triangles": 18126,
+     "vertices": 11045
+    }
+   },
+   "reports": {
+    "levels.json": "b995b77770dea72fb4a744632bcff0b05e7ea67d95f6aabec77c610b32c8284b",
+    "wall_planes.json": "2e0a02804809c857fc9ae25c9be70c19146fc3699ec79535246444149722b1ad",
+    "wall_profiles.json": "f05033bb9531c0e4f4aaa889301944aec079b2df2a2804a9649def886ad2139e",
+    "mirror_report.json": "d9e6395cd99f8f721a9c701c88be520563a181762e1ab7cf4f2bb19c35b792bf",
+    "classification.json": "b1aa8b63ae93dc051efe9184f8c2e1c842a7069cddab989a7fb4039f852e4cfd",
+    "colorized_aerial_coverage.json": "da11833f2c6d3456e404969dbee07bbd892baa02c089f41aff33d4ab45fbcb0f",
+    "audit.json": "87e769e07b7c3de10422c7d024cf123854892f7447bb1de3f90b60c1f38be422",
+    "texture_check.json": "a4240f0b1bef907cfb56db2ab926cbc5f9550900ef0577c92fa29b5a5fbd5523",
+    "3dtiles_mesh/tileset.json": "073c7822f3630c82e8087f3710c2e07f7ea88103d09661e9f0703350bba4b66a",
+    "3dtiles_complete/tileset.json": "356904f23bfda801e3788689fdae1f5322128a8541e1681d699b993557838c65"
+   },
+   "measures": {
+    "holes_m2": 382.8,
+    "holes_views_m2": 1618.2,
+    "above_m2": 88.3,
+    "outside_m2": 54.7,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 51.0
+   }
+  },
+  "bcbc0005-cfe4-4719-8b90-7e9c69dc9782": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "0796622a3cc2dc6bb1773d499400f501789a2c8d09ca27fa2827dbb32b448d91",
+     "geometry": "f3e8e0d003018c3fed2adfd6528d92821de0d7f995d76043f90aa29cc25022f5",
+     "triangles": 3706,
+     "vertices": 2726
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "9da898477e8a3945a6c436843648df614a5bf1fcd05b4219d77b40b29afdf169",
+     "geometry": "f3e8e0d003018c3fed2adfd6528d92821de0d7f995d76043f90aa29cc25022f5",
+     "triangles": 3706,
+     "vertices": 2726
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "9b2f8f369c0ce9f54fe3d8380c555e9223f004d2ed384eff12883607180236af",
+     "geometry": "f3e8e0d003018c3fed2adfd6528d92821de0d7f995d76043f90aa29cc25022f5",
+     "triangles": 3706,
+     "vertices": 2726
+    }
+   },
+   "reports": {
+    "levels.json": "b41375a97e251b56aa264984cf1b674121089894fc1469acae7b4ebcfd1b0bed",
+    "wall_planes.json": "c8289574d81be4f53aa7aa5337c97f9b8b0b8e8897a73d06d21c1ff008d78051",
+    "wall_profiles.json": "0e8852566f0d6c43d0d6f8ec821e3bfa45feeef5a6435d3f9f0f692e0661b342",
+    "mirror_report.json": "747e54bd1aa41bbd908505c129b9e9f59b5cd715d9e7880703aa1268c8ced13e",
+    "classification.json": "3100d4d7414eff65a53ff066e6d79d6fb2ba5919c6042396aeca5a9d1bfa6cd0",
+    "colorized_aerial_coverage.json": "d30756e1dc27b465a40c36ab5d4d3c74eba8a896633539b51f1024f7002ed311",
+    "audit.json": "5d282ed4c07326604b76f105e2e445638b860e54dcc10e56b48bbfa2c5b42e30",
+    "texture_check.json": "8220c5468c5204163fe8d6e77b4d495a3c84a7d8242f17312e4ada20005a9f43",
+    "3dtiles_mesh/tileset.json": "60a48faa4ac1875762f3c43caeea7a2d4b5228a1b0bdad0f73d2c5327f9cd2d0",
+    "3dtiles_complete/tileset.json": "7a86142a2cc834b732e0fd079c13aa87f22778569ec7150158dc326b84a105dc"
+   },
+   "measures": {
+    "holes_m2": 870.8,
+    "holes_views_m2": 2800.6,
+    "above_m2": 25.0,
+    "outside_m2": 0.0,
+    "inside_m2": 257.6,
+    "roof_gap_m2": 55.8
+   }
+  },
+  "ec790737-7929-4a57-8ba7-ad8843bbef4f": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "0a253ae4c52f3ee7b1814dd99f8b4d546d884b3700c1858c3f86357100c66184",
+     "geometry": "abdd18802a2cec5b2c9f11c42588238f8b0ac326c2aa5b109a00fb40fca363db",
+     "triangles": 17110,
+     "vertices": 11609
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "9c2d78e8a6442a9051b2e011e3c199df290cf70e0e28e29cea95781c3c353cfa",
+     "geometry": "abdd18802a2cec5b2c9f11c42588238f8b0ac326c2aa5b109a00fb40fca363db",
+     "triangles": 17110,
+     "vertices": 11609
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "f00a5b95508ad8144b7e32440e5fa5a07102cf329f66b17d958dc6dbb243e588",
+     "geometry": "abdd18802a2cec5b2c9f11c42588238f8b0ac326c2aa5b109a00fb40fca363db",
+     "triangles": 17110,
+     "vertices": 11609
+    }
+   },
+   "reports": {
+    "levels.json": "53d8a5e476a17c1b7da1f3638d91f5bebfdca23d59c965bbf664a7e6288ce685",
+    "wall_planes.json": "93452342df50eefbc1a2804cf8f533ebd2683de73299b6fef4bc228d589e532e",
+    "wall_profiles.json": "d1cbfc8511c07642c5b31aa12d8fe90c18e08c1f7a5bbba279013c0bcdc766fa",
+    "mirror_report.json": "8e473bd2317d795f96015496d3f9d1ef31a3c1b2352179de83cde4dba67ed1bd",
+    "classification.json": "9eeb767cc9cc8f74eed43357237c1177d1da170abd4882f851c6d3630850e95f",
+    "colorized_aerial_coverage.json": "acce3611d9871a3fd77b46821571bc2dd72da5f472edbf97601a32770c29a4f1",
+    "audit.json": "2a34eba9ad98575a5cb03c8228e417c2ceb66b5d5018310f8b64f5d9e73f4952",
+    "texture_check.json": "fb9ab535c513b679718c8a43002fbbbb3c54cb097cf41394a36713acce24888a",
+    "3dtiles_mesh/tileset.json": "c861623467785dbd32640927f75a1e83c37abbc5cdfd8ffa10e86afd9c033f5a",
+    "3dtiles_complete/tileset.json": "1682910e80744effd95b7fc01ec439e556fb9679677f9003e110dd7d5778d380"
+   },
+   "measures": {
+    "holes_m2": 88.8,
+    "holes_views_m2": 466.8,
+    "above_m2": 74.4,
+    "outside_m2": 418.1,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 54.8
+   }
+  },
+  "9e9df280-ccae-46bd-b450-354e7d5e2fcf": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "046b244e665457d4fbfd38b6ddb890c0a2bb30caf4bbb9e6b6b76bffffc127b0",
+     "geometry": "d762d828fb60f02b1cc7ad4c0d71d34b6e80c1f6662683fe89b1e90aa95b71d6",
+     "triangles": 19941,
+     "vertices": 14815
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "6caa679b8efec3042dda607aee8b435aa2ee04945003918c437a73d8dbfea131",
+     "geometry": "d762d828fb60f02b1cc7ad4c0d71d34b6e80c1f6662683fe89b1e90aa95b71d6",
+     "triangles": 19941,
+     "vertices": 14815
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "a93053f17cdeaaa3d8caa2028e1c861ef75566cde3b91cca40759a3aebb77108",
+     "geometry": "d762d828fb60f02b1cc7ad4c0d71d34b6e80c1f6662683fe89b1e90aa95b71d6",
+     "triangles": 19941,
+     "vertices": 14815
+    }
+   },
+   "reports": {
+    "levels.json": "20d25e56a95b88a6f57a3ee12adb74c018003d1ab5e74d0e4c8f1ea93c663168",
+    "wall_planes.json": "97928d317410740a54861531145b6b49f6f26e0716b48ca05941b1d5cbd86ba8",
+    "wall_profiles.json": "455ffa4dcd4c6cb459dc572a32affc837db273d3bab0c3c6ec96376d1ce94a75",
+    "mirror_report.json": "cf65d9f8dbd3ce8ed04e50b6708b339e0cb8c175fcbf29f1ef3a4dccc391f43a",
+    "classification.json": "e7feb45eb89f5c15170a23ef3b66a32fa26397691b83d96b522287234e56fe56",
+    "colorized_aerial_coverage.json": "6f8939d7266711201cfa85ef01477b8f6cd8a808332c95387f160cd0bcb4eacc",
+    "audit.json": "8c9067b819200184c7ec58c8b8650944fe6e79ec76e6b39b56118a34f811ecec",
+    "texture_check.json": "33c0e42717d1363c8a58f358e22b77862392234a4e2c11f7eb8ee71423b4ada9",
+    "3dtiles_mesh/tileset.json": "6d5d4feea1d081d791d792f688e28eefd99e80fbb703f3f54f968bd546b09b7f",
+    "3dtiles_complete/tileset.json": "f5da093b3c86df11467ef4895ef66e856261b7797259cf66a6ab06f5b1c2c8c9"
+   },
+   "measures": {
+    "holes_m2": 201.5,
+    "holes_views_m2": 791.5,
+    "above_m2": 0.0,
+    "outside_m2": 9.0,
+    "inside_m2": 43.9,
+    "roof_gap_m2": 148.4
+   }
+  },
+  "d683e785-f8c8-475c-a0a3-c3b476924098": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "4ee55972783c603081c3d47b03a16370d01c2441eabc5ce03b4ffc190baf52d2",
+     "geometry": "bb185cbc12c680cfa74bccc5155648c8221dbc05640760f32d7a14cbdcc9805d",
+     "triangles": 7188,
+     "vertices": 5412
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "317febd8feff9ada0aac04aa683ca1466f23adc845df4ac0937424e298ef3c70",
+     "geometry": "bb185cbc12c680cfa74bccc5155648c8221dbc05640760f32d7a14cbdcc9805d",
+     "triangles": 7188,
+     "vertices": 5412
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "dc09d1f022b8009cb06e8dc48e4b3aa82254b0c6b13a99141e4007c3b69cc8f1",
+     "geometry": "bb185cbc12c680cfa74bccc5155648c8221dbc05640760f32d7a14cbdcc9805d",
+     "triangles": 7188,
+     "vertices": 5412
+    }
+   },
+   "reports": {
+    "levels.json": "fbcac4bc5ed1278bd8a84aca87889779ad64d90029f3aaef7271cd523ba3fb7e",
+    "wall_planes.json": "4dada8e34601f6f3cefe22bd4559b7bf4be21bdbb72a9568aca4b5da33da914a",
+    "wall_profiles.json": "96adf2c3b789419189c8c2333566b02f7c5245d2071ecd0c9fbe8c51e733dff6",
+    "mirror_report.json": "21658c69e6da7fcdf28b206b5cdaf5f3221acf2579781391b333023a6078a8a2",
+    "classification.json": "34bd32a7fea3e78258fa144be14b8bbf427f793e51820f8551ec6c95d49c6436",
+    "colorized_aerial_coverage.json": "78941c3eb8a18fb54785cbc41cbd990512ffd5ccde1aaf25a7aac1abe1c23a04",
+    "audit.json": "9175e464b673678185ba7adb14bfd75f8830c66b6d82eea3e6ba4fd767f40aba",
+    "texture_check.json": "6134f1961e51e3f8cd5f3abf14831c41d01e9b6ce8199ca42f589e77f0e9dcb4",
+    "3dtiles_mesh/tileset.json": "bd192246d27ce54ed59a99f3f8d0ab5a36847461b5d4377c1e2b03d7ad6a4912",
+    "3dtiles_complete/tileset.json": "39791c4ad3f6c8800be801957c4cd285edefdf0fcb1b91bca605e04fc1d4fbd0"
+   },
+   "measures": {
+    "holes_m2": 940.5,
+    "holes_views_m2": 2919.3,
+    "above_m2": 66.6,
+    "outside_m2": 0.0,
+    "inside_m2": 36.4,
+    "roof_gap_m2": 145.7
+   }
+  },
+  "a1f393cc-05c9-43cb-a726-34aa92a2016a": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "9b0f52496fabfa071d0b3129bb2ea207fa9ca550befaad6a12963f87213afabe",
+     "geometry": "9e6f336106d0444c537020878b6ef8f87c9458e6de613b0d3910ad10e53ce79d",
+     "triangles": 24912,
+     "vertices": 16498
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "7d1f5c3b1dc4a8c2c0ac9501f03e669791b6a7a048af31cfd68bb24e4cce5476",
+     "geometry": "9e6f336106d0444c537020878b6ef8f87c9458e6de613b0d3910ad10e53ce79d",
+     "triangles": 24912,
+     "vertices": 16498
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "ac9922af9d16067dc2e98f77c0f964f641a0cf3ef52077bbbcc6e411cee7d063",
+     "geometry": "9e6f336106d0444c537020878b6ef8f87c9458e6de613b0d3910ad10e53ce79d",
+     "triangles": 24912,
+     "vertices": 16498
+    }
+   },
+   "reports": {
+    "levels.json": "631384e67c7373f0a6614b5a2f32d6436db0046506f543441118c78e2ff868bc",
+    "wall_planes.json": "1f401e73db846ed53978c4cad9f617c69b7a73567b7a54a590fbed69f8077301",
+    "wall_profiles.json": "b7a5844dd396bd566c7dfba3d0020bd652ebb994b3d78c34dda451161263c299",
+    "mirror_report.json": "d8753e729791a5c443e1b3ad2273c188e6e7d854b39070ccee35794edde49eac",
+    "classification.json": "3ca2525da0d3c95ca63ba157c189ebccbad07514be9dbbcc6dc2c1a78bf7ba39",
+    "colorized_aerial_coverage.json": "c436f0774e9f9e6a45b41ec34786b24da0aca9b78fc55be1b75ce9dd073e8ede",
+    "audit.json": "54d18a3816dc78a156e9750103266558af96cbb3171ea90a8850b15beee8acfd",
+    "texture_check.json": "742c9532ba72cf78edb6a24af22edb1515143b1017b9b6a36eb4ee38f958c241",
+    "3dtiles_mesh/tileset.json": "42084fbecf9f3fb34e9be1b5bcdc642799d7404cc28471f672c4940ed82dc682",
+    "3dtiles_complete/tileset.json": "27c16c9cc7c7d905929daf413d30de4f9465422c76866a4c228ccd22693c44ef"
+   },
+   "measures": {
+    "holes_m2": 491.0,
+    "holes_views_m2": 2192.5,
+    "above_m2": 0.0,
+    "outside_m2": 238.5,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 161.1
+   }
+  },
+  "3158c676-4406-43e9-8a71-183312badbb5": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "bea0f5a702561a768d3fb12d1639fa4ed6218ba38d083882a18b54602b28a972",
+     "geometry": "940791bbb3d0426be46894a6cf741d7cbce9ae91241055a52d96fda0de4a5656",
+     "triangles": 9096,
+     "vertices": 6647
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "e77bbf598610632dec665f508d7eed46803bdeaaf82d07b208c6e832fef2a5e4",
+     "geometry": "940791bbb3d0426be46894a6cf741d7cbce9ae91241055a52d96fda0de4a5656",
+     "triangles": 9096,
+     "vertices": 6647
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "78047aa4a540648e658656d817a95bad1257db5fe3f26bac83d2d2922f56c1e5",
+     "geometry": "940791bbb3d0426be46894a6cf741d7cbce9ae91241055a52d96fda0de4a5656",
+     "triangles": 9096,
+     "vertices": 6647
+    }
+   },
+   "reports": {
+    "levels.json": "575e7c9930974680884f98f2ee9e8dd7e8d03277542921f634c6c769863a6f12",
+    "wall_planes.json": "0dcd2ad68506dd7c0f2de76943f4fd37787e7669847eca93323734c94bd3feaa",
+    "wall_profiles.json": "93507107de9f06bb8012a6df0a68a2b88c3a5e94128aea652535c27830239f8c",
+    "mirror_report.json": "5c63d5ea959dae892e5a3a87f1119d42f8c6d2dfdf710f0f7afb5109fdea2fd4",
+    "classification.json": "178884d157ee797e3251c9244b6eb9229a52657c1b2194bdf503fe05a6a4a91f",
+    "colorized_aerial_coverage.json": "066f1dc9e308e8f7788db9cdb364d4f22b55495d09cd6b8b0dfe843deb9cb3fb",
+    "audit.json": "4771e5a0fb126667db1d58da4a42e54c484653e7370af70aba85ec9c40e3eb77",
+    "texture_check.json": "8e23971b046781cda32d11475d7c1632d47a8511a8268df1325efda782369861",
+    "3dtiles_mesh/tileset.json": "3ccf8ba32d5d0ced1135a229e5ab3b847eb7852d546c9731d3d92384b917cc2f",
+    "3dtiles_complete/tileset.json": "f05fcfe68a312abda392c4e5d0468972900316bbe354fa5aebd6231d5d67cb35"
+   },
+   "measures": {
+    "holes_m2": 767.0,
+    "holes_views_m2": 2918.0,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 143.7
+   }
+  },
+  "40ead71b-7947-4e87-ab44-b3f11d755957": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "8ea15400980ba8311c4ae224c710106e83da86ed6045874ea117226a9a0954df",
+     "geometry": "c371941015718dbc647b776523b4bac7e6c151cb37347b94d10cad15248820ac",
+     "triangles": 2224,
+     "vertices": 1808
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "22887f543a3b5ff884e93fb201eb17187713c00c0746bd598039bea3cee7bbe3",
+     "geometry": "c371941015718dbc647b776523b4bac7e6c151cb37347b94d10cad15248820ac",
+     "triangles": 2224,
+     "vertices": 1808
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "d472a3f7f486a4aa948592b6e80cac3648c02db63b521fb1639d6a67ae7546d1",
+     "geometry": "c371941015718dbc647b776523b4bac7e6c151cb37347b94d10cad15248820ac",
+     "triangles": 2224,
+     "vertices": 1808
+    }
+   },
+   "reports": {
+    "levels.json": "e9aadd91cb28e50e50621d2807a8536e15a2ca9e03870470a8c289cf38477ce4",
+    "wall_planes.json": "3ad35ec3528dcf2742e2bb22d6f48a1e07a29828642b9df0c498c30c88ceded6",
+    "wall_profiles.json": "4d25dc82bcd5db4df037ba41981631c9841ff888c16c36e7862fa1ccbfcfe357",
+    "mirror_report.json": "2c5e1325ddb1e3c5d2d430a59cc1ef892de33e98e06552c0a09c0a04e1a0e3a9",
+    "classification.json": "71c1aeb1328251687629826115a956e13add6dd5fd7eaea826dee34a9e10427b",
+    "colorized_aerial_coverage.json": "9a59ffd84e3a7728dc76f0809b3272063f4e8a8c558cbee15ce8cdd16cba6cfb",
+    "audit.json": "812b2abef76697e9cf8c96fe114472182b65adcc8a54fc6b0ccf400533a4599b",
+    "texture_check.json": "cf746b35f9f8f0fbefc415bb61710e3c0641430ad906e09926886fb4788facb7",
+    "3dtiles_mesh/tileset.json": "27a2acf54da74e9dfcc591eb54293e7073a3461fe6e9693b593bae341eba869c",
+    "3dtiles_complete/tileset.json": "04f9406263974981866e30b65cab377c18194ce08e006914dd6f0d94ec7acabb"
+   },
+   "measures": {
+    "holes_m2": 44.0,
+    "holes_views_m2": 139.0,
+    "above_m2": 0.0,
+    "outside_m2": 225.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 57.7
+   }
+  },
+  "8ab5c0ec-896c-4cb3-aece-2a5510b34a88": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "f9fb1ab7b5238864749dcdb1d16a27b6a65a12b89e15dfda3dabab6c76381c41",
+     "geometry": "738ab60b57e1bfaaa2005ba2bb78d46637dc8ced38de68d1753b9085192b396b",
+     "triangles": 8874,
+     "vertices": 7590
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "55d6e8767bd866e74c8eb0a1ae65caa4a863ebdea23fffd4a01e2cc32414e0e3",
+     "geometry": "738ab60b57e1bfaaa2005ba2bb78d46637dc8ced38de68d1753b9085192b396b",
+     "triangles": 8874,
+     "vertices": 7590
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "185755cf3431724d0b98e67165a7282d8c705fbd7271c9bd62c75420ab77e50a",
+     "geometry": "738ab60b57e1bfaaa2005ba2bb78d46637dc8ced38de68d1753b9085192b396b",
+     "triangles": 8874,
+     "vertices": 7590
+    }
+   },
+   "reports": {
+    "levels.json": "8089bb3bc668410074d42196e46a210fc9688467e52dd5dbd351ea599af64633",
+    "wall_planes.json": "8b9ef4b04796c1c401f30746e5e49c30c7bc9048bec8c1e7e79f704564eb09db",
+    "wall_profiles.json": "575846f5dded77db5eee1155612e780622d17ef3ada51eb3f48649f10060a068",
+    "mirror_report.json": "41287fe082b10e46d543095771ae28210e95fd112843038a6fcb3cb651627564",
+    "classification.json": "5bb24cb5ed9bcaf3cca965b952f7673d371814977047dce9bd152fa8afabb5f4",
+    "colorized_aerial_coverage.json": "7e3d8321115fa8d25c219d436f9130f1b7168384e7eb62ef699772affbbfc3ff",
+    "audit.json": "082039f4fbe1760611ebc375fcb48a780d5980c5e52d2d9c6de2a2c94cf918ef",
+    "texture_check.json": "93a5599eee04d7952e5c965bdc80567ab3286742ebd869fbec0734062170c01a",
+    "3dtiles_mesh/tileset.json": "2448fd01355cb4a2f43eb796ea519b23a4f979bafc5835bb803155634c3f9d2f",
+    "3dtiles_complete/tileset.json": "f48d2eabecba416bd77353436c61959e98cfce72b5cce36f77fdf8244370569b"
+   },
+   "measures": {
+    "holes_m2": 314.8,
+    "holes_views_m2": 1533.7,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 94.8
+   }
+  },
+  "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "ff6ba3c0dc50e886e51c4be973662d5d066880b09ea59e73b00a330b915b2109",
+     "geometry": "d8c4a4f071936ce25121f3854baaa700558d380aec07f8141cf4878896ccb352",
+     "triangles": 2491,
+     "vertices": 1976
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "c1665f6127ac32ebc1135eef4da9088f6e301978625353b64ef12f4a1e2b770c",
+     "geometry": "d8c4a4f071936ce25121f3854baaa700558d380aec07f8141cf4878896ccb352",
+     "triangles": 2491,
+     "vertices": 1976
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "4953c28d103123f19a755bd7628d61aace0ee6848e869d498c77ebdbbe7c7842",
+     "geometry": "d8c4a4f071936ce25121f3854baaa700558d380aec07f8141cf4878896ccb352",
+     "triangles": 2491,
+     "vertices": 1976
+    }
+   },
+   "reports": {
+    "levels.json": "dd387941124a78ecad30e3e6db64453aa18b1c8e4414a1101ae4cd0dedccd3a0",
+    "wall_planes.json": "59426d5d47634057a044f9537a8cac496bf32d91a31a37c66eb4ec27935d05f4",
+    "wall_profiles.json": "b07c79c926212fc3fcb1f020f389999106935807f05e3066f09b3a29562b58f6",
+    "mirror_report.json": "fbb41ea23ee7c0251b68df2694ccbbf12cf7e8176ca4fa467fef2197b7e55b1b",
+    "classification.json": "b2f148b97ee400a4df5b6362cbbf1b1e517bf1b2b4aee11e8ffb8b11e4a7351f",
+    "colorized_aerial_coverage.json": "0de67060b6bb45748256d1ef13e5e90f980e87ae5bc4dfc97ce5b67d1b1613e2",
+    "audit.json": "0f0ddfcf16d0f5bbb97d595eb08e3ea7d1285129fd5af5cf68cb2d68196df686",
+    "texture_check.json": "b1e7182c7e36438578c603f73e6f23224e4022a3044d0ef030e057e8044b90c5",
+    "3dtiles_mesh/tileset.json": "8b62c97937cd98a37a561ed6015c7d33151f68dbad9dd98f3c9e530422b6cd1d",
+    "3dtiles_complete/tileset.json": "372fdf6a22b6584f3a462e00cc49c76b7626583d9975957ca11956476a640c60"
+   },
+   "measures": {
+    "holes_m2": 244.8,
+    "holes_views_m2": 1287.7,
+    "above_m2": 23.7,
+    "outside_m2": 5.3,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 23.3
+   }
+  },
+  "cfb7194a-2889-4b49-942f-7beaabbd2cf4": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "7d267a7f293c6964dfe5fd0b1b8bb344780e172c6f1ec0bc2bf4a2ef934c1fc6",
+     "geometry": "9e5808ffa0dc87ef630e55c3256f0a1999e2f4bff917b4edd183cf2bd52b5dfd",
+     "triangles": 2582,
+     "vertices": 2352
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "8574641e4be04b45167facf2b477068d44f1917a5c1a65d018a8916b5cbd845a",
+     "geometry": "9e5808ffa0dc87ef630e55c3256f0a1999e2f4bff917b4edd183cf2bd52b5dfd",
+     "triangles": 2582,
+     "vertices": 2352
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "d5472e9d5474614133141b5a872bb883a2cb1967dd4bebd2c52f6f580173b876",
+     "geometry": "9e5808ffa0dc87ef630e55c3256f0a1999e2f4bff917b4edd183cf2bd52b5dfd",
+     "triangles": 2582,
+     "vertices": 2352
+    }
+   },
+   "reports": {
+    "levels.json": "180d438940c6b9c65b2588dfc146fe0f1ff20438e8ceae884d819988411b25ca",
+    "wall_planes.json": "f156a53b5b2a13bafb253c4e55caa92e05f0c32d09610fb60c4f1356f023a186",
+    "wall_profiles.json": "2a686111585b5a84dfcbe841ab39fa3069b978789a77ea344ca92349195f366f",
+    "mirror_report.json": "619aaf80c288dd4a62e7917c426bfc0270f8f78e34ccea623483ae16d4dba4bb",
+    "classification.json": "144cfca7927a37aacbc8d8de46fbde5dc534dc3ef89aec1292a623407bf752c5",
+    "colorized_aerial_coverage.json": "ec61b17c5cf29981f9659a3cace7f49e0c24ef995d3466e759ac380f0ca56173",
+    "audit.json": "74eb5bcb2925cebb9b388079a82cf2c3a4a1df22370c85878cf327408c60b7e4",
+    "texture_check.json": "d0e804523b843b2da3cffbcf7ca978a3038bedd72a50f46f09477181accf3750",
+    "3dtiles_mesh/tileset.json": "86531a2cfb4496fa84b5123cab9bf1b0af778c47204ebcedb7d5433aee67f5b9",
+    "3dtiles_complete/tileset.json": "08173341ac01303790750e18449af222e74bd071ab7aa3eaa3206dce67a54eea"
+   },
+   "measures": {
+    "holes_m2": 147.8,
+    "holes_views_m2": 607.4,
+    "above_m2": 62.9,
+    "outside_m2": 33.0,
+    "inside_m2": 779.4,
+    "roof_gap_m2": 48.5
+   }
+  },
+  "2c66180b-c236-4b34-b0c8-14658398aff3": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "5332cb5ab474eb9d439b1e7b87440a7fa10d72cf08df23dc52d2986e0eccbaa4",
+     "geometry": "794a234c9218308cd036a1530ccd85d43897abe9af2f433fc548eb12fa7771d5",
+     "triangles": 1222,
+     "vertices": 736
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "6d4020c241688216fe26ebc76d45b2ec3611850382b9699baeff16832b44821a",
+     "geometry": "794a234c9218308cd036a1530ccd85d43897abe9af2f433fc548eb12fa7771d5",
+     "triangles": 1222,
+     "vertices": 736
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "961525197eafa2598227d0b470275270119cde08de4c7ae74c01df44948167e4",
+     "geometry": "794a234c9218308cd036a1530ccd85d43897abe9af2f433fc548eb12fa7771d5",
+     "triangles": 1222,
+     "vertices": 736
+    }
+   },
+   "reports": {
+    "levels.json": "0f62fdb726175dd19519a710665c9c1c5e482e000bec530928ab1b9890f5abc8",
+    "wall_planes.json": "f20fad9b8a83e930fceec9b643edcfbc293484f23f5f64c17e82e8cb5948d4e2",
+    "wall_profiles.json": "12ca79dc2289148eaf3a7eee665ae06e080bb49def1005a7f0bfb4ffc9261519",
+    "mirror_report.json": "ee952efc7194197cf0c2806093cd4e9c9178f39f05b567198cc41ea41e816728",
+    "classification.json": "3f93add507dd5c4fb423a7f2987d38c0ce453e68ff75f097a511414dfb1131b4",
+    "colorized_aerial_coverage.json": "a284f419207f3468afb0ab40a497d5397ed6bf276724bd07a5a894fd59308165",
+    "audit.json": "e03062553ae39f9b9a5470aba6f42f1037d9d5e07ad52d3be150c069f82d5884",
+    "texture_check.json": "4f2104ae18be574b62a51c1f3505ec8dd4b30b54547d6017540b3904e8eea528",
+    "3dtiles_mesh/tileset.json": "6c10a6456c2cc1493bdfcbf565b92cba48be12b71fc6af4e4f45c8cb2ba940a8",
+    "3dtiles_complete/tileset.json": "e474c28dcb0b417e85f6d9fb9419cfff203adfc0b17277f55291db16e8fb38da"
+   },
+   "measures": {
+    "holes_m2": 6.2,
+    "holes_views_m2": 6.2,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "fb24c7f8-8969-490f-a883-22b17223e910": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "b8bbbceb55beb6cd40bc82023ff7f038c5c80dd5bda8051a28b169b771d2ae72",
+     "geometry": "df1e3eecf50a893944fcee776feab05f098437881f76a166b6c38618f32edf73",
+     "triangles": 6905,
+     "vertices": 3891
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "11ea150821488f3c4f6e23cbbaf484ea472f3d78bd00d0aa80fe901cddfe693e",
+     "geometry": "df1e3eecf50a893944fcee776feab05f098437881f76a166b6c38618f32edf73",
+     "triangles": 6905,
+     "vertices": 3891
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "53d89f801d808e8219ef8e8d25ab6c53e65f2739a55fa84aa2cc5bc887f3eada",
+     "geometry": "df1e3eecf50a893944fcee776feab05f098437881f76a166b6c38618f32edf73",
+     "triangles": 6905,
+     "vertices": 3891
+    }
+   },
+   "reports": {
+    "levels.json": "45e36bca001aa481ffd535ec437fdbb0e635e83257948ef0831f5f3e62276675",
+    "wall_planes.json": "ee23b0609ff4aab22517860a2a9637459c67a47fa786148c6b2e31486299aafd",
+    "wall_profiles.json": "1db8013212514dcc9a56d256d8a508708ec23e416ac191581b60ce9aed8e12a0",
+    "mirror_report.json": "b54f93613b298c5d648e58e96f656f858caa4f516358b651be2ca63ef0ff3063",
+    "classification.json": "ae99c87ad10d169a1f1a2c5720843dc65a9b760c2c0c8f7b3083efdf0a87deae",
+    "colorized_aerial_coverage.json": "4ce47585574cce62ee0ad64390da9d07e62193d3f539dc7ebadf8d43b64254e2",
+    "audit.json": "667fa893a44e226e7d420d7088f44fd738c4c9482a3b37b8e3e4f0f387efdfe1",
+    "texture_check.json": "9d516bd4fb09d82503dd077d7494a92a0dc08fb4093643ab60cb3de9750b45a6",
+    "3dtiles_mesh/tileset.json": "83cd238eaa87edcb9fe4a81276319a1cfadfa55830b1608c6df77eb0eb51fa5e",
+    "3dtiles_complete/tileset.json": "0b94d2f5c42501a26d0c22ce95dc693ce5c2228dbe49c267fff6735eb81c8a20"
+   },
+   "measures": {
+    "holes_m2": 29.0,
+    "holes_views_m2": 77.6,
+    "above_m2": 5.2,
+    "outside_m2": 75.4,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 5.2
+   }
+  },
+  "d8f1f2c3-f379-4390-94aa-a7aa302bf363": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "4c809376dbffd002a3bb9bfd84d3685ada62e4f5d95fd28caef9b78fd17d4f0f",
+     "geometry": "965fb48bbc2244a649ca13f4b52e928c042a1e3df58bedab63b2766531964cb8",
+     "triangles": 5877,
+     "vertices": 4286
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "025a2fefe4b7fb45b54363a4c9afa4c7367121146b18bd8ed3ee4f5eb68d1b88",
+     "geometry": "965fb48bbc2244a649ca13f4b52e928c042a1e3df58bedab63b2766531964cb8",
+     "triangles": 5877,
+     "vertices": 4286
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "73e5b07d71e02316154597cd79c993726fe9b80be9e754888017d7fac7980031",
+     "geometry": "965fb48bbc2244a649ca13f4b52e928c042a1e3df58bedab63b2766531964cb8",
+     "triangles": 5877,
+     "vertices": 4286
+    }
+   },
+   "reports": {
+    "levels.json": "44e30d5b7b712776ec08d51ceaaad098eeaf2204626766d3959d9a552b1e1e7a",
+    "wall_planes.json": "38ef613c0cc50374e4a3dd13c7408a180881b97c1a3c143b494f3c2467a7b12f",
+    "wall_profiles.json": "2c9e412623fbf6bc661f561927d617b2544f7fc57271b9151d2a5d06cb847ffb",
+    "mirror_report.json": "72e01f3c8d313b0a909e36fd4d6581ae8b3087ed8910fa948b3ff5ae45de53e5",
+    "classification.json": "2ed7f8c1e05f227f2cae55ac01cc049d387397f945aab1a00b576d725772ea57",
+    "colorized_aerial_coverage.json": "d022ceccd5bdd70b7764ad96bbe92c1161d58cefa10a217af1cefa3ed0fbbabb",
+    "audit.json": "5d2ba294ab1ede5c2c960443779f30998bba75fb6ee8aba2eeaf61615a68feac",
+    "texture_check.json": "e30a6e4bbaf4c1e36299824c324f824ac269b9fad2dd5285a8d10aa3d0d72191",
+    "3dtiles_mesh/tileset.json": "62ac99a03b3d1f57e1b821a3b2f91e42d64336da81613bf0b98ea24bbdd5a19c",
+    "3dtiles_complete/tileset.json": "539875b9346bb3aea5ca4d00ae29068da0fec6f1ed16f2f864faa85215e0b69c"
+   },
+   "measures": {
+    "holes_m2": 196.0,
+    "holes_views_m2": 896.9,
+    "above_m2": 0.0,
+    "outside_m2": 60.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 31.5
+   }
+  },
+  "7c0e2eb6-96e6-4fa2-85b4-0ef2ae590026": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "3f4562836ad37134919677c4ac5919b86fc2157595b1dd1ec32e4aef99a35b46",
+     "geometry": "092c38dbdf55ae8230ee82ca1c9f374b82d24f31f7140af0650fe5d9033e98c7",
+     "triangles": 9763,
+     "vertices": 8374
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "49daeafeb0399301504d8199ad9c8b91b71b95f2b469e3dac0f5ea16cddd468b",
+     "geometry": "092c38dbdf55ae8230ee82ca1c9f374b82d24f31f7140af0650fe5d9033e98c7",
+     "triangles": 9763,
+     "vertices": 8374
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "5f534825b62f36441d20dccea8c0ff64f4933890a92df78be72e5fac315db99f",
+     "geometry": "092c38dbdf55ae8230ee82ca1c9f374b82d24f31f7140af0650fe5d9033e98c7",
+     "triangles": 9763,
+     "vertices": 8374
+    }
+   },
+   "reports": {
+    "levels.json": "68854da2550beb91e69567ad893193117d3dda74cbaf07ee298b0e7f5188cada",
+    "wall_planes.json": "7009e1c0f669ebb4d57081be1d216fec9ed0b01386abc17195cb229618cf8011",
+    "wall_profiles.json": "6fd971b13b373f543afd208c6fe8f382a30641b9fcf6b77ff1b88f35c5c74def",
+    "mirror_report.json": "e0ea2543e1d26be29711e1418f30eb3778837c2997bc771f63aea2f84f0834a3",
+    "classification.json": "45b4eea117117ff79fb1bdcc2899dedfdb4a4eaa4d7a60f4e7645919bf6acd4f",
+    "colorized_aerial_coverage.json": "ed1922bb4ac053bd2fa602175303f4d46c3b027fc241c9fa724c4950cd610e47",
+    "audit.json": "a16142cb2b0637c9bd1ecb98fb237da4e7741b5d641b07aee2755e31980664c2",
+    "texture_check.json": "c893ba6aab28595556d7c3554346c59a6abc4d0b60f3070280e4160644f5148f",
+    "3dtiles_mesh/tileset.json": "5783711a3015e33e7320959a0172da2384a27f0d8541987d37bc4ca0cd243a6d",
+    "3dtiles_complete/tileset.json": "cc8af6bc40330ba8268e2b476d535fd1265d750e7dd567ca68c9747882037ac4"
+   },
+   "measures": {
+    "holes_m2": 116.5,
+    "holes_views_m2": 550.9,
+    "above_m2": 0.0,
+    "outside_m2": 357.9,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 59.5
+   }
+  },
+  "61c76435-b315-454b-a57c-fff91b9d5f43": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "ddcddc0c6abdad7ecec534c17cd7ded502d9c64175bb8f467b9fa38ad0cbbc2e",
+     "geometry": "6fa5784e3a64c5681a204dbbe062e1522e3af9a7bae7b416ccd9f51cc51f1f63",
+     "triangles": 10,
+     "vertices": 22
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "646a5570c63b5e33479e6876f6354fa977497d39afb2096d632a384a8dd40581",
+     "geometry": "6fa5784e3a64c5681a204dbbe062e1522e3af9a7bae7b416ccd9f51cc51f1f63",
+     "triangles": 10,
+     "vertices": 22
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "b1a05b952b9463d930fabc712791d6bda72d1cd2be35706150127331c3321ebe",
+     "geometry": "6fa5784e3a64c5681a204dbbe062e1522e3af9a7bae7b416ccd9f51cc51f1f63",
+     "triangles": 10,
+     "vertices": 22
+    }
+   },
+   "reports": {
+    "classification.json": "6fc606062286ca0793e4f14e57d3815559a82f9f883c8c9e4f1fcdff6c1abb4c",
+    "audit.json": "1534a2ba9f87172878c973140343009045d1acab3072a0d255f1ebf9797e8f85",
+    "texture_check.json": "1c456c2eeb62d8811b86ae196426e80ea9afe22d886f8d9bb08fbdad8dbc4cf3",
+    "3dtiles_mesh/tileset.json": "44a5c96c4584f8fe09d7e542a6234a148d301f1856bae73ce4bbba5655303ae6",
+    "3dtiles_complete/tileset.json": "2c927c4f58cf8ff7e762c1b506284c4146ec76f15ba377ff8f88e6cd656b99f2"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "a6b0b98c-ccde-4c25-be24-ed460829a2ee": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "e44cc7b5649eae76343f81169ed223bf6a56c6df3d3a2e462a149794a3a6c012",
+     "geometry": "9b3b3a71aa79a4cb67286fdf591bc74969b7b4189c7d8a431eeddc616991cbde",
+     "triangles": 1158,
+     "vertices": 784
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "6be893888a77ae5f5008f6a8effac67f524c1a348ca22055af3141e04b13514d",
+     "geometry": "9b3b3a71aa79a4cb67286fdf591bc74969b7b4189c7d8a431eeddc616991cbde",
+     "triangles": 1158,
+     "vertices": 784
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "9928f3aed47e86ee731e3a7ff3fdd0628e5c6393bc27516a12d72b8beac55045",
+     "geometry": "9b3b3a71aa79a4cb67286fdf591bc74969b7b4189c7d8a431eeddc616991cbde",
+     "triangles": 1158,
+     "vertices": 784
+    }
+   },
+   "reports": {
+    "levels.json": "dd953ca8c4e994f115e2cb992c27b29b7e4c9d387dcf647bb0330c3773720d4f",
+    "wall_planes.json": "a2bcd037ad02eac1e72ed84be60870230ab2f74d26b85d96e8f732744ee99e3c",
+    "wall_profiles.json": "6197f68d71cacab725e03d28a0c928b6c7f3cf4c6f32fe19a44b774a1568c61a",
+    "mirror_report.json": "654a9841c0af303104461a21e7c6fa156750ea55a508755a45c52341944cfcb7",
+    "classification.json": "eba8695dbbbac047149517d15e7aab920ec7efbe10ceb48b95df14f89d10ed49",
+    "colorized_aerial_coverage.json": "1f796aa8531c25932e4425f091e233bd56fa1a3827e9528399dd2f1c9c4dcb37",
+    "audit.json": "e27e033f290c859ec8cd3089942e40e1a5a75844fbc7d6632c866cadd1093991",
+    "texture_check.json": "b87abc7055a5e958864fcdee089a97c771195a5331d1dfcb66f6edfb7e6b7e91",
+    "3dtiles_mesh/tileset.json": "1e93a992a85ca4478c258f5885ae8c113dcda5b04b8fb581d9462bd0e9df2453",
+    "3dtiles_complete/tileset.json": "84b683951d87efdf301babd71f3f266a8304dd012d66af51a00471e6ca1ea1de"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 10.2,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "5b86e483-90a5-45a4-a789-a24f1bd9e8ee": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "b47b8a9b35e850549fdb55a9a325de6743961de1a976a6e48297c8cc13957aa3",
+     "geometry": "db2767914638b5cadd5de41b83cae6437d61cb0c275e8d19ec5f8aeb24e02256",
+     "triangles": 8490,
+     "vertices": 4873
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "6bdff6305d370895f05c4f8d176f1caa0098760bdef92ae83f53bb4c8e324d30",
+     "geometry": "db2767914638b5cadd5de41b83cae6437d61cb0c275e8d19ec5f8aeb24e02256",
+     "triangles": 8490,
+     "vertices": 4873
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "34c1b9b846937c39c88e7c1829ec772d55bf0afa833ea77d0541a4b9a0e6b8d0",
+     "geometry": "db2767914638b5cadd5de41b83cae6437d61cb0c275e8d19ec5f8aeb24e02256",
+     "triangles": 8490,
+     "vertices": 4873
+    }
+   },
+   "reports": {
+    "levels.json": "fc2f7d60aa2125d702cff3360ae867eda78b973c0fee8231b0a362e0f0659a5a",
+    "wall_planes.json": "4a1cf23bf26558a6fe8a51b6476d8fa288f056d8e3dd1ca79a4301aeb476d29f",
+    "wall_profiles.json": "e07e1f670ff93990ed46ab5ade2eddc5ea8f390c4cad769561a0db14257991cf",
+    "mirror_report.json": "132bea3b8dbef02e5fc66a9fa3aef6f77489f03ba49f2fc4af953c3ffd95a8a6",
+    "classification.json": "f4a7b09837f2d562a587b1614e070e93004ff69af8b95d769079a6f751b0d680",
+    "colorized_aerial_coverage.json": "4317e090c2c430b2dca30c13750fa65444673f76631729fb542c8488d938338e",
+    "audit.json": "090b89451afdc315a8940a4470f70566845a5f47dc07a9d5746bbdcffaae0cea",
+    "texture_check.json": "f5cf0d6d5092301422de4341311cde68c5f3f2704a32c021c8f7c3308c7f77d4",
+    "3dtiles_mesh/tileset.json": "de0cc88655151ef17eb0bc916c5a788815a22fffeb2dd9c9dfa431715ef44062",
+    "3dtiles_complete/tileset.json": "0da509f9dbb1a5754a8c5a8b4ee3a4bfb988022156d7b730ebf9f34952a5818d"
+   },
+   "measures": {
+    "holes_m2": 62.5,
+    "holes_views_m2": 218.2,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 13.4
+   }
+  },
+  "2dca842b-c1a9-42b4-9a71-790399201fc3": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "d9149203958b9dd761b0518a85ac8ed9aaa56c321bbd9b9b78e40dc6a6d11e99",
+     "geometry": "5cf1dd80e73daee99ce4e2fa0babed5e4635eb421a63f208901a43380f8899e6",
+     "triangles": 6468,
+     "vertices": 5491
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "a250d8d687db9460ea69aa8c413add2a98d4abe7e902051044c4a7a110521aef",
+     "geometry": "5cf1dd80e73daee99ce4e2fa0babed5e4635eb421a63f208901a43380f8899e6",
+     "triangles": 6468,
+     "vertices": 5491
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "69df8082d9de00b9a88425e57e5b59d13aa41d297523f34f07fa07f042ece2d1",
+     "geometry": "5cf1dd80e73daee99ce4e2fa0babed5e4635eb421a63f208901a43380f8899e6",
+     "triangles": 6468,
+     "vertices": 5491
+    }
+   },
+   "reports": {
+    "levels.json": "f49732b28462b36e3957df9d0f3e22343336fa6e796ec343bb1e9c90968f0756",
+    "wall_planes.json": "5d97fe7cc4ea5d36dd59ca1ae6d4cb5eedab9f8bb16bf4afe44d72d8ace17c48",
+    "wall_profiles.json": "f32e2d99ec194959d69edb741cf41610076c37014866b7a4209099ea686d46d9",
+    "mirror_report.json": "4439a40cff531e0f1f0474017fd2449848fb284f88f6cc403780670363fcb3e6",
+    "classification.json": "4c5adbee33a9803c2f6fd87c7e4342b55a9efda4dc2c345da1fa0db710a457ee",
+    "colorized_aerial_coverage.json": "26090a2cc0315f35cfac8cc4ce33c36ea98c5cb1c0cc769c2eaf820990083dcb",
+    "audit.json": "be3e33763894bd65073c39b79f42cf432f6383f9403742e3636f1f807aeaf839",
+    "texture_check.json": "43511bdf95636643edef56966c2ce1c494742e2be7aaaa4ee92ce39bfaa6b796",
+    "3dtiles_mesh/tileset.json": "09d53133f28fbd2f6fceef0a524d3fad99c1e7cd0d7a883c539905f8767e4e38",
+    "3dtiles_complete/tileset.json": "a10a168d936cf8ff2ff89c62f5f94210e93c377bd101e441a22e62d2e3272236"
+   },
+   "measures": {
+    "holes_m2": 178.0,
+    "holes_views_m2": 365.7,
+    "above_m2": 65.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 21.0
+   }
+  },
+  "e0f8064e-ca6a-4c96-97c7-728c05be6963": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "9c404b0b410e802b2a03921d27c94b5463f6705bbe88e8300baf289171004901",
+     "geometry": "85b4a90aa75041e396699b5e457f17b966105937de702437da7c2604bf2ff4b1",
+     "triangles": 1260,
+     "vertices": 777
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "b1ff2a12ee861b7e6029d0ed752d22f33275ce92e14d86cebf36d732d553f44c",
+     "geometry": "85b4a90aa75041e396699b5e457f17b966105937de702437da7c2604bf2ff4b1",
+     "triangles": 1260,
+     "vertices": 777
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "ce70278709a7b6ddc097ba8514d175ed0c8ae8459f14b7a66a5371de106bfd3b",
+     "geometry": "85b4a90aa75041e396699b5e457f17b966105937de702437da7c2604bf2ff4b1",
+     "triangles": 1260,
+     "vertices": 777
+    }
+   },
+   "reports": {
+    "levels.json": "f065565d63b617b16e35e31b5e3f812680c69f4df884371fa8c120b88ba03e5b",
+    "wall_planes.json": "e52438df6ae001c651ef9343cfe1b12eabec8fe942b85b71ded724fcf8635da9",
+    "wall_profiles.json": "1508e8dfa9c26d9063e8271535e048fc70cc9b1608ecb99db45dfb7a0c37e42e",
+    "mirror_report.json": "65ee03db0552f0d36ea4b9ca20f663a8a75c10b3bc1fec7a12d71d9553a1c2e9",
+    "classification.json": "860c62be6277954663f944341be27ab14eda14fc98ff99bfc82fa9a5597b169d",
+    "colorized_aerial_coverage.json": "d366873b8b4c5e2ac50d155f6832ec9f556066a4031ff7bd2f8d0e2e01076e5d",
+    "audit.json": "a51207e25981ebe34e5513224aa277ea4f9d4977d2b9c982f69ba7f29a0c8786",
+    "texture_check.json": "fa57a83995b4ab1fb45f340d3e2f27b1016d3c4d39ffc24fce094fd7bd5bcf46",
+    "3dtiles_mesh/tileset.json": "5b0b324c1fb9ab921f5675ce37e4f052735c6d00969390128d036eb7db99d714",
+    "3dtiles_complete/tileset.json": "a24be7cc5abe88224e4c4ff5ecb308698cf597ad0510fcbb28610d53c92042d0"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 27.6,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "c36d20bc-0203-403a-b019-0379cfa28f8b": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "5df291d6b927cec2aca01e05915ca9a0d79bbbc373af7ab1bc0f73b26161d51b",
+     "geometry": "beb9c3655c58316de638fbe61f601eb335be4f3ae8eac5e56e28f9ba6d17192a",
+     "triangles": 396,
+     "vertices": 290
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "c275c06c9908a5b8c5bb70540a64aa9f3a327a7edd44d319459d20378927bf21",
+     "geometry": "beb9c3655c58316de638fbe61f601eb335be4f3ae8eac5e56e28f9ba6d17192a",
+     "triangles": 396,
+     "vertices": 290
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "a2ff6590c4e232050d9578b2d86caf724b9fc599fb9aca3a0ae39bffd9a71e01",
+     "geometry": "beb9c3655c58316de638fbe61f601eb335be4f3ae8eac5e56e28f9ba6d17192a",
+     "triangles": 396,
+     "vertices": 290
+    }
+   },
+   "reports": {
+    "levels.json": "13d2567aebf5fe96ebb923c726a5cdcbc37684aef9e4f5875c84f9732abdc857",
+    "wall_planes.json": "7210ec5c4c93ff8387045cc6ec74edaf51a3df2a5e8317784834baba89f71609",
+    "wall_profiles.json": "baa16fb8511d4225fa29a1fb7a0e41eb99951e2100424dc52fdf6cc596098467",
+    "mirror_report.json": "e3c2113c83b850d0d50925f928bdb83ff4998f7305c5aee122adcbca5d21b972",
+    "classification.json": "c6f6558799275bacf1bc8b72fabd4b46b7b267cbeea9f4e898b077d30fa01507",
+    "colorized_aerial_coverage.json": "f1a7a9a6398a9607b58110b00890f89972191f34c232a3151f8eeab31a381125",
+    "audit.json": "2c4ed31a043742f3f688b73a8a429f16d7f90cc6ce548e98de88cdd82302c93e",
+    "texture_check.json": "1475da9dc8f1dc593a5762001c6c51f3381e2d07ec2da886454a85e280f08aac",
+    "3dtiles_mesh/tileset.json": "d13dd2e760e03f698979d8ccd5d9922e76c20a2f2568dc7239a7df6fa252cfcd",
+    "3dtiles_complete/tileset.json": "cd67693e15c27ec5edad0ef91bc404f024712ad97911799b0eb284c4495918f2"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 18.3,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "4373d0c3-a02d-4052-98d4-977c6fcc2f0b": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "3bcb86d1bea1bd79adb014d25e54b8fd0e9f7af0912d462f8ae1bf432152fd4e",
+     "geometry": "4427f83dc2c6951e818ca9631ce729b17b0711fe286a42fe5c1ca626987d9c6a",
+     "triangles": 12434,
+     "vertices": 9275
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "7af7cfc7a076b72e8e43348c9998c9d06e3dd6a5dc130532d82f6edac02c3103",
+     "geometry": "4427f83dc2c6951e818ca9631ce729b17b0711fe286a42fe5c1ca626987d9c6a",
+     "triangles": 12434,
+     "vertices": 9275
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "ebb06111fee16e1350018235e3f3f81826ea8f5e5115909521a21da03372e5e6",
+     "geometry": "4427f83dc2c6951e818ca9631ce729b17b0711fe286a42fe5c1ca626987d9c6a",
+     "triangles": 12434,
+     "vertices": 9275
+    }
+   },
+   "reports": {
+    "levels.json": "1887a426fae9d3bf33dfdeccbcebf6f9c2a11ff09febc2a63d1f26f5da81fbcb",
+    "wall_planes.json": "116b8873883ecb4b43a1e1c8614c4a198ff1100bda6768579d86a920a36713fa",
+    "wall_profiles.json": "6feba35e5fa1724153c96971505f6f6d4fbb86f17a9c9f40ad3a9d97c9680326",
+    "mirror_report.json": "063ef75f0bbe971f11c1d1dc87ab4291f7415828adc620f404941daec65d9d6e",
+    "classification.json": "07b8eba337736404ff79264bf5f952f3e05e2f888126e8abc47d72f31e6472e2",
+    "colorized_aerial_coverage.json": "0f2509f358e7153c38e72dc56e3d1e9cbb3d01e2d975fdf30b9fdf3eebd5635d",
+    "audit.json": "62f7f33055b6ecc80a36996c7a5dd4eb1a207f314ecd7483b13363a8041f2239",
+    "texture_check.json": "f00caca26d8d4ece1652329d2ba46ee894d282a9072c9f649de9744e86f09542",
+    "3dtiles_mesh/tileset.json": "2cd5bd76db7b961c7fe5d6815cf8bed776562ebc5fb094aadfd471c2f5f8f26b",
+    "3dtiles_complete/tileset.json": "8ecf6de94d1805631d0a91caf35a1af0963e6d2860dd9f5ebfac910c22c0ca34"
+   },
+   "measures": {
+    "holes_m2": 153.5,
+    "holes_views_m2": 877.3,
+    "above_m2": 0.0,
+    "outside_m2": 38.6,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 14.6
+   }
+  },
+  "c35b66ea-b334-4e1f-b86d-1af8caa4673a-a": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "71bfe900bdc5048af790e67eed6de6e7e5f5cb5e00191cf874f5db481d5620b1",
+     "geometry": "123adc3428576e852590f1488d1d1ddbf9283f68031537e287f6986637e328f8",
+     "triangles": 224,
+     "vertices": 172
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "6f2eef3969d79d1cad95ead3b3570a5da706c02ec9181c533996e4739ad4eb79",
+     "geometry": "123adc3428576e852590f1488d1d1ddbf9283f68031537e287f6986637e328f8",
+     "triangles": 224,
+     "vertices": 172
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "dd6ffb42e65676ae8e69908ad14b1d68b8d37750af7cc057a16334eac1725fa3",
+     "geometry": "123adc3428576e852590f1488d1d1ddbf9283f68031537e287f6986637e328f8",
+     "triangles": 224,
+     "vertices": 172
+    }
+   },
+   "reports": {
+    "levels.json": "7297bc125f1fdbf1fd1e3349d510d4911484f15963499199e94cfe5f0f221e38",
+    "wall_planes.json": "d865ad3b3bfe8dc059a5708bbe776d3d8427a74530f045498e27ffd0a93ca445",
+    "wall_profiles.json": "5b26d955f9c37c5498e824001d353d9f5545d4015c13f7a43cf7527f5bc0f93c",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "a3f558df7661d1abf6ca5edce9fdf9443934a6d435d9d6c7ef480bc32736934c",
+    "audit.json": "45a44357b4f26ddbece766469f4231a6b735ab608a0cd056d93da760c9a39465",
+    "texture_check.json": "952e93da2cc582218ec24e48a522f44145b6ba40f19dd336b4e7210f1f56e0e8",
+    "3dtiles_mesh/tileset.json": "80c11a866258763586faee33e42a6098210d65ac02a776555e12dc6808d77778",
+    "3dtiles_complete/tileset.json": "5056b81ebb1fc1f0a5af06731e115f1cd1903e4cb99dbcb7e414f5d513dd0ba9"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 33.7,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "928bfb13-4f67-4f13-86a4-b130cf3110b7": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "195d4fedbf6dbe2877b5c0adeec0ec3cb95103ec3cde3945e7d11a0c6515d6d3",
+     "geometry": "010970d23ed56232eb4dd3a20e46dc6602945c7f1d11c3efc3dcd0f8e7e46283",
+     "triangles": 318,
+     "vertices": 251
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "5d35fdeb730915cbf65c20d8710571bebc477c61911548a5ffcf228a7e2b83ed",
+     "geometry": "010970d23ed56232eb4dd3a20e46dc6602945c7f1d11c3efc3dcd0f8e7e46283",
+     "triangles": 318,
+     "vertices": 251
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "567d57c0ac4116624950b3052b00be3ee041ee6d488ed6304d47ef62ed8b8c90",
+     "geometry": "010970d23ed56232eb4dd3a20e46dc6602945c7f1d11c3efc3dcd0f8e7e46283",
+     "triangles": 318,
+     "vertices": 251
+    }
+   },
+   "reports": {
+    "levels.json": "fb660bd3c9b219ef566b5814952c87210ce50195b92d472929353caf527c7b8b",
+    "wall_planes.json": "cd701e99cfc0c8fa657ace5d8bd6beaa376226f0741c784760204ad353c9d834",
+    "wall_profiles.json": "39598f1653cc688dec4bf73c54eb34f2ef547330fde24630a6c184dd20ef7450",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "c4dc6b8cf08c0e5049db1271f3da90e90aeae26c3f6c06303e22baf1eb35caa1",
+    "colorized_aerial_coverage.json": "cdcc0546b8bec2e1c76b960c95f699b5e814a47ddabf6dc52f9b9feab453c29b",
+    "audit.json": "80979bd8255817b891b5467135726770cd37b6ffd0b484313bb515d5ca253f31",
+    "texture_check.json": "eb7d8d2d8d42286a5263e944b556a7fcd6f2004290845ad11c3e16737637a96b",
+    "3dtiles_mesh/tileset.json": "256984b732f26d06ad0ec11a28a89b3622be59d1a1dca88d1563604c774aaaa3",
+    "3dtiles_complete/tileset.json": "7fe847d2646d0d114961dd46b0c4e2154e3105eab80df66a9bb52d505c8a7526"
+   },
+   "measures": {
+    "holes_m2": 23.2,
+    "holes_views_m2": 23.2,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 301.8,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "529b29ec-660d-40af-ade4-509957888774": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "96b61e502536755b0eb103c182fe5445a316ca5e6b1d2e9eea4043c4b2f4d596",
+     "geometry": "27b48ea4c370ae529b4c8248636a56e61da25237e6fd9f6176b4d5fe264e4b96",
+     "triangles": 4053,
+     "vertices": 2825
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "87b0eb4f75f43fc2e2eb728c0f86cdf239ed5f3cd3017de8c0925a04c4c70254",
+     "geometry": "27b48ea4c370ae529b4c8248636a56e61da25237e6fd9f6176b4d5fe264e4b96",
+     "triangles": 4053,
+     "vertices": 2825
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "0dde8f0a0269b0e441b7abe58a54128fad3cbea0685d871fe719f6217615ee89",
+     "geometry": "27b48ea4c370ae529b4c8248636a56e61da25237e6fd9f6176b4d5fe264e4b96",
+     "triangles": 4053,
+     "vertices": 2825
+    }
+   },
+   "reports": {
+    "levels.json": "9e97b076df8719bf62e2ffc22f1a0110b6b733de38be6d45d21aa204ad72143a",
+    "wall_planes.json": "4c885fdd72301e8d95b15f7ba3c9866c844c4c6b7a69d232d0c62da54f5738e0",
+    "wall_profiles.json": "01b8dda4c923312aebb2e995b69a9f638358e4b77b728f7b6feb86a951d644ad",
+    "mirror_report.json": "91fd24ec6b59e7d58fb0d60b8c7b0334f95a19eff0921969469c8bdce73a8d9c",
+    "classification.json": "f248b66602cff2f51f3a59cb3817a3a803619fe9c4f92dbffa2971150999f7bc",
+    "colorized_aerial_coverage.json": "f3cc0201b01eb83b00b03cb20330bbcc75ff9a3369d5b6766a5d9058199b56e3",
+    "audit.json": "9ca5a1179fad9d3cbf915ba8301d8bba2ade96832b72d11f58f77cfe3a8d4e93",
+    "texture_check.json": "bcd21f82e7a453ef1e05a206ca136b65852ad62e5466d2431d02e531fc344a6e",
+    "3dtiles_mesh/tileset.json": "aa21e2331913c3b85260f6bff67beefb9e4a9dfd5f832458c099ef57d3e92e9a",
+    "3dtiles_complete/tileset.json": "f425e1723fd0432ae7dda6d231724eb3dc9347223b37f552f0af8f3af6a3b629"
+   },
+   "measures": {
+    "holes_m2": 96.8,
+    "holes_views_m2": 376.9,
+    "above_m2": 0.0,
+    "outside_m2": 197.1,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 25.8
+   }
+  },
+  "05cecd95-2c91-4168-87bf-e2f7916ad6d3": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "70f28bf8e7964ff8f73613ede78ee4aa523334b9e687bc1c817235d16fc91724",
+     "geometry": "fe5724a190af0a5d85bb0ce0525a3176164e5669873199d54be05b58bdddbab3",
+     "triangles": 661,
+     "vertices": 456
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "a7d9c09042a943a6cbb6472a7b0b47b1dc32e595330d6a8bb6332813348164f3",
+     "geometry": "fe5724a190af0a5d85bb0ce0525a3176164e5669873199d54be05b58bdddbab3",
+     "triangles": 661,
+     "vertices": 456
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "1ea86ca3c6b5263b7f628b9fafb7d11258c9b6adf33ea5df794a88decacf52a6",
+     "geometry": "fe5724a190af0a5d85bb0ce0525a3176164e5669873199d54be05b58bdddbab3",
+     "triangles": 661,
+     "vertices": 456
+    }
+   },
+   "reports": {
+    "levels.json": "26e19bbd0eef3e517a34ef1f2b81d0bd405a44153f644ac4adab55599d5ede53",
+    "wall_planes.json": "73d38a6ccb4b55ab3e4b31a82ad6e6b02df21cbac50b5dfc241163cb727aeb3c",
+    "wall_profiles.json": "3561e16028f9e9f89f29224f7b90f4105cd569908d1a533067eb3433490fc759",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "14627a4d890775339cf17357e9b7d5acfc280789d86f7a2332edc31068846082",
+    "audit.json": "fe58cfe6160544a55752f57ef161ecbff60c3dd4825af64a2274798d79a59b4b",
+    "texture_check.json": "686d3c7123b43a59d6872738e12e76a1b3785080d9cee1b226f27ac5ebd218f6",
+    "3dtiles_mesh/tileset.json": "54d2ebb1d5301166a816e09956e3636fdebcc571999935e8f24eb02abdbb530a",
+    "3dtiles_complete/tileset.json": "e4f696b02a51754a3901b7ad7642c428573798059dd3f87528a3c938fd8cd300"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 54.2,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "4a16819c-a0ed-4edb-b2f4-32023d3bf48c": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "183d19eb941ee22ac72ec2df978fb7dad283a51ccb8dde4590f1e1828cf74f38",
+     "geometry": "c51cff669b81ce7876ab392d87b8adc291589e59801d3769e40a8db975a2f827",
+     "triangles": 521,
+     "vertices": 437
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "04b1e0fc4b9c100ba6a842a0534370143dfd39dfcf9770f2bac4010a1e2cbbc7",
+     "geometry": "c51cff669b81ce7876ab392d87b8adc291589e59801d3769e40a8db975a2f827",
+     "triangles": 521,
+     "vertices": 437
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "65ad9df80adc0235995a0c39816d64c61bf91f1f48ca85ac6a7918e8b70a59f6",
+     "geometry": "c51cff669b81ce7876ab392d87b8adc291589e59801d3769e40a8db975a2f827",
+     "triangles": 521,
+     "vertices": 437
+    }
+   },
+   "reports": {
+    "levels.json": "ac86f7d4e6c1fe1fd6fcc96d21d5aade2c8819cf160953fe2b7a018c58dcafef",
+    "wall_planes.json": "d562a56142b224ae78f0ce488c350317709fff38f2d92347bb48b666ad59943a",
+    "wall_profiles.json": "b600f13118b40368b7d83e25a20adea712a56bab1f706c884d73b932cc870700",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "5928237858439c57fe86bbc1e15071f45079de71d72543154886524606ba3216",
+    "colorized_aerial_coverage.json": "c79e62fb72171548d7365b7a3d6265e05592996a4d8a80bc237a2ddae5a7959a",
+    "audit.json": "ec805bcb1c2643c51f17513f009af0861816b6ca47a2c402395ee72b640480a7",
+    "texture_check.json": "c85c5925b029a996f97b8a28dd7a71b83f3002b8aba66fe59a7db19385344902",
+    "3dtiles_mesh/tileset.json": "7780b8682035da304c5d726ab6d2767ebe9c6cadc781b77083d503692aa1448d",
+    "3dtiles_complete/tileset.json": "d4c742cb431fd561c8c83ce0218ec0994b9f67db7b5c625fb9da69657b6eb5ce"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 39.8,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 12.3
+   }
+  },
+  "29932134-b528-4c88-8555-d7b2a982950f": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "ee6465a558615e96d2fad584cef39efe505102618df4c242d334cb7c02e00d5f",
+     "geometry": "e74541bb0a97b0fe49b1a52ed4177076f819bb083bc0e23c32979fedad2681a5",
+     "triangles": 1099,
+     "vertices": 701
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "828d07da8481aec5aeb5c5efe929351dab2da4564d5207a027dbadb22fce4146",
+     "geometry": "e74541bb0a97b0fe49b1a52ed4177076f819bb083bc0e23c32979fedad2681a5",
+     "triangles": 1099,
+     "vertices": 701
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "322ccb41fae59f825c3b0e43a0278b947cc4cda0fe130816f864811fa872de6f",
+     "geometry": "e74541bb0a97b0fe49b1a52ed4177076f819bb083bc0e23c32979fedad2681a5",
+     "triangles": 1099,
+     "vertices": 701
+    }
+   },
+   "reports": {
+    "levels.json": "c2ca0d6dc59daf78b7b285a372fe3ec194bd6bd4ef7da31633f5d4e4f03b73b6",
+    "wall_planes.json": "68a3ff64b2816b243fe26fec4961b7a1c65239e42d650f0cbbd4caccbd7c2a53",
+    "wall_profiles.json": "9dde085a24fdf699d479d9a01693e42ad9837df17a55935b25eab1d128bc6319",
+    "mirror_report.json": "046e23d35fd5c4618c531d5e617c61a7f6ce9c483d62318b43d4d9303fe22ef1",
+    "classification.json": "b668f357056eedafb1914208f44b6265aeebf327d8312a59a2d334a5babe69ad",
+    "colorized_aerial_coverage.json": "677b83c846435fe519704b25d093b5fc44f9b90e781e0a046fe71aa67d4174f1",
+    "audit.json": "efb3bd1859c34509b61eed6074d06286bcae42d4d4861b2d6efd2d212b8f9830",
+    "texture_check.json": "45034e5ee8fbbb2c3d157394abc68665efcc760b00a424ce6a6e5ea62c39fdc7",
+    "3dtiles_mesh/tileset.json": "9febacb264825bb08e288b5b7423e21eea853f5a78cae78a9ba10d38c30d2426",
+    "3dtiles_complete/tileset.json": "e8b73109fc5e971ab154b88cb08471590e0cfc2b1988b6e90f267ea7a47edcb0"
+   },
+   "measures": {
+    "holes_m2": 88.2,
+    "holes_views_m2": 208.8,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 221.9,
+    "roof_gap_m2": 1.1
+   }
+  },
+  "b7729875-5f96-4157-b945-9827abe4bb33-b": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "be8c744a1c10ff1b2590d4f7b2c5453eb6bd73ff715c9812c216d8ffdc175f1a",
+     "geometry": "9644eecd5e5f96cef90e16ed17e5db1418ca2fb67e6bc3b2b2a1e43f86937ecc",
+     "triangles": 688,
+     "vertices": 520
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "031eb37f6363c8472a4724a7503fef78ea799a1a299170260a1fc127fb66da76",
+     "geometry": "9644eecd5e5f96cef90e16ed17e5db1418ca2fb67e6bc3b2b2a1e43f86937ecc",
+     "triangles": 688,
+     "vertices": 520
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "077b2c1484413d8086fa10bfc3676105a798e92e3f11dc8413e1f993df0d4b8a",
+     "geometry": "9644eecd5e5f96cef90e16ed17e5db1418ca2fb67e6bc3b2b2a1e43f86937ecc",
+     "triangles": 688,
+     "vertices": 520
+    }
+   },
+   "reports": {
+    "levels.json": "60d97a55f135a6a047d05ad355b3ba8e3fbec63bc7571598c7b067c52ed0f4d0",
+    "wall_planes.json": "0318c5a9a14bec24987521bc585c92f2a9d12e504716ea662c2ad4bc6f10f82f",
+    "wall_profiles.json": "8a0d15dfb5a804b4479e5a0d9a62be0f21148694d310fe996ab5f468ef05914e",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "829c5e09d47b42dc325a19df05c40914a250664e91c1613c787c5c3b53e490a3",
+    "colorized_aerial_coverage.json": "a418ae07b2137d4d82067c49ad6d1f73bf03ea39560d7c0aa424af8c0ef65ee8",
+    "audit.json": "b15411dd998d66e5a14ce0631c16f7eca151c3dd48bbee064c643c91d4101739",
+    "texture_check.json": "559433ca3d683bbed7f9b220834edea7e109c8fb033b4da3f8c9fe09d05f7f6f",
+    "3dtiles_mesh/tileset.json": "45411d3130466017e2f0039e1fb5611210397d6d132697fda9ff28105b3e24d6",
+    "3dtiles_complete/tileset.json": "22b875cd1e263029fecedce29932d7938f34c2826030b69d92ca5b8dd589b014"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 88.3,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 3.3
+   }
+  },
+  "93cfbc0a-8780-4992-89fd-5a5c3d69369d": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "457bef82dd46793c35ef998001e5f85fe058c83687d714ef8de991c9bb029f66",
+     "geometry": "8ad98bbbb23d7207d4f4f36ba34dafc3aa2788cb399346be6c97f62be88eaaca",
+     "triangles": 1897,
+     "vertices": 1376
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "0f6d1e2f14157a94e574f53006c4f33d02128d283daa06561084f4a7e111acad",
+     "geometry": "8ad98bbbb23d7207d4f4f36ba34dafc3aa2788cb399346be6c97f62be88eaaca",
+     "triangles": 1897,
+     "vertices": 1376
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "78176602e031f4bc0cc36d63f1cf2685ef543ff8f08d0ce9680f733d84c1c821",
+     "geometry": "8ad98bbbb23d7207d4f4f36ba34dafc3aa2788cb399346be6c97f62be88eaaca",
+     "triangles": 1897,
+     "vertices": 1376
+    }
+   },
+   "reports": {
+    "levels.json": "3751ec9846c76375cfb8e06df27e276917e82b93432697601a20dbfab46d4d5c",
+    "wall_planes.json": "ee11ddaa385162cd3c0a8130ef1e2c8101418a830fe113e1f803dd8bf8f3e91d",
+    "wall_profiles.json": "bdc542357333e2c89d85a9ca1bcc66fef2fae5e356ce9ab918b08c695c3a5634",
+    "mirror_report.json": "37c555b38c8acc2f1f81fb771e5e29d028e1a0a821b035522dedafcfca016f96",
+    "classification.json": "2d7a72cece7f962dcf3425023c38e9cc3fca07d0f71d3b691ada31a5c25d6bf2",
+    "colorized_aerial_coverage.json": "17a63026cd85f25ac71bfdc14626355856a7d6a2372c4cc346551ea4a545033e",
+    "audit.json": "ef0498b49a3b3a69762d4f541a4cfd2934d756d7036bdeec12b9e4d13e4a14ba",
+    "texture_check.json": "882005a88b973fdf538c1118a1b3f32daa7e6a2912414ec041673eada92562be",
+    "3dtiles_mesh/tileset.json": "f4be64b845b9c833aade46f25a1903923bc0c7fc18bc04d8c080720e547a8bb9",
+    "3dtiles_complete/tileset.json": "74d5dca38652ff4201e629e22dd46e50a5848b196ab5f8b5cd6d2a95ee134861"
+   },
+   "measures": {
+    "holes_m2": 283.8,
+    "holes_views_m2": 694.2,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 8.1
+   }
+  },
+  "30cf5ef9-ef48-487b-b907-fde40d4e64a7-b": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "cd3130830f8f716ddeb68fb30f822c23f000d307d0cb47cab971bb9912d6003a",
+     "geometry": "8d974952bd631122d23187b7e4827809419b1445151f94abb77751b245b2a0e5",
+     "triangles": 187,
+     "vertices": 164
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "7720efd6a8207a0c7afb8d3d65c6d998ee4f63bb61454ca2f764c88d724ce85d",
+     "geometry": "8d974952bd631122d23187b7e4827809419b1445151f94abb77751b245b2a0e5",
+     "triangles": 187,
+     "vertices": 164
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "9edda481a38474e30f20645401a8a2a8a79b88b9274d4574f329f51d6534cc0b",
+     "geometry": "8d974952bd631122d23187b7e4827809419b1445151f94abb77751b245b2a0e5",
+     "triangles": 187,
+     "vertices": 164
+    }
+   },
+   "reports": {
+    "levels.json": "5cf0338b828df7f72b051cf644f726b96415f78d1211ed3a3e133c99718abfa4",
+    "wall_planes.json": "6915dc8545f49ee0c45d8da944f42f5ff279bbc2bae0ca6c1b8182c4da6a8f48",
+    "wall_profiles.json": "bc6efd8a5084fb2de973ecfbbf4a2a471afea58b7adc5e99446479c2b28b378b",
+    "mirror_report.json": "20ad20052ac33dfc1809517035f14e5b19f6469937984c0415bc78192a1d6cb0",
+    "classification.json": "d86183270e032bcf6287d4bbab1e808fb2b7b1fdd0daaad1a0fd1b2abb4e870d",
+    "colorized_aerial_coverage.json": "f800d01a7ecd8ac228b5246b3130718c7a2a9190adbdde975f2d0d49f99ca325",
+    "audit.json": "6f31ded47b87cc5dc37698a5c9d2368df1ff7164f282410bc062bdc4b1c4cf36",
+    "texture_check.json": "26ccedf4733886212934664b8eb37ed3a846fa67ea7feae7540e76023568c367",
+    "3dtiles_mesh/tileset.json": "0a057cfac14a07b210ac13a716f19c03650e78ebfc73fa090183551a9288d12a",
+    "3dtiles_complete/tileset.json": "a98aab0c68a067b9a19a5d509fab7b7fbde961fa36708e2f966a5baae3b0d78c"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 2.7
+   }
+  },
+  "8c47a2dd-d7bc-4162-8e08-bea1b994a526-b": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "746d20769fff2448342691c13626eb1f90216b1f09149ac96f93449e46302b68",
+     "geometry": "dd45c1cc5fc467b9deb86fd50ed6e45427890cd6166c99c3f10c2f5ed32ba093",
+     "triangles": 371,
+     "vertices": 316
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "7901bdcf154e8c75beafc57eb317256b072b49a0996249615db73dd334361fa1",
+     "geometry": "dd45c1cc5fc467b9deb86fd50ed6e45427890cd6166c99c3f10c2f5ed32ba093",
+     "triangles": 371,
+     "vertices": 316
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "74cae8f367c2c7d845da77f08b6b305cabf8e194017ba04f9d64fc1234a55b7d",
+     "geometry": "dd45c1cc5fc467b9deb86fd50ed6e45427890cd6166c99c3f10c2f5ed32ba093",
+     "triangles": 371,
+     "vertices": 316
+    }
+   },
+   "reports": {
+    "levels.json": "d28e2bdc217826847d569fdf49dd7fbf41d83bccee85e31ca8ce0e11c823a0c1",
+    "wall_planes.json": "7b02bd8eb580f98ac8a18c626dfd6fac085f5ff8353a26a521fe4edd0475328b",
+    "wall_profiles.json": "c03818e66eb1df3b2a66365da60c279b61625d1cab6a254750842bbf85111d87",
+    "mirror_report.json": "ee952efc7194197cf0c2806093cd4e9c9178f39f05b567198cc41ea41e816728",
+    "classification.json": "1c8b89a66ba6d8bddc2f4923870e0202296316020f945205eac2e23b6d166414",
+    "colorized_aerial_coverage.json": "ac9c77d6ee2649d15139fb2dbb144492e213bd09a210177a4d9d126cd7fc87e8",
+    "audit.json": "73a4c50a0da2e8f32564d8dd14f86fbcb575796ca5bdd8771e9dfab0d952f799",
+    "texture_check.json": "c8c046c7a8ab9c92e91895ea2c38bbde35e084015bdd00cacbe9b433b6af1738",
+    "3dtiles_mesh/tileset.json": "b358b65ccfab0b7dc418b22f0f51ffa88ee89a4f9d7aaa91160b2332442b6d66",
+    "3dtiles_complete/tileset.json": "78a3c110450906af3cf560bc181475f0f76543e64cfade0101d563ec53c656ef"
+   },
+   "measures": {
+    "holes_m2": 30.0,
+    "holes_views_m2": 30.0,
+    "above_m2": 0.0,
+    "outside_m2": 82.9,
+    "inside_m2": 320.4,
+    "roof_gap_m2": 3.0
+   }
+  },
+  "b7729875-5f96-4157-b945-9827abe4bb33-a": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "42fb5cdf9290f4710ac981913c48405dfc116e981281aa400b346e3a752f9d48",
+     "geometry": "9be64643b7e545ef93404b1bca2da947beb5829f256afc39fd8d04f9599cb74f",
+     "triangles": 410,
+     "vertices": 380
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "bd3b16782a40395e02c3c7269dfe40da4a22718e9ed688f5610d11a23d83bc69",
+     "geometry": "9be64643b7e545ef93404b1bca2da947beb5829f256afc39fd8d04f9599cb74f",
+     "triangles": 410,
+     "vertices": 380
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "e339b13926be34bdf7020ba1f2c778cb1f9a110e18bf437bf73aab33c4a63818",
+     "geometry": "9be64643b7e545ef93404b1bca2da947beb5829f256afc39fd8d04f9599cb74f",
+     "triangles": 410,
+     "vertices": 380
+    }
+   },
+   "reports": {
+    "levels.json": "4edbded9cf2889484a6623fdda2d2a93c4053bf952c88ebdebb10ff6ad3c4f5d",
+    "wall_planes.json": "372c92982b2ad49bbb11ea45165886571e1a071b498e38aa407df1a3a734b7e9",
+    "wall_profiles.json": "2f2ebdfe4fa0b229fb6e7d9ca19dd4482a55d84a5f370e5fbf53305719fb4ac5",
+    "mirror_report.json": "533c3f7130827de2f1cd62cfe55210e509572526b91948d0bc936b11ad1c6698",
+    "classification.json": "f3c891db4544c959a31b31a8fe68ee89bac4b6155ad3f0f823d9796b52abdebd",
+    "colorized_aerial_coverage.json": "225a7a21d1365d33432cb76431055bf198f4ea1a52f81b6fcfd75667104c749d",
+    "audit.json": "398e47bd2992ec52cca6b2eceba1f255d7cbc5aef3d82ecd92a4282819c3c41a",
+    "texture_check.json": "f0be8c3e9ce90115833787fa42655ccbaacef73bbb048bca45c630b17aebd870",
+    "3dtiles_mesh/tileset.json": "4f880174ad45e61bac0373b824ebe1248699b7153a93b8043a59a84547bd1a71",
+    "3dtiles_complete/tileset.json": "38244b58448d93ac93ae4ff68c72a05cfe76fe3a8ffde4d594f5a895bd8480a2"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 102.3,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.4
+   }
+  },
+  "4d4b4e2e-e365-403e-9283-cd81f9d76a61": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "82a78212bc0ff0426c3e0acba65733ffbe8f1805dd3e22cef7a118daf0581709",
+     "geometry": "8c8b73c9d32c5ee40111498e1db7d209f998ecef0d349bda75e9b8110a13c939",
+     "triangles": 230,
+     "vertices": 214
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "c197d8f1dfa782520eda32b817db87e0b497c74b936b1884b7555a47340b11f0",
+     "geometry": "8c8b73c9d32c5ee40111498e1db7d209f998ecef0d349bda75e9b8110a13c939",
+     "triangles": 230,
+     "vertices": 214
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "e397a64e384df46da16f9bc286f9beb626bcf4659ff5154d65715fbfc68e0d02",
+     "geometry": "8c8b73c9d32c5ee40111498e1db7d209f998ecef0d349bda75e9b8110a13c939",
+     "triangles": 230,
+     "vertices": 214
+    }
+   },
+   "reports": {
+    "levels.json": "59fb7016eaabddeead253a571aaf4f1fa3cabff4f1f981afacbfcbcaab0b8de2",
+    "wall_planes.json": "b578c52898cb776b8c587c6007596a6ec8d047932010ae600dc475366fb4416b",
+    "wall_profiles.json": "aa231e3a0df91df4406743c7e2569a1638f37369683a08d80573757f0c566092",
+    "mirror_report.json": "a0f538184fa0df807d111f275ec72f4a9a5c3d72cb2d8b3349f344a1cd1b370c",
+    "classification.json": "1e0d7a8bb92ab8134ac716eb8766f81a61d7508b514950fa9c1e8012c726a231",
+    "colorized_aerial_coverage.json": "954954f7b208dcc0482876aa3c4c8f3271f765967ae50ced77e6e095a72525bd",
+    "audit.json": "1e3794c471c1ce2d1056e2c7584eef25883a693e939ff45cf43dc30af279e165",
+    "texture_check.json": "318dfd847b4a8269bf7b4937803b2200f1cc146cccd626c6e855920af9fc70e5",
+    "3dtiles_mesh/tileset.json": "415dad46c5aae0d0e70c420e1f7a856f301c22da7796a9e4b7a68eb95beb76a5",
+    "3dtiles_complete/tileset.json": "28510ea1a2a1963fc02535b6880da476173d17fc40c60ccce91f36629a6b43d6"
+   },
+   "measures": {
+    "holes_m2": 7.0,
+    "holes_views_m2": 7.0,
+    "above_m2": 0.0,
+    "outside_m2": 41.8,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.1
+   }
+  },
+  "2fa249bb-48ce-4dda-838b-69280fdde876": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "040b2057cf3d591e4cf336aa6baa6e504881764049761e0578bf2840acc1539d",
+     "geometry": "f6ebe82b84a14f826b5dff6a68783037f9722683a69c64fa06c86830561cdbef",
+     "triangles": 1775,
+     "vertices": 1104
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "2cc637c679351e04c9add0194ed3df00d971097767a5028f4582f35656f97092",
+     "geometry": "f6ebe82b84a14f826b5dff6a68783037f9722683a69c64fa06c86830561cdbef",
+     "triangles": 1775,
+     "vertices": 1104
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "6bb358b5856adf3cb31e365f1da13073b06d5297984d94fec436cf43c0dc243a",
+     "geometry": "f6ebe82b84a14f826b5dff6a68783037f9722683a69c64fa06c86830561cdbef",
+     "triangles": 1775,
+     "vertices": 1104
+    }
+   },
+   "reports": {
+    "levels.json": "7e20e22e9f9b87d8971c8028a0ca016c357a9f5235a602f2cb8dff158045673a",
+    "wall_planes.json": "8469b5a5180c8b11e31f7aae5c9c27598033e8973d25038b29beb0c6758d459c",
+    "wall_profiles.json": "fa6a2ddf674950528a498d2011f39c87898f729f94e9b10a77568ad08dad01fc",
+    "mirror_report.json": "654a9841c0af303104461a21e7c6fa156750ea55a508755a45c52341944cfcb7",
+    "classification.json": "39e93d8bff9a15edd4646cb2abedbe536e20f1dee05e61833def860ff71f0eb7",
+    "colorized_aerial_coverage.json": "458f6424a51793ae912d20180289b38795422f45aae120eed30ec65d5421880f",
+    "audit.json": "f19e1bdfcd1a0ab74b0a9842fbb5d9f74556100de30d3a6726fe19ac4a05f9e9",
+    "texture_check.json": "f79eb023371351dc8fe82e688b21d7dd7e406c03ff1d059cede8a57cf92679e2",
+    "3dtiles_mesh/tileset.json": "4ac2da53f19607d3b21fa3652b13d5bde937d7d8c373b64f8b8469a482fd6384",
+    "3dtiles_complete/tileset.json": "6872f59762f7f2811519eba14df2649ab6d7b75aea73b3a7b4181e12253b6c7b"
+   },
+   "measures": {
+    "holes_m2": 0.0,
+    "holes_views_m2": 0,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.4
+   }
+  },
+  "47603cef-ece6-4f63-ae2d-7a19750a951f": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "3ef8b92f3a7da85af808665c0b0fc1ef3ddf571d466146124a22ba9c3a8f47f8",
+     "geometry": "d8bc3e2561e200ee53f11f92bcef9201fef8071152d82b85d0d1c41d375247d7",
+     "triangles": 5446,
+     "vertices": 3567
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "acba6c6751f0331b0228e7d18a3472d348666178a6659553b50d152786d97c7f",
+     "geometry": "d8bc3e2561e200ee53f11f92bcef9201fef8071152d82b85d0d1c41d375247d7",
+     "triangles": 5446,
+     "vertices": 3567
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "23838a82db15572d87273355b004476c4c7d58c552f31c28993fd833d282c4f6",
+     "geometry": "d8bc3e2561e200ee53f11f92bcef9201fef8071152d82b85d0d1c41d375247d7",
+     "triangles": 5446,
+     "vertices": 3567
+    }
+   },
+   "reports": {
+    "levels.json": "9578bdd7e6f5cedbcace5ab09862f36fb317e5ba2fd7e2dfe60951601011c325",
+    "wall_planes.json": "6856f201a0be7a18864fc2800af50a2855162806d9bbfdd342a68644a24f09e5",
+    "wall_profiles.json": "bd292f3495c2eb8449b02c1870453205b1b18f231d8301fb57e83362f9eb5434",
+    "mirror_report.json": "4aaf2945630d8e7744301ae1dc3eab6cc3f7f87596a0e6d177d14d47e89295fa",
+    "classification.json": "bd548712eb85f077fee20634139fa2db0262f32ff02a931190629cc488a4d1df",
+    "colorized_aerial_coverage.json": "492002cb4e90f4d69a349a52b931145b3d5cc6ce19a1f3b78ae0e065ed8a4113",
+    "audit.json": "4151075e96b607927823999dcdfc5be3d4e09bca146fdfded1c9a6c04bcf2bab",
+    "texture_check.json": "3dc762f31e8249a7b9ac89097df303a0d49f372831506020edd8e9063a7f4f52",
+    "3dtiles_mesh/tileset.json": "0c4492a6b88e897788571593e5d49869b3aea53f301a982246011c409fa72cd2",
+    "3dtiles_complete/tileset.json": "22842af65b907611bc2f05df2299cac52d228fa2df91ee7b6f203f2c8f004962"
+   },
+   "measures": {
+    "holes_m2": 42.0,
+    "holes_views_m2": 77.2,
+    "above_m2": 0.0,
+    "outside_m2": 97.1,
+    "inside_m2": 14.8,
+    "roof_gap_m2": 49.0
+   }
+  },
+  "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "04cd901e18dc8d6ace4dbbd5a46a4bf04b590971592f0060283e5e4f130b9c1f",
+     "geometry": "39186ae0090de7ee5536514f085321e9ca756306288dce73b1ac7dfd6d6c4836",
+     "triangles": 129691,
+     "vertices": 85102
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "1166019cdbf6133c3252e8624a40c9472625bb33631fa9f52005df29ef5ff98a",
+     "geometry": "39186ae0090de7ee5536514f085321e9ca756306288dce73b1ac7dfd6d6c4836",
+     "triangles": 129691,
+     "vertices": 85102
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "57e326c4b1b5c0dd80dc006dad570572df948ad289d00b5f4aa8016af4f19cab",
+     "geometry": "39186ae0090de7ee5536514f085321e9ca756306288dce73b1ac7dfd6d6c4836",
+     "triangles": 129691,
+     "vertices": 85102
+    }
+   },
+   "reports": {
+    "levels.json": "b756b7750adc4aa2b7fe9deadf8b217e552ad731400a3af308b9cab90fd77ca9",
+    "wall_planes.json": "475e4ce9dc666b3c635360cccab0a3854276c4ddf833c519760e322ddf8129fc",
+    "wall_profiles.json": "548f7ccc936ae2ce7b8bfa49446fb0f1a5640e546bbf24e07456d257e1980f86",
+    "mirror_report.json": "78394ad5bcc9a0ad24d6a4fe721f63a9ec492eab6e303df5aad2f7d25fc1a7ef",
+    "classification.json": "a052a490a4223f6457a8ac349f5323137963ae0a2f0bb03396a39f77193cf4ee",
+    "colorized_aerial_coverage.json": "bbb9e771e9c933569dbc872780172b0718d2ca4c658a940be38e73036f83d9a9",
+    "audit.json": "ceb4392b2989e49585ab7572fb283c31b1a2aff1f4b8df66cbabbc85bb2bbedf",
+    "texture_check.json": "cd692c926187268c37cf4328337528e42e695b52f35ad4172d243ab6846b754e",
+    "3dtiles_mesh/tileset.json": "3eb6db703af0fe542a9573b6051f3167a6d7d4e487de6bc9313039dbd4ed1b9e",
+    "3dtiles_complete/tileset.json": "33134b3faf990a43702b76996d09dab510a9aa98762ca542bfbff20895f37a37"
+   },
+   "measures": {
+    "holes_m2": 529.0,
+    "holes_views_m2": 2325.4,
+    "above_m2": 0.0,
+    "outside_m2": 86.2,
+    "inside_m2": 471.8,
+    "roof_gap_m2": 71.2
+   }
+  },
+  "464787e1-68a8-4cb7-bc79-820a329ac120": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "61484de0b872d9e163a3b4cc6930ae375e9154bdf59c8947a04449da37cb930a",
+     "geometry": "2a53dda69a5fa9b7d421154ad1b36f1338d90813d8ce7bccf721e492c151c7ac",
+     "triangles": 22371,
+     "vertices": 14780
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "4e63503be06c64eef77cbf39cab6f75daaedaf5a403c6a2c1c564656322c609d",
+     "geometry": "2a53dda69a5fa9b7d421154ad1b36f1338d90813d8ce7bccf721e492c151c7ac",
+     "triangles": 22371,
+     "vertices": 14780
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "d4a2eb5a6ad730dad012c7319753504bc1703258a50d9b3ea68733f87d2b06ba",
+     "geometry": "2a53dda69a5fa9b7d421154ad1b36f1338d90813d8ce7bccf721e492c151c7ac",
+     "triangles": 22371,
+     "vertices": 14780
+    }
+   },
+   "reports": {
+    "levels.json": "84e7ad9392af1f0104461f97d7a1d8446acfa1a92ec6667e40a20f4f23f00a25",
+    "wall_planes.json": "211f0b07458ec0f8f0c72e3dba32e6e7a6ebea1f8169804815d94f0001413c66",
+    "wall_profiles.json": "13d5339e57114b7486fd938736bef11f5c10784c5665245251265a57d928a997",
+    "mirror_report.json": "71bd4b3b21d44b360ee7f6974a93ceae550f6eba59d9cf6ef8fca66bd24dff85",
+    "classification.json": "8bc7dffe467eb928088812c33b5e5eca21d2d41a70caa3337836c26641150d3a",
+    "colorized_aerial_coverage.json": "6efa829b856562d6e5c77443b6f3d8806f612aa4f815cd2a131a45d1d9838dd4",
+    "audit.json": "5a20a8d2e08f523fa69b8605b146631563685a43ab247e3f3dd67c8c9fa4ea4f",
+    "texture_check.json": "918667ff56d67f01ea7e8db3fed862aee8e0e751a9df728c40784d086186492e",
+    "3dtiles_mesh/tileset.json": "3f3d9f4baee753e23cc954695ccbd81000b24f27ecb243d48653eb4949b2e424",
+    "3dtiles_complete/tileset.json": "e3f7a35747c958d1522bfec62d84d06c7c2e75b1460b67ad634c168dbd7562b3"
+   },
+   "measures": {
+    "holes_m2": 125.8,
+    "holes_views_m2": 443.7,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 28.4
+   }
+  },
+  "2b18f52d-212a-4d3a-a0f3-82da9e02ac0a": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "ff8a554e1a0695d57c772e0b5f98fa604cdca482a35fde78d2bd9771aa9a4962",
+     "geometry": "d853e684f3a41d6f54132ca3928a2e941c5b9099763496ae9c0ed83ab3b9e2c8",
+     "triangles": 1612,
+     "vertices": 1128
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "4ec14d989f41a55c4e9cd4060a7c287ba240cac4e71f16830cda784f8fc0543a",
+     "geometry": "d853e684f3a41d6f54132ca3928a2e941c5b9099763496ae9c0ed83ab3b9e2c8",
+     "triangles": 1612,
+     "vertices": 1128
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "314b07095ecc301f14287aeaaef3487b4c04cc54ff5cdc9c2ebdeb5620d85e7b",
+     "geometry": "d853e684f3a41d6f54132ca3928a2e941c5b9099763496ae9c0ed83ab3b9e2c8",
+     "triangles": 1612,
+     "vertices": 1128
+    }
+   },
+   "reports": {
+    "levels.json": "7bc33cfd1fff2d1f419c9bb96d33b49e44f1fa3fa3ba22e8222e00d2228c7294",
+    "wall_planes.json": "6d73b769ef2324c5235e1f0962f42d3fbf14111460f0fbe189995a1b3d3aec89",
+    "wall_profiles.json": "14d41e0351683b86e592ea6cd65240886dc3eb54d36aa0020ab671ec1a566e6c",
+    "mirror_report.json": "b40992299db62e38fd91f9785b795084958fd470bc84ad79f886065c1ce0d18e",
+    "classification.json": "57f44bf9c343021fc4e6a6d10c19be12bf0bf2d3627d7f388edaca271293a412",
+    "colorized_aerial_coverage.json": "3a455845132902d2a90779efdc85552b32202e2fbbd064b7139b777f0dcd0447",
+    "audit.json": "05fee38f9b4910135db7b4da2cc299e8d0f1be14d8aa815f95db7696de959d7e",
+    "texture_check.json": "ced129c835db7a278d947c0a146a27832d8adc2ce57b28d39ba1b5a05e8ef874",
+    "3dtiles_mesh/tileset.json": "76810478ef765ae80fd5bf721eb04c3b20ea30918638801adf4f316cd95710d0",
+    "3dtiles_complete/tileset.json": "0f1c63bc26d4e56fb941be1f75b159fe9fa9518a21241b5452ca42987a633013"
+   },
+   "measures": {
+    "holes_m2": 14.0,
+    "holes_views_m2": 36.7,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 9.8
+   }
+  },
+  "2870eeb0-4053-48b7-828f-a88356676ce4": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "8982ab05ec60b0bf566414475d4a6f5099c98679c92c82bd7e8f70ff042fef6b",
+     "geometry": "067f763e5327c0b6056bd876423c8c7e7b398d23e3bf9864e9bcee9a347b19bd",
+     "triangles": 17941,
+     "vertices": 11043
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "8ecff7d6048d4327192632295808c7ff177ba3e11772486f5d0736161c8b9c23",
+     "geometry": "067f763e5327c0b6056bd876423c8c7e7b398d23e3bf9864e9bcee9a347b19bd",
+     "triangles": 17941,
+     "vertices": 11043
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "a4408cc319e34e54e5a786f1a03e034c8f3f56c998cdacc03bff501cf82eb7e5",
+     "geometry": "067f763e5327c0b6056bd876423c8c7e7b398d23e3bf9864e9bcee9a347b19bd",
+     "triangles": 17941,
+     "vertices": 11043
+    }
+   },
+   "reports": {
+    "levels.json": "2981de17dfd62cca4368afb0da97cd80fb33b8fd33d0abfcb006d7df3dabc089",
+    "wall_planes.json": "ffed504eeb0a3e7a688ebe5a4270bffe529c9354c29ea1f918dde3b352021307",
+    "wall_profiles.json": "186e602cb18bbffde34ac3bcdf58f50576b30bea29e0e2c99acfae1a9628c7c4",
+    "mirror_report.json": "71341ab9ab37e07ba086ade0349c6f8ff85121239825831636ef781a4b2404f2",
+    "classification.json": "296e0cffefac223796b2e2b28c5c659f68ae02a1858e317037a68fb78a96f951",
+    "colorized_aerial_coverage.json": "2f2b4c0b4e1dbee471d17e79d47de2789763d64adf63d45df749553b040df4d4",
+    "audit.json": "ffbd0a4cd6b01c3ac4b0daaf9fb2f81ad8343657ba15b2137088721a1c26eeba",
+    "texture_check.json": "b3e19a6666724104f2ff91de09aefc7249231c12f165100d9019ed0686be3c94",
+    "3dtiles_mesh/tileset.json": "591ccf560bde335cb25d0a05ee72f9fdeeef060b08ab5e112931ae3d1df76661",
+    "3dtiles_complete/tileset.json": "d9c31ce6d6d6f6ebbf770fa76bf607b434f29f5046a00832a9a6cdb510753574"
+   },
+   "measures": {
+    "holes_m2": 22.5,
+    "holes_views_m2": 51.7,
+    "above_m2": 0.0,
+    "outside_m2": 24.7,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 18.7
+   }
+  },
+  "77c2f303-0d53-44d1-867b-8dcbed35c171": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "41aa7c30318942cd9af900c1ca7def2c3fdac2ce524f2525fd41b74b3146d187",
+     "geometry": "47b7c8448a2adad18c896b99cf2a57e224f3a5b0ecb118e29e912ef8e2098296",
+     "triangles": 5642,
+     "vertices": 3763
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "bffbe643ea60fd8b9da7c6da1e8838eaf95e71d11b8c51a6d3224e076ea23a81",
+     "geometry": "47b7c8448a2adad18c896b99cf2a57e224f3a5b0ecb118e29e912ef8e2098296",
+     "triangles": 5642,
+     "vertices": 3763
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "eb79c5c0fb61fc306d330747134ef292560a9b48dccab8a86a1e7d656890b81a",
+     "geometry": "47b7c8448a2adad18c896b99cf2a57e224f3a5b0ecb118e29e912ef8e2098296",
+     "triangles": 5642,
+     "vertices": 3763
+    }
+   },
+   "reports": {
+    "levels.json": "23761fb6ce7782e97e65c1d8dd93351c4d9a4cc1b8d9101412c7c194e31dd3fd",
+    "wall_planes.json": "535fd1efe8720c6a39a9408c4a8e95d09fd572bf798a58a0c29b3e50f8caf84d",
+    "wall_profiles.json": "96fe3d187b028f38c6472e279872af739ef2c1e48044d2dde33616dbe2ecc129",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "34e2ccb5746b395a51cfef80eb5f36283907637e6af218ace18f7ac6cc6c1377",
+    "colorized_aerial_coverage.json": "597d287eb83d0bfb81b0cda4b0c40b38fc9899e36dd463bb9273b910489c3fe3",
+    "audit.json": "0d9f1f43190af53c04cfd059d3ba42c770acc269252ab802157678a5fa9db11d",
+    "texture_check.json": "32466f0fdfa7d0136f5da354e8e02c5d388d21d21ba7d022ae67979fdaa55300",
+    "3dtiles_mesh/tileset.json": "14dd574cab1ee798a076f4942afa4d70a81b98141bb5b8001040bed142a7a8db",
+    "3dtiles_complete/tileset.json": "69ae89e3ce12652edec543c0a7ca58499b6792e1ea70088a4d3a7a716197fbd6"
+   },
+   "measures": {
+    "holes_m2": 141.2,
+    "holes_views_m2": 507.7,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 0.0,
+    "roof_gap_m2": 0.0
+   }
+  },
+  "be45685f-7b19-4e65-a4e4-4fad66f6bd62": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "1b46e437bd9e9e81f651ac0e07c6be3314e6b5b1fe78627345d4955f378cdd37",
+     "geometry": "e60d8e6ce02fae135e4405cad159c6f41ac04b2970946b97267f4dd76861d007",
+     "triangles": 17481,
+     "vertices": 13572
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "3809933848f987027e8b62b6e8d0af13d751bce0d40a5ddce03f7ead09e0bcc2",
+     "geometry": "e60d8e6ce02fae135e4405cad159c6f41ac04b2970946b97267f4dd76861d007",
+     "triangles": 17481,
+     "vertices": 13572
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "b23204676d7266181dd3d5a408a6c20f5d73809a64e9791a1737d10606168c51",
+     "geometry": "e60d8e6ce02fae135e4405cad159c6f41ac04b2970946b97267f4dd76861d007",
+     "triangles": 17481,
+     "vertices": 13572
+    }
+   },
+   "reports": {
+    "levels.json": "c523cd58d342bb3e2d89ff76fd7a3c747865902fa7280d8c912246a87a172544",
+    "wall_planes.json": "22e08b5c7683f4838964a8e4474646ce621b5965911179c6f12d9f33cb5f523c",
+    "wall_profiles.json": "aaa2cdfdf675eb398efcf0359ce96c59116e6bdbb8d0c30abfc5ac56532fa6f5",
+    "mirror_report.json": "e9fc07f6289e918bd9e0546dbae155c0a0612eee0f442bb9621e180f396e7dfd",
+    "classification.json": "6bf35c1f69a795e55e6f19b78f3d356822da242a5caafe7db611b385a2a5b582",
+    "colorized_aerial_coverage.json": "1b1dddb4a8b9adc3fc8b5631fd40273c07b4374e7e99d5a60f86979c139ab58d",
+    "audit.json": "145a718f87a7176472211c49c40de42b996d9183c9815b3055dec9ebc715f73d",
+    "texture_check.json": "4ccd80990df61a4e50a59d2ab5518843b707bdc8a89860a10445c7c091b4d6db",
+    "3dtiles_mesh/tileset.json": "903e3ed1c6bfc245011ac224559b48271204d3c1606f9f6e278aa4c2f1839417",
+    "3dtiles_complete/tileset.json": "ff9476e198e0b2a9b67dc3c4e3067ff00544a75f891e18ad81ca2434e5a99374"
+   },
+   "measures": {
+    "holes_m2": 693.5,
+    "holes_views_m2": 2716.3,
+    "above_m2": 0.0,
+    "outside_m2": 994.7,
+    "inside_m2": 1668.3,
+    "roof_gap_m2": 157.4
+   }
+  },
+  "fb099a5d-d36a-4cdb-bf42-d1cfcfbb7586": {
+   "meshes": {
+    "3dtiles_mesh/building.glb": {
+     "file": "fc2ed9789cd35959254f88c172d1530f9ca79890283f49999cce7ec649e43397",
+     "geometry": "3b3c8b949aaef1b11be8b91b456f637f6bfc6909bdf3e1a8e1887512760d0ee9",
+     "triangles": 3362,
+     "vertices": 1880
+    },
+    "3dtiles_complete/building.glb": {
+     "file": "c9c0c17b6722d5e4f86363fc93f88b2535c52a81c7fab1a4aa6b3d009690df29",
+     "geometry": "3b3c8b949aaef1b11be8b91b456f637f6bfc6909bdf3e1a8e1887512760d0ee9",
+     "triangles": 3362,
+     "vertices": 1880
+    },
+    "3dtiles_complete/building_tint.glb": {
+     "file": "165a488e7a18a88c7eca7e40569145ce57d049dae5a2e64b5d23202a73eb62c2",
+     "geometry": "3b3c8b949aaef1b11be8b91b456f637f6bfc6909bdf3e1a8e1887512760d0ee9",
+     "triangles": 3362,
+     "vertices": 1880
+    }
+   },
+   "reports": {
+    "levels.json": "a704e31bea20820e07de507ba6e2a7cfe019f1f8f35ad62986af0ac463083332",
+    "wall_planes.json": "8e740ac9722ac8d843cfd58f6d39ff444cc8482081278757d4d5f9865e8941ff",
+    "wall_profiles.json": "da4ea0c17adce57fc98be36353d8cd544fcba1b757aa7312f0c9b6b81b2dd330",
+    "mirror_report.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "classification.json": "ad3556c94eebe6e643643bd84880b7e2e909fc57a81a30d9d1efc9a86b4a1485",
+    "colorized_aerial_coverage.json": "239bd597aacefc5171df14571a2eb722cdbcadf7b0880ddc99746cbf1da85199",
+    "audit.json": "2d42c22d1aea9f75dd07985e065cdcbd6f842d4ca37874da3b320a0b7c823e74",
+    "texture_check.json": "8242d563c24a8c376ebeffe9726b78e06b074215d628bb4af03de499b06ff245",
+    "3dtiles_mesh/tileset.json": "51060a0e8dc10d3641bb4b4ea139557cdf944ec52fce6c56ff7049f0c57d18f1",
+    "3dtiles_complete/tileset.json": "613a9213428c1c0532418dbe39eeb11702356b6c95da9fc862ad392d26df42ad"
+   },
+   "measures": {
+    "holes_m2": 85.0,
+    "holes_views_m2": 357.5,
+    "above_m2": 0.0,
+    "outside_m2": 0.0,
+    "inside_m2": 592.3,
+    "roof_gap_m2": 0.0
+   }
+  }
+ }
+}

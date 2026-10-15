@@ -319,7 +319,7 @@ def plane_bands(plane: WallPlane, bands: list[FaceBand], dense_per_m2: float = 0
 
 def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | None" = None,
                   ground_field: "GroundField | None" = None, edge_face: int | None = None,
-                  foot_to_roof: bool = False):
+                  foot_to_roof: bool = False, wall_cap: bool = True):
     """Quads for one face: (corners(4,3), normal(3), uv(4,2) or None, kind).
 
     ``kind`` is "wall" (textured with the face image), "ledge" or "return"
@@ -373,6 +373,9 @@ def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | No
         if len(below) and np.isfinite(below).any() and float(np.nanmin(below)) < z_first - 0.3:
             foot_z = float(np.nanmin(below))
             z0 = foot_z
+    # with the wall cap off (--no-wall-cap, the build before it), only a wall drawn under a
+    # roof edge stops at the roof
+    capped, parapet = (CAPPED_STATUSES, PARAPET_M) if wall_cap else (("edge",), None)
     prev = None                                     # (runs, z_hi) of the band below
     for b in used:
         runs = _runs(plane, b, roof)
@@ -391,18 +394,18 @@ def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | No
         # in a strip of the roof below (the Presbyterian Church headquarters'
         # tower) the roof just inside reads low.
         top_band = b.z_hi >= z1 - 1e-3
-        if roof is None or (b.status not in CAPPED_STATUSES and (PARAPET_M is None or not top_band)):
+        if roof is None or (b.status not in capped and (parapet is None or not top_band)):
             tops = [(a, c, off, b.z_hi) for a, c, off in runs]
         # (a wall standing out past its outline holds the roof inside the
         # outline: from the wall in, Chase Bank Plaza's tower face read its
         # podium's roof 2 m out and lost its wall above 14 m)
-        elif b.status in CAPPED_STATUSES:
+        elif b.status in capped:
             tops = [(ra, rc, off, zt) for a, c, off in runs
                     for ra, rc, zt in roof.capped_runs(plane, min(off, 0.0), b.z_lo, b.z_hi, a, c)]
         else:
             tops = [(ra, rc, off, zt) for a, c, off in runs
                     for ra, rc, zt in roof.capped_runs(plane, min(off, 0.0), b.z_lo, b.z_hi, a, c, min_run_m=0.0,
-                                                       above_m=PARAPET_M, keep_unknown=True)]
+                                                       above_m=parapet, keep_unknown=True)]
         runs = [(a, c, off) for a, c, off, _ in tops]
         foot = foot_z is not None and abs(b.z_lo - z_first) < 1e-3
         if foot:
@@ -1710,7 +1713,9 @@ def building_classification(b: Path, xyz, poly, levels, profiles, edges, party, 
     return c
 
 
-def main() -> int:
+def parser() -> argparse.ArgumentParser:
+    from kyfromabove_3d.settings import MeshSettings
+    D = MeshSettings()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--building", type=Path, required=True)
     ap.add_argument("--case", default=None)
@@ -1720,21 +1725,21 @@ def main() -> int:
     ap.add_argument("--footprints", type=Path, default=Path("outputs/survey/case_footprints.json"))
     ap.add_argument("--footprint-csv", type=Path, default=Path("data/derived/ky_facade_tiled_wkt.csv"))
     ap.add_argument("--name", default=None, help="display name (default: from the footprint)")
-    ap.add_argument("--texel-m", type=float, default=TEXEL_M)
+    ap.add_argument("--texel-m", type=float, default=D.texel_m)
     ap.add_argument("--no-roof-tidy", dest="roof_tidy", action="store_false",
                     help="the roof field as measured: no ramps over empty cells, no snapping to flat levels (before)")
     ap.add_argument("--no-wall-cap", dest="wall_cap", action="store_false",
                     help="walls carried up or copied keep their band's top, and seen ones too; only a wall drawn "
                          "under a roof edge stops at the roof (before)")
-    ap.add_argument("--roof-edge", choices=("outline", "grid"), default="outline",
+    ap.add_argument("--roof-edge", choices=("outline", "grid"), default=D.roof_edge,
                     help="the roof's triangles cut along the levels' outlines, or two per cell of the height field (before)")
-    ap.add_argument("--roof-cell-m", type=float, default=0.0,
+    ap.add_argument("--roof-cell-m", type=float, default=D.roof_cell_m,
                     help="roof height-field cell; 0 = 0.75 m where the returns are dense (>= 4/m2), else 1.5 m")
     ap.add_argument("--out", type=Path, default=None, help="default <building>/3dtiles_mesh/")
     ap.add_argument("--ply", type=Path, default=None,
                     help="coloured cloud to texture the walls from (default <building>/colorized_aerial.laz, "
                          "or .ply from an older run; made here from the aerial frames alone when missing)")
-    ap.add_argument("--texture", choices=TEXTURE_FORMATS, default="ktx2",
+    ap.add_argument("--texture", choices=TEXTURE_FORMATS, default=D.texture,
                     help="texture format in the glb: ktx2 (Basis, GPU-compressed; needs basisu), webp, jpeg, png")
     ap.add_argument("--dump-textures", action="store_true",
                     help="also keep every texture as a lossless PNG in <out>/textures/ (the measured and the "
@@ -1758,10 +1763,29 @@ def main() -> int:
                     help="where the neighbours' levels.json are; 'none' for their outlines at LiDAR height only")
     ap.add_argument("--scene-cloud", type=Path, default=None,
                     help="a cached occluder cloud (scripts/run_downtown.py writes one) passed on to the colourise")
-    args = ap.parse_args()
-    if not args.wall_cap:
-        global CAPPED_STATUSES, PARAPET_M
-        CAPPED_STATUSES, PARAPET_M = ("edge",), None
+    return ap
+
+
+def settings_from_args(args):
+    """The mesh's settings as the command line gives them (kyfromabove_3d.settings)."""
+    from kyfromabove_3d.settings import MeshSettings
+    return MeshSettings(texel_m=args.texel_m, roof_tidy=args.roof_tidy, wall_cap=args.wall_cap,
+                        roof_edge=args.roof_edge, roof_cell_m=args.roof_cell_m, texture=args.texture)
+
+
+def main() -> int:
+    args = parser().parse_args()
+    import dataclasses
+    from kyfromabove_3d.settings import ColouriseSettings, MeshSettings, changed_from_defaults, resolve
+    cli = settings_from_args(args)
+    # the defaults, then the building's class's, then what the command line changed (the
+    # colourise's own options that pass through here among them)
+    colourise_cli = {"prism_occluders": not args.no_prism_occluders,
+                     "outline": "lidar" if args.lidar_outline else "overture", "match_walls": args.match_walls}
+    BS = resolve(args.building, colourise=changed_from_defaults(colourise_cli, ColouriseSettings),
+                 mesh=changed_from_defaults({f.name: getattr(cli, f.name) for f in dataclasses.fields(cli)},
+                                            MeshSettings))
+    M = BS.mesh
 
     from colorize_building import load_cameras
 
@@ -1853,7 +1877,7 @@ def main() -> int:
         from colorize_building import FOOTPRINTS, levels_dir, neighbour_prisms, occluder_cloud, occlusion_maps
         occ = occluder_cloud(b, args.scene_cloud, 250.0, xyz) if args.scene_cloud else xyz
         kw = {} if args.neighbour_levels is None else {"buildings_dir": levels_dir(args.neighbour_levels)}
-        prisms = [] if args.no_prism_occluders else neighbour_prisms(b, args.neighbours or FOOTPRINTS, **kw)
+        prisms = [] if not BS.colourise.prism_occluders else neighbour_prisms(b, args.neighbours or FOOTPRINTS, **kw)
         occlusion_maps(b, cams, occ, prisms)
     # The frames are listed but their crops are gone (run_downtown deletes them
     # after a mesh): a mesh built now would take no colour from the frames --
@@ -1885,12 +1909,9 @@ def main() -> int:
     # Bourre Bonne was built after the flight, its returns 78% ground) is a box
     # at its recorded height, coloured from the frames and marked not from the
     # LiDAR: the completed product holds it, the measured one leaves it out.
-    from kyfromabove_3d.strategy import class_strategy
-    strategy = class_strategy(b)
-    not_in_lidar = (strategy.get("lidar") == "absent" and bool(height_m)
-                    and poly.area >= float(strategy.get("min_area_m2", 0.0)))
+    not_in_lidar = (M.lidar == "absent" and bool(height_m) and poly.area >= M.absent_min_area_m2)
     if not_in_lidar:
-        print(f"  not in the LiDAR ({strategy['_class']}): a box at the recorded {float(height_m):.1f} m, "
+        print(f"  not in the LiDAR ({BS.building_class}): a box at the recorded {float(height_m):.1f} m, "
               f"for the completed product only")
     path = "box" if (n_on < 30 or not height_m or colourise_failed or not_in_lidar) else "profile"
     # The bodies: the footprint alone, or the levels the colourise found (a
@@ -1907,9 +1928,9 @@ def main() -> int:
         roof_top = max(float(np.percentile(xyz[:, 2], 99)) - ground_z, 6.0) if len(xyz) else 6.0
     if not levels:
         levels = [{"level": 0, "ring": ring_m.tolist(), "z_lo": ground_z, "z_hi": ground_z + roof_top}]
-    cell = args.roof_cell_m if args.roof_cell_m > 0 else (0.75 if n_on / max(poly.area, 1.0) >= 4.0 else 1.5)
+    cell = M.roof_cell_m if M.roof_cell_m > 0 else (0.75 if n_on / max(poly.area, 1.0) >= 4.0 else 1.5)
     xs, ys, Z, valid = roof_heightfield(xyz, poly, ground_z, cell, max_z=ground_z + roof_top + 1.5)
-    if args.roof_tidy and valid.sum() >= 8:
+    if M.roof_tidy and valid.sum() >= 8:
         Z = tidy_roof_field(xyz, poly, ground_z, xs, ys, Z, valid)
     if path == "box" or valid.sum() < 4:
         # a flat roof at the building's height; the height field is not trusted
@@ -1943,13 +1964,13 @@ def main() -> int:
     party = party_edges(ring_m, neighbours, [e for e in edges if edge_level[e.face]["level"] == 0], tops=nb_tops)
     # the building's class and its strategy (classify_buildings.py, configs/class_strategies.yaml)
     whole_party = set()
-    if strategy.get("party_walls") == "whole":
+    if M.party_walls == "whole":
         for e in edges:
             if e.face in party and not isinstance(e, ArcWall):
                 shared = sum(s1 - s0 for s0, s1, _ in party[e.face])
                 if shared >= 0.5 * e.length_m:
                     whole_party.add(e.face)
-        print(f"  class {strategy['_class']}: {len(whole_party)} party wall(s) drawn whole, plain up to the neighbour's roof")
+        print(f"  class {BS.building_class}: {len(whole_party)} party wall(s) drawn whole, plain up to the neighbour's roof")
     classification = building_classification(b, xyz, poly, levels, profiles, edges, party, Z, valid, cell)
     if len(levels) > 1:
         print(f"  {len(levels)} levels: " + "; ".join(f"level {lv['level']} {float(lv['z_lo']):.0f}-{float(lv['z_hi']):.0f} m" for lv in levels))
@@ -1959,7 +1980,7 @@ def main() -> int:
     # height; the tower is 30 m wide.
     roof = RoofField(xs, ys, Z, valid) if valid.any() else None
 
-    glb = GlbRecorder(GlbWriter(args.texture, dump_dir=(out / "textures") if args.dump_textures else None))
+    glb = GlbRecorder(GlbWriter(M.texture, dump_dir=(out / "textures") if args.dump_textures else None))
     atlas = TextureAtlas()
     textured = []                                    # (handle, quads with uv in the image's [0,1] frame)
     flat_quads = []                                  # (rgb, quads)
@@ -2012,7 +2033,7 @@ def main() -> int:
             bands = [b for b in bands if b.status != "matched"]
         quads, extent = (
             wall_geometry(plane, bands, roof, ground_field=(ArcGround(ground_field, arc) if arc is not None and ground_field is not None else ground_field),
-                          edge_face=edge.face, foot_to_roof=strategy.get("tower_foot") == "down_to_roof")
+                          edge_face=edge.face, foot_to_roof=M.tower_foot == "down_to_roof", wall_cap=M.wall_cap)
             if (plane is not None and path != "box")
             else ([], None)
         )
@@ -2024,12 +2045,12 @@ def main() -> int:
                 # texture from the coloured points in the unrolled frame; the
                 # rectangles back onto the circle, cut every 1.5 m along it
                 near = np.abs(np.hypot(*(cxyz[:, :2] - arc.centre).T) - arc.radius) <= 12.0
-                tex, n_pts = face_texture(plane, bands, extent, cxyz[near], crgb[near], args.texel_m,
+                tex, n_pts = face_texture(plane, bands, extent, cxyz[near], crgb[near], M.texel_m,
                                           party=edge.face in party)
                 quads = roll_quads(quads, arc)
                 n_arc += 1
             else:
-                tex, n_pts = face_texture(plane, bands, extent, cxyz, crgb, args.texel_m, party=edge.face in party)
+                tex, n_pts = face_texture(plane, bands, extent, cxyz, crgb, M.texel_m, party=edge.face in party)
             walls = [q for q in quads if q[3] == "wall"]
             matched = [(float(b.z_lo), float(b.z_hi)) for b in bands if b.status == "matched"]
             matched_m2 += sum((b.z_hi - b.z_lo) * (b.along_hi - b.along_lo) for b in bands if b.status == "matched")
@@ -2119,7 +2140,7 @@ def main() -> int:
                     if tex is None:
                         if len(cxyz):
                             dummy_band = FaceBand(float(z_a), float(z_t), 0.0, 10, 0.0, 0.0, L, "observed")
-                            tex_cloud, n_pts = face_texture(edge, [dummy_band], (float(z_a), float(z_t), L), cxyz, crgb, args.texel_m)
+                            tex_cloud, n_pts = face_texture(edge, [dummy_band], (float(z_a), float(z_t), L), cxyz, crgb, M.texel_m)
                             if n_pts > 0:
                                 textured.append((atlas.add(tex_cloud, {"face": edge.face, "kind": "prism", "z": (float(z_a), float(z_t)), "along": (c0, c1)}), pieces))
                                 continue
@@ -2157,7 +2178,7 @@ def main() -> int:
                 print(f"  the underside of the overhang at {z:.1f} m: {len(quads)} triangle(s) over {oh['cut_area_m2']:.0f} m2")
 
     # Fitted wall tiles: the wall where the LiDAR saw it directly.
-    tiles = tile_geometry(b, xyz, poly, cxyz, crgb, args.texel_m) if path != "box" else []
+    tiles = tile_geometry(b, xyz, poly, cxyz, crgb, M.texel_m) if path != "box" else []
     for corners, n, uv, tex, face, n_pts in tiles:
         textured.append((atlas.add(tex, {"face": face, "kind": "tile"}), [(corners, n, uv, "wall")]))
     if tiles:
@@ -2167,7 +2188,7 @@ def main() -> int:
     # Roof
     if valid.any():
         verts, tris, steep = roof_mesh(xs, ys, Z, valid, all_wall_quads, [by_face[f] for f in used_bands], used_bands, levels=levels,
-                                       outline=args.roof_edge == "outline")
+                                       outline=M.roof_edge == "outline")
     else:
         from overture_boxes import extrude
         P_, N_, I_ = extrude(ring_m, ground_z, roof_top)
@@ -2202,15 +2223,15 @@ def main() -> int:
     if cams and len(verts):
         if valid.any():
             from shapely.geometry import Polygon as _RoofPoly
-            roof_outline = _RoofPoly(np.asarray(levels[0]["ring"], dtype=float)[:, :2]).buffer(0) if args.roof_edge == "outline" else None
-            tex, bbox, n_seen, n_tex = roof_texture(xs, ys, Z, valid, poly, cams, args.texel_m, outline=roof_outline)
+            roof_outline = _RoofPoly(np.asarray(levels[0]["ring"], dtype=float)[:, :2]).buffer(0) if M.roof_edge == "outline" else None
+            tex, bbox, n_seen, n_tex = roof_texture(xs, ys, Z, valid, poly, cams, M.texel_m, outline=roof_outline)
         else:
             flat_valid = np.ones_like(valid); Zf = np.full(Z.shape, ground_z + roof_top)
-            tex, bbox, n_seen, n_tex = roof_texture(xs, ys, Zf, flat_valid, poly, cams, args.texel_m)
+            tex, bbox, n_seen, n_tex = roof_texture(xs, ys, Zf, flat_valid, poly, cams, M.texel_m)
         source_desc = f"{n_seen:,} of {n_tex:,} texels seen by a camera ({', '.join(heads)})"
     elif len(verts) and len(cxyz) and (crgb.sum(axis=1) > 15).any():
         flat_z = (ground_z + roof_top) if path == "box" else None
-        tex, bbox, n_pts, n_in = roof_texture_from_cloud(xs, ys, Z, valid, poly, cxyz, crgb, args.texel_m, flat_z=flat_z)
+        tex, bbox, n_pts, n_in = roof_texture_from_cloud(xs, ys, Z, valid, poly, cxyz, crgb, M.texel_m, flat_z=flat_z)
         source_desc = f"{n_pts:,} coloured point returns from {ply_path.name}"
 
     roof_tex = tex if (tex is not None and len(verts)) else None
@@ -2289,17 +2310,17 @@ def main() -> int:
     }
     (out / "tileset.json").write_text(json.dumps(tileset, indent=1), encoding="utf-8")
     if n_matched_faces:
-        write_matched_tint(out, glb, atlas, args, extras, tileset)
+        write_matched_tint(out, glb, atlas, M, extras, tileset)
     print(f"mesh -> {out / 'building.glb'} ({size / 1e6:.1f} MB, {n_tris:,} triangles); tileset -> {out / 'tileset.json'}")
     print(f"[time] mesh {time.time() - t_start:.1f} s (with the colourise)")
     if args.complete:
         t_done = time.time()
-        write_completed(args.building, glb, atlas, roof_tex, args, extras, tileset)
+        write_completed(args.building, glb, atlas, roof_tex, M, args.dump_textures, extras, tileset)
         print(f"[time] complete {time.time() - t_done:.1f} s")
     return 0
 
 
-def write_matched_tint(out: Path, glb: "GlbRecorder", atlas: TextureAtlas, args, extras: dict, tileset: dict):
+def write_matched_tint(out: Path, glb: "GlbRecorder", atlas: TextureAtlas, M, extras: dict, tileset: dict):
     """The measured mesh again with the walls whose depth came from the
     frames (``matched`` bands, kyfromabove_3d.wall_match) tinted cyan for the
     viewer: ``building_matched.glb`` and ``tileset_matched.json``. Measured,
@@ -2322,7 +2343,7 @@ def write_matched_tint(out: Path, glb: "GlbRecorder", atlas: TextureAtlas, args,
     a = TextureAtlas(atlas.page_px, atlas.gap)
     for im in images:
         a.add(im)
-    w = GlbWriter(args.texture)
+    w = GlbWriter(M.texture)
     glb.replay(w, {f"walls_{k}": pg for k, pg in enumerate(a.pack())})
     w.write(out / "building_matched.glb", extras)
     ts = json.loads(json.dumps(tileset))
@@ -2332,7 +2353,8 @@ def write_matched_tint(out: Path, glb: "GlbRecorder", atlas: TextureAtlas, args,
           f"{extras['matched']['area_m2']:.0f} m2)")
 
 
-def write_completed(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, args, extras: dict, tileset: dict):
+def write_completed(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, M, dump_textures: bool, extras: dict,
+                    tileset: dict):
     """The completed product (product 3): the measured mesh again, call for
     call, with every texel no frame saw filled from the building's own
     facade (kyfromabove_3d.facade_fill: its twin, its rhythm, patches of
@@ -2346,10 +2368,10 @@ def write_completed(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, 
     rep = b / "mirror_report.json"
     twins = {int(f): int(r["from_face"]) for f, r in json.loads(rep.read_text(encoding="utf-8")).items()
              if r.get("symmetric")} if rep.exists() else {}
-    done = complete_textures(atlas.images, atlas.meta, args.texel_m, twins)
+    done = complete_textures(atlas.images, atlas.meta, M.texel_m, twins)
     roof = None
     if roof_tex is not None and getattr(roof_tex, "source", None) is not None and "patch" in POLICY["roof"]:
-        roof = patch_fill(np.asarray(roof_tex), roof_tex.source, args.texel_m)
+        roof = patch_fill(np.asarray(roof_tex), roof_tex.source, M.texel_m)
     fill = shares([sv for _, sv in done] + ([roof[1]] if roof else []))
 
     def pages_of(images):
@@ -2374,7 +2396,7 @@ def write_completed(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, 
             swap["roof"] = roof_img
         # the completed pages kept lossless too (--dump-textures), for the
         # batched tiles to repack; not the tinted copy, which is for review
-        w = GlbWriter(args.texture, dump_dir=(out / "textures") if args.dump_textures and name == "building.glb"
+        w = GlbWriter(M.texture, dump_dir=(out / "textures") if dump_textures and name == "building.glb"
                       else None)
         glb.replay(w, swap)
         w.write(out / name, {**extras, "product": "completed", "fill": fill})
@@ -2388,7 +2410,7 @@ def write_completed(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, 
         images.append(roof_tex); metas.append({"kind": "roof"})
     walls = {f"img_{i}": np.asarray(im) for i, im in enumerate(images) if getattr(im, "source", None) is not None}
     walls.update({f"src_{i}": im.source for i, im in enumerate(images) if getattr(im, "source", None) is not None})
-    np.savez_compressed(out / "fill_faces.npz", meta=json.dumps(metas), texel_m=args.texel_m,
+    np.savez_compressed(out / "fill_faces.npz", meta=json.dumps(metas), texel_m=M.texel_m,
                         twins=json.dumps(twins), **walls)
     print(f"completed -> {out / 'building.glb'}: " + ", ".join(f"{NAMES[k]} {fill[NAMES[k]]:.0%}" for k in sorted(NAMES)))
 

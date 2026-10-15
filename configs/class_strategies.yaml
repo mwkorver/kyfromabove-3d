@@ -4,6 +4,10 @@
 # on its development buildings and kept only if its held-out buildings agree
 # (outputs/classes/split_<class>.json).
 #
+# Every setting here is checked when the file is read (src/kyfromabove_3d/
+# settings.py, CLASS_KEYS says which stage each one goes to): a misspelt
+# setting or a value that is not allowed stops the build.
+#
 # upper_levels: roof_edge -- every wall of an upper level (its outline traced
 #   from the LiDAR's roof) is under a measured roof edge: unseen bands, sloped
 #   ones holding the wall's line and open ones over a roof are drawn

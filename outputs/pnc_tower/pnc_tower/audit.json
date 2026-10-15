@@ -147,10 +147,6 @@
   "m2": 0.0,
   "share": 0.0
  },
- "roof_tilt": {
-  "m2": 442.6,
-  "share": 0.232
- },
  "inside_walls": {
   "m2": 0.0,
   "n_triangles": 0

@@ -1,0 +1,132 @@
+# The safety net for the refactor (2026-10-14): buildings whose outputs are
+# recorded before a refactoring step and must come out the same after it
+# (scripts/safety_net.py record / check). The reference set, one or two of
+# every class (a development and a held-out one where the class has a
+# strategy), and buildings fixed by hand. A landmark (dir, case) is built the
+# way it is built today, on its own; it joins the ordinary path in step 2.
+buildings:
+- id: b7daf154-da79-4a42-b938-a973aa1111b5
+  why: reference set
+  name: Omni Louisville Hotel
+- id: building_002
+  why: reference set
+  dir: outputs/urban/building_002
+  case: building_002
+  name: 400 West Market
+- id: pnc_tower
+  why: reference set
+  dir: outputs/pnc_tower/pnc_tower
+  case: pnc_tower
+  name: PNC Tower
+- id: bf3923af-34d6-4fdb-b867-2a9f533bef4e
+  why: reference set
+  name: Kentucky Home Life Building
+- id: c5fe3ad2-ffa0-4800-9240-410277f7b332
+  why: reference set
+  name: The Seelbach Hilton Hotel
+- id: 39a33bd6-59b1-4edc-bd76-ffe26f85a868-a
+  why: reference set
+  name: 39a33bd6 part a
+- id: 39a33bd6-59b1-4edc-bd76-ffe26f85a868-b
+  why: reference set
+  name: 39a33bd6 part b
+- id: 39a33bd6-59b1-4edc-bd76-ffe26f85a868-c
+  why: reference set
+  name: 39a33bd6 part c
+- id: 9947f2b0-4b1e-41af-b68c-af6ae665b1a8
+  why: reference set
+  name: 9947f2b0 (beside 400 West Market)
+- id: bcbc0005-cfe4-4719-8b90-7e9c69dc9782
+  why: reference set
+  name: Marmaduke Building
+- id: ec790737-7929-4a57-8ba7-ad8843bbef4f
+  why: reference set
+  name: Chase Bank Plaza
+- id: 9e9df280-ccae-46bd-b450-354e7d5e2fcf
+  why: reference set
+  name: Hyatt Regency Louisville
+- id: d683e785-f8c8-475c-a0a3-c3b476924098
+  why: reference set
+  name: Louisville Marriott Downtown
+- id: a1f393cc-05c9-43cb-a726-34aa92a2016a
+  why: reference set
+  name: RIVUE Tower
+- id: 3158c676-4406-43e9-8a71-183312badbb5
+  why: reference set
+  name: Truist Tower - One Riverfront Plaza
+- id: 40ead71b-7947-4e87-ab44-b3f11d755957
+  why: reference set
+  name: Hampton Inn Louisville Downtown
+- id: 8ab5c0ec-896c-4cb3-aece-2a5510b34a88
+  why: reference set
+  name: Louisville Gas & Electric
+- id: 6f0cece2-9ef7-4c8e-ac57-32b2cf39157a
+  why: reference set
+  name: 6f0cece2
+- id: cfb7194a-2889-4b49-942f-7beaabbd2cf4
+  why: reference set
+  name: cfb7194a
+- id: 2c66180b-c236-4b34-b0c8-14658398aff3
+  why: class box/low
+- id: fb24c7f8-8969-490f-a883-22b17223e910
+  why: class box/mid
+- id: d8f1f2c3-f379-4390-94aa-a7aa302bf363
+  why: class box/tall, development
+- id: 7c0e2eb6-96e6-4fa2-85b4-0ef2ae590026
+  why: class box/tall, held out
+- id: 61c76435-b315-454b-a57c-fff91b9d5f43
+  why: class none
+- id: a6b0b98c-ccde-4c25-be24-ed460829a2ee
+  why: class pitched/low
+- id: 5b86e483-90a5-45a4-a789-a24f1bd9e8ee
+  why: class pitched/mid
+- id: 2dca842b-c1a9-42b4-9a71-790399201fc3
+  why: class pitched/tall
+- id: e0f8064e-ca6a-4c96-97c7-728c05be6963
+  why: class row1/low
+- id: c36d20bc-0203-403a-b019-0379cfa28f8b
+  why: class row1/mid
+- id: 4373d0c3-a02d-4052-98d4-977c6fcc2f0b
+  why: class row1/tall
+- id: c35b66ea-b334-4e1f-b86d-1af8caa4673a-a
+  why: class row2c/low
+- id: 928bfb13-4f67-4f13-86a4-b130cf3110b7
+  why: class row2c/mid
+- id: 529b29ec-660d-40af-ade4-509957888774
+  why: class row2c/tall
+- id: 05cecd95-2c91-4168-87bf-e2f7916ad6d3
+  why: class row2o/low
+- id: 4a16819c-a0ed-4edb-b2f4-32023d3bf48c
+  why: class row2o/mid, development
+- id: 29932134-b528-4c88-8555-d7b2a982950f
+  why: class row2o/mid, held out
+- id: b7729875-5f96-4157-b945-9827abe4bb33-b
+  why: class row2o/tall, development
+- id: 93cfbc0a-8780-4992-89fd-5a5c3d69369d
+  why: class row2o/tall, held out
+- id: 30cf5ef9-ef48-487b-b907-fde40d4e64a7-b
+  why: class row3/low
+- id: 8c47a2dd-d7bc-4162-8e08-bea1b994a526-b
+  why: class row3/mid
+- id: b7729875-5f96-4157-b945-9827abe4bb33-a
+  why: class row3/tall
+- id: 4d4b4e2e-e365-403e-9283-cd81f9d76a61
+  why: class tiered/low
+- id: 2fa249bb-48ce-4dda-838b-69280fdde876
+  why: class tiered/mid, development
+- id: 47603cef-ece6-4f63-ae2d-7a19750a951f
+  why: class tiered/mid, held out
+- id: 4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7
+  why: class tiered/tall, development
+- id: 464787e1-68a8-4cb7-bc79-820a329ac120
+  why: class tiered/tall, held out
+- id: 2b18f52d-212a-4d3a-a0f3-82da9e02ac0a
+  why: mansard roof, roof tidy (2026-10-14)
+- id: 2870eeb0-4053-48b7-828f-a88356676ce4
+  why: parapet wall cap (2026-10-14)
+- id: 77c2f303-0d53-44d1-867b-8dcbed35c171
+  why: 'American Life Building: penthouse behind the wall cap'
+- id: be45685f-7b19-4e65-a4e4-4fad66f6bd62
+  why: Waterfront Plaza
+- id: fb099a5d-d36a-4cdb-bf42-d1cfcfbb7586
+  why: small building, tower-tuned constants (2026-10-13)

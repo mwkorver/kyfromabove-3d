@@ -38,6 +38,12 @@ from typing import Any, Callable, Dict, Optional, Sequence
 MEASURED_LEVELS = "levels_measured.json"
 
 
+def scripts_dir() -> Path:
+    """The pipeline's scripts: the repository's, or in the image SCRIPTS_DIR."""
+    import os
+    return Path(os.environ.get("SCRIPTS_DIR") or Path(__file__).resolve().parents[2] / "scripts")
+
+
 @dataclass
 class Area:
     """What every building of a run shares: the footprints (the neighbours,
@@ -72,7 +78,7 @@ def measure(rec: Dict[str, Any], bdir: Path, area: Area, log: Callable = print) 
     from .prepare import prepare_piece
     from .settings import resolve
 
-    scripts = Path(__file__).resolve().parents[2] / "scripts"
+    scripts = scripts_dir()
     if str(scripts) not in sys.path:
         sys.path.insert(0, str(scripts))
     import lidar_outline
@@ -133,9 +139,8 @@ def cut_crops_from_piece(bdir: Path, log: Callable = print) -> Dict[str, Any]:
 
 #: what the build is made of besides the package: the scripts the build phase
 #: runs, and the classes' settings
-_CODE = ("scripts/colorize_building.py", "scripts/build_mesh.py", "scripts/check_building.py",
-         "scripts/audit_building.py", "scripts/lidar_outline.py", "scripts/wall_visibility.py",
-         "configs/class_strategies.yaml")
+_CODE = ("colorize_building.py", "build_mesh.py", "check_building.py", "audit_building.py", "lidar_outline.py",
+         "wall_visibility.py")
 #: the measure phase's files a building is built from
 _MEASURED = ("coordinates.json", "footprint.json", "clip.json", "check_features.json", "frame_coverage.csv",
              "frames.json", "building_class.json", "footprint_lidar.json", MEASURED_LEVELS)
@@ -149,9 +154,9 @@ def code_version() -> str:
     global _code_version
     if _code_version is None:
         import hashlib
-        root = Path(__file__).resolve().parents[2]
+        from .settings import CLASS_CONFIG
         h = hashlib.sha256()
-        for f in sorted(Path(__file__).resolve().parent.glob("*.py")) + [root / c for c in _CODE]:
+        for f in sorted(Path(__file__).resolve().parent.glob("*.py")) + [scripts_dir() / c for c in _CODE] + [CLASS_CONFIG]:
             if f.exists():
                 h.update(f.name.encode())
                 h.update(f.read_bytes())
@@ -211,7 +216,7 @@ def run_main(script: str, argv) -> SimpleNamespace:
     import traceback
     from types import SimpleNamespace
 
-    scripts = Path(__file__).resolve().parents[2] / "scripts"
+    scripts = scripts_dir()
     if str(scripts) not in sys.path:
         sys.path.insert(0, str(scripts))
     mod = importlib.import_module(script)

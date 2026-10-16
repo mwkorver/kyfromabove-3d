@@ -23,7 +23,9 @@ from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
 from typing import Any, Dict, Literal, Mapping, Optional
 
-CLASS_CONFIG = Path(__file__).resolve().parents[2] / "configs" / "class_strategies.yaml"
+#: the project's configs: the repository's, or in the pipeline's image KFA_CONFIG_DIR (deploy/Dockerfile)
+CONFIG_DIR = Path(os.environ.get("KFA_CONFIG_DIR") or Path(__file__).resolve().parents[2] / "configs")
+CLASS_CONFIG = CONFIG_DIR / "class_strategies.yaml"
 
 
 class SettingsError(ValueError):
@@ -232,7 +234,10 @@ def load_class_settings(path: Optional[Path] = None) -> Dict[str, Dict[str, Dict
     import yaml
     path = Path(path or os.environ.get("KFA_CLASS_STRATEGIES") or CLASS_CONFIG)
     if not path.exists():
-        return {}
+        # not an empty strategy: a build without the classes' settings would
+        # quietly build every building as before classes (the cloud image
+        # once had no configs/)
+        raise SettingsError(f"no class settings at {path}")
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return {cls: class_overrides(entry, f"{path.name}, class {cls}") for cls, entry in raw.items()}
 

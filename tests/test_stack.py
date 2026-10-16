@@ -234,3 +234,30 @@ def test_the_project_tag_reaches_the_spot_machines_and_their_disks(tmp_path_fact
     lt = next(iter(t.find_resources("AWS::EC2::LaunchTemplate").values()))["Properties"]["LaunchTemplateData"]
     tagged = {s["ResourceType"] for s in lt.get("TagSpecifications", []) if tag in s["Tags"]}
     assert {"instance", "volume"} <= tagged, tagged
+
+
+def test_the_queue_run_is_spot_machines_on_a_queue_with_a_patient_dead_letter_queue(tmp_path_factory):
+    from aws_cdk import aws_ec2 as ec2
+    from aws_cdk.aws_ecr_assets import DockerImageAsset
+    from stack import QUEUE_INSTANCES, QUEUE_LIFETIME_MIN, QueueRunStack
+
+    tiny = tmp_path_factory.mktemp("image6")
+    (tiny / "Dockerfile").write_text("FROM public.ecr.aws/lambda/python:3.12\n")
+    st = QueueRunStack(cdk.App(), "Queue", run="r1", max_machines=3,
+                       vpc_factory=lambda s: ec2.Vpc(s, "Vpc", max_azs=2, nat_gateways=0),
+                       image_factory=lambda s: DockerImageAsset(s, "Image", directory=str(tiny)))
+    t = assertions.Template.from_stack(st)
+    t.has_resource_properties("AWS::SQS::Queue", {"QueueName": "kyfromabove-3d-jobs", "VisibilityTimeout": 900,
+                                                  "RedrivePolicy": assertions.Match.object_like({"maxReceiveCount": 10})})
+    t.has_resource_properties("AWS::AutoScaling::AutoScalingGroup", {
+        "MinSize": "0", "MaxSize": "3", "MixedInstancesPolicy": assertions.Match.object_like({
+            "InstancesDistribution": assertions.Match.object_like({
+                "OnDemandBaseCapacity": 0, "OnDemandPercentageAboveBaseCapacity": 0,
+                "SpotAllocationStrategy": "capacity-optimized"})})})
+    asg = next(iter(t.find_resources("AWS::AutoScaling::AutoScalingGroup").values()))["Properties"]
+    types = [o["InstanceType"] for o in asg["MixedInstancesPolicy"]["LaunchTemplate"]["Overrides"]]
+    assert types == list(QUEUE_INSTANCES)
+    lt = next(iter(t.find_resources("AWS::EC2::LaunchTemplate").values()))
+    ud = json.dumps(lt["Properties"]["LaunchTemplateData"]["UserData"])
+    assert f"shutdown -h +{QUEUE_LIFETIME_MIN}" in ud and "scripts/queue_worker.py" in ud and "--run r1" in ud
+    t.resource_count_is("AWS::EC2::SecurityGroupIngress", 0)

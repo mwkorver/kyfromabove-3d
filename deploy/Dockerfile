@@ -52,6 +52,10 @@ COPY --from=basisu /usr/local/bin/basisu /usr/local/bin/basisu
 # The building step runs the laptop's scripts, each in its own process.
 COPY scripts ${LAMBDA_TASK_ROOT}/scripts
 ENV SCRIPTS_DIR=${LAMBDA_TASK_ROOT}/scripts
+# and the classes' settings (configs/class_strategies.yaml): without them every
+# building would be built as before classes (kyfromabove_3d.settings now stops)
+COPY configs ${LAMBDA_TASK_ROOT}/configs
+ENV KFA_CONFIG_DIR=${LAMBDA_TASK_ROOT}/configs
 
 COPY deploy/handlers.py ${LAMBDA_TASK_ROOT}/
 

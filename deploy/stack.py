@@ -277,6 +277,113 @@ class Ec2BenchStack(Stack):
         CfnOutput(self, "ImageUri", value=image.image_uri)
 
 
+#: The queue run's machines: Graviton, 16 processors, 32-64 GB, whichever a
+#: zone has Spot capacity for (capacity-optimized).
+QUEUE_INSTANCES = ("c8g.4xlarge", "c7g.4xlarge", "m8g.4xlarge", "m7g.4xlarge")
+QUEUE_MAX_PRICE = "0.45"
+#: A machine's hard end: however the run goes, none lives past this.
+QUEUE_LIFETIME_MIN = 720
+
+
+class QueueRunStack(Stack):
+    """A run on EC2 Spot fed by SQS (refactor step 4): the job queue (a
+    dead-letter queue behind it at ``max_receives``, high because a Spot
+    interruption also counts as a receive -- the worker parks a job after its
+    own count of real failures), and an Auto Scaling group of Graviton Spot
+    machines that each run ``scripts/queue_worker.py`` in the pipeline's
+    image, beside the frame cache. The group grows to ``max_machines`` while
+    the queue holds work (visible or in flight) and shrinks to none when it is
+    empty. Reached through SSM only; no inbound port. Each machine stops
+    itself after ``QUEUE_LIFETIME_MIN`` minutes."""
+
+    def __init__(self, scope: Construct, cid: str, *, run: str = "run", bucket_name: str = "kyfromabove-3d",
+                 max_machines: int = 2, slots: int = 14, max_receives: int = 10,
+                 vpc_factory: Optional[Callable[[Stack], object]] = None,
+                 image_factory: Optional[Callable[[Stack], object]] = None, **kw):
+        super().__init__(scope, cid, **kw)
+        from aws_cdk import aws_autoscaling as autoscaling
+        from aws_cdk import aws_cloudwatch as cw
+        from aws_cdk import aws_ec2 as ec2
+        from aws_cdk import aws_iam as iam
+
+        vpc = (vpc_factory or (lambda s: ec2.Vpc.from_lookup(s, "Default", is_default=True)))(self)
+        if image_factory is None:
+            from aws_cdk.aws_ecr_assets import DockerImageAsset, Platform
+            image = DockerImageAsset(self, "Image", directory=str(ROOT), file="deploy/Dockerfile",
+                                     exclude=IMAGE_EXCLUDE, platform=Platform.LINUX_ARM64)
+        else:
+            image = image_factory(self)
+
+        dlq = sqs.Queue(self, "Parked", queue_name="kyfromabove-3d-jobs-dlq", retention_period=Duration.days(14))
+        queue = sqs.Queue(self, "Jobs", queue_name="kyfromabove-3d-jobs", visibility_timeout=Duration.minutes(15),
+                          retention_period=Duration.days(14),
+                          dead_letter_queue=sqs.DeadLetterQueue(queue=dlq, max_receive_count=max_receives))
+
+        role = iam.Role(self, "Role", role_name="kyfromabove-3d-queue-role",
+                        assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
+                        managed_policies=[iam.ManagedPolicy.from_aws_managed_policy_name(
+                            "AmazonSSMManagedInstanceCore")])
+        s3.Bucket.from_bucket_name(self, "Data", bucket_name).grant_read_write(role)
+        queue.grant_consume_messages(role)
+        image.repository.grant_pull(role)
+        sg = ec2.SecurityGroup(self, "NoInbound", vpc=vpc, allow_all_outbound=True,
+                               description="kyfromabove-3d queue run: no inbound; out to S3, SQS, ECR and KyFromAbove")
+
+        ud = ec2.UserData.for_linux()
+        worker = (f"docker run --name worker --network host --entrypoint python -w /var/task "
+                  f"-e OMP_NUM_THREADS=1 -e COG_CACHE_URL=http://127.0.0.1:8001 -e STORE=s3://{bucket_name} "
+                  f"-e WORK_DIR=/var/tmp/work -e AWS_REGION={self.region} -v /var/tmp/work:/var/tmp/work "
+                  f"{image.image_uri} scripts/queue_worker.py --queue-url {queue.queue_url} --run {run} "
+                  f"--slots {slots} --idle-exit-s 1800 > /var/tmp/worker.log 2>&1")
+        ud.add_commands(
+            f"shutdown -h +{QUEUE_LIFETIME_MIN}",               # first: the machine's hard end
+            "dnf install -y docker && systemctl start docker",
+            f"aws ecr get-login-password --region {self.region} | docker login --username AWS "
+            f"--password-stdin {self.account}.dkr.ecr.{self.region}.amazonaws.com",
+            f"docker pull {image.image_uri}",
+            "mkdir -p /opt/cog_cache /var/tmp/cog_log /var/tmp/work",
+            "cat > /opt/cog_cache/nginx.conf.template <<'KFA_NGINX'",
+            (ROOT / "deploy" / "cog_cache" / "nginx.conf.template").read_text().rstrip("\n"),
+            "KFA_NGINX",
+            f"docker run -d --name kfa-cog-cache --network host -e SLICE=1m -e CACHE_MAX=20g "
+            f"-v /opt/cog_cache/nginx.conf.template:/etc/nginx/templates/cog.conf.template:ro "
+            f"-v kfa-cog-cache:/var/cache/nginx/cog -v /var/tmp/cog_log:/var/log/nginx {COG_CACHE_NGINX}",
+            worker,
+            "aws s3 cp /var/tmp/worker.log "
+            f"s3://{bucket_name}/runs/{run}/logs/$(cat /var/lib/cloud/data/instance-id).log || true")
+        lt = ec2.LaunchTemplate(
+            self, "Template", machine_image=ec2.MachineImage.latest_amazon_linux2023(
+                cpu_type=ec2.AmazonLinuxCpuType.ARM_64),
+            role=role, security_group=sg, user_data=ud,
+            instance_initiated_shutdown_behavior=ec2.InstanceInitiatedShutdownBehavior.TERMINATE,
+            block_devices=[ec2.BlockDevice(device_name="/dev/xvda", volume=ec2.BlockDeviceVolume.ebs(
+                60, volume_type=ec2.EbsDeviceVolumeType.GP3, delete_on_termination=True))])
+        asg = autoscaling.AutoScalingGroup(
+            self, "Machines", vpc=vpc, vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
+            min_capacity=0, max_capacity=max_machines,
+            mixed_instances_policy=autoscaling.MixedInstancesPolicy(
+                launch_template=lt,
+                launch_template_overrides=[autoscaling.LaunchTemplateOverrides(instance_type=ec2.InstanceType(t))
+                                           for t in QUEUE_INSTANCES],
+                instances_distribution=autoscaling.InstancesDistribution(
+                    on_demand_base_capacity=0, on_demand_percentage_above_base_capacity=0,
+                    spot_allocation_strategy=autoscaling.SpotAllocationStrategy.CAPACITY_OPTIMIZED,
+                    spot_max_price=QUEUE_MAX_PRICE)))
+        # all the machines while the queue holds work, none when it is empty; work in flight
+        # counts (a job being built is not visible, and its machine must stay)
+        work = cw.MathExpression(expression="visible + flight", period=Duration.minutes(1), using_metrics={
+            "visible": queue.metric_approximate_number_of_messages_visible(period=Duration.minutes(1)),
+            "flight": queue.metric_approximate_number_of_messages_not_visible(period=Duration.minutes(1))})
+        asg.scale_on_metric("ByQueue", metric=work, adjustment_type=autoscaling.AdjustmentType.EXACT_CAPACITY,
+                            scaling_steps=[autoscaling.ScalingInterval(upper=0, change=0),
+                                           autoscaling.ScalingInterval(lower=1, change=max_machines)],
+                            evaluation_periods=5, cooldown=Duration.minutes(5))
+        CfnOutput(self, "QueueUrl", value=queue.queue_url)
+        CfnOutput(self, "DeadLetterQueueUrl", value=dlq.queue_url)
+        CfnOutput(self, "GroupName", value=asg.auto_scaling_group_name)
+        CfnOutput(self, "ImageUri", value=image.image_uri)
+
+
 #: What the viewer's CloudFront may read from the bucket: the page, the
 #: statewide tree, each tile's batched tiles and the terrain. Everything else
 #: (pieces, building outputs, audits, logs) stays private even to CloudFront.

@@ -83,3 +83,8 @@ def test_the_building_lists_read():
     import yaml
     for f in ("safety_net.yaml", "audit_reference.yaml", "landmarks.yaml", "class_strategies.yaml"):
         assert yaml.safe_load((ROOT / "configs" / f).read_text(encoding="utf-8"))
+
+
+def test_no_class_settings_stops_the_build(tmp_path):
+    with pytest.raises(S.SettingsError, match="no class settings"):
+        S.load_class_settings(tmp_path / "missing.yaml")

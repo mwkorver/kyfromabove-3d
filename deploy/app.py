@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import aws_cdk as cdk                                                     # noqa: E402
 
 from stack import (PROJECT_TAG, BudgetStack, BuildingStepStack, Ec2BenchStack, PieceStepStack,  # noqa: E402
-                   TileStepStack, ViewerStack)
+                   QueueRunStack, TileStepStack, ViewerStack)
 
 # step by step: steps 1, 2 and 3, each its own Lambda, invoked directly
 # (PiecesStack, the event-driven chain, stays in stack.py for a later step)
@@ -25,6 +25,11 @@ BuildingStepStack(app, "kyfromabove-3d-building-step", env=env)
 # a Graviton Spot machine to price EC2 against Lambda; destroy it when done
 Ec2BenchStack(app, "kyfromabove-3d-ec2-bench", env=env, count=int(app.node.try_get_context("bench_count") or 1),
               first_subnet=int(app.node.try_get_context("bench_subnet") or 0))
+# a run on Spot machines fed by SQS (refactor step 4), only when a run is named:
+# npx aws-cdk deploy kyfromabove-3d-queue -c queue_run=r1 [-c queue_machines=2]
+if app.node.try_get_context("queue_run"):
+    QueueRunStack(app, "kyfromabove-3d-queue", env=env, run=app.node.try_get_context("queue_run"),
+                  max_machines=int(app.node.try_get_context("queue_machines") or 2))
 # the demo viewer: CloudFront over the served prefixes; the password (a
 # git-ignored file) only with -c viewer_password=on
 _pw = Path(__file__).with_name("viewer_password.txt")

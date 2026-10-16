@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-15T14:43:41",
+ "updated": "2026-10-16T00:29:40",
  "counts": {
   "meshed": 392
  },
@@ -11,9 +11,9 @@
    "path": "box",
    "n_frames": 17,
    "n_on_footprint": 41,
-   "t_total": 12.8,
+   "t_total": 8.2,
    "error": null,
-   "attempts": 47
+   "attempts": 56
   },
   {
    "gers": "37e97999-0088-4a8c-956b-d32d276bc6b4-a",
@@ -77,9 +77,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 3812,
-   "t_total": 14.0,
+   "t_total": 10.1,
    "error": null,
-   "attempts": 44
+   "attempts": 53
   },
   {
    "gers": "96f855e3-046e-45bb-b3ca-defd0bc88d08",
@@ -286,9 +286,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 577,
-   "t_total": 13.3,
+   "t_total": 10.2,
    "error": null,
-   "attempts": 50
+   "attempts": 59
   },
   {
    "gers": "b7729875-5f96-4157-b945-9827abe4bb33-b",
@@ -297,9 +297,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 863,
-   "t_total": 13.2,
+   "t_total": 10.0,
    "error": null,
-   "attempts": 50
+   "attempts": 59
   },
   {
    "gers": "b144a5d2-079d-41e5-b52d-b36d264ce44e",
@@ -319,9 +319,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 13258,
-   "t_total": 20.8,
+   "t_total": 16.7,
    "error": null,
-   "attempts": 45
+   "attempts": 54
   },
   {
    "gers": "fa2a341b-423e-4c87-aa21-10ad538f152a",
@@ -440,9 +440,9 @@
    "path": "profile",
    "n_frames": 15,
    "n_on_footprint": 1206,
-   "t_total": 13.9,
+   "t_total": 9.7,
    "error": null,
-   "attempts": 43
+   "attempts": 52
   },
   {
    "gers": "53eb5fc6-8823-4152-aec8-1b5659f67bb1",
@@ -594,9 +594,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 17232,
-   "t_total": 32.3,
+   "t_total": 23.5,
    "error": null,
-   "attempts": 45
+   "attempts": 54
   },
   {
    "gers": "4bacf443-4386-41f9-866b-cefb401ec759",
@@ -638,9 +638,9 @@
    "path": "profile",
    "n_frames": 17,
    "n_on_footprint": 10007,
-   "t_total": 19.0,
+   "t_total": 15.0,
    "error": null,
-   "attempts": 42
+   "attempts": 51
   },
   {
    "gers": "7ba6f41f-e957-4a3f-b2c7-497eb06278fa",
@@ -704,9 +704,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 5712,
-   "t_total": 17.2,
+   "t_total": 11.5,
    "error": null,
-   "attempts": 44
+   "attempts": 53
   },
   {
    "gers": "770f2fa2-b709-40b5-9343-2fe63f5d5249",
@@ -737,9 +737,9 @@
    "path": "profile",
    "n_frames": 17,
    "n_on_footprint": 535,
-   "t_total": 15.3,
+   "t_total": 7.5,
    "error": null,
-   "attempts": 43
+   "attempts": 52
   },
   {
    "gers": "38266a6d-577e-43db-90d6-053c6a4bb13f",
@@ -759,9 +759,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 1705,
-   "t_total": 14.3,
+   "t_total": 9.6,
    "error": null,
-   "attempts": 39
+   "attempts": 48
   },
   {
    "gers": "7ed2305d-a61c-4dc3-b4a6-e7b86095a4d8",
@@ -814,9 +814,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 4996,
-   "t_total": 16.8,
+   "t_total": 10.7,
    "error": null,
-   "attempts": 40
+   "attempts": 49
   },
   {
    "gers": "3cdc0d6f-3e66-459e-a0d9-0c6ac9df9521",
@@ -893,7 +893,7 @@
    "n_on_footprint": 13,
    "t_total": 12.2,
    "error": null,
-   "attempts": 42
+   "attempts": 43
   },
   {
    "gers": "125d7d2a-c01c-4cd2-9650-1394dd36e93b",
@@ -926,7 +926,7 @@
    "n_on_footprint": 29,
    "t_total": 11.8,
    "error": null,
-   "attempts": 42
+   "attempts": 43
   },
   {
    "gers": "abc80893-ad26-4f4e-8704-dd6b5524c544",
@@ -946,9 +946,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 813,
-   "t_total": 15.7,
+   "t_total": 9.6,
    "error": null,
-   "attempts": 89
+   "attempts": 98
   },
   {
    "gers": "39a33bd6-59b1-4edc-bd76-ffe26f85a868-b",
@@ -957,9 +957,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 420,
-   "t_total": 14.7,
+   "t_total": 8.7,
    "error": null,
-   "attempts": 92
+   "attempts": 101
   },
   {
    "gers": "39a33bd6-59b1-4edc-bd76-ffe26f85a868-c",
@@ -968,9 +968,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 493,
-   "t_total": 14.8,
+   "t_total": 8.6,
    "error": null,
-   "attempts": 90
+   "attempts": 99
   },
   {
    "gers": "187f28ac-42db-4221-9182-c2fbf462242e",
@@ -1034,9 +1034,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 5494,
-   "t_total": 19.6,
+   "t_total": 13.3,
    "error": null,
-   "attempts": 101
+   "attempts": 110
   },
   {
    "gers": "964b2adf-77e0-4cb0-ab9e-8217979f8aaa",
@@ -1113,7 +1113,7 @@
    "n_on_footprint": 15,
    "t_total": 14.7,
    "error": null,
-   "attempts": 41
+   "attempts": 42
   },
   {
    "gers": "af75d196-dd8a-4555-9804-4418528123ab",
@@ -1133,9 +1133,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 10666,
-   "t_total": 27.7,
+   "t_total": 20.9,
    "error": null,
-   "attempts": 41
+   "attempts": 50
   },
   {
    "gers": "3e6ac482-3d32-45c7-b127-56c33f068067",
@@ -1157,7 +1157,7 @@
    "n_on_footprint": 6,
    "t_total": 13.6,
    "error": null,
-   "attempts": 41
+   "attempts": 42
   },
   {
    "gers": "b2ef5b08-8689-4a48-9391-5989c512a8d2",
@@ -1177,9 +1177,9 @@
    "path": "profile",
    "n_frames": 15,
    "n_on_footprint": 18269,
-   "t_total": 34.8,
+   "t_total": 22.1,
    "error": null,
-   "attempts": 101
+   "attempts": 110
   },
   {
    "gers": "7d14268b-8323-4acc-9108-42be7654c293",
@@ -1210,9 +1210,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 23339,
-   "t_total": 38.0,
+   "t_total": 25.6,
    "error": null,
-   "attempts": 43
+   "attempts": 52
   },
   {
    "gers": "a37bdab8-d45f-49ff-b2dd-340f8d3722f8",
@@ -1289,7 +1289,7 @@
    "n_on_footprint": 15,
    "t_total": 12.3,
    "error": null,
-   "attempts": 41
+   "attempts": 42
   },
   {
    "gers": "3527c98b-08a1-410b-96f6-18f739b76de4",
@@ -1309,9 +1309,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 4453,
-   "t_total": 16.8,
+   "t_total": 11.8,
    "error": null,
-   "attempts": 46
+   "attempts": 55
   },
   {
    "gers": "4de2d4ed-a044-4d64-91a0-efc829f4c9cb",
@@ -1452,9 +1452,9 @@
    "path": "profile",
    "n_frames": 13,
    "n_on_footprint": 67226,
-   "t_total": 72.0,
+   "t_total": 48.2,
    "error": null,
-   "attempts": 128
+   "attempts": 137
   },
   {
    "gers": "7c308aa7-8362-4f34-aa30-f1513ee0293d",
@@ -1509,7 +1509,7 @@
    "n_on_footprint": 26,
    "t_total": 16.1,
    "error": null,
-   "attempts": 41
+   "attempts": 42
   },
   {
    "gers": "0a2aa729-0cdb-4cdb-a982-66b52e546134",
@@ -1575,7 +1575,7 @@
    "n_on_footprint": 53,
    "t_total": 16.0,
    "error": null,
-   "attempts": 41
+   "attempts": 42
   },
   {
    "gers": "9ced5451-db59-4012-94b8-fa88cf6103a2",
@@ -1705,9 +1705,9 @@
    "path": "profile",
    "n_frames": 20,
    "n_on_footprint": 815,
-   "t_total": 15.1,
+   "t_total": 12.4,
    "error": null,
-   "attempts": 37
+   "attempts": 46
   },
   {
    "gers": "01f28eaa-f85f-4d5c-980a-69b146b1c8d1",
@@ -1771,9 +1771,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 5850,
-   "t_total": 23.9,
+   "t_total": 19.8,
    "error": null,
-   "attempts": 98
+   "attempts": 107
   },
   {
    "gers": "f73638d0-30e4-41a1-a1d2-93869107c7ad",
@@ -1804,9 +1804,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 6537,
-   "t_total": 24.1,
+   "t_total": 18.2,
    "error": null,
-   "attempts": 45
+   "attempts": 54
   },
   {
    "gers": "092a4bdc-fd3a-4ce7-9076-969057126159",
@@ -1817,7 +1817,7 @@
    "n_on_footprint": 10,
    "t_total": 13.7,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "81d0310d-4ac9-4e87-9d2f-b60af52ee17c",
@@ -1916,7 +1916,7 @@
    "n_on_footprint": 8,
    "t_total": 11.2,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "6f0cece2-9ef7-4c8e-ac57-32b2cf39157a",
@@ -1925,9 +1925,9 @@
    "path": "profile",
    "n_frames": 17,
    "n_on_footprint": 7442,
-   "t_total": 22.4,
+   "t_total": 16.4,
    "error": null,
-   "attempts": 98
+   "attempts": 107
   },
   {
    "gers": "1bddff9f-0265-43a4-b564-146bdcf26d18-a",
@@ -1958,9 +1958,9 @@
    "path": "profile",
    "n_frames": 17,
    "n_on_footprint": 561,
-   "t_total": 15.2,
+   "t_total": 9.4,
    "error": null,
-   "attempts": 36
+   "attempts": 45
   },
   {
    "gers": "c35b66ea-b334-4e1f-b86d-1af8caa4673a-b",
@@ -2156,9 +2156,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 269,
-   "t_total": 16.5,
+   "t_total": 8.6,
    "error": null,
-   "attempts": 36
+   "attempts": 45
   },
   {
    "gers": "928bfb13-4f67-4f13-86a4-b130cf3110b7",
@@ -2167,9 +2167,9 @@
    "path": "profile",
    "n_frames": 17,
    "n_on_footprint": 714,
-   "t_total": 17.2,
+   "t_total": 8.4,
    "error": null,
-   "attempts": 37
+   "attempts": 46
   },
   {
    "gers": "e6eecaf6-813b-47a9-ae76-909d29c58f83",
@@ -2213,7 +2213,7 @@
    "n_on_footprint": 31,
    "t_total": 13.1,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "8bcb7393-6d50-462f-91cb-0d2200f21cf2-a",
@@ -2343,9 +2343,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 899,
-   "t_total": 18.6,
+   "t_total": 9.3,
    "error": null,
-   "attempts": 48
+   "attempts": 57
   },
   {
    "gers": "24bc6e4e-9992-42d8-a196-1bd01ab45575",
@@ -2365,9 +2365,9 @@
    "path": "profile",
    "n_frames": 15,
    "n_on_footprint": 30662,
-   "t_total": 39.1,
+   "t_total": 25.1,
    "error": null,
-   "attempts": 43
+   "attempts": 52
   },
   {
    "gers": "d9393025-cdc4-486f-8d37-c70d8bc91ebc",
@@ -2409,9 +2409,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 6296,
-   "t_total": 31.9,
+   "t_total": 20.4,
    "error": null,
-   "attempts": 100
+   "attempts": 109
   },
   {
    "gers": "9c52a24e-7bd9-4eac-8ff0-c87f80fcda61",
@@ -2486,9 +2486,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 51415,
-   "t_total": 56.6,
+   "t_total": 33.6,
    "error": null,
-   "attempts": 100
+   "attempts": 109
   },
   {
    "gers": "be45685f-7b19-4e65-a4e4-4fad66f6bd62",
@@ -2497,9 +2497,9 @@
    "path": "profile",
    "n_frames": 15,
    "n_on_footprint": 39788,
-   "t_total": 69.5,
+   "t_total": 44.7,
    "error": null,
-   "attempts": 44
+   "attempts": 53
   },
   {
    "gers": "b5c96706-db50-4d41-9ad3-aaf9f1f36ed2",
@@ -2585,9 +2585,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 8188,
-   "t_total": 28.8,
+   "t_total": 17.7,
    "error": null,
-   "attempts": 39
+   "attempts": 48
   },
   {
    "gers": "ccf3f1a7-02db-4270-a812-203e7e9d12dd",
@@ -2607,9 +2607,9 @@
    "path": "profile",
    "n_frames": 13,
    "n_on_footprint": 17393,
-   "t_total": 36.8,
+   "t_total": 25.3,
    "error": null,
-   "attempts": 94
+   "attempts": 103
   },
   {
    "gers": "da636439-9fa2-483b-9d51-87b6d77332d8",
@@ -2728,9 +2728,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 1515,
-   "t_total": 15.0,
+   "t_total": 9.6,
    "error": null,
-   "attempts": 37
+   "attempts": 46
   },
   {
    "gers": "4aa4b14b-3509-4b8c-bb72-e5860338ac43",
@@ -2805,9 +2805,9 @@
    "path": "profile",
    "n_frames": 13,
    "n_on_footprint": 27493,
-   "t_total": 48.0,
+   "t_total": 31.5,
    "error": null,
-   "attempts": 95
+   "attempts": 104
   },
   {
    "gers": "acae9611-3dc6-43ca-b80b-df086f66d867",
@@ -2893,9 +2893,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 31829,
-   "t_total": 49.1,
+   "t_total": 30.3,
    "error": null,
-   "attempts": 103
+   "attempts": 112
   },
   {
    "gers": "4ef9551b-3106-4bbe-ae4f-ff17d8ba34f7",
@@ -2904,9 +2904,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 197537,
-   "t_total": 120.6,
+   "t_total": 94.2,
    "error": null,
-   "attempts": 54
+   "attempts": 63
   },
   {
    "gers": "deddcb4d-1b37-42c9-8f0d-3706db714905",
@@ -2948,9 +2948,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 1472,
-   "t_total": 17.7,
+   "t_total": 10.0,
    "error": null,
-   "attempts": 39
+   "attempts": 48
   },
   {
    "gers": "1d1365b4-2241-4d35-827f-e6badbe3edea",
@@ -3058,9 +3058,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 31366,
-   "t_total": 37.5,
+   "t_total": 22.7,
    "error": null,
-   "attempts": 40
+   "attempts": 49
   },
   {
    "gers": "9c35818a-dc55-4048-90a1-206a1a9653fb",
@@ -3124,9 +3124,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": null,
-   "t_total": 47.7,
+   "t_total": 43.4,
    "error": null,
-   "attempts": 4
+   "attempts": 13
   },
   {
    "gers": "a629ead2-02f3-4c6b-9d8b-c3d444f48437",
@@ -3170,7 +3170,7 @@
    "n_on_footprint": 5,
    "t_total": 14.8,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "2237acdd-63ea-4104-a60b-f0673427dadd",
@@ -3344,9 +3344,9 @@
    "path": "profile",
    "n_frames": 18,
    "n_on_footprint": 24180,
-   "t_total": 49.9,
+   "t_total": 35.8,
    "error": null,
-   "attempts": 112
+   "attempts": 121
   },
   {
    "gers": "fa6e7a02-1308-4776-becf-b85901372acd",
@@ -3368,7 +3368,7 @@
    "n_on_footprint": null,
    "t_total": 51.1,
    "error": null,
-   "attempts": 3
+   "attempts": 12
   },
   {
    "gers": "a099db5b-dfea-4a14-9865-cdd63706ed1a",
@@ -3379,7 +3379,7 @@
    "n_on_footprint": 20,
    "t_total": 19.1,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "ec790737-7929-4a57-8ba7-ad8843bbef4f",
@@ -3388,9 +3388,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 26326,
-   "t_total": 45.1,
+   "t_total": 29.4,
    "error": null,
-   "attempts": 101
+   "attempts": 110
   },
   {
    "gers": "16886442-2551-4b80-988d-f2db8cdf8cc5",
@@ -3412,7 +3412,7 @@
    "n_on_footprint": 5,
    "t_total": 20.2,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "43a72043-c26f-48bc-880a-aa7df3381d2d",
@@ -3434,7 +3434,7 @@
    "n_on_footprint": 29,
    "t_total": 20.2,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "58d85cc4-06f1-48a9-9a2d-046c62f98804",
@@ -3465,9 +3465,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": 8090,
-   "t_total": 41.1,
+   "t_total": 27.8,
    "error": null,
-   "attempts": 98
+   "attempts": 107
   },
   {
    "gers": "73233974-ac0e-40ae-945e-c638396efb35",
@@ -3478,7 +3478,7 @@
    "n_on_footprint": 20,
    "t_total": 18.4,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "ce0bb96d-9a3a-4d68-b7be-3485e01b8791",
@@ -3632,7 +3632,7 @@
    "n_on_footprint": 19,
    "t_total": 14.7,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "6b0a5aa3-70ae-4f4e-9001-f0c946df2571",
@@ -3674,9 +3674,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 15518,
-   "t_total": 26.8,
+   "t_total": 19.8,
    "error": null,
-   "attempts": 39
+   "attempts": 48
   },
   {
    "gers": "3eb58f1a-7a41-4dfb-89e5-ad5f26a19f0c",
@@ -3797,7 +3797,7 @@
    "n_on_footprint": 19,
    "t_total": 14.5,
    "error": null,
-   "attempts": 39
+   "attempts": 40
   },
   {
    "gers": "f449a7c8-43a6-4555-afd4-c67c3115abc6",
@@ -3883,9 +3883,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 2155,
-   "t_total": 19.9,
+   "t_total": 14.0,
    "error": null,
-   "attempts": 41
+   "attempts": 50
   },
   {
    "gers": "e5214ab7-800d-46bf-88d0-6ca360684484",
@@ -3993,9 +3993,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 1612,
-   "t_total": 19.3,
+   "t_total": 13.4,
    "error": null,
-   "attempts": 36
+   "attempts": 45
   },
   {
    "gers": "211041a1-2636-4bff-8a60-c41f5e30651c",
@@ -4136,9 +4136,9 @@
    "path": "profile",
    "n_frames": 16,
    "n_on_footprint": null,
-   "t_total": 45.7,
+   "t_total": 32.4,
    "error": null,
-   "attempts": 3
+   "attempts": 12
   },
   {
    "gers": "9da70723-692c-4609-b19e-b4e3e3ae2522",
@@ -4158,9 +4158,9 @@
    "path": "profile",
    "n_frames": 14,
    "n_on_footprint": 22399,
-   "t_total": 39.8,
+   "t_total": 21.9,
    "error": null,
-   "attempts": 97
+   "attempts": 106
   },
   {
    "gers": "77c2f303-0d53-44d1-867b-8dcbed35c171",
@@ -4169,9 +4169,9 @@
    "path": "profile",
    "n_frames": 19,
    "n_on_footprint": 8907,
-   "t_total": 28.5,
+   "t_total": 14.9,
    "error": null,
-   "attempts": 40
+   "attempts": 49
   },
   {
    "gers": "92229a36-4e0d-4300-bcd7-8dec13276868",

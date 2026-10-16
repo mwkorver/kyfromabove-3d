@@ -16,7 +16,7 @@ cells (about 150 m) so the viewer can cull whole blocks at once.
 Usage::
 
     python scripts/merge_downtown_tileset.py --out outputs/downtown \\
-        --buildings outputs/downtown/buildings --extra outputs/pnc_tower/pnc_tower outputs/humana/humana outputs/urban/building_002
+        --buildings outputs/downtown/buildings
 """
 
 from __future__ import annotations

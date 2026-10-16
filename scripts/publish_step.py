@@ -14,7 +14,6 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -102,9 +101,7 @@ def main() -> int:
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--inputs", required=True,
-                    help="the tiles' buildings.json and ground.npz, and buildings/<version>/<gers>/")
-    ap.add_argument("--building-version", default=None,
-                    help="which version of the building step's results to publish (default: the current code's)")
+                    help="the tiles' buildings.json and ground.npz, and buildings/<gers>/")
     ap.add_argument("--store", default=None, help="where to write (default: --inputs)")
     ap.add_argument("--tiles", nargs="*", default=[])
     ap.add_argument("--tiles-file", type=Path, default=None)
@@ -124,10 +121,9 @@ def main() -> int:
     grid = phase2_grid(args.raw)
     t0 = time.time()
     if tiles and not args.no_tiles:
-        from kyfromabove_3d.building import BUILDING_CODE_VERSION, buildings_prefix
+        from kyfromabove_3d.building import BUILDINGS_PREFIX as bprefix
         from kyfromabove_3d.publish import built_buildings
 
-        bprefix = buildings_prefix(args.building_version or BUILDING_CODE_VERSION)
         available = built_buildings(src, bprefix)                 # one listing, not a question per building
         print(f"{len(available):,} built building(s) in {args.inputs}/{bprefix}", flush=True)
         done = 0

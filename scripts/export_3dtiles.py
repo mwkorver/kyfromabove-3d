@@ -17,8 +17,8 @@ RGB, RTC_CENTER for float precision), which every 3D Tiles viewer reads.
 
 Usage::
 
-    python scripts/export_3dtiles.py --building outputs/pnc_tower/pnc_tower
-    # -> outputs/pnc_tower/pnc_tower/3dtiles/tileset.json
+    python scripts/export_3dtiles.py --building outputs/downtown/buildings/1614a997-3d6f-475f-9bc5-bb5a9dbc878d      # PNC Tower
+    # -> <building>/3dtiles/tileset.json
 """
 
 from __future__ import annotations

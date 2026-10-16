@@ -95,7 +95,7 @@ def reference_buildings(reference: Path, landmarks: Path, transforms: Dict[str, 
     lm = {d.get("case") or d["key"]: d for d in yaml.safe_load(landmarks.read_text(encoding="utf-8"))["landmarks"]}
     out = []
     for b in ref:
-        bdir = ROOT / b["dir"] if b.get("dir") else buildings_dir / b["id"]
+        bdir = buildings_dir / b["id"]
         gers = lm[b["case"]]["gers"] if b.get("case") in lm else b["id"]
         if gers not in transforms:
             print(f"[WARN] {b['name']}: not in the tileset, skipped")

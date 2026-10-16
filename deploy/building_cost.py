@@ -5,8 +5,8 @@ Kentucky, stage by stage.
 Measured, not assumed, where it can be:
 
 * **seconds and peak memory of each stage, per building** -- a sample of
-  buildings built on the laptop by ``scripts/building_step.py`` (the same
-  code the Lambda runs), drawn evenly from five footprint-size bands so the
+  buildings built on the laptop by the old ``scripts/building_step.py``
+  (removed 2026-10-16; its results files remain), drawn evenly from five footprint-size bands so the
   towers are measured as well as the houses (``--results``);
 * **how many buildings of each size** -- the 2x2 block's 2,361 from the tile
   step, and Kentucky's 2.79 million from Overture's outlines over the Phase 2
@@ -150,7 +150,7 @@ def cost(counts, bands, factor: float, batch: int = 5):
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--results", type=Path, required=True, help="scripts/building_step.py --results")
+    ap.add_argument("--results", type=Path, required=True, help="the old scripts/building_step.py --results lines")
     ap.add_argument("--tiles-dir", type=Path, required=True, help="the 2x2 block's tiles/<name>/buildings.json")
     ap.add_argument("--state-hist", type=Path, default=Path(__file__).with_name("ky_area_hist.json"))
     ap.add_argument("--contention", type=float, nargs=2, default=(1.0, 1.0), metavar=("COMPUTING", "CROPS"),

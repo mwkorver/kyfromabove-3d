@@ -19,7 +19,7 @@ this prediction is the part another flight could recover.
 
 Usage::
 
-    python scripts/predict_overhang_shadow.py --building outputs/humana/humana \\
+    python scripts/predict_overhang_shadow.py --building outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 \\
         --gers d2786314-4fb3-4da6-8f81-621873d40c08
 """
 

@@ -49,7 +49,7 @@ ENV PROJ_NETWORK=OFF
 
 COPY --from=basisu /usr/local/bin/basisu /usr/local/bin/basisu
 
-# The building step runs the laptop's scripts, each in its own process.
+# The queue jobs run the laptop's scripts (kyfromabove_3d.pipeline.run_main).
 COPY scripts ${LAMBDA_TASK_ROOT}/scripts
 ENV SCRIPTS_DIR=${LAMBDA_TASK_ROOT}/scripts
 # and the classes' settings (configs/class_strategies.yaml): without them every
@@ -65,4 +65,4 @@ ENV MPLBACKEND=Agg MPLCONFIGDIR=/tmp/matplotlib PROJ_USER_WRITABLE_DIRECTORY=/tm
 # Lambda may be the host's; fixed at 256 MB it cannot crowd a large
 # building's crops. Speed only: the pixels are the same.
 ENV GDAL_CACHEMAX=256
-CMD ["handlers.make_pieces"]
+CMD ["handlers.tile_step"]

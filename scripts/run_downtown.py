@@ -116,7 +116,7 @@ def worker(args) -> int:
     """prepare -> colourise -> mesh -> cleanup for one building, writing
     state.json after every step. Runs in its own process."""
     from kyfromabove_3d.lidar import LidarTileIndex
-    from kyfromabove_3d.prepare import load_frames_index, prepare_building
+    from kyfromabove_3d.prepare import load_frames_index
 
     data = json.loads(args.footprints.read_text(encoding="utf-8"))
     records = data["buildings"]
@@ -166,13 +166,10 @@ def worker(args) -> int:
                     (bdir / fname).unlink(missing_ok=True)
             save(status="measured" if state.get("status") != "meshed" else "meshed", measure=res, error=None)
             return 0
-        # phase 2: the crops of the frames the measure phase chose, when they are not on disk -- cut
-        # ahead by the run's crop workers (phase "crops") while other buildings are built, or here
+        # phase 2: the crops of the frames the measure phase chose, when they are not on disk
         if not (bdir / "images").exists() and (bdir / "frames.json").exists():
             from kyfromabove_3d.pipeline import cut_crops_from_piece
             save(crops=cut_crops_from_piece(bdir))
-        if args.phase == "crops":
-            return 0
         # colourise (as part of the mesh: build_mesh runs it and takes the box path if it declines)
         cmd = [sys.executable, str(SCRIPTS / "build_mesh.py"), "--building", str(bdir),
                "--name", rec.get("name") or args.gers, "--scene-cloud", str(args.out / "scene_phase2.npz")]
@@ -184,8 +181,6 @@ def worker(args) -> int:
             cmd.append("--match-walls")
         if args.lidar_outline:
             cmd.append("--lidar-outline")
-        if getattr(args, "roof_edge", None):
-            cmd += ["--roof-edge", args.roof_edge]
         if args.complete:
             cmd.append("--complete")
         t = time.time()
@@ -455,8 +450,6 @@ def run(args) -> int:
             cmd.append("--match-walls")
         if args.lidar_outline:
             cmd.append("--lidar-outline")
-        if getattr(args, "roof_edge", None):
-            cmd += ["--roof-edge", args.roof_edge]
         if args.check_sheets:
             cmd.append("--check-sheets")
         if args.complete:
@@ -507,17 +500,8 @@ def run(args) -> int:
         todo = [r for r in todo if r not in same]
         print(f"{len(same)} building(s) unchanged since they were built; {len(todo)} to build")
     done = 0
-    # the crops wait on the network: cut ahead by their own workers, in the build's order, while
-    # the build workers compute (refactor step 3); a build starts when its crops are on disk
-    cpool = ThreadPoolExecutor(max_workers=max(args.crop_workers, 1))
-    crops_of = {r["id"]: cpool.submit(one, r, "crops") for r in todo} if args.crop_workers else {}
-
-    def build(r):
-        if r["id"] in crops_of:
-            crops_of[r["id"]].result()
-        return one(r)
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = {pool.submit(build, r): r for r in todo}
+        futures = {pool.submit(one, r): r for r in todo}
         for fut in as_completed(futures):
             rec = futures[fut]
             try:
@@ -541,7 +525,6 @@ def run(args) -> int:
                     do_merge(out)
                 except Exception as exc:                       # noqa: BLE001
                     print(f"[warn] merge failed: {exc}")
-    cpool.shutdown()
     manifest = write_manifest(out, records, read_states(out))
     do_merge(out)
     print(f"done in {(time.time() - t_run) / 60:.1f} min: {manifest['counts']}")
@@ -595,22 +578,16 @@ def main() -> int:
     common.add_argument("--no-prism-occluders", action="store_true",
                         help="texture with LiDAR-point occlusion alone (neighbours' facades mostly missing)")
     common.add_argument("--check-sheets", action="store_true", help="the check also draws texture_check.jpg")
-    common.add_argument("--roof-edge", choices=("outline", "grid"), default=None,
-                        help="the roof cut along the outlines (build_mesh's default) or the height field's grid (before)")
     common.add_argument("--lidar-outline", action="store_true",
                         help="the colourise uses each building's footprint_lidar.json where it has one (scripts/lidar_outline.py)")
     common.add_argument("--match-walls", action="store_true",
                         help="the colourise gives unknown wall bands the depth the frames agree on (kyfromabove_3d.wall_match)")
     common.add_argument("--force-step", nargs="*", choices=STEPS, default=None)
     r = sub.add_parser("run", parents=[common]); r.add_argument("--workers", type=int, default=4)
-    r.add_argument("--crop-workers", type=int, default=0,
-                   help="workers cutting the next buildings' crops while the others build; 0: each build cuts its "
-                        "own (on the laptop, with the frame cache, cutting ahead was slower: 512 s for the safety "
-                        "net, 529 s with 4 crop workers, 582 s with 2)")
     r.add_argument("--limit", type=int, default=0); r.add_argument("--only", nargs="*", default=None)
     r.add_argument("--no-resume", action="store_true"); r.add_argument("--merge-every", type=int, default=25)
     w = sub.add_parser("worker", parents=[common]); w.add_argument("--gers", required=True)
-    w.add_argument("--phase", choices=("measure", "crops", "build"), default="build",
+    w.add_argument("--phase", choices=("measure", "build"), default="build",
                    help="measure: the piece, class, outline and levels; build: crops, colourise, mesh, check, audit")
     sub.add_parser("merge", parents=[common])
     sub.add_parser("report", parents=[common])

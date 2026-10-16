@@ -1,51 +1,50 @@
 # The pipeline in AWS
 
-The goal is all of Kentucky. What runs today is simple: a laptop starts each
-step over a list of LiDAR tiles and watches it, and every step reads from and
-writes to one private bucket, `s3://kyfromabove-3d` (us-west-2, beside the
-KyFromAbove and Overture buckets).
+The goal is all of Kentucky. Every step reads from and writes to one private
+bucket, `s3://kyfromabove-3d` (us-west-2, beside the KyFromAbove and Overture
+buckets). The buildings are made by the same code as on the laptop (the one
+pipeline, `kyfromabove_3d.pipeline`), run as jobs on EC2 Spot machines that
+take them from a queue (refactor step 4, October 2026).
 
 ```
 stage 0 (laptop, once per Overture release)
   Overture footprints ──> inputs/footprints/tile=<name>.json
                                    │
-step 1, tile      (Lambda, one per tile)          run_tile_step.py
+step 1, tile      (Lambda, one per tile)          deploy/run_tile_step.py
   tiles/<name>/buildings.json, frames.gpkg        product 1 heights, frames listed
                                    │
-step 2, piece     (Lambda, 25 buildings a call)   run_piece_step.py
-  pieces/<gers>/ ... piece.json last              LiDAR clip, frames as pointers
+measure jobs      (EC2 Spot, one job per tile)    scripts/queue_run.py measure
+  pieces/<gers>/ ... piece.json last              LiDAR clip, frames, class, outline, levels
                                    │
-step 3, building  (EC2 Spot, 16 at once)          run_spot_build.py
-  buildings/<version>/<gers>/: 5 objects         meshes, check, audit
+build jobs        (EC2 Spot, 8-16 buildings)      scripts/queue_run.py build
+  buildings/<gers>/: 5 objects, building.json last   meshes, check, audit
                                    │
-step 4, publish   (a Spot machine, or a laptop)   publish_step.py
+step 4, publish   (a Spot machine, or a laptop)   scripts/publish_step.py
   kentucky/, tiles/*/3dtiles/, terrain/, viewer/ ──> CloudFront ──> the viewer
 ```
 
-Each runner (`deploy/run_*.py`) is started from the laptop and invokes its
-step directly; there are no queues or events between the steps yet. Every
-step can be rerun safely: a step skips work whose inputs have not changed
-(the marker files written last carry a hash of their inputs).
+The queue run (`QueueRunStack` in `deploy/stack.py`, deployed as
+`kyfromabove-3d-queue` with `-c queue_run=<name>`): one SQS queue of jobs with
+a dead-letter queue, and a group of Spot machines that grows with the
+messages waiting and shrinks to none when the queue is empty. Each machine
+runs `scripts/queue_worker.py` (`kyfromabove_3d.queue_worker`): one job at a
+time per slot, in a process of its own, its message kept hidden while it
+runs, and on the Spot two-minute notice the job handed back to the queue.
+A run's progress is kept under `runs/<run>/` (done, failed, parked).
 
-### Designed but not deployed: an event chain
+Every step can be rerun safely. A piece's marker carries a hash of its
+inputs; a building's `building.json` carries its fingerprint (the code, the
+measured files, the settings and the neighbours' measured levels), and a
+build job skips a building whose fingerprint matches the one published.
 
-`PiecesStack` in `deploy/stack.py` is a different way to join the steps,
-tested locally but **never deployed**: a piece's marker landing in S3 is an
-event that EventBridge routes, through a queue with a dead-letter queue, to
-the next step. Its tests run the whole chain against moto, a local stand-in
-for AWS (`tests/test_event_chain.py`, `tests/test_stack.py`). It is kept for
-a statewide run, where a laptop starting and watching every step would be
-the weak point.
-
-```
-make_pieces (Lambda, from a tiles queue) ──> pieces/<gers>/ ... piece.json last
-                                                       │  S3 "Object Created"
-                                                       ▼
-                     EventBridge rule: key matches pieces/*/piece.json
-                                                       │
-                                                       ▼
-                     pieces queue (+ dead-letter) ──> record_piece ──> DynamoDB "pieces"
-```
+**Removed 2026-10-16** (cleanup after refactor step 4): the Lambda piece
+and building steps, the event chain that was designed but never deployed
+(`PiecesStack`, `make_pieces`, `record_piece`, `start_tiles.py`), the Spot
+bench (`Ec2BenchStack`), their runners (`run_piece_step.py`,
+`run_building_step.py`, `run_spot_build.py`, `run_ec2_bench.py`,
+`migrate_buildings.py`) and `scripts/piece_step.py`, `building_step.py`,
+`make_pieces.py`. The sections below that describe September's runs name
+them as they were then.
 
 ## Built so far, step by step (September 2026)
 
@@ -275,18 +274,19 @@ cannot do, once per account:
 
 ## What a building leaves behind
 
-The building step stores each building as five objects, under a folder for
-the version of the code that built it (`building.pack_building`):
+A build job stores each building as five objects plus its marker
+(`building.publish_building`), in one folder per building; a rebuild
+overwrites it:
 
 ```
-buildings/<version>/<gers>/
+buildings/<gers>/
   3dtiles_mesh.zip       the measured product: tileset.json, building.glb, textures/*.png
   3dtiles_complete.zip   the completed product: the same
   review.zip             the audit and its picture, the texture check, classification,
                          wall planes and profiles, the mirror and coverage reports,
                          the tinted copy, the fill test's data, the build log
   levels.json            the building's traced levels
-  building.json          what it was built from and how long each stage took; written last
+  building.json          its fingerprint, what it was built from, each file's size; written last
 ```
 
 Why these five and not one or twenty:
@@ -297,25 +297,24 @@ Why these five and not one or twenty:
 - **Step 4 reads only the mesh products**, so each is its own zip: publishing
   the measured view downloads one small zip a building, not the review files.
 - **`building.json` stays separate and last**: a rerun reads it to skip a
-  building already built from the same piece by the same code.
+  building whose fingerprint has not changed.
 - **`levels.json` stays separate**: it is small, and a neighbour's levels are
   the known fix for a tower drawn as its whole outline (see "What the
-  building step costs" above), which would read them one building at a time.
+  building step costs" below), which would read them one building at a time.
 - **The zips are deterministic** (`archive.zip_bytes`: sorted members, one
-  fixed timestamp), so the same files always give the same bytes. A
-  building rebuilt from scratch and the same building repacked by the
-  migration below give identical mesh zips.
+  fixed timestamp), so the same files always give the same bytes.
 
-**Each version keeps its own folder.** `building.BUILDING_CODE_VERSION`
-names it (today `stage3-2`). A new method means a new version: its buildings
-land beside the old ones, so the two can be compared building by building,
-and step 4 publishes whichever is asked for
-(`publish_step.py --building-version`).
+**One folder per building, no versions.** Until October the buildings were
+kept under a folder per version of the building step
+(`buildings/stage3-2/<gers>/`, the pilot's); those stay in the bucket as
+they are, and step 4 now reads `buildings/<gers>/`
+(`building.BUILDINGS_PREFIX`). To compare two methods, run them into two
+stores (`STORE` for the queue run), not two folders of one.
 
 **A rebuild does not read any of this.** It starts again from:
 
-- the building's piece, `pieces/<gers>/` (step 2: the LiDAR clip, the frames
-  chosen, the local frame);
+- the building's piece, `pieces/<gers>/` (the measure job: the LiDAR clip,
+  the frames chosen, the local frame, the class, the outline and levels);
 - the tile's `tiles/<tile>/buildings.json` and its neighbours' (the
   neighbouring buildings, standing as prisms);
 - the LiDAR within 250 m and the aerial frames themselves, read again from
@@ -325,14 +324,6 @@ and step 4 publishes whichever is asked for
 So `pieces/` and `tiles/` are the project's real inputs and must be kept. If
 lifecycle rules are ever added to clean up scratch folders, they must not
 touch those two.
-
-**Buildings stored the old way** (about 20 files under `buildings/<gers>/`,
-as the pilot's 9,252 were) are moved by `deploy/migrate_buildings.py`: it
-counts by default, `--copy` repacks each under the version its own
-`building.json` names, and `--delete-old`, run after, removes an old
-building's files only where its copy lists every one of them. On the
-README's one-tile example (5 buildings, 109 files), the copies published
-exactly the same 29 files, byte for byte, as the originals.
 
 ## What a piece is
 
@@ -367,40 +358,37 @@ Bump `CODE_VERSION` and every piece is rewritten, and every event fires.
 | Where | What |
 |---|---|
 | `src/kyfromabove_3d/store.py` | `LocalStore` (a folder) and `S3Store` (a bucket; `endpoint_url` for LocalStack or moto) |
-| `src/kyfromabove_3d/pieces.py` | tile ownership and halo, `make_tile_pieces`, `publish_piece` (marker last, unchanged skipped), `run_tile` |
+| `src/kyfromabove_3d/pieces.py` | tile ownership and halo, `piece_step`, `publish_piece` (marker last, unchanged skipped) |
 | `src/kyfromabove_3d/product1.py` | product 1's measures, shared with `scripts/overture_boxes.py`: heights inside the edge, the roof-step splits |
-| `src/kyfromabove_3d/prepare.py` | `prepare_piece` and `cut_crops`; `prepare_building` still does both, so `run_downtown.py` is unchanged |
+| `src/kyfromabove_3d/pipeline.py` | the one pipeline, laptop and cloud: measure, then build; the fingerprint |
+| `src/kyfromabove_3d/cloud_jobs.py` | the queue's two jobs: `measure_job` (a tile's buildings) and `build_job` (a batch) |
+| `src/kyfromabove_3d/queue_worker.py` | a Spot machine's loop over the queue (heartbeat, retries, the Spot notice) |
+| `src/kyfromabove_3d/building.py` | a piece fetched, the neighbours, the LiDAR around a batch, a building packed and published |
 | `scripts/stage0_index.py` | footprints by tile, to a folder or `s3://` |
-| `scripts/make_pieces.py` | stage 1 on this machine, to a folder or `s3://` |
-| `src/kyfromabove_3d/building.py` | step 3: the piece pulled, the cameras rebuilt, the scripts run and timed, `building.json` last |
-| `scripts/building_step.py` | step 3 on this machine (a sample by footprint size, `--results` for the cost model) |
-| `deploy/building_cost.py` | step 3's cost from the laptop's measurements, for the block and the state |
-| `deploy/` | the CDK app (`stack.py`), the Lambda image (`Dockerfile`, ARM, Python 3.12), the handlers, `start_tiles.py` |
+| `scripts/queue_run.py` | a run's jobs sent (`measure`, `build`), its progress (`status`), its failures again (`retry-failed`) |
+| `scripts/queue_worker.py` | the worker a Spot machine starts |
+| `deploy/building_cost.py`, `deploy/ec2_cost.py`, `deploy/cost_model.py` | what a run costs, from measurements |
+| `deploy/` | the CDK app (`stack.py`), the image (`Dockerfile`, ARM, Python 3.12), the tile step's handler, `run_tile_step.py` |
 
 ## Running it
 
-On this machine, no AWS account (the KyFromAbove and Overture buckets are
-read anonymously):
+In AWS (after `aws login`; the CDK CLI runs through `npx`), on downtown's
+2x2 block:
 
 ```bash
-python scripts/stage0_index.py --overture data/derived/louisville_downtown_overture.json --store outputs/cloud
-python scripts/make_pieces.py --store outputs/cloud --all --frames-cache outputs/downtown/frames_2024s1.gpkg
-```
-
-In AWS (after `aws login`; the CDK CLI runs through `npx`), the steps as
-the pilot ran them, on downtown's 2x2 block:
-
-```bash
-cd deploy && npx aws-cdk bootstrap && npx aws-cdk deploy kyfromabove-3d-tile-step kyfromabove-3d-piece-step && cd ..
+cd deploy && npx aws-cdk deploy kyfromabove-3d-tile-step && cd ..
 python scripts/stage0_index.py --bbox -85.773 38.238 -85.735 38.269 --store s3://kyfromabove-3d --tiles N076E228 N076E229 N077E228 N077E229
 python deploy/run_tile_step.py --tiles N076E228 N076E229 N077E228 N077E229
-python deploy/run_piece_step.py --tiles N076E228 N076E229 N077E228 N077E229 --batch 25
+cd deploy && npx aws-cdk deploy kyfromabove-3d-queue -c queue_run=r2 && cd ..
+export QUEUE_URL=$(aws cloudformation describe-stacks --stack-name kyfromabove-3d-queue --query "Stacks[0].Outputs[?OutputKey=='QueueUrl'].OutputValue" --output text)
+python scripts/queue_run.py measure --run r2 --tiles N076E228 N076E229 N077E228 N077E229
+python scripts/queue_run.py build --run r2 --tiles N076E228 N076E229 N077E228 N077E229
+python scripts/queue_run.py status --run r2
 ```
 
-The building step then runs on Spot machines (`kyfromabove-3d-ec2-bench`,
-deployed with `-c bench_count=N`) through `deploy/run_spot_build.py`; see
-the pilot below. `deploy/start_tiles.py` starts the event chain instead, and
-needs `PiecesStack` deployed, which it never has been.
+The machines start when the jobs arrive and stop when the queue has been
+empty a while. Send the build jobs once `status` shows every measure job
+done: a building is built against its neighbours' measured levels.
 
 ## What has been checked
 

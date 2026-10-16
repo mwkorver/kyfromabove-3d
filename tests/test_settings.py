@@ -69,8 +69,8 @@ def test_the_ab_switches_reach_their_settings():
     import build_mesh
     import colorize_building
     m = build_mesh.settings_from_args(build_mesh.parser().parse_args(
-        ["--building", "x", "--no-wall-cap", "--no-roof-tidy", "--roof-edge", "grid"]))
-    assert (m.wall_cap, m.roof_tidy, m.roof_edge) == (False, False, "grid")
+        ["--building", "x", "--no-wall-cap", "--no-roof-tidy"]))
+    assert (m.wall_cap, m.roof_tidy) == (False, False)
     c = colorize_building.settings_from_args(colorize_building.parser().parse_args(
         ["--building", "x", "--lidar-outline", "--no-prism-occluders", "--no-levels", "--drop-classes", ""]))
     assert (c.outline, c.prism_occluders, c.find_levels, c.drop_classes) == ("lidar", False, False, ())

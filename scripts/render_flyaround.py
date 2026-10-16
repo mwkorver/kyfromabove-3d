@@ -51,7 +51,7 @@ similarity (Sim(3)) alignment to these poses, not a rigid one.
 
 Usage::
 
-    python scripts/render_flyaround.py --building outputs/humana/humana --out outputs/flyaround/humana
+    python scripts/render_flyaround.py --building outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 --out outputs/flyaround/humana
     python scripts/render_flyaround.py --glb tests/data/audit/omni_before_mesh.glb --path walk --out /tmp/omni_walk
     python scripts/render_flyaround.py --glb buildings/v3/<gers>/3dtiles_mesh.zip --out /tmp/x --video
 

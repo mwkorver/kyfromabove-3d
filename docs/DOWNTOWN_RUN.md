@@ -214,7 +214,7 @@ at the taller building's height across both.
 ![the six split footprints before and after](figures/split_before_after.jpg)
 
 ```bash
-python scripts/overture_boxes.py split --buildings data/derived/louisville_downtown_overture_lidar.json --frame outputs/humana/humana --out data/derived/louisville_downtown_overture_split.json
+python scripts/overture_boxes.py split --buildings data/derived/louisville_downtown_overture_lidar.json --frame outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 --out data/derived/louisville_downtown_overture_split.json
 python scripts/run_downtown.py run --footprints data/derived/louisville_downtown_overture_split.json --only <gers>-a <gers>-b ... --force-step prepare colorize mesh
 ```
 
@@ -436,7 +436,7 @@ Three smaller repairs from the same review:
   4.5 m, in front of it too — a neighbour's facade across a party wall
   could be painted on. Only a wall up to 2 m *behind* the band, never on a
   party face, is taken now.
-- The batch rebuild (`scripts/rebuild_downtown_meshes.py`) counted a
+- The batch rebuild (`scripts/rebuild_downtown_meshes.py`, since removed) counted a
   failed building as built and merged regardless; it lists every failure
   and merges only when all built. The LiDAR clip is reused only when it
   was cut for the same box about the same origin (`clip.json`).
@@ -564,7 +564,7 @@ in shadow — a choice of source frame, the next adjustment on the list.
 
 **What building the check turned up about the downtown tileset.** A
 mesh-only rebuild in the round of work reviewed above
-(`rebuild_downtown_meshes.py`) ran after `run_downtown` had deleted the
+(`rebuild_downtown_meshes.py`, since removed) ran after `run_downtown` had deleted the
 frame crops, as it does after every mesh. With no crops, `build_mesh`
 quietly textured every prism face and roof from the point cloud or left it
 grey: on `origin/main` all 390 buildings were textured from the frames, in
@@ -576,7 +576,7 @@ run.
 
 ```bash
 python scripts/run_downtown.py run --only <gers> ... --force-step mesh --keep-crops --check-sheets
-python scripts/check_building.py --building outputs/humana/humana --sheet
+python scripts/check_building.py --building outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 --sheet
 python scripts/plot_texture_check.py --dirs outputs/downtown/buildings/<gers> ... --out docs/figures/texture_check.png
 ```
 
@@ -730,8 +730,8 @@ nothing is visible at street distance.
 
 ```bash
 python scripts/overture_boxes.py fetch --bbox -85.764 38.25 -85.75 38.26 --out data/derived/louisville_downtown_overture.json
-python scripts/overture_boxes.py lidar-heights --buildings data/derived/louisville_downtown_overture.json --frame outputs/humana/humana --out data/derived/louisville_downtown_overture_lidar.json
-python scripts/overture_boxes.py split --buildings data/derived/louisville_downtown_overture_lidar.json --frame outputs/humana/humana --out data/derived/louisville_downtown_overture_split.json
+python scripts/overture_boxes.py lidar-heights --buildings data/derived/louisville_downtown_overture.json --frame outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 --out data/derived/louisville_downtown_overture_lidar.json
+python scripts/overture_boxes.py split --buildings data/derived/louisville_downtown_overture_lidar.json --frame outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 --out data/derived/louisville_downtown_overture_split.json
 python scripts/run_downtown.py run --footprints data/derived/louisville_downtown_overture_split.json --workers 4   # resumable; --only <gers> for one, --keep-crops to inspect
 python scripts/run_downtown.py report
 python scripts/plot_downtown_run.py

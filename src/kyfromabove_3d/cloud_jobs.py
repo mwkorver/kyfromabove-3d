@@ -148,7 +148,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
 
     import numpy as np
 
-    from .building import neighbour_records, pack_building, pull_piece, scene_cloud_for
+    from .building import BUILDINGS_PREFIX, neighbour_records, publish_building, pull_piece, scene_cloud_for
     from .coordinates import LocalCoordinateFrame
     from .pipeline import MEASURED_LEVELS, cut_crops_from_piece, fingerprint, run_main
     from .sources_choice import index_for
@@ -185,7 +185,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
         prints = {g: fingerprint(work / "buildings" / g, work / "buildings") for g in markers}
         skipped = 0
         for g in list(markers):
-            done_key = f"buildings/{g}/building.json"
+            done_key = f"{BUILDINGS_PREFIX}/{g}/building.json"
             if store.exists(done_key) and store.read_json(done_key).get("fingerprint") == prints[g]:
                 markers.pop(g)
                 skipped += 1
@@ -205,7 +205,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
         for g in markers:
             b = work / "buildings" / g
             try:
-                fp, done_key = prints[g], f"buildings/{g}/building.json"
+                fp = prints[g]
                 t = time.time()
                 cut_crops_from_piece(b, log=lambda *a, **k: None)
                 cmd = ["--building", b, "--name", markers[g].get("name") or g, "--refresh", "--complete",
@@ -223,12 +223,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
                 ex = json.loads((b / "3dtiles_mesh" / "tileset.json").read_text(encoding="utf-8")).get("extras", {})
                 summary = {"gers": g, "tile": tile, "fingerprint": fp, "run": run, "seconds": round(time.time() - t, 1),
                            **{k: ex.get(k) for k in ("path", "triangles", "n_frames")}}
-                objects, files = pack_building(b)
-                for name in sorted(objects):
-                    store.put_bytes(f"buildings/{g}/{name}", objects[name],
-                                    "application/zip" if name.endswith(".zip") else "application/json")
-                summary.update(files=files, bytes=int(sum(files.values())))
-                store.put_json(done_key, summary)                       # last: the checkpoint
+                publish_building(b, summary, store)                     # building.json last: the checkpoint
                 built += 1
             except Exception as exc:                                    # noqa: BLE001
                 _record_failure(store, run, g, f"build: {exc!r}")

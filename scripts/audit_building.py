@@ -36,7 +36,7 @@ from kyfromabove_3d.clouds import find_cloud, read_cloud                        
 from kyfromabove_3d.project import repo_relative                                 # noqa: E402
 
 
-def lidar_model(b: Path, case: str | None = None, outline: str = "footprint") -> dict:
+def lidar_model(b: Path, outline: str = "footprint") -> dict:
     """The building as the mesh step sets it up (build_mesh.py): the outline
     in the local frame, the levels, and the LiDAR roof field over the
     outline, with the same cell and height cap. ``outline="lidar"`` takes the
@@ -53,7 +53,7 @@ def lidar_model(b: Path, case: str | None = None, outline: str = "footprint") ->
     if outline == "lidar" and (b / "footprint_lidar.json").exists():
         poly, fp = resolve_footprint(b, ox, oy, footprint=b / "footprint_lidar.json")
     else:
-        poly, fp = resolve_footprint(b, ox, oy, case=case)
+        poly, fp = resolve_footprint(b, ox, oy)
     lidar = read_cloud(find_cloud(b, "lidar_local"))
     xyz = np.column_stack([lidar["x"], lidar["y"], lidar["z"]]).astype(np.float64)
     ground_z = 0.0
@@ -112,7 +112,7 @@ def level_edges(levels):
     return edges
 
 
-def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: str | None = None,
+def audit(b: Path, glb: Path | None = None, picture: Path | None = None,
           outline: str = "footprint") -> dict:
     from overture_boxes import min_corner_deg, roof_returns
 
@@ -121,7 +121,7 @@ def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: s
     t0 = time.time()
     glb = glb or (b / "3dtiles_mesh" / "building.glb")
     V, T = read_glb_geometry(glb)
-    m = lidar_model(b, case, outline)
+    m = lidar_model(b, outline=outline)
     rec = {"building": b.name, "name": m["fp"].get("name"), "path": m["path"], "glb": repo_relative(glb), "audit_outline": outline}
 
     # holes: the mesh against the LiDAR solid, from eight sides and above
@@ -183,13 +183,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--building", type=Path, required=True)
     ap.add_argument("--glb", type=Path, default=None, help="audit this mesh of the building instead of its own")
-    ap.add_argument("--case", default=None, help="a landmark's footprint case (configs/landmarks.yaml), e.g. pnc_tower")
     ap.add_argument("--out", type=Path, default=None, help="where to write audit.json / audit.png (default: the building)")
     ap.add_argument("--no-picture", action="store_true")
     args = ap.parse_args(argv)
     out = args.out or args.building
     out.mkdir(parents=True, exist_ok=True)
-    rec = audit(args.building, args.glb, None if args.no_picture else out / "audit.png", case=args.case)
+    rec = audit(args.building, args.glb, None if args.no_picture else out / "audit.png")
     (out / "audit.json").write_text(json.dumps(rec, indent=1, default=float), encoding="utf-8")
     h = rec["holes"]
     print(f"{rec['name'] or rec['building']}: holes {h['total_m2']:,.0f} m2 (largest view)"

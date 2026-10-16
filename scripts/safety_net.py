@@ -54,7 +54,7 @@ def load_set(path: Path = CONFIG) -> list[dict]:
 
 
 def building_dir(b: dict) -> Path:
-    return ROOT / b["dir"] if b.get("dir") else BUILDINGS / b["id"]
+    return BUILDINGS / b["id"]
 
 
 def _strip(o):

@@ -75,9 +75,9 @@ split part): 39a33bd6-a had been squashed to a point.
   python scripts/audit_reference.py accept      # the current audit becomes the baseline
   ```
 
-  Two landmarks built on their own are in the set too: 400 West Market,
-  whose domed crown came out right and must stay so, and PNC Tower
-  (`rebuild` runs `build_mesh.py --case` for them).
+  Two landmarks are in the set too, built like every other building: 400
+  West Market, whose domed crown came out right and must stay so, and PNC
+  Tower.
 
   A hole can be put down to a neighbouring face, or to a corner, from one
   build to the next while staying the same hole. So a face counts as worse

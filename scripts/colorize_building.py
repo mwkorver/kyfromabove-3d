@@ -25,8 +25,7 @@ filling a 1.90 m gap with a 1.22 m error. Resampling a fitted plane costs
 
 Usage::
 
-    python scripts/colorize_building.py --building outputs/urban/building_002 \
-        --case building_002
+    python scripts/colorize_building.py --building outputs/downtown/buildings/df2fccca-d6bd-4d4d-b4bc-673cfb5245aa      # 400 West Market
 """
 
 from __future__ import annotations
@@ -231,15 +230,7 @@ def neighbour_prisms(b: Path, footprints: Path | None = FOOTPRINTS, radius_m: fl
     ox, oy, oz = json.loads((b / "coordinates.json").read_text(encoding="utf-8"))["origin_source_xyz"]
     recs = json.loads(Path(footprints).read_text(encoding="utf-8"))
     recs = recs if isinstance(recs, list) else recs.get("buildings", recs)
-    if (b / "footprint.json").exists():
-        wkt = json.loads((b / "footprint.json").read_text(encoding="utf-8"))["wkt"]
-    else:                                         # a landmark's directory: find it by its GERS id
-        ts = b / "3dtiles_mesh" / "tileset.json"
-        gers = json.loads(ts.read_text(encoding="utf-8"))["extras"].get("gers") if ts.exists() else None
-        wkt = next((r["wkt"] for r in recs if r["id"] == gers), None)
-        if wkt is None:
-            print(f"[warn] {b.name} is not in {Path(footprints).name}: no neighbour prisms")
-            return []
+    wkt = json.loads((b / "footprint.json").read_text(encoding="utf-8"))["wkt"]
     me = footprint_wgs84_to_local(wkt, ox, oy)
     out = []
     for r in recs:
@@ -788,18 +779,6 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--building", type=Path, required=True,
                     help="a pipeline output dir holding lidar_local.laz (or .ply), "
                          "cameras_normalized.json and images/")
-    ap.add_argument("--case",
-                    help="key in the JSON footprint cache, e.g. building_002")
-    ap.add_argument("--gers",
-                    help="GERS id, looked up in --footprint-csv instead")
-    ap.add_argument("--footprint", type=Path, default=None,
-                    help="a footprint.json written by prepare (the default when the building dir has one "
-                         "and neither --case nor --gers is given)")
-    ap.add_argument("--footprints", type=Path,
-                    default=Path("outputs/survey/case_footprints.json"))
-    ap.add_argument("--footprint-csv", type=Path,
-                    default=Path("data/derived/ky_facade_tiled_wkt.csv"),
-                    help="a fetch_overture_buildings list, for --gers")
     ap.add_argument("--spacing-m", type=float, default=D.spacing_m,
                     help="wall resample pitch. 3-inch imagery is 0.076 m; the "
                          "default is deliberately coarser, because the "
@@ -840,24 +819,11 @@ def parser() -> argparse.ArgumentParser:
                          "their outlines at their LiDAR heights only (the cloud building step)")
     ap.add_argument("--no-prism-occluders", action="store_true",
                     help="occlude with the LiDAR returns alone (the neighbours' facades mostly missing)")
-    ap.add_argument("--twin-colour", action="store_true",
-                    help="colour a hidden face's unseen points from its symmetric twin (an invention; off in "
-                         "the measured product)")
     ap.add_argument("--occluder-radius-m", type=float, default=D.occluder_radius_m,
                     help="half-width of the LiDAR extent read purely to occlude "
                          "with. Must reach past the AOI: the neighbours that "
                          "block a wall are by definition outside the box drawn "
                          "around the target")
-    ap.add_argument("--no-occlusion", action="store_true",
-                    help="skip the visibility test, for comparison. The result "
-                         "paints whatever is in front of a wall onto it")
-    ap.add_argument("--extrude", choices=["profile", "prism", "verified", "off"], default=D.extrude,
-                    help="extrude planar-verified faces ('prism' completes connecting prism faces if >= 60%% perimeter verified; 'verified' only directly verified faces; 'off' disables extrusion). "
-                         "'profile' (default) does 'prism' and then, for faces still unverified, extrudes band by "
-                         "band wherever the returns near the face say where the wall is -- and bridges bands the "
-                         "flight missed when the wall above and below agree. Humana's east wall stands 2 m outside "
-                         "its footprint and steps back at the crown; its south wall was seen to 40 m and from 90 m; "
-                         "neither is one plane, both are walls")
     ap.add_argument("--prism-min-ratio", type=float, default=D.prism_min_ratio,
                     help="minimum fraction of nominal perimeter verified before inferring prism completion")
     ap.add_argument("--lidar-outline", action="store_true",
@@ -891,8 +857,8 @@ def settings_from_args(args):
         max_offset_m=args.max_offset_m, tile_m=args.tile_m, max_plane_rms_m=args.max_plane_rms_m,
         min_facing_cos=args.min_facing_cos, occlusion_slack_m=args.occlusion_slack_m,
         drop_classes=tuple(args.drop_classes), corner_snap=args.corner_snap, find_levels=args.levels,
-        prism_occluders=not args.no_prism_occluders, twin_colour=args.twin_colour,
-        occluder_radius_m=args.occluder_radius_m, occlusion=not args.no_occlusion, extrude=args.extrude,
+        prism_occluders=not args.no_prism_occluders,
+        occluder_radius_m=args.occluder_radius_m,
         prism_min_ratio=args.prism_min_ratio, outline="lidar" if args.lidar_outline else "overture",
         match_walls=args.match_walls, profile_band_m=args.profile_band_m,
         extrude_max_rms_m=args.extrude_max_rms_m, extrude_max_normal_deg=args.extrude_max_normal_deg,
@@ -907,9 +873,7 @@ class ColouriseFailure(Exception):
         self.code = code
 
 
-def footprint_and_levels(building: Path, CS, case=None, gers=None, footprint=None,
-                         footprints=Path("outputs/survey/case_footprints.json"),
-                         footprint_csv=Path("data/derived/ky_facade_tiled_wkt.csv"), cli_lidar_outline: bool = False):
+def footprint_and_levels(building: Path, CS, cli_lidar_outline: bool = False):
     """What the colourise finds before it looks at a frame: the building's
     returns (``CS.drop_classes`` left out, its neighbours' footprints cut out),
     its outline (Overture's, or the LiDAR's where the class or the command
@@ -943,17 +907,15 @@ def footprint_and_levels(building: Path, CS, case=None, gers=None, footprint=Non
     lidar_outline = CS.outline == "lidar"
     if lidar_outline and not cli_lidar_outline:
         print("footprint: the class builds on the LiDAR outline")
-    fp_case, fp_gers, fp_file = case, gers, footprint
+    fp_file = None                                # the building's own footprint.json
     if lidar_outline and (building / "footprint_lidar.json").exists():
         # the outline from our own data; Overture's polygon stays in the record as outline.overture_wkt
-        fp_case, fp_gers, fp_file = None, None, building / "footprint_lidar.json"
+        fp_file = building / "footprint_lidar.json"
         print("footprint: the LiDAR outline (footprint_lidar.json), not Overture's")
     elif lidar_outline:
         print("[warn] --lidar-outline: no footprint_lidar.json here; Overture's footprint used")
     try:
-        poly_local, entry = resolve_footprint(building, ox, oy, case=fp_case, gers=fp_gers,
-                                              footprint=fp_file, footprints_json=footprints,
-                                              footprint_csv=footprint_csv)
+        poly_local, entry = resolve_footprint(building, ox, oy, footprint=fp_file)
     except (KeyError, ValueError) as exc:
         print(f"[FAIL] {exc}")
         raise ColouriseFailure(1, f"[FAIL] {exc}")
@@ -1129,8 +1091,7 @@ def main(argv=None) -> int:
         return 2
 
     try:
-        F = footprint_and_levels(args.building, CS, args.case, args.gers, args.footprint, args.footprints,
-                                 args.footprint_csv, args.lidar_outline)
+        F = footprint_and_levels(args.building, CS, args.lidar_outline)
     except ColouriseFailure as exc:
         return exc.code
     ox, oy, oz, xyz = F.ox, F.oy, F.oz, F.xyz
@@ -1164,28 +1125,27 @@ def main(argv=None) -> int:
     normals[wall_all] = np.column_stack([
         np.divide(out, np.maximum(nrm, 1e-9)), np.zeros(len(out))])
 
-    if not (not CS.occlusion):
-        if args.scene_cloud:
-            wider = scene_cloud_from_cache(args.scene_cloud, (ox, oy, oz), CS.occluder_radius_m)
-        else:
-            wider = scene_cloud((ox, oy, oz), CS.occluder_radius_m)
-        if wider is None:
-            occ = xyz
-            print("[warn] no wider tile; occluding with the AOI alone, which "
-                  "cannot see the neighbours that block a wall")
-        else:
-            occ = np.column_stack([(wider[:, 0] - ox) * METERS_PER_US_SURVEY_FOOT,
-                                   (wider[:, 1] - oy) * METERS_PER_US_SURVEY_FOOT,
-                                   (wider[:, 2] - oz) * METERS_PER_US_SURVEY_FOOT])
-        prisms = [] if (not CS.prism_occluders) else neighbour_prisms(
-            args.building, args.neighbours, CS.occluder_radius_m, levels_dir(args.neighbour_levels))
-        occlusion_maps(args.building, cams, occ, prisms)
-        print(f"depth maps from {len(occ):,} returns within "
-              f"{CS.occluder_radius_m:.0f} m ({len(xyz):,} in the AOI), so a "
-              f"wall is not coloured through whatever stands in front of it")
-        if prisms:
-            print(f"  and {len(prisms)} neighbour prism(s): a tower's facade, which the LiDAR "
-                  f"barely touches, occludes as a solid")
+    if args.scene_cloud:
+        wider = scene_cloud_from_cache(args.scene_cloud, (ox, oy, oz), CS.occluder_radius_m)
+    else:
+        wider = scene_cloud((ox, oy, oz), CS.occluder_radius_m)
+    if wider is None:
+        occ = xyz
+        print("[warn] no wider tile; occluding with the AOI alone, which "
+              "cannot see the neighbours that block a wall")
+    else:
+        occ = np.column_stack([(wider[:, 0] - ox) * METERS_PER_US_SURVEY_FOOT,
+                               (wider[:, 1] - oy) * METERS_PER_US_SURVEY_FOOT,
+                               (wider[:, 2] - oz) * METERS_PER_US_SURVEY_FOOT])
+    prisms = [] if (not CS.prism_occluders) else neighbour_prisms(
+        args.building, args.neighbours, CS.occluder_radius_m, levels_dir(args.neighbour_levels))
+    occlusion_maps(args.building, cams, occ, prisms)
+    print(f"depth maps from {len(occ):,} returns within "
+          f"{CS.occluder_radius_m:.0f} m ({len(xyz):,} in the AOI), so a "
+          f"wall is not coloured through whatever stands in front of it")
+    if prisms:
+        print(f"  and {len(prisms)} neighbour prism(s): a tower's facade, which the LiDAR "
+              f"barely touches, occludes as a solid")
     rgb, seen, _, from_photo_orig = sample_colour(xyz, normals, cams, CS.min_facing_cos,
                                                  CS.occlusion_slack_m)
     got = seen > 0
@@ -1253,42 +1213,40 @@ def main(argv=None) -> int:
     verified_planes: dict[int, VerifiedWallPlane] = {}
     new_surface = np.ones(len(new_xyz), dtype=np.uint8) if len(new_xyz) else np.empty(0, dtype=np.uint8)
 
-    if CS.extrude != "off":
-        prism_comp = CS.extrude in ("prism", "profile")
-        all_ext_xyz, all_ext_n, all_ext_face = [], [], []
-        for lv in levels:
-            lv_planes = [pl for pl in nominal_planes if level_of[pl.face] == lv["level"] and not is_arc[pl.face]]
-            if not lv_planes:
-                continue
-            ext_xyz, ext_n, ext_face, lv_verified = extrude_verified_faces(
-                nominal_planes=lv_planes,
-                tiles_by_face=tiles_by_face,
-                spacing_m=CS.spacing_m,
-                tile_m=CS.tile_m,
-                max_offset_rms_m=CS.extrude_max_rms_m,
-                max_normal_dev_deg=CS.extrude_max_normal_deg,
-                roof_z=float(lv["z_hi"]),
-                prism_completion=prism_comp,
-                min_prism_ratio=CS.prism_min_ratio,
-            )
-            verified_planes.update(lv_verified)
-            if len(ext_xyz):
-                all_ext_xyz.append(ext_xyz)
-                all_ext_n.append(ext_n)
-                all_ext_face.append(ext_face)
-        if all_ext_xyz:
-            ext_xyz = np.vstack(all_ext_xyz)
-            ext_n = np.vstack(all_ext_n)
-            ext_face = np.concatenate(all_ext_face)
-            ext_surface = np.full(len(ext_xyz), 3, dtype=np.uint8)
-            n_dir = sum(1 for v in verified_planes.values() if not v.inferred)
-            n_inf = sum(1 for v in verified_planes.values() if v.inferred)
-            inf_msg = f" ({n_dir} verified + {n_inf} inferred prism)" if n_inf else ""
-            print(f"  extruded {len(ext_xyz):,} points across {len(verified_planes)} face(s){inf_msg}")
-            new_xyz = np.vstack([new_xyz, ext_xyz]) if len(new_xyz) else ext_xyz
-            new_n = np.vstack([new_n, ext_n]) if len(new_n) else ext_n
-            new_face = np.concatenate([new_face, ext_face]) if len(new_face) else ext_face
-            new_surface = np.concatenate([new_surface, ext_surface]) if len(new_surface) else ext_surface
+    all_ext_xyz, all_ext_n, all_ext_face = [], [], []
+    for lv in levels:
+        lv_planes = [pl for pl in nominal_planes if level_of[pl.face] == lv["level"] and not is_arc[pl.face]]
+        if not lv_planes:
+            continue
+        ext_xyz, ext_n, ext_face, lv_verified = extrude_verified_faces(
+            nominal_planes=lv_planes,
+            tiles_by_face=tiles_by_face,
+            spacing_m=CS.spacing_m,
+            tile_m=CS.tile_m,
+            max_offset_rms_m=CS.extrude_max_rms_m,
+            max_normal_dev_deg=CS.extrude_max_normal_deg,
+            roof_z=float(lv["z_hi"]),
+            prism_completion=True,
+            min_prism_ratio=CS.prism_min_ratio,
+        )
+        verified_planes.update(lv_verified)
+        if len(ext_xyz):
+            all_ext_xyz.append(ext_xyz)
+            all_ext_n.append(ext_n)
+            all_ext_face.append(ext_face)
+    if all_ext_xyz:
+        ext_xyz = np.vstack(all_ext_xyz)
+        ext_n = np.vstack(all_ext_n)
+        ext_face = np.concatenate(all_ext_face)
+        ext_surface = np.full(len(ext_xyz), 3, dtype=np.uint8)
+        n_dir = sum(1 for v in verified_planes.values() if not v.inferred)
+        n_inf = sum(1 for v in verified_planes.values() if v.inferred)
+        inf_msg = f" ({n_dir} verified + {n_inf} inferred prism)" if n_inf else ""
+        print(f"  extruded {len(ext_xyz):,} points across {len(verified_planes)} face(s){inf_msg}")
+        new_xyz = np.vstack([new_xyz, ext_xyz]) if len(new_xyz) else ext_xyz
+        new_n = np.vstack([new_n, ext_n]) if len(new_n) else ext_n
+        new_face = np.concatenate([new_face, ext_face]) if len(new_face) else ext_face
+        new_surface = np.concatenate([new_surface, ext_surface]) if len(new_surface) else ext_surface
 
     # The footprint's corners, before any face is profiled or textured: first
     # where two LiDAR-verified planes meet (their intersection), then where
@@ -1386,215 +1344,214 @@ def main(argv=None) -> int:
     # Faces no single plane describes: a profile of bands from the returns.
     profiles: dict[int, list] = {}
     mirrored: dict[int, dict] = {}
-    if CS.extrude == "profile":
-        from kyfromabove_3d.features import clip_profiles_by_neighbours, extrude_profile, face_profile, profile_keeps
-        # Pass 1: every face's profile. Each face looks inside its level at most
-        # --look-in-share of the level's narrowest width (and at most 8 m): with
-        # 8 m regardless, on a tier or a row building 7-8 m across a face took
-        # the far wall's returns for its own wall "7 m in" (e5214ab7); 200 of
-        # the downtown's 350 buildings are under 16 m across.
-        from shapely import maximum_inscribed_circle
-        from shapely.geometry import Polygon as _LvPoly
-        level_width = {lv["level"]: 2.0 * float(maximum_inscribed_circle(_LvPoly(np.asarray(lv["ring"], dtype=float)[:, :2]).buffer(0)).length)
-                       for lv in levels}
+    from kyfromabove_3d.features import clip_profiles_by_neighbours, extrude_profile, face_profile, profile_keeps
+    # Pass 1: every face's profile. Each face looks inside its level at most
+    # --look-in-share of the level's narrowest width (and at most 8 m): with
+    # 8 m regardless, on a tier or a row building 7-8 m across a face took
+    # the far wall's returns for its own wall "7 m in" (e5214ab7); 200 of
+    # the downtown's 350 buildings are under 16 m across.
+    from shapely import maximum_inscribed_circle
+    from shapely.geometry import Polygon as _LvPoly
+    level_width = {lv["level"]: 2.0 * float(maximum_inscribed_circle(_LvPoly(np.asarray(lv["ring"], dtype=float)[:, :2]).buffer(0)).length)
+                   for lv in levels}
 
-        def look_in_window(plane):
-            if CS.look_in_share <= 0:
-                return None                                   # the fixed 8 m (before)
-            w = level_width.get(level_of[plane.face])
-            inner = 8.0 if w is None else min(8.0, max(2.0, CS.look_in_share * w))
-            return (-inner, 3.0)
-        for plane in nominal_planes:
-            # a level's profile reads only the returns of its own height
-            # range (a little over), so the podium's bands do not see the
-            # tower's wall and the tower's do not see the podium's roof
-            lv_xyz = profile_xyz[(profile_xyz[:, 2] >= plane.z_lo - 2.0) & (profile_xyz[:, 2] <= plane.z_hi + 2.0)]
-            if is_arc[plane.face]:
-                # a curved wall is profiled unrolled: the returns within 12 m
-                # of the arc's radius brought into its flat frame
-                near = np.abs(np.hypot(*(lv_xyz[:, :2] - plane.centre).T) - plane.radius) <= 12.0
-                lv_xyz = np.column_stack([plane.unroll(lv_xyz[near, :2]), lv_xyz[near, 2]])
-            bands = face_profile(plane, lv_xyz, band_m=CS.profile_band_m, offset_window_m=look_in_window(plane),
-                                 local_rise=CS.band_local_rise)
-            # A tower can stand well back from the edge its podium was traced
-            # along: Humana's north wall is 25 m inside the Main Street edge,
-            # seen by a thin column of returns the 8 m window never reaches.
-            # When the standard window finds no wall above the podium, look
-            # deeper -- up to 60% of the way to the far side -- with a lower
-            # floor, and keep the result only if it finds a set-back wall.
-            # (Only when the building is one level: with the tower split
-            # out, its walls are its own faces.)
-            top_seen = max((b.z_hi for b in bands if b.status in ("observed", "bridged", "extended")), default=0.0)
-            # ... and only where the roof just inside the wall is well below the
-            # top, as at Humana's podium edge: where the roof reaches the edge
-            # the wall is there, unseen, and looking 60% across found the far wall
-            # (the Galt House's face 7, drawn 37 m in)
-            def roof_inside_low(pl=plane):
-                a_, o_ = pl.local(lv_xyz[:, :2])
-                m_ = (a_ >= 0.2 * pl.length_m) & (a_ <= 0.8 * pl.length_m) & (o_ <= -0.25) & (o_ >= -2.0)
-                return m_.sum() < 10 or float(np.percentile(lv_xyz[m_, 2], 90)) < ground_z + 0.6 * (roof_z - ground_z)
-            if len(levels) == 1 and top_seen < 0.4 * (roof_z - ground_z) and not is_arc[plane.face] and roof_inside_low():
-                depth = float(max(-((ring_m - plane.p0) @ plane.normal).min(), 8.0))
-                deep = face_profile(plane, lv_xyz, band_m=CS.profile_band_m,
-                                    offset_window_m=(-0.6 * depth, 3.0), min_returns=20,
-                                    local_rise=CS.band_local_rise)
-                found = [b for b in deep if b.status in ("observed", "bridged", "extended") and b.offset_m is not None and b.offset_m < -8.0]
-                if found:
-                    print(f"    face {plane.face}: a wall set {-np.median([b.offset_m for b in found]):.0f} m back from the footprint edge, "
-                          f"{found[0].z_lo:.0f}-{found[-1].z_hi:.0f} m up, found by looking {0.6 * depth:.0f} m in")
-                    # The standard window keeps its say on the podium; the
-                    # deep one speaks only for the bands above what it saw.
-                    bands = [b if b.z_lo < top_seen else d for b, d in zip(bands, deep)]
-            profiles[plane.face] = bands
+    def look_in_window(plane):
+        if CS.look_in_share <= 0:
+            return None                                   # the fixed 8 m (before)
+        w = level_width.get(level_of[plane.face])
+        inner = 8.0 if w is None else min(8.0, max(2.0, CS.look_in_share * w))
+        return (-inner, 3.0)
+    for plane in nominal_planes:
+        # a level's profile reads only the returns of its own height
+        # range (a little over), so the podium's bands do not see the
+        # tower's wall and the tower's do not see the podium's roof
+        lv_xyz = profile_xyz[(profile_xyz[:, 2] >= plane.z_lo - 2.0) & (profile_xyz[:, 2] <= plane.z_hi + 2.0)]
+        if is_arc[plane.face]:
+            # a curved wall is profiled unrolled: the returns within 12 m
+            # of the arc's radius brought into its flat frame
+            near = np.abs(np.hypot(*(lv_xyz[:, :2] - plane.centre).T) - plane.radius) <= 12.0
+            lv_xyz = np.column_stack([plane.unroll(lv_xyz[near, :2]), lv_xyz[near, 2]])
+        bands = face_profile(plane, lv_xyz, band_m=CS.profile_band_m, offset_window_m=look_in_window(plane),
+                             local_rise=CS.band_local_rise)
+        # A tower can stand well back from the edge its podium was traced
+        # along: Humana's north wall is 25 m inside the Main Street edge,
+        # seen by a thin column of returns the 8 m window never reaches.
+        # When the standard window finds no wall above the podium, look
+        # deeper -- up to 60% of the way to the far side -- with a lower
+        # floor, and keep the result only if it finds a set-back wall.
+        # (Only when the building is one level: with the tower split
+        # out, its walls are its own faces.)
+        top_seen = max((b.z_hi for b in bands if b.status in ("observed", "bridged", "extended")), default=0.0)
+        # ... and only where the roof just inside the wall is well below the
+        # top, as at Humana's podium edge: where the roof reaches the edge
+        # the wall is there, unseen, and looking 60% across found the far wall
+        # (the Galt House's face 7, drawn 37 m in)
+        def roof_inside_low(pl=plane):
+            a_, o_ = pl.local(lv_xyz[:, :2])
+            m_ = (a_ >= 0.2 * pl.length_m) & (a_ <= 0.8 * pl.length_m) & (o_ <= -0.25) & (o_ >= -2.0)
+            return m_.sum() < 10 or float(np.percentile(lv_xyz[m_, 2], 90)) < ground_z + 0.6 * (roof_z - ground_z)
+        if len(levels) == 1 and top_seen < 0.4 * (roof_z - ground_z) and not is_arc[plane.face] and roof_inside_low():
+            depth = float(max(-((ring_m - plane.p0) @ plane.normal).min(), 8.0))
+            deep = face_profile(plane, lv_xyz, band_m=CS.profile_band_m,
+                                offset_window_m=(-0.6 * depth, 3.0), min_returns=20,
+                                local_rise=CS.band_local_rise)
+            found = [b for b in deep if b.status in ("observed", "bridged", "extended") and b.offset_m is not None and b.offset_m < -8.0]
+            if found:
+                print(f"    face {plane.face}: a wall set {-np.median([b.offset_m for b in found]):.0f} m back from the footprint edge, "
+                      f"{found[0].z_lo:.0f}-{found[-1].z_hi:.0f} m up, found by looking {0.6 * depth:.0f} m in")
+                # The standard window keeps its say on the podium; the
+                # deep one speaks only for the bands above what it saw.
+                bands = [b if b.z_lo < top_seen else d for b, d in zip(bands, deep)]
+        profiles[plane.face] = bands
 
-        # Pass 1b: an unknown band takes its depth from the frames, where two
-        # that see it from directions apart agree on one (wall_match). Before
-        # the mirror and the bridges, which read measured bands only.
-        if CS.match_walls:
-            from kyfromabove_3d.wall_match import MAX_ANGLE_DEG, match_profiles
-            facing = float(np.cos(np.radians(MAX_ANGLE_DEG)))
-            report = match_profiles(nominal_planes, profiles, cams,
-                                    lambda xyz, nrm, c: project_visible(xyz, nrm, c, facing)[0],
-                                    skip_faces=set(verified_planes))
-            (args.building / "match_report.json").write_text(json.dumps(report, indent=1, default=float), encoding="utf-8")
+    # Pass 1b: an unknown band takes its depth from the frames, where two
+    # that see it from directions apart agree on one (wall_match). Before
+    # the mirror and the bridges, which read measured bands only.
+    if CS.match_walls:
+        from kyfromabove_3d.wall_match import MAX_ANGLE_DEG, match_profiles
+        facing = float(np.cos(np.radians(MAX_ANGLE_DEG)))
+        report = match_profiles(nominal_planes, profiles, cams,
+                                lambda xyz, nrm, c: project_visible(xyz, nrm, c, facing)[0],
+                                skip_faces=set(verified_planes))
+        (args.building / "match_report.json").write_text(json.dumps(report, indent=1, default=float), encoding="utf-8")
 
-        # Pass 2a: a hidden face takes its shape from the face opposite, when
-        # the two have been seen to share one -- buildings are mostly
-        # symmetric across their middle, and the face in a neighbour's
-        # shadow is best read from its twin.
-        from kyfromabove_3d.features import mirror_hidden_bands
-        # the faces under a roof edge the LiDAR measured -- with the LiDAR outline,
-        # or, where the class sets upper_levels: roof_edge, every face of an upper
-        # level, whose outline is traced from the LiDAR's roof (building_levels):
-        # an unseen one takes the roof edge's word, not its twin's (pass 2a'')
-        upper_measured = CS.upper_levels == "roof_edge"
-        measured_levels = set(lidar_tower_levels) | ({lv["level"] for lv in levels if lv["level"] > 0} if upper_measured else set())
-        under = (under_measured_edge(nominal_planes, is_arc, level_of, measured_levels, measured_edges if lidar_outline else [])
-                 if (lidar_outline or upper_measured) else set())
-        mirrored = {}
-        for lv in levels:
-            lv_planes = [pl for pl in nominal_planes if level_of[pl.face] == lv["level"] and not is_arc[pl.face]]
-            lv_prof = {pl.face: profiles[pl.face] for pl in lv_planes}
-            # (a verified plane is extruded whole and is not filled from the roof edge: its twin still speaks)
-            mirrored.update(mirror_hidden_bands(lv_planes, lv_prof, measured_faces=(under - set(verified_planes)) or None))
-        # which faces are symmetric twins: the completed product's twin fill reads it
-        (args.building / "mirror_report.json").write_text(
-            json.dumps({str(f): rec for f, rec in mirrored.items()}, indent=1, default=float), encoding="utf-8")
-        for f, rec in sorted(mirrored.items()):
-            if rec["symmetric"] and rec["mirrored"]:
-                print(f"    face {f}: {rec['mirrored']} unseen band(s) taken from face {rec['from_face']} opposite "
-                      + (f"(shapes agree within {rec['shape_diff_m']} m on {rec['n_joint']} bands)" if rec.get("anchored") else "(this face was never seen; the opposite face's offsets as they are)"))
-            elif rec.get("skipped"):
-                print(f"    face {f}: nothing taken from face {rec['from_face']} opposite ({rec['skipped']})")
-            elif not rec["symmetric"]:
-                print(f"    face {f}: face {rec['from_face']} opposite has a different shape "
-                      f"({rec['shape_diff_m']} m apart on {rec['n_joint']} bands); nothing mirrored")
+    # Pass 2a: a hidden face takes its shape from the face opposite, when
+    # the two have been seen to share one -- buildings are mostly
+    # symmetric across their middle, and the face in a neighbour's
+    # shadow is best read from its twin.
+    from kyfromabove_3d.features import mirror_hidden_bands
+    # the faces under a roof edge the LiDAR measured -- with the LiDAR outline,
+    # or, where the class sets upper_levels: roof_edge, every face of an upper
+    # level, whose outline is traced from the LiDAR's roof (building_levels):
+    # an unseen one takes the roof edge's word, not its twin's (pass 2a'')
+    upper_measured = CS.upper_levels == "roof_edge"
+    measured_levels = set(lidar_tower_levels) | ({lv["level"] for lv in levels if lv["level"] > 0} if upper_measured else set())
+    under = (under_measured_edge(nominal_planes, is_arc, level_of, measured_levels, measured_edges if lidar_outline else [])
+             if (lidar_outline or upper_measured) else set())
+    mirrored = {}
+    for lv in levels:
+        lv_planes = [pl for pl in nominal_planes if level_of[pl.face] == lv["level"] and not is_arc[pl.face]]
+        lv_prof = {pl.face: profiles[pl.face] for pl in lv_planes}
+        # (a verified plane is extruded whole and is not filled from the roof edge: its twin still speaks)
+        mirrored.update(mirror_hidden_bands(lv_planes, lv_prof, measured_faces=(under - set(verified_planes)) or None))
+    # which faces are symmetric twins: the completed product's twin fill reads it
+    (args.building / "mirror_report.json").write_text(
+        json.dumps({str(f): rec for f, rec in mirrored.items()}, indent=1, default=float), encoding="utf-8")
+    for f, rec in sorted(mirrored.items()):
+        if rec["symmetric"] and rec["mirrored"]:
+            print(f"    face {f}: {rec['mirrored']} unseen band(s) taken from face {rec['from_face']} opposite "
+                  + (f"(shapes agree within {rec['shape_diff_m']} m on {rec['n_joint']} bands)" if rec.get("anchored") else "(this face was never seen; the opposite face's offsets as they are)"))
+        elif rec.get("skipped"):
+            print(f"    face {f}: nothing taken from face {rec['from_face']} opposite ({rec['skipped']})")
+        elif not rec["symmetric"]:
+            print(f"    face {f}: face {rec['from_face']} opposite has a different shape "
+                  f"({rec['shape_diff_m']} m apart on {rec['n_joint']} bands); nothing mirrored")
 
-        # Pass 2a'': a wall stands under a roof edge the LiDAR measured -- a
-        # tower edge from the LiDAR's own outline of the tower, or an edge of
-        # the outline whose roof end it found -- unless there is evidence of a
-        # gap. Not on Overture's edge, which is not measured: only with the LiDAR
-        # outline, or on upper levels where the class says so.
-        if under:
-            from kyfromabove_3d.features import fill_under_roof_edge
-            n_faces = n_bands = 0
-            for f in sorted(under):
-                if f in verified_planes or f not in profiles:
-                    continue
-                pl_f = next(pl for pl in nominal_planes if pl.face == f)
-                if (k := fill_under_roof_edge(profiles[f], pl_f.length_m)):
-                    n_faces += 1
-                    n_bands += k
-                    print(f"    face {f}: {k} band(s) under the measured roof edge drawn as wall (none seen as a gap)")
-            print(f"  {len(under)} face(s) under a measured roof edge; {n_bands} band(s) on {n_faces} of them drawn as wall")
-
-        # Pass 2a': a wall stands on the wall below it -- where a neighbour
-        # hid part of a band from the scanner, it runs as far as the band above.
-        from kyfromabove_3d.features import carry_extents_down, crown_bands
-        for f, bands in sorted(profiles.items()):
-            pl_f = next((pl for pl in nominal_planes if pl.face == f), None)
-            top_z = float(pl_f.z_hi) if pl_f is not None else None
-
-            def crown_top(b, pl=pl_f):
-                """How high the returns on the crown's front surface reach."""
-                if pl is None or not len(profile_xyz):
-                    return None
-                along, off = pl.local(profile_xyz[:, :2])
-                m = ((along >= 0) & (along <= pl.length_m) & (np.abs(off - b.offset_m) < 0.75)
-                     & (profile_xyz[:, 2] >= b.z_lo) & (profile_xyz[:, 2] <= b.z_hi + 1.0))
-                return float(np.percentile(profile_xyz[m, 2], 98)) if m.sum() >= 10 else None
-
-            if not is_arc[f] and (n_crown := crown_bands(bands, 0.0 if f in verified_planes else None, top_z=top_z,
-                                                         top_of=crown_top)):
-                print(f"    face {f}: {n_crown} open band(s) at the top drawn as the wall's crown, at their front")
-            if not is_arc[f] and (n_carried := carry_extents_down(bands)):
-                print(f"    face {f}: {n_carried} band(s) widened to the wall above them (returns stopped short)")
-
-        # Pass 2b: faces meet at corners. Where a neighbour's wall stands back
-        # from the footprint at some height, this face's wall stops there.
-        n_clipped = 0
-        for lv in levels:
-            lv_planes = [pl for pl in nominal_planes if level_of[pl.face] == lv["level"] and not is_arc[pl.face]]
-            n_clipped += clip_profiles_by_neighbours(lv_planes, {pl.face: profiles[pl.face] for pl in lv_planes})
-        if n_clipped:
-            print(f"    {n_clipped} band(s) clipped where a neighbouring wall stands back from the corner")
-
-        # Pass 3: trim the verified planes, extrude the rest.
-        prof_xyz, prof_n, prof_face = [], [], []
-        for plane in nominal_planes:
-            bands = profiles[plane.face]
-            # A verified plane is extruded over the whole face; the profile
-            # trims it to where the returns say the wall is, band by band --
-            # not into an open loggia, not past the corner where the wall
-            # steps in. Humana's north face is a plane, but its photo was
-            # painting sky and the tower behind onto the part that is not wall.
-            if plane.face in verified_planes:
-                on_face = (new_face == plane.face) & (new_surface == 3)
-                if on_face.any():
-                    keep_f = profile_keeps(plane, bands, new_xyz[on_face])
-                    drop = np.zeros(len(new_xyz), dtype=bool)
-                    drop[np.flatnonzero(on_face)[~keep_f]] = True
-                    n_obs = sum(b.status in ("observed", "bridged") for b in bands)
-                    n_open = sum(b.status == "open" for b in bands)
-                    print(f"    face {plane.face}: verified plane trimmed to the profile ({n_obs} band(s) with a wall, "
-                          f"{n_open} open): {drop.sum():,} of {on_face.sum():,} extruded points removed")
-                    if drop.any():
-                        new_xyz, new_n, new_face, new_surface = new_xyz[~drop], new_n[~drop], new_face[~drop], new_surface[~drop]
+    # Pass 2a'': a wall stands under a roof edge the LiDAR measured -- a
+    # tower edge from the LiDAR's own outline of the tower, or an edge of
+    # the outline whose roof end it found -- unless there is evidence of a
+    # gap. Not on Overture's edge, which is not measured: only with the LiDAR
+    # outline, or on upper levels where the class says so.
+    if under:
+        from kyfromabove_3d.features import fill_under_roof_edge
+        n_faces = n_bands = 0
+        for f in sorted(under):
+            if f in verified_planes or f not in profiles:
                 continue
-            n_obs = sum(b.status == "observed" for b in bands)
-            n_br = sum(b.status == "bridged" for b in bands)
-            n_sl = sum(b.status == "sloped" for b in bands)
-            n_ex = sum(b.status == "extended" for b in bands)
-            n_mi = sum(b.status == "mirrored" for b in bands)
-            n_ma = sum(b.status == "matched" for b in bands)
-            n_ed = sum(b.status == "edge" for b in bands)
-            if n_obs == 0 and n_mi == 0 and n_ed == 0:                       # matched bands never stand alone (see build_mesh)
-                print(f"    face {plane.face}: no band observed; nothing extruded")
-                continue
-            pts = extrude_profile(plane, bands, CS.spacing_m)
-            if is_arc[plane.face] and len(pts):
-                # back onto the arc, each point's normal the outward radial there
-                pts, pts_n = plane.to_world_3d(pts, np.repeat(np.array([[0.0, -1.0, 0.0]]), len(pts), axis=0))
-            else:
-                pts_n = np.repeat(np.array([[plane.normal[0], plane.normal[1], 0.0]]), len(pts), axis=0)
-            offs = sorted({round(b.offset_m, 1) for b in bands if b.offset_m is not None})
-            zs = [b for b in bands if b.status in ("observed", "bridged", "extended", "mirrored", "matched", "edge")]
-            print(f"    face {plane.face}: {n_obs} band(s) observed, {n_br} bridged, {n_ex} extended through thin bands, {n_mi} mirrored from the face opposite, "
-                  + (f"{n_ma} matched in the frames, " if n_ma else "") + (f"{n_ed} under the measured roof edge, " if n_ed else "") + f"{n_sl} sloped (not extruded); wall {zs[0].z_lo:.0f}-{zs[-1].z_hi:.0f} m up, "
-                  f"offsets {offs[0]:+.1f}..{offs[-1]:+.1f} m from the footprint; {len(pts):,} points")
-            if len(pts):
-                prof_xyz.append(pts)
-                prof_n.append(pts_n)
-                prof_face.append(np.full(len(pts), plane.face))
-        if prof_xyz:
-            px, pn, pf = np.vstack(prof_xyz), np.vstack(prof_n), np.concatenate(prof_face)
-            print(f"  extruded {len(px):,} points on {len(prof_xyz)} profiled face(s)")
-            new_xyz = np.vstack([new_xyz, px]) if len(new_xyz) else px
-            new_n = np.vstack([new_n, pn]) if len(new_n) else pn
-            new_face = np.concatenate([new_face, pf]) if len(new_face) else pf
-            new_surface = np.concatenate([new_surface, np.full(len(px), 4, dtype=np.uint8)]) if len(new_surface) else np.full(len(px), 4, dtype=np.uint8)
-        (args.building / "wall_profiles.json").write_text(json.dumps(
-            {str(k): [b.to_dict() for b in v] for k, v in profiles.items()}, indent=1), encoding="utf-8")
+            pl_f = next(pl for pl in nominal_planes if pl.face == f)
+            if (k := fill_under_roof_edge(profiles[f], pl_f.length_m)):
+                n_faces += 1
+                n_bands += k
+                print(f"    face {f}: {k} band(s) under the measured roof edge drawn as wall (none seen as a gap)")
+        print(f"  {len(under)} face(s) under a measured roof edge; {n_bands} band(s) on {n_faces} of them drawn as wall")
+
+    # Pass 2a': a wall stands on the wall below it -- where a neighbour
+    # hid part of a band from the scanner, it runs as far as the band above.
+    from kyfromabove_3d.features import carry_extents_down, crown_bands
+    for f, bands in sorted(profiles.items()):
+        pl_f = next((pl for pl in nominal_planes if pl.face == f), None)
+        top_z = float(pl_f.z_hi) if pl_f is not None else None
+
+        def crown_top(b, pl=pl_f):
+            """How high the returns on the crown's front surface reach."""
+            if pl is None or not len(profile_xyz):
+                return None
+            along, off = pl.local(profile_xyz[:, :2])
+            m = ((along >= 0) & (along <= pl.length_m) & (np.abs(off - b.offset_m) < 0.75)
+                 & (profile_xyz[:, 2] >= b.z_lo) & (profile_xyz[:, 2] <= b.z_hi + 1.0))
+            return float(np.percentile(profile_xyz[m, 2], 98)) if m.sum() >= 10 else None
+
+        if not is_arc[f] and (n_crown := crown_bands(bands, 0.0 if f in verified_planes else None, top_z=top_z,
+                                                     top_of=crown_top)):
+            print(f"    face {f}: {n_crown} open band(s) at the top drawn as the wall's crown, at their front")
+        if not is_arc[f] and (n_carried := carry_extents_down(bands)):
+            print(f"    face {f}: {n_carried} band(s) widened to the wall above them (returns stopped short)")
+
+    # Pass 2b: faces meet at corners. Where a neighbour's wall stands back
+    # from the footprint at some height, this face's wall stops there.
+    n_clipped = 0
+    for lv in levels:
+        lv_planes = [pl for pl in nominal_planes if level_of[pl.face] == lv["level"] and not is_arc[pl.face]]
+        n_clipped += clip_profiles_by_neighbours(lv_planes, {pl.face: profiles[pl.face] for pl in lv_planes})
+    if n_clipped:
+        print(f"    {n_clipped} band(s) clipped where a neighbouring wall stands back from the corner")
+
+    # Pass 3: trim the verified planes, extrude the rest.
+    prof_xyz, prof_n, prof_face = [], [], []
+    for plane in nominal_planes:
+        bands = profiles[plane.face]
+        # A verified plane is extruded over the whole face; the profile
+        # trims it to where the returns say the wall is, band by band --
+        # not into an open loggia, not past the corner where the wall
+        # steps in. Humana's north face is a plane, but its photo was
+        # painting sky and the tower behind onto the part that is not wall.
+        if plane.face in verified_planes:
+            on_face = (new_face == plane.face) & (new_surface == 3)
+            if on_face.any():
+                keep_f = profile_keeps(plane, bands, new_xyz[on_face])
+                drop = np.zeros(len(new_xyz), dtype=bool)
+                drop[np.flatnonzero(on_face)[~keep_f]] = True
+                n_obs = sum(b.status in ("observed", "bridged") for b in bands)
+                n_open = sum(b.status == "open" for b in bands)
+                print(f"    face {plane.face}: verified plane trimmed to the profile ({n_obs} band(s) with a wall, "
+                      f"{n_open} open): {drop.sum():,} of {on_face.sum():,} extruded points removed")
+                if drop.any():
+                    new_xyz, new_n, new_face, new_surface = new_xyz[~drop], new_n[~drop], new_face[~drop], new_surface[~drop]
+            continue
+        n_obs = sum(b.status == "observed" for b in bands)
+        n_br = sum(b.status == "bridged" for b in bands)
+        n_sl = sum(b.status == "sloped" for b in bands)
+        n_ex = sum(b.status == "extended" for b in bands)
+        n_mi = sum(b.status == "mirrored" for b in bands)
+        n_ma = sum(b.status == "matched" for b in bands)
+        n_ed = sum(b.status == "edge" for b in bands)
+        if n_obs == 0 and n_mi == 0 and n_ed == 0:                       # matched bands never stand alone (see build_mesh)
+            print(f"    face {plane.face}: no band observed; nothing extruded")
+            continue
+        pts = extrude_profile(plane, bands, CS.spacing_m)
+        if is_arc[plane.face] and len(pts):
+            # back onto the arc, each point's normal the outward radial there
+            pts, pts_n = plane.to_world_3d(pts, np.repeat(np.array([[0.0, -1.0, 0.0]]), len(pts), axis=0))
+        else:
+            pts_n = np.repeat(np.array([[plane.normal[0], plane.normal[1], 0.0]]), len(pts), axis=0)
+        offs = sorted({round(b.offset_m, 1) for b in bands if b.offset_m is not None})
+        zs = [b for b in bands if b.status in ("observed", "bridged", "extended", "mirrored", "matched", "edge")]
+        print(f"    face {plane.face}: {n_obs} band(s) observed, {n_br} bridged, {n_ex} extended through thin bands, {n_mi} mirrored from the face opposite, "
+              + (f"{n_ma} matched in the frames, " if n_ma else "") + (f"{n_ed} under the measured roof edge, " if n_ed else "") + f"{n_sl} sloped (not extruded); wall {zs[0].z_lo:.0f}-{zs[-1].z_hi:.0f} m up, "
+              f"offsets {offs[0]:+.1f}..{offs[-1]:+.1f} m from the footprint; {len(pts):,} points")
+        if len(pts):
+            prof_xyz.append(pts)
+            prof_n.append(pts_n)
+            prof_face.append(np.full(len(pts), plane.face))
+    if prof_xyz:
+        px, pn, pf = np.vstack(prof_xyz), np.vstack(prof_n), np.concatenate(prof_face)
+        print(f"  extruded {len(px):,} points on {len(prof_xyz)} profiled face(s)")
+        new_xyz = np.vstack([new_xyz, px]) if len(new_xyz) else px
+        new_n = np.vstack([new_n, pn]) if len(new_n) else pn
+        new_face = np.concatenate([new_face, pf]) if len(new_face) else pf
+        new_surface = np.concatenate([new_surface, np.full(len(px), 4, dtype=np.uint8)]) if len(new_surface) else np.full(len(px), 4, dtype=np.uint8)
+    (args.building / "wall_profiles.json").write_text(json.dumps(
+        {str(k): [b.to_dict() for b in v] for k, v in profiles.items()}, indent=1), encoding="utf-8")
 
     planes_to_save = [verified_planes.get(p.face, p) for p in nominal_planes]
     planes_path = args.building / "wall_planes.json"
@@ -1609,20 +1566,10 @@ def main(argv=None) -> int:
         new_rgb, new_seen, _, from_photo_wall = sample_colour(new_xyz, new_n, cams,
                                                              CS.min_facing_cos,
                                                              CS.occlusion_slack_m)
-        # A face read from its twin for shape can take its colour from the
-        # twin too, on the inferred bands and wherever no camera reached --
-        # an invention, so only with --twin-colour: the measured product
-        # (product 2) colours a texel only where a frame saw it, and the
-        # completed product (3) makes the twin copy on its textures, flagged.
+        # (a face read from its twin for shape takes no colour from it: the
+        # measured product colours a texel only where a frame saw it, and the
+        # completed product makes the twin copy on its textures, flagged)
         colour_from_twin = np.zeros(len(new_xyz), dtype=bool)
-        if CS.extrude == "profile" and mirrored and CS.twin_colour:
-            from kyfromabove_3d.features import mirror_colour_from_twin
-            colour_from_twin = mirror_colour_from_twin(nominal_planes, profiles, mirrored,
-                                                       new_xyz, new_face, new_rgb, new_seen)
-            for f, rec in sorted(mirrored.items()):
-                n_f = int((colour_from_twin & (new_face == f)).sum())
-                if n_f:
-                    print(f"    face {f}: {n_f:,} points coloured from face {rec['from_face']} opposite")
         keep = new_seen > 0
         print(f"  coloured {keep.sum():,} of them ({keep.mean():.0%}) "
               f"({time.time() - started:.0f}s)")

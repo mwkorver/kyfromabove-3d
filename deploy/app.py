@@ -12,19 +12,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import aws_cdk as cdk                                                     # noqa: E402
 
-from stack import (PROJECT_TAG, BudgetStack, BuildingStepStack, Ec2BenchStack, PieceStepStack,  # noqa: E402
-                   QueueRunStack, TileStepStack, ViewerStack)
+from stack import PROJECT_TAG, BudgetStack, QueueRunStack, TileStepStack, ViewerStack  # noqa: E402
 
-# step by step: steps 1, 2 and 3, each its own Lambda, invoked directly
-# (PiecesStack, the event-driven chain, stays in stack.py for a later step)
 app = cdk.App()
 env = cdk.Environment(account=os.environ.get("CDK_DEFAULT_ACCOUNT"), region="us-west-2")
+# step 1, each tile's inputs, one Lambda invoked per tile (deploy/run_tile_step.py)
 TileStepStack(app, "kyfromabove-3d-tile-step", env=env)
-PieceStepStack(app, "kyfromabove-3d-piece-step", env=env)
-BuildingStepStack(app, "kyfromabove-3d-building-step", env=env)
-# a Graviton Spot machine to price EC2 against Lambda; destroy it when done
-Ec2BenchStack(app, "kyfromabove-3d-ec2-bench", env=env, count=int(app.node.try_get_context("bench_count") or 1),
-              first_subnet=int(app.node.try_get_context("bench_subnet") or 0))
 # a run on Spot machines fed by SQS (refactor step 4), only when a run is named:
 # npx aws-cdk deploy kyfromabove-3d-queue -c queue_run=r1 [-c queue_machines=2]
 if app.node.try_get_context("queue_run"):

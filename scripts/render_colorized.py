@@ -15,7 +15,7 @@ resampling actually added:
 
 Usage::
 
-    python scripts/render_colorized.py --ply outputs/urban/building_002/colorized.ply
+    python scripts/render_colorized.py --ply outputs/downtown/buildings/df2fccca-d6bd-4d4d-b4bc-673cfb5245aa/colorized.ply
 """
 
 from __future__ import annotations

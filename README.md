@@ -59,8 +59,8 @@ byte-identical results in each.
 |---|---|---|---|
 | 0 | Groups Overture's footprints by the LiDAR tile they fall in | a laptop, once per Overture release | `scripts/stage0_index.py` |
 | 1 · tile | Measures every building's height from the LiDAR, splits outlines that hold two or three buildings, and picks the LiDAR survey and photo collection taken **closest together in time** | one Lambda per tile | `pieces.tile_step`, `sources_choice.py` |
-| 2 · piece | Cuts each building's LiDAR and lists the aerial frames that see it | Lambdas, 25 buildings each | `pieces.piece_step` |
-| 3 · building | Fits walls to the LiDAR, colours them from the frames, builds the measured and completed meshes, and audits them | EC2 Spot machines, 16 buildings at a time | `building.py`, `scripts/build_mesh.py` |
+| 2 · measure | Cuts each building's LiDAR, lists the aerial frames that see it, and measures its class, outline and levels | EC2 Spot machines, one tile a job | `cloud_jobs.measure_job`, `pipeline.py` |
+| 3 · build | Fits walls to the LiDAR, colours them from the frames, builds the measured and completed meshes, and audits them | EC2 Spot machines, 8-16 nearby buildings a job | `cloud_jobs.build_job`, `scripts/build_mesh.py` |
 | 4 · publish | Batches each tile's buildings into 3D Tiles, builds the statewide tree and the terrain, writes the viewer | a Spot machine, or a laptop | `publish.py`, `terrain.py` |
 
 CloudFront serves the published files (behind a password while this is a
@@ -181,8 +181,7 @@ about two minutes on a laptop:
 ```bash
 python scripts/stage0_index.py --bbox -85.764 38.25 -85.75 38.26 --store outputs/one_tile --tiles N076E229
 python scripts/tile_step.py --store outputs/one_tile --tiles N076E229
-python scripts/piece_step.py --store outputs/one_tile --tiles N076E229
-python scripts/building_step.py --inputs outputs/one_tile --store outputs/one_tile --tiles N076E229 --sample 5 --workers 5
+python scripts/queue_run.py local --run one --store outputs/one_tile --tiles N076E229 --limit 5
 python scripts/publish_step.py --inputs outputs/one_tile --tiles N076E229 --tree --terrain --viewer --start -85.7522 38.25 700
 python -m http.server -d outputs/one_tile 8000
 ```
@@ -192,17 +191,17 @@ frames are read straight from KyFromAbove's public bucket.
 
 ### In AWS
 
-The stacks are in [`deploy/`](deploy/) (AWS CDK): the tile, piece and building
-steps, the Spot machines, and the CloudFront viewer. The runners
-(`deploy/run_tile_step.py`, `run_piece_step.py`, `run_spot_build.py`) start a
-step over a list of tiles and tally what it costs as it goes; `run_spot_build.py`
-stops the machines before a spending cap. [`docs/CLOUD.md`](docs/CLOUD.md)
-walks through a full run.
+The stacks are in [`deploy/`](deploy/) (AWS CDK): the tile step (a Lambda),
+the queue run (an SQS queue and a group of Spot machines that take the
+measure and build jobs from it, the same code as on the laptop), the
+CloudFront viewer and the budget. `deploy/run_tile_step.py` starts the tile
+step over a list of tiles; `scripts/queue_run.py` sends a run's jobs and
+follows it. [`docs/CLOUD.md`](docs/CLOUD.md) walks through a full run.
 
 Before deploying your own copy: the bucket name `kyfromabove-3d` in the code
 and docs is the author's and bucket names are global, so change it; the Spot
-runner's cap is a check in the script, so deploy the budget stack too
-(`docs/CLOUD.md`, "Watching the spend"); and a deployed viewer is public unless the password is switched on. See
+machines have a price ceiling and a 12-hour lifetime but no spending cap, so
+deploy the budget stack too (`docs/CLOUD.md`, "Watching the spend"); and a deployed viewer is public unless the password is switched on. See
 [SECURITY.md](SECURITY.md).
 
 ### Checking a change
@@ -242,7 +241,9 @@ src/kyfromabove_3d/
   pieces.py            steps 1 and 2: a LiDAR tile into per-building pieces
   product1.py          product 1's measures: every building's height from the LiDAR
   sources_choice.py    which LiDAR survey and photo collection a tile uses
-  building.py          step 3: a piece in, a building's meshes out
+  pipeline.py          the one pipeline, laptop and cloud: measure, then build
+  cloud_jobs.py, queue_worker.py   the queue run's jobs, and a Spot machine's loop over the queue
+  building.py          a piece fetched, a building packed and published to buildings/<gers>/
   facade_fill.py       the completed product: fill what no frame saw, from the building itself
   publish.py           step 4: a tile's buildings as batched 3D Tiles, and the statewide tree
   terrain.py           the ground under the buildings, as the viewer's terrain
@@ -250,7 +251,7 @@ src/kyfromabove_3d/
   audit.py, texture_check.py   a built mesh against evidence it was not built from
   lidar.py, imagery.py, footprints.py, coordinates.py, cameras.py, crops.py, prepare.py, ...
 scripts/
-  stage0_index.py, tile_step.py, piece_step.py, building_step.py, publish_step.py   the steps, locally
+  stage0_index.py, tile_step.py, queue_run.py, publish_step.py   the steps (queue_run.py local: on this machine)
   build_mesh.py, colorize_building.py, check_building.py   one building's mesh, colour, checks
   overture_boxes.py    Overture footprints: fetched, measured on the LiDAR, split, boxed
   audit_reference.py   the reference-set audit

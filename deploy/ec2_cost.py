@@ -2,7 +2,8 @@
 """What one run of step 3 costs on Graviton EC2 Spot, beside Lambda.
 
 Lambda is priced from the calibration: the billed seconds of real buildings
-in AWS, per footprint-size band (``deploy/run_building_step.py --results``).
+in AWS, per footprint-size band (the results the old
+``deploy/run_building_step.py`` wrote, removed in cleanup 2026-10-16).
 
 EC2 Spot is priced from processor-seconds per building and the machine's
 hourly Spot price. Until a Spot machine has been measured, processor-seconds
@@ -16,7 +17,7 @@ are bracketed:
 
 A measured machine (``--measured``: a bench run's ``--results`` lines, with
 its ``.meta.json`` beside them -- how many ran at once and how long the whole
-run took, from ``deploy/run_ec2_bench.py``) replaces the bracket: each
+run took, from the old ``deploy/run_ec2_bench.py``, removed 2026-10-16) replaces the bracket: each
 building's share of the machine is its seconds over the number at once,
 scaled so the shares add up to the run's length.
 

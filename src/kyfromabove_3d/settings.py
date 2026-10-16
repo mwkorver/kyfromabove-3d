@@ -74,10 +74,7 @@ class ColouriseSettings:
     corner_snap: bool = True
     find_levels: bool = True
     prism_occluders: bool = True
-    twin_colour: bool = False
     occluder_radius_m: float = 250.0
-    occlusion: bool = True
-    extrude: Literal["profile", "prism", "verified", "off"] = "profile"
     prism_min_ratio: float = 0.60
     outline: Literal["overture", "lidar"] = "overture"
     match_walls: bool = False
@@ -103,7 +100,6 @@ class MeshSettings:
     texel_m: float = 0.15
     roof_tidy: bool = True
     wall_cap: bool = True
-    roof_edge: Literal["outline", "grid"] = "outline"
     roof_cell_m: float = 0.0
     texture: Literal["ktx2", "webp", "jpeg", "png"] = "ktx2"
     # a face that is a party wall over half its length: "seen" (only what the

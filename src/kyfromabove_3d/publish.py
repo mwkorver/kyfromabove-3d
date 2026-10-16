@@ -60,10 +60,11 @@ GLTF_TO_ZUP = np.array([[1.0, 0, 0, 0], [0, 0, -1.0, 0], [0, 1.0, 0, 0], [0, 0, 
 
 def _scripts():
     """build_mesh.py's writer and packer, and overture_boxes.py's extrusion."""
-    from .building import SCRIPTS
+    from .pipeline import scripts_dir
 
-    if str(SCRIPTS) not in sys.path:
-        sys.path.insert(0, str(SCRIPTS))
+    scripts = scripts_dir()
+    if str(scripts) not in sys.path:
+        sys.path.insert(0, str(scripts))
     import build_mesh
     import overture_boxes
 
@@ -606,12 +607,12 @@ def boxes_glb(boxes: Sequence[Tuple[np.ndarray, np.ndarray, np.ndarray]], featur
 
 def built_buildings(store, prefix: Optional[str] = None) -> Dict[str, set]:
     """{gers: the mesh products it has} from one listing of ``prefix``
-    (default: this version's buildings) -- instead of asking the store about
+    (default: ``buildings/``) -- instead of asking the store about
     each of a tile's buildings (a million requests for the pilot's 316,000,
     most of which have no mesh). A product is there when its zip is."""
-    from .building import buildings_prefix
+    from .building import BUILDINGS_PREFIX
 
-    prefix = (prefix or buildings_prefix()).rstrip("/")
+    prefix = (prefix or BUILDINGS_PREFIX).rstrip("/")
     subs = {s for v in PRODUCTS.values() for s in v}
     out: Dict[str, set] = {}
     for k in store.list(f"{prefix}/"):
@@ -630,9 +631,9 @@ def load_building(store, gers: str, product: str, prefix: Optional[str] = None,
     from PIL import Image
 
     from .archive import read_zip
-    from .building import buildings_prefix
+    from .building import BUILDINGS_PREFIX
 
-    prefix = prefix or buildings_prefix()
+    prefix = prefix or BUILDINGS_PREFIX
     for sub in PRODUCTS[product]:
         key = f"{prefix}/{gers}/{sub}.zip"
         if available is not None:

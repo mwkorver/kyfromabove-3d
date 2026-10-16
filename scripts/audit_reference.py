@@ -45,8 +45,8 @@ def load_config(path: Path = CONFIG) -> dict:
 
 
 def building_dir(b: dict, buildings: Path = BUILDINGS) -> Path:
-    """A downtown building's folder, or a landmark's own (``dir``)."""
-    return ROOT / b["dir"] if b.get("dir") else buildings / b["id"]
+    """A building's folder (the landmarks too: one pipeline for every building)."""
+    return buildings / b["id"]
 
 
 def current(cfg: dict, buildings: Path = BUILDINGS, fresh: bool = False) -> dict:
@@ -61,7 +61,7 @@ def current(cfg: dict, buildings: Path = BUILDINGS, fresh: bool = False) -> dict
         if not (d / "3dtiles_mesh" / "building.glb").exists():
             continue
         if fresh or not a.exists():
-            rec = audit(d, picture=d / "audit.png", case=b.get("case"))
+            rec = audit(d, picture=d / "audit.png")
             a.write_text(json.dumps(rec, indent=1, default=float), encoding="utf-8")
         out[b["id"]] = json.loads(a.read_text(encoding="utf-8"))
     return out
@@ -267,7 +267,7 @@ def main() -> int:
         for b in cfg["buildings"]:
             d = building_dir(b)
             if (d / "3dtiles_mesh" / "building.glb").exists():
-                rec = audit(d, case=b.get("case"), outline=args.audit_outline)
+                rec = audit(d, outline=args.audit_outline)
                 (args.to / f"{b['id']}.json").write_text(json.dumps(rec, indent=1, default=float), encoding="utf-8")
         print(f"snapshot ({args.audit_outline} outline) -> {args.to}")
         return 0

@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import json
 import shutil
-import sys
 from pathlib import Path
 
-import numpy as np
 import pytest
 
 from kyfromabove_3d import building as B
@@ -68,22 +66,6 @@ def test_the_neighbours_come_from_the_tile_and_the_measured_tiles_around_it(tmp_
     assert "extra" not in got["a"]                                        # only what the prisms read
 
 
-def test_the_stage_times_are_read_from_build_meshs_output():
-    out = "colouring...\n[time] colourise 6.0 s\n  face 1\n[time] mesh 11.6 s (with the colourise)\n[time] complete 0.4 s\n"
-    assert B._stage_times(out) == {"colourise": 6.0, "mesh": 11.6, "complete": 0.4}
-
-
-def test_a_script_is_timed_and_its_own_peak_memory_read(tmp_path):
-    code = "import numpy as np; a = np.ones(60_000_000, dtype=np.uint8); a[::4096] = 2; print('ok', a.sum())"
-    rc, s, mb, out = B.run_script([sys.executable, "-c", code], tmp_path / "log.txt", 60)
-    assert rc == 0 and "ok" in out and s >= 0 and mb > 55                 # the 60 MB array is in its peak
-    assert "ok" in (tmp_path / "log.txt").read_text()
-    rc, *_ = B.run_script([sys.executable, "-c", "import sys; sys.exit(3)"], tmp_path / "log.txt", 60)
-    assert rc == 3
-    rc, s, _, out = B.run_script([sys.executable, "-c", "import time; time.sleep(30)"], tmp_path / "log.txt", 1)
-    assert rc != 0 and s < 10 and "timed out" in out
-
-
 def _built(folder: Path, gers="g1"):
     """A built building's folder as the scripts leave it, crops and all."""
     b = folder / gers
@@ -114,8 +96,8 @@ def test_a_building_is_five_objects_summary_last_without_its_crops(tmp_path):
     order = []
     real = store.put_bytes
     store.put_bytes = lambda k, d, *a, **kw: (order.append(k), real(k, d, *a, **kw))[1]
-    s = B.publish_building(b, {"gers": "g1", "piece_hash": "h", "code_version": B.BUILDING_CODE_VERSION}, store)
-    base = f"buildings/{B.BUILDING_CODE_VERSION}/g1"
+    s = B.publish_building(b, {"gers": "g1", "fingerprint": "f"}, store)
+    base = "buildings/g1"
     assert order[-1] == f"{base}/building.json"                           # the marker last
     assert sorted(order) == sorted(f"{base}/{n}" for n in (
         "3dtiles_mesh.zip", "3dtiles_complete.zip", "review.zip", "levels.json", "building.json"))
@@ -145,29 +127,3 @@ def test_the_same_files_pack_into_the_same_bytes(tmp_path):
         os.utime(p, (1e9, 1e9))
     two, _ = B.pack_building(b2)
     assert one == two
-
-
-def test_a_building_built_from_the_same_piece_by_the_same_code_is_up_to_date(tmp_path):
-    store = LocalStore(tmp_path)
-    key = f"buildings/{B.BUILDING_CODE_VERSION}/g1/building.json"
-    assert not B.up_to_date("g1", {"inputs_hash": "h"}, store)
-    store.put_json(key, {"piece_hash": "h", "code_version": B.BUILDING_CODE_VERSION})
-    assert B.up_to_date("g1", {"inputs_hash": "h"}, store)
-    assert not B.up_to_date("g1", {"inputs_hash": "changed"}, store)
-    store.put_json(key, {"piece_hash": "h", "code_version": "older"})
-    assert not B.up_to_date("g1", {"inputs_hash": "h"}, store)
-    # another version's folder does not count as built by this code
-    store.put_json("buildings/older/g2/building.json", {"piece_hash": "h", "code_version": "older"})
-    assert not B.up_to_date("g2", {"inputs_hash": "h"}, store)
-
-
-def test_the_building_step_skips_an_up_to_date_building_and_reports_a_missing_piece(tmp_path):
-    store = LocalStore(tmp_path / "bucket")
-    for f in PIECE.iterdir():
-        store.put_file(f"pieces/g1/{f.name}", f)
-    marker = json.loads((PIECE / "piece.json").read_text())
-    store.put_json(f"buildings/{B.BUILDING_CODE_VERSION}/g1/building.json",
-                   {"piece_hash": marker["inputs_hash"], "code_version": B.BUILDING_CODE_VERSION})
-    res = B.building_step(["g1", "nope"], store, tmp_path / "work", index=None, log=lambda m: None)
-    assert res["skipped"] == ["g1"] and res["built"] == [] and list(res["failed"]) == ["nope"]
-    assert np.isclose(res["seconds"]["scene"], 0.0, atol=0.5)             # nothing to build: no LiDAR read

@@ -32,8 +32,8 @@ glTF's Y-up.
 
 Usage::
 
-    python scripts/build_mesh.py --building outputs/humana/humana --gers <id>
-    # -> outputs/humana/humana/3dtiles_mesh/tileset.json
+    python scripts/build_mesh.py --building outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08      # Humana
+    # -> <building>/3dtiles_mesh/tileset.json
 """
 
 from __future__ import annotations
@@ -1120,14 +1120,14 @@ def roof_from_outline(xs, ys, Z, valid, rings):
 
 
 def roof_mesh(xs, ys, Z, valid, wall_quads, planes=(), profiles=None, max_slope_deg: float = 75.0,
-              min_step_m: float = 2.0, levels=None, outline: bool = True):
+              min_step_m: float = 2.0, levels=None):
     """The roof's triangles, split into the flat ones (the roof, textured
     from the plan view) and the steep ones (a step or a wall the LiDAR saw
     that no band models -- Humana's bulging north side); a steep triangle
-    standing where a wall quad already is gets dropped. With ``outline``
-    (and levels) the triangles are cut along the levels' outlines
-    (roof_from_outline); otherwise two per cell of four valid corners."""
-    if outline and levels:
+    standing where a wall quad already is gets dropped. The triangles are
+    cut along the levels' outlines (roof_from_outline); with no levels, two
+    per cell of four valid corners."""
+    if levels:
         verts, tris = roof_from_outline(xs, ys, Z, valid, [lv["ring"] for lv in levels])
     else:
         ny, nx = Z.shape
@@ -1691,9 +1691,7 @@ def load_footprint(args, ox, oy):
     or --footprint; the building's own footprint.json when none is given."""
     from kyfromabove_3d.footprints import resolve_footprint
 
-    poly, entry = resolve_footprint(args.building, ox, oy, case=args.case, gers=args.gers,
-                                    footprint=getattr(args, "footprint", None),
-                                    footprints_json=args.footprints, footprint_csv=args.footprint_csv)
+    poly, entry = resolve_footprint(args.building, ox, oy)
     return poly, entry.get("name") or entry.get("overture_name") or entry.get("gers"), entry.get("gers"), entry
 
 
@@ -1718,12 +1716,6 @@ def parser() -> argparse.ArgumentParser:
     D = MeshSettings()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--building", type=Path, required=True)
-    ap.add_argument("--case", default=None)
-    ap.add_argument("--gers", default=None)
-    ap.add_argument("--footprint", type=Path, default=None,
-                    help="a footprint.json written by prepare (default when the building dir has one)")
-    ap.add_argument("--footprints", type=Path, default=Path("outputs/survey/case_footprints.json"))
-    ap.add_argument("--footprint-csv", type=Path, default=Path("data/derived/ky_facade_tiled_wkt.csv"))
     ap.add_argument("--name", default=None, help="display name (default: from the footprint)")
     ap.add_argument("--texel-m", type=float, default=D.texel_m)
     ap.add_argument("--no-roof-tidy", dest="roof_tidy", action="store_false",
@@ -1731,14 +1723,9 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--no-wall-cap", dest="wall_cap", action="store_false",
                     help="walls carried up or copied keep their band's top, and seen ones too; only a wall drawn "
                          "under a roof edge stops at the roof (before)")
-    ap.add_argument("--roof-edge", choices=("outline", "grid"), default=D.roof_edge,
-                    help="the roof's triangles cut along the levels' outlines, or two per cell of the height field (before)")
     ap.add_argument("--roof-cell-m", type=float, default=D.roof_cell_m,
                     help="roof height-field cell; 0 = 0.75 m where the returns are dense (>= 4/m2), else 1.5 m")
     ap.add_argument("--out", type=Path, default=None, help="default <building>/3dtiles_mesh/")
-    ap.add_argument("--ply", type=Path, default=None,
-                    help="coloured cloud to texture the walls from (default <building>/colorized_aerial.laz, "
-                         "or .ply from an older run; made here from the aerial frames alone when missing)")
     ap.add_argument("--texture", choices=TEXTURE_FORMATS, default=D.texture,
                     help="texture format in the glb: ktx2 (Basis, GPU-compressed; needs basisu), webp, jpeg, png")
     ap.add_argument("--dump-textures", action="store_true",
@@ -1770,7 +1757,7 @@ def settings_from_args(args):
     """The mesh's settings as the command line gives them (kyfromabove_3d.settings)."""
     from kyfromabove_3d.settings import MeshSettings
     return MeshSettings(texel_m=args.texel_m, roof_tidy=args.roof_tidy, wall_cap=args.wall_cap,
-                        roof_edge=args.roof_edge, roof_cell_m=args.roof_cell_m, texture=args.texture)
+                        roof_cell_m=args.roof_cell_m, texture=args.texture)
 
 
 def main(argv=None) -> int:
@@ -1799,8 +1786,8 @@ def main(argv=None) -> int:
     name = args.name or name
     lidar = read_cloud(find_cloud(b, "lidar_local"))
     xyz = np.column_stack([lidar["x"], lidar["y"], lidar["z"]]).astype(np.float64)
-    ply_path = args.ply or find_cloud(b, "colorized_aerial")
-    if args.ply is None and (args.refresh or not ply_path.exists()):
+    ply_path = find_cloud(b, "colorized_aerial")
+    if args.refresh or not ply_path.exists():
         # The mesh's colour comes from the state's aerial frames alone: a
         # colourise with no --extra-camera, kept apart from colorized.ply
         # (which may carry admitted photographs for the point view). It also
@@ -1810,12 +1797,6 @@ def main(argv=None) -> int:
         (b / "colorized_aerial.ply").unlink(missing_ok=True)        # an older run's copy
         cmd = [sys.executable, str(Path(__file__).resolve().parent / "colorize_building.py"),
                "--building", str(b), "--out", str(ply_path)]
-        if args.case:
-            cmd += ["--case", args.case]
-        elif args.gers:
-            cmd += ["--gers", args.gers]
-        elif args.footprint:
-            cmd += ["--footprint", str(args.footprint)]
         if args.scene_cloud:
             cmd += ["--scene-cloud", str(args.scene_cloud)]
         if args.neighbours:
@@ -2201,8 +2182,7 @@ def main(argv=None) -> int:
 
     # Roof
     if valid.any():
-        verts, tris, steep = roof_mesh(xs, ys, Z, valid, all_wall_quads, [by_face[f] for f in used_bands], used_bands, levels=levels,
-                                       outline=M.roof_edge == "outline")
+        verts, tris, steep = roof_mesh(xs, ys, Z, valid, all_wall_quads, [by_face[f] for f in used_bands], used_bands, levels=levels)
     else:
         from overture_boxes import extrude
         P_, N_, I_ = extrude(ring_m, ground_z, roof_top)
@@ -2237,7 +2217,7 @@ def main(argv=None) -> int:
     if cams and len(verts):
         if valid.any():
             from shapely.geometry import Polygon as _RoofPoly
-            roof_outline = _RoofPoly(np.asarray(levels[0]["ring"], dtype=float)[:, :2]).buffer(0) if M.roof_edge == "outline" else None
+            roof_outline = _RoofPoly(np.asarray(levels[0]["ring"], dtype=float)[:, :2]).buffer(0)
             tex, bbox, n_seen, n_tex = roof_texture(xs, ys, Z, valid, poly, cams, M.texel_m, outline=roof_outline)
         else:
             flat_valid = np.ones_like(valid); Zf = np.full(Z.shape, ground_z + roof_top)

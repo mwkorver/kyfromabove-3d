@@ -191,8 +191,8 @@ Fetch, measure and build with:
 
 ```bash
 python scripts/overture_boxes.py fetch --bbox -85.764 38.25 -85.75 38.26 --out data/derived/louisville_downtown_overture.json
-python scripts/overture_boxes.py lidar-heights --buildings data/derived/louisville_downtown_overture.json --frame outputs/humana/humana --out data/derived/louisville_downtown_overture_lidar.json
-python scripts/overture_boxes.py build --buildings data/derived/louisville_downtown_overture_lidar.json --frame outputs/humana/humana --out outputs/overture_boxes/downtown_lidar
+python scripts/overture_boxes.py lidar-heights --buildings data/derived/louisville_downtown_overture.json --frame outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 --out data/derived/louisville_downtown_overture_lidar.json
+python scripts/overture_boxes.py build --buildings data/derived/louisville_downtown_overture_lidar.json --frame outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 --out outputs/overture_boxes/downtown_lidar
 ```
 
 ## A review of the three landmarks, and what it changed
@@ -250,7 +250,7 @@ verification change; a `run_downtown.py run --force-step colorize mesh`
 Build one with:
 
 ```bash
-python scripts/build_mesh.py --building outputs/humana/humana --gers d2786314-4fb3-4da6-8f81-621873d40c08 --name "Humana Building"
+python scripts/build_mesh.py --building outputs/downtown/buildings/d2786314-4fb3-4da6-8f81-621873d40c08 --name "Humana Building"
 ```
 
 The intake server serves the result at `/tiles?target=<gers>&mesh=1`, and

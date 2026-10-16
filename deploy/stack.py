@@ -377,7 +377,7 @@ class QueueRunStack(Stack):
         asg.scale_on_metric("ByQueue", metric=work, adjustment_type=autoscaling.AdjustmentType.EXACT_CAPACITY,
                             scaling_steps=[autoscaling.ScalingInterval(upper=0, change=0),
                                            autoscaling.ScalingInterval(lower=1, change=max_machines)],
-                            evaluation_periods=5, cooldown=Duration.minutes(5))
+                            evaluation_periods=5)
         CfnOutput(self, "QueueUrl", value=queue.queue_url)
         CfnOutput(self, "DeadLetterQueueUrl", value=dlq.queue_url)
         CfnOutput(self, "GroupName", value=asg.auto_scaling_group_name)

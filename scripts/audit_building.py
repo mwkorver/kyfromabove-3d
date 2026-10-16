@@ -179,14 +179,14 @@ def audit(b: Path, glb: Path | None = None, picture: Path | None = None, case: s
     return rec
 
 
-def main() -> int:
+def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--building", type=Path, required=True)
     ap.add_argument("--glb", type=Path, default=None, help="audit this mesh of the building instead of its own")
     ap.add_argument("--case", default=None, help="a landmark's footprint case (configs/landmarks.yaml), e.g. pnc_tower")
     ap.add_argument("--out", type=Path, default=None, help="where to write audit.json / audit.png (default: the building)")
     ap.add_argument("--no-picture", action="store_true")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     out = args.out or args.building
     out.mkdir(parents=True, exist_ok=True)
     rec = audit(args.building, args.glb, None if args.no_picture else out / "audit.png", case=args.case)

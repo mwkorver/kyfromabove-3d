@@ -1773,8 +1773,8 @@ def settings_from_args(args):
                         roof_edge=args.roof_edge, roof_cell_m=args.roof_cell_m, texture=args.texture)
 
 
-def main() -> int:
-    args = parser().parse_args()
+def main(argv=None) -> int:
+    args = parser().parse_args(argv)
     import dataclasses
     from kyfromabove_3d.settings import ColouriseSettings, MeshSettings, changed_from_defaults, resolve
     cli = settings_from_args(args)
@@ -1830,7 +1830,8 @@ def main() -> int:
             cmd.append("--lidar-outline")
         print(f"colouring from the aerial frames only -> {ply_path.name}")
         t_col = time.time()
-        r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        from kyfromabove_3d.pipeline import run_main
+        r = run_main("colorize_building", cmd[2:])           # in this process (refactor step 3)
         # a line the building step reads to price each stage
         print(f"[time] colourise {time.time() - t_col:.1f} s")
         # the profile's decisions go into the building's log (which faces got

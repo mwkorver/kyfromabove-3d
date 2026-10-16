@@ -1110,8 +1110,8 @@ def footprint_and_levels(building: Path, CS, case=None, gers=None, footprint=Non
                            lidar_outline=lidar_outline)
 
 
-def main() -> int:
-    args = parser().parse_args()
+def main(argv=None) -> int:
+    args = parser().parse_args(argv)
     import dataclasses
     from kyfromabove_3d.settings import ColouriseSettings, changed_from_defaults, resolve
     cli = settings_from_args(args)

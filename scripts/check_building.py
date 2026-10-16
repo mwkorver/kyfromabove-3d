@@ -163,7 +163,7 @@ def sheet(path: Path, grids, cams, scores, n_rows: int = 4, width_px: int = 460)
     return path
 
 
-def main() -> int:
+def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--building", type=Path, required=True)
     ap.add_argument("--spacing-m", type=float, default=0.25)
@@ -176,7 +176,7 @@ def main() -> int:
                     help="the neighbours, as solid prisms at their LiDAR heights")
     ap.add_argument("--neighbour-levels", default=None,
                     help="where the neighbours' levels.json are; 'none' for their outlines at LiDAR height only")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     t0 = time.time()
     faces, grids, cams, scores = check(args.building, args.spacing_m, args.scene_cloud, args.occluder_radius_m,
                                        args.footprints, args.neighbour_levels)

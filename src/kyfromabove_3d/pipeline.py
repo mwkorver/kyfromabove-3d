@@ -31,6 +31,7 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Callable, Dict, Optional, Sequence
 
 #: the levels as the LiDAR shows them, before the frames move a corner
@@ -193,3 +194,34 @@ def fingerprint(bdir: Path, buildings_dir: Path, radius_m: float = 250.0) -> str
             h.update(nb.name.encode())
             h.update(_canonical(MEASURED_LEVELS, lv.read_bytes()))
     return h.hexdigest()
+
+
+# ------------------------------------------------------------------ the stages in one process
+
+def run_main(script: str, argv) -> SimpleNamespace:
+    """A stage's ``main`` (scripts/<script>.py) called in this process, as
+    if it ran on its own: its printed log captured, an exception or an exit
+    a non-zero return code. Returns (returncode, stdout) as subprocess.run
+    does. One Python start per building instead of one per stage -- the
+    imports cost about a second each time (refactor step 3)."""
+    import contextlib
+    import importlib
+    import io
+    import sys
+    import traceback
+    from types import SimpleNamespace
+
+    scripts = Path(__file__).resolve().parents[2] / "scripts"
+    if str(scripts) not in sys.path:
+        sys.path.insert(0, str(scripts))
+    mod = importlib.import_module(script)
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        try:
+            rc = mod.main([str(a) for a in argv]) or 0
+        except SystemExit as exc:
+            rc = exc.code if isinstance(exc.code, int) else (0 if exc.code is None else 1)
+        except Exception:                                           # noqa: BLE001
+            traceback.print_exc(file=buf)
+            rc = 1
+    return SimpleNamespace(returncode=rc, stdout=buf.getvalue())

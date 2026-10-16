@@ -166,10 +166,13 @@ def worker(args) -> int:
                     (bdir / fname).unlink(missing_ok=True)
             save(status="measured" if state.get("status") != "meshed" else "meshed", measure=res, error=None)
             return 0
-        # phase 2: the crops of the frames the measure phase chose, when they are not on disk
+        # phase 2: the crops of the frames the measure phase chose, when they are not on disk -- cut
+        # ahead by the run's crop workers (phase "crops") while other buildings are built, or here
         if not (bdir / "images").exists() and (bdir / "frames.json").exists():
             from kyfromabove_3d.pipeline import cut_crops_from_piece
             save(crops=cut_crops_from_piece(bdir))
+        if args.phase == "crops":
+            return 0
         # colourise (as part of the mesh: build_mesh runs it and takes the box path if it declines)
         cmd = [sys.executable, str(SCRIPTS / "build_mesh.py"), "--building", str(bdir),
                "--name", rec.get("name") or args.gers, "--scene-cloud", str(args.out / "scene_phase2.npz")]
@@ -186,8 +189,8 @@ def worker(args) -> int:
         if args.complete:
             cmd.append("--complete")
         t = time.time()
-        r = subprocess.run(cmd, cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-                           timeout=args.timeout_min * 60)
+        from kyfromabove_3d.pipeline import run_main
+        r = run_main("build_mesh", cmd[2:])           # in this process; the run's timeout covers the worker
         print(r.stdout)
         if r.returncode != 0:
             raise RuntimeError(f"build_mesh exit {r.returncode}: " + "\n".join(r.stdout.splitlines()[-8:]))
@@ -197,13 +200,15 @@ def worker(args) -> int:
              n_frames=ex.get("n_frames"), t_mesh=round(time.time() - t, 1), error=None)
         # the check: the mesh against the frames it was not textured from,
         # while the crops are still on disk; a check that fails does not fail the building
-        if not args.no_check and ex.get("n_frames"):
+        # the check on a share of the buildings (--check-sample), the same ones every run
+        import hashlib
+        sampled = int(hashlib.sha1(args.gers.encode()).hexdigest()[:8], 16) % 1000 < args.check_sample * 1000
+        if not args.no_check and sampled and ex.get("n_frames"):
             t = time.time()
             ccmd = [sys.executable, str(SCRIPTS / "check_building.py"), "--building", str(bdir)]
             if args.check_sheets:
                 ccmd.append("--sheet")
-            rc = subprocess.run(ccmd, cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-                                timeout=args.timeout_min * 60)
+            rc = run_main("check_building", ccmd[2:])
             print(rc.stdout)
             if rc.returncode == 0:
                 chk = json.loads((bdir / "texture_check.json").read_text(encoding="utf-8"))["building"]
@@ -216,8 +221,7 @@ def worker(args) -> int:
         if not args.no_audit:
             t = time.time()
             acmd = [sys.executable, str(SCRIPTS / "audit_building.py"), "--building", str(bdir)]
-            ra = subprocess.run(acmd, cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-                                timeout=args.timeout_min * 60)
+            ra = run_main("audit_building", acmd[2:])
             print(ra.stdout)
             if ra.returncode == 0:
                 save(audit=audit_brief(json.loads((bdir / "audit.json").read_text(encoding="utf-8"))),
@@ -242,6 +246,60 @@ def worker(args) -> int:
 
 
 # -------------------------------------------------------------------- the run
+
+_AREA = None
+
+
+def measure_task(job):
+    """Phase 1 for one building, in a long-lived process of the run's pool
+    (the frame index and the LiDAR index read once per process). Returns
+    (gers, ok); the building's state records what it found or why not."""
+    global _AREA
+    args, rec = job
+    from kyfromabove_3d.pipeline import Area, measure
+    from kyfromabove_3d.prepare import load_frames_index
+    from kyfromabove_3d.lidar import LidarTileIndex
+    if _AREA is None:
+        records = json.loads(args.footprints.read_text(encoding="utf-8"))["buildings"]
+        grounds = [r["lidar_ground_z"] for r in records if r.get("lidar_ground_z") is not None]
+        _AREA = Area(records=records,
+                     frames_gdf=load_frames_index(args.out / "frames_2024s1.gpkg", area_bounds_ft(records, 300.0)),
+                     index=LidarTileIndex(ROOT / "data" / "raw", phases=("phase2",)), pad_ft=args.pad_ft,
+                     max_per_head=args.max_per_head, min_frames=args.min_frames,
+                     fallback_ground_m=float(np.median(grounds)) if grounds else None)
+    bdir = args.out / "buildings" / rec["id"]
+    bdir.mkdir(parents=True, exist_ok=True)
+    state_path = bdir / "state.json"
+    state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+    coords_file = bdir / "coordinates.json"
+    old_origin = json.loads(coords_file.read_text(encoding="utf-8")).get("origin_source_xyz") if coords_file.exists() else None
+    import contextlib
+    import io
+    log = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(log):
+            res = measure(rec, bdir, _AREA)
+        ok, err = True, None
+    except Exception as exc:                                        # noqa: BLE001
+        res, ok, err = None, False, repr(exc)[-2000:]
+    new_origin = json.loads(coords_file.read_text(encoding="utf-8")).get("origin_source_xyz") if coords_file.exists() else None
+    if old_origin is not None and new_origin is not None and not np.allclose(old_origin, new_origin, atol=1e-3):
+        # Origin moved: invalidate old colourise outputs and profiles to avoid mixing frames
+        for fname in ("colorized_aerial.laz", "colorized_aerial.ply", "colorized_aerial_coverage.json",
+                      "colorized.ply", "coverage.json", "wall_planes.json", "wall_profiles.json", "levels.json"):
+            (bdir / fname).unlink(missing_ok=True)
+    state.update({"gers": rec["id"], "name": rec.get("name"), "measure": res,
+                  "updated": time.strftime("%Y-%m-%dT%H:%M:%S")})
+    if ok:
+        state["status"] = state.get("status") if state.get("status") == "meshed" else "measured"
+        state["error"] = None
+    else:
+        state.update(status="failed", error=err)
+    state_path.write_text(json.dumps(state, indent=1), encoding="utf-8")
+    with open(bdir / "log.txt", "a", encoding="utf-8") as fh:
+        fh.write(f"\n=== {state['updated']} measure\n" + log.getvalue())
+    return rec["id"], ok
+
 
 def mark_split_parents(out: Path, records) -> int:
     """A footprint cut into parts (``parent_gers`` on the records) keeps its
@@ -388,6 +446,7 @@ def run(args) -> int:
             cmd.append("--keep-crops")
         if args.no_check:
             cmd.append("--no-check")
+        cmd += ["--check-sample", str(args.check_sample)]
         if args.no_audit:
             cmd.append("--no-audit")
         if args.no_prism_occluders:
@@ -430,8 +489,10 @@ def run(args) -> int:
     to_measure = todo + [r for r in records if r["id"] not in ids
                          and not (out / "buildings" / r["id"] / MEASURED_LEVELS).exists()]
     t_run = time.time()
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        bad = [g for g, rc, _ in pool.map(lambda r: one(r, "measure"), to_measure) if rc]
+    import multiprocessing as mp
+    from concurrent.futures import ProcessPoolExecutor
+    with ProcessPoolExecutor(max_workers=args.workers, mp_context=mp.get_context("spawn")) as pool:
+        bad = [g for g, ok in pool.map(measure_task, [(args, r) for r in to_measure], chunksize=4) if not ok]
     print(f"measured {len(to_measure)} building(s) in {(time.time() - t_run) / 60:.1f} min"
           + (f"; {len(bad)} failed: {[g[:8] for g in bad[:8]]}" if bad else ""))
     # a building already built from the same inputs, settings, neighbours and code is not built again
@@ -446,8 +507,17 @@ def run(args) -> int:
         todo = [r for r in todo if r not in same]
         print(f"{len(same)} building(s) unchanged since they were built; {len(todo)} to build")
     done = 0
+    # the crops wait on the network: cut ahead by their own workers, in the build's order, while
+    # the build workers compute (refactor step 3); a build starts when its crops are on disk
+    cpool = ThreadPoolExecutor(max_workers=max(args.crop_workers, 1))
+    crops_of = {r["id"]: cpool.submit(one, r, "crops") for r in todo} if args.crop_workers else {}
+
+    def build(r):
+        if r["id"] in crops_of:
+            crops_of[r["id"]].result()
+        return one(r)
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = {pool.submit(one, r): r for r in todo}
+        futures = {pool.submit(build, r): r for r in todo}
         for fut in as_completed(futures):
             rec = futures[fut]
             try:
@@ -471,6 +541,7 @@ def run(args) -> int:
                     do_merge(out)
                 except Exception as exc:                       # noqa: BLE001
                     print(f"[warn] merge failed: {exc}")
+    cpool.shutdown()
     manifest = write_manifest(out, records, read_states(out))
     do_merge(out)
     print(f"done in {(time.time() - t_run) / 60:.1f} min: {manifest['counts']}")
@@ -515,6 +586,9 @@ def main() -> int:
     common.add_argument("--timeout-min", type=float, default=20.0)
     common.add_argument("--keep-crops", action="store_true")
     common.add_argument("--no-check", action="store_true", help="skip the texture check after the mesh")
+    common.add_argument("--check-sample", type=float, default=1.0,
+                        help="the texture check on this share of the buildings, the same ones every run "
+                             "(a production run: 0.1)")
     common.add_argument("--no-audit", action="store_true", help="skip the audit after the mesh (audit_building.py)")
     common.add_argument("--complete", action="store_true",
                         help="also build the completed product (unseen texels filled from each building's own facade)")
@@ -529,10 +603,14 @@ def main() -> int:
                         help="the colourise gives unknown wall bands the depth the frames agree on (kyfromabove_3d.wall_match)")
     common.add_argument("--force-step", nargs="*", choices=STEPS, default=None)
     r = sub.add_parser("run", parents=[common]); r.add_argument("--workers", type=int, default=4)
+    r.add_argument("--crop-workers", type=int, default=0,
+                   help="workers cutting the next buildings' crops while the others build; 0: each build cuts its "
+                        "own (on the laptop, with the frame cache, cutting ahead was slower: 512 s for the safety "
+                        "net, 529 s with 4 crop workers, 582 s with 2)")
     r.add_argument("--limit", type=int, default=0); r.add_argument("--only", nargs="*", default=None)
     r.add_argument("--no-resume", action="store_true"); r.add_argument("--merge-every", type=int, default=25)
     w = sub.add_parser("worker", parents=[common]); w.add_argument("--gers", required=True)
-    w.add_argument("--phase", choices=("measure", "build"), default="build",
+    w.add_argument("--phase", choices=("measure", "crops", "build"), default="build",
                    help="measure: the piece, class, outline and levels; build: crops, colourise, mesh, check, audit")
     sub.add_parser("merge", parents=[common])
     sub.add_parser("report", parents=[common])

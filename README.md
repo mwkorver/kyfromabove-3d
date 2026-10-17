@@ -244,6 +244,9 @@ src/kyfromabove_3d/
   pipeline.py          the one pipeline, laptop and cloud: measure, then build
   cloud_jobs.py, queue_worker.py   the queue run's jobs, and a Spot machine's loop over the queue
   building.py          a piece fetched, a building packed and published to buildings/<gers>/
+  features/            what the LiDAR shows of a building: planes, walls, face profiles, levels, ground, class
+  colourise/           a building's points coloured from the frames: occlusion, colour, extra wall points, levels
+  mesh/                the mesh: walls, roof, textures, party walls, and the glTF and 3D Tiles it is written as
   facade_fill.py       the completed product: fill what no frame saw, from the building itself
   publish.py           step 4: a tile's buildings as batched 3D Tiles, and the statewide tree
   terrain.py           the ground under the buildings, as the viewer's terrain
@@ -252,7 +255,7 @@ src/kyfromabove_3d/
   lidar.py, imagery.py, footprints.py, coordinates.py, cameras.py, crops.py, prepare.py, ...
 scripts/
   stage0_index.py, tile_step.py, queue_run.py, publish_step.py   the steps (queue_run.py local: on this machine)
-  build_mesh.py, colorize_building.py, check_building.py   one building's mesh, colour, checks
+  build_mesh.py, colorize_building.py, check_building.py   one building's mesh, colour, checks (the stages; their parts are in src/)
   overture_boxes.py    Overture footprints: fetched, measured on the LiDAR, split, boxed
   audit_reference.py   the reference-set audit
   intake_server.py     local viewers: /tiles, /compare, frames and crops, terrain

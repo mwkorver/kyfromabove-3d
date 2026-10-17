@@ -556,7 +556,8 @@ def test_face_texture_never_borrows_a_facade_in_front_of_the_band():
 def test_a_lone_point_stays_a_point_and_a_sparse_raster_still_fills():
     """The small-gap fill bridges gaps between seen texels; round a lone point
     it must not grow a disc (the round dots on the Omni's walls)."""
-    from build_mesh import NEAR, PLAIN, SEEN, _fill_holes
+    from kyfromabove_3d.facade_fill import NEAR, PLAIN, SEEN
+    from kyfromabove_3d.mesh.textures import _fill_holes
     img = np.zeros((60, 60, 3)); cnt = np.zeros((60, 60))
     img[30, 30] = (40, 40, 40); cnt[30, 30] = 1                     # one dark point on an unseen wall
     img[:, :5] = 200; cnt[:, :5] = 1                                 # a seen strip, for the median
@@ -614,7 +615,8 @@ def test_on_a_wall_specks_are_dropped_solid_patches_grow_and_blank_takes_its_flo
     """Walls: a scattered speck is not trusted (bridging specks drew lines,
     growing them drew dots); a solidly seen patch grows its colour up to the
     reach; unseen wall takes the median of its own floor, not the face's."""
-    from build_mesh import NEAR, PLAIN, SEEN, _fill_holes
+    from kyfromabove_3d.facade_fill import NEAR, PLAIN, SEEN
+    from kyfromabove_3d.mesh.textures import _fill_holes
     H, W = 60, 80
     img = np.zeros((H, W, 3)); cnt = np.zeros((H, W))
     img[:30, :30] = 60; cnt[:30, :30] = 1                            # lower floors, seen, in shadow
@@ -631,7 +633,8 @@ def test_on_a_wall_specks_are_dropped_solid_patches_grow_and_blank_takes_its_flo
 
 
 def test_a_small_seen_blob_grows_no_ring_and_a_speckled_floor_keeps_the_specks_colour():
-    from build_mesh import NEAR, PLAIN, SEEN, _fill_holes
+    from kyfromabove_3d.facade_fill import NEAR, PLAIN, SEEN
+    from kyfromabove_3d.mesh.textures import _fill_holes
     H, W = 80, 80
     img = np.zeros((H, W, 3)); cnt = np.zeros((H, W))
     img[:30, :] = 60; cnt[:30, :] = 1                                # lower floors seen solidly, in shadow

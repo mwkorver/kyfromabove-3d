@@ -8,15 +8,10 @@ thread holding only its own handles.)"""
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-
-import colorize_building as C                                              # noqa: E402
+from kyfromabove_3d.colourise import occlusion as C
 
 
 

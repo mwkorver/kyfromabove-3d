@@ -82,7 +82,7 @@ def measure(rec: Dict[str, Any], bdir: Path, area: Area, log: Callable = print) 
     if str(scripts) not in sys.path:
         sys.path.insert(0, str(scripts))
     import lidar_outline
-    from colorize_building import ColouriseFailure, footprint_and_levels
+    from .colourise.levels import ColouriseFailure, footprint_and_levels
 
     bdir = Path(bdir)
     t0 = time.time()
@@ -147,6 +147,17 @@ _MEASURED = ("coordinates.json", "footprint.json", "clip.json", "check_features.
 _code_version: Optional[str] = None
 
 
+def code_files():
+    """(name, path) of every file :func:`code_version` digests: the package's
+    modules, its subpackages' too (features/, mesh/, colourise/, each by its
+    path in the package), the build's scripts and the class settings."""
+    from .settings import CLASS_CONFIG
+    pkg = Path(__file__).resolve().parent
+    out = [(f.relative_to(pkg).as_posix(), f) for f in sorted(pkg.rglob("*.py"))]
+    out += [(f.name, f) for f in [scripts_dir() / c for c in _CODE] + [CLASS_CONFIG] if f.exists()]
+    return out
+
+
 def code_version() -> str:
     """A digest of the code a building is built with: the package and the
     build's scripts and class settings, by content (no git needed, so the
@@ -154,12 +165,10 @@ def code_version() -> str:
     global _code_version
     if _code_version is None:
         import hashlib
-        from .settings import CLASS_CONFIG
         h = hashlib.sha256()
-        for f in sorted(Path(__file__).resolve().parent.glob("*.py")) + [scripts_dir() / c for c in _CODE] + [CLASS_CONFIG]:
-            if f.exists():
-                h.update(f.name.encode())
-                h.update(f.read_bytes())
+        for name, f in code_files():
+            h.update(name.encode())
+            h.update(f.read_bytes())
         _code_version = h.hexdigest()[:16]
     return _code_version
 

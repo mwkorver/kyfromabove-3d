@@ -77,7 +77,7 @@ def measure_job(job: Dict[str, Any]) -> Dict[str, Any]:
     if str(scripts) not in sys.path:
         sys.path.insert(0, str(scripts))
     import lidar_outline
-    from colorize_building import ColouriseFailure, footprint_and_levels
+    from .colourise.levels import ColouriseFailure, footprint_and_levels
 
     store, run, tile = _store(), job.get("run", "run"), job["tile"]
     work = _work()

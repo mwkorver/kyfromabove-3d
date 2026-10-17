@@ -144,7 +144,7 @@ rectangle at the roof's edge height, textured on its own — a fan of slats
 with a seam at every edge. Now a run of four or more consecutive edges no
 longer than 4 m, turning the same way by 3–35° at each vertex and by 35°
 in all, whose vertices fit a circle within 0.3 m, is one face: an
-`ArcWall` (`features.py`). Its trick is to change the *coordinates*, not
+`ArcWall` (`features/walls.py`). Its trick is to change the *coordinates*, not
 the fifty places that use a face's frame: the arc is handled **unrolled**
 — `x` is distance along the arc, `y` is minus the outward offset — so the
 profile, the bands, the roof-behind clip, the wall rectangles and the

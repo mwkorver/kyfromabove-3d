@@ -69,18 +69,6 @@ def _piece(folder, gers="g1", height=12.0):
     return folder
 
 
-def test_a_piece_is_published_marker_last_and_an_unchanged_one_is_not_rewritten(tmp_path):
-    store = _Recording(tmp_path / "store")
-    f = _piece(tmp_path / "work" / "g1")
-    assert P.publish_piece(f, store) is True
-    assert store.keys[-1] == "pieces/g1/piece.json"                       # the event fires on the whole piece
-    assert "pieces/g1/footprint.json" in store.keys and len(store.keys) == 4
-    store.keys.clear()
-    assert P.publish_piece(f, store) is False and store.keys == []         # nothing written: no event
-    _piece(f, height=14.0)                                                 # the LiDAR height changed
-    assert P.publish_piece(f, store) is True and store.keys[-1] == "pieces/g1/piece.json"
-
-
 def test_the_inputs_hash_follows_the_footprint_and_the_code_version(tmp_path, monkeypatch):
     f = _piece(tmp_path / "g1")
     h = P.inputs_hash(f)

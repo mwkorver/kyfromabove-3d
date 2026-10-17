@@ -5,8 +5,9 @@ the frame indexes, without the pixels (:func:`prepare.prepare_piece`):
 ``coordinates.json``, ``footprint.json`` (with product 1's LiDAR height and,
 for a footprint holding several buildings, its part), the LiDAR clip
 ``lidar_local.laz`` and ``clip.json``, ``check_features.json`` and the frames
-chosen, ``frame_coverage.csv``. Its marker, ``piece.json``, is written last:
-in S3 its arrival is the event that the next step listens for.
+chosen, ``frame_coverage.csv``. Its marker, ``piece.json``, is written last
+(the measure job, ``cloud_jobs.measure_job``): a piece without one is not
+finished.
 
 The unit of work is one Phase 2 LiDAR tile (46,167 statewide, each a COPC
 file read by range requests). A building belongs to the tile holding its
@@ -23,11 +24,11 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
-#: Bump to rebuild every piece: a new marker is written, and its event fires.
+#: Bump when the way pieces are cut changes: every piece's inputs hash changes.
 #: stage1-2: the hash reads values rounded, not bytes; frames.json added.
 CODE_VERSION = "stage1-2"
 
@@ -404,65 +405,3 @@ def piece_step(tilename: str, gers: Sequence[str], buildings: Sequence[Dict[str,
         (folder / "piece.json").write_text(json.dumps(marker, indent=1, default=float), encoding="utf-8")
         folders.append(folder)
     return {"pieces": folders, "failed": failed}
-
-
-def make_tile_pieces(tilename: str, owned: Sequence[Dict[str, Any]], halo: Sequence[Dict[str, Any]], work: Path,
-                     grid, index, frames_gdf, pad_ft: float = 90.0, max_per_head: int = 4, min_frames: int = 3,
-                     log=print) -> Dict[str, Any]:
-    """Cut one tile's pieces into ``work/<gers>/`` (each with its marker
-    ``piece.json``): :func:`tile_step`, then each building's piece. Returns
-    {"pieces": [folders], "records": product 1 records of the owned
-    footprints (split parts in place of their parent), "splits": [...]}."""
-    step = tile_step(tilename, owned, halo, grid, index, log=log)
-    parts, halo, splits = step["buildings"], step["halo"], step["splits"]
-    if not parts:
-        return {"pieces": [], "records": [], "splits": []}
-    made = piece_step(tilename, [r["id"] for r in parts], parts, halo, frames_gdf, index, work, pad_ft,
-                      max_per_head, min_frames, log=log)
-    return {"pieces": made["pieces"], "records": parts, "splits": splits}
-
-
-def publish_piece(folder: Path, store, prefix: str = "pieces") -> bool:
-    """Write a piece's files to ``<prefix>/<gers>/`` and its marker
-    ``piece.json`` last. A piece whose marker in the store already has the
-    same ``inputs_hash`` is left alone -- no write, so no event. Returns
-    whether it was written."""
-    folder = Path(folder)
-    marker = json.loads((folder / "piece.json").read_text(encoding="utf-8"))
-    key = f"{prefix}/{marker['gers']}/piece.json"
-    if store.exists(key):
-        try:
-            if store.read_json(key).get("inputs_hash") == marker["inputs_hash"]:
-                return False
-        except (ValueError, KeyError):
-            pass
-    for name in PIECE_FILES:
-        p = folder / name
-        if p.exists():
-            store.put_file(f"{prefix}/{marker['gers']}/{name}", p)
-    store.put_json(key, marker)                                     # last: its arrival is the event
-    return True
-
-
-def publish_tile(tilename: str, made: Dict[str, Any], written: Iterable[str], store,
-                 prefix: str = "pieces", products: str = "products/footprints") -> None:
-    """The tile's manifest (the pieces it owns, which were rewritten) and its
-    product 1 records."""
-    store.put_json(f"{prefix}/_tiles/{tilename}.json",
-                   {"tile": tilename, "code_version": CODE_VERSION,
-                    "pieces": [Path(f).name for f in made["pieces"]], "written": sorted(written)})
-    store.put_json(f"{products}/tile={tilename}.json", {"tile": tilename, "buildings": made["records"],
-                                                         "split": made["splits"]})
-
-
-def run_tile(tilename: str, tile_inputs: Dict[str, list], work: Path, store, grid, index, frames_gdf,
-             log=print) -> Dict[str, Any]:
-    """One tile, end to end: cut its pieces, publish them (unchanged ones
-    skipped), publish the tile's manifest and product 1 records."""
-    made = make_tile_pieces(tilename, tile_inputs.get("owned", []), tile_inputs.get("halo", []), work, grid, index,
-                            frames_gdf, log=log)
-    written = [Path(f).name for f in made["pieces"] if publish_piece(f, store)]
-    publish_tile(tilename, made, written, store)
-    log(f"tile {tilename}: {len(made['pieces'])} pieces, {len(written)} written, "
-        f"{len(made['pieces']) - len(written)} unchanged")
-    return {"tile": tilename, "pieces": len(made["pieces"]), "written": len(written)}

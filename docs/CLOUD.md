@@ -349,16 +349,17 @@ chosen to texture it. The crops are cut later, by the building step.
 
 `piece.json` carries an `inputs_hash`: the footprint and its product 1
 record, the clip's box and origin, the frames chosen, the clip's point
-count, and `pieces.CODE_VERSION`. `publish_piece` writes nothing when the
-marker in S3 already has that hash, so an unchanged piece raises no event.
-Bump `CODE_VERSION` and every piece is rewritten, and every event fires.
+count, and `pieces.CODE_VERSION` (bump it when the way pieces are cut
+changes). A building's fingerprint (`pipeline.fingerprint`) reads its
+measured files, so a build job rebuilds exactly the buildings whose pieces,
+settings, neighbours or code changed, and skips the rest.
 
 ## The code
 
 | Where | What |
 |---|---|
 | `src/kyfromabove_3d/store.py` | `LocalStore` (a folder) and `S3Store` (a bucket; `endpoint_url` for LocalStack or moto) |
-| `src/kyfromabove_3d/pieces.py` | tile ownership and halo, `piece_step`, `publish_piece` (marker last, unchanged skipped) |
+| `src/kyfromabove_3d/pieces.py` | tile ownership and halo, `run_tile_step` (step 1), `piece_step` (a tile's pieces) |
 | `src/kyfromabove_3d/product1.py` | product 1's measures, shared with `scripts/overture_boxes.py`: heights inside the edge, the roof-step splits |
 | `src/kyfromabove_3d/pipeline.py` | the one pipeline, laptop and cloud: measure, then build; the fingerprint |
 | `src/kyfromabove_3d/cloud_jobs.py` | the queue's two jobs: `measure_job` (a tile's buildings) and `build_job` (a batch) |

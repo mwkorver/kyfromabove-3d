@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Step 1, the tile step, on this machine: what the Lambda
-``kyfromabove-3d-tile-step`` does, for checking it before and after.
+"""Step 1, the tile step, on this machine: what the queue's tile job and the
+Lambda ``kyfromabove-3d-tile-step`` do (``pieces.run_tile_step``).
 
 For each tile: read its Overture outlines (``inputs/footprints/tile=<name>.json``,
 from ``stage0_index.py``), read the LiDAR around them at full resolution,
@@ -24,33 +24,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from kyfromabove_3d.pieces import (phase2_grid, publish_tile_step, tile_bounds_ft, tile_ground_bytes,  # noqa: E402
-                                   tile_step)
+from kyfromabove_3d.pieces import phase2_grid, run_tile_step                                   # noqa: E402
 from kyfromabove_3d.store import store_from                                                  # noqa: E402
 
 
-def run(tile: str, inputs_store, out_store, grid, index, work: Path, frames_cache: Path | None = None,
-        log=print) -> dict:
-    """One tile, as the Lambda runs it."""
-    from kyfromabove_3d.sources_choice import choose_sources
-
-    inputs = inputs_store.read_json(f"inputs/footprints/tile={tile}.json")
-    # index: {phase: single-phase index}; the LiDAR and obliques closest in time
-    choice = choose_sources(tile, grid, index, work, log=log)
-    phase_index = index[choice["phase"]]
-    res = tile_step(tile, inputs.get("owned", []), inputs.get("halo", []), grid, phase_index, log=log,
-                    provenance=choice["provenance"])
-    frames_path = choice["frames_path"]
-    res["stats"]["frames"] = int(len(choice["frames"]))
-    res["stats"]["sources_considered"] = choice["candidates"]
-    index = phase_index
-    ground = tile_ground_bytes(tile, grid, index, res["stats"], log=log)
-    publish_tile_step(tile, res, frames_path, out_store, ground=ground)
-    return res["stats"]
+def run(tile: str, inputs_store, out_store, grid, index, work: Path, log=print) -> dict:
+    """One tile, as the queue's tile job and the Lambda run it (pieces.run_tile_step)."""
+    return run_tile_step(tile, inputs_store, out_store, grid, index, work, log=log)
 
 
 def main() -> int:
-    from kyfromabove_3d.lidar import LidarTileIndex
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--store", required=True, help="where to write: a folder, or s3://bucket")

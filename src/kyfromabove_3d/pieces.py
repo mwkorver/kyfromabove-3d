@@ -269,6 +269,37 @@ def publish_tile_step(tilename: str, result: Dict[str, Any], frames_path: Option
     store.put_json(f"{prefix}/{tilename}/summary.json", stats)
 
 
+def run_tile_step(tilename: str, inputs_store, out_store, grid, indexes: Dict[str, Any], work: Path,
+                  log=print) -> Dict[str, Any]:
+    """Step 1 for one tile, from its inputs to its published results -- the
+    one way it runs, in the queue's tile job, the Lambda and
+    ``scripts/tile_step.py``: the tile's Overture outlines
+    (``inputs/footprints/tile=<name>.json``, from stage 0), the LiDAR phase
+    and oblique collection taken closest together in time
+    (``sources_choice``), the outlines measured and split (:func:`tile_step`),
+    the ground grid, and ``tiles/<name>/`` written (:func:`publish_tile_step`,
+    ``summary.json`` last). ``indexes``: one single-phase LiDAR index per
+    phase. Returns the tile's stats."""
+    import time
+
+    from .sources_choice import choose_sources
+
+    t = time.time()
+    inputs = inputs_store.read_json(f"inputs/footprints/tile={tilename}.json")
+    t_inputs = time.time() - t
+    t = time.time()
+    choice = choose_sources(tilename, grid, indexes, work, log=log)
+    t_choice = time.time() - t
+    index = indexes[choice["phase"]]
+    res = tile_step(tilename, inputs.get("owned", []), inputs.get("halo", []), grid, index, log=log,
+                    provenance=choice["provenance"])
+    res["stats"].update({"frames": int(len(choice["frames"])), "sources_considered": choice["candidates"],
+                         "seconds_inputs": round(t_inputs, 1), "seconds_choice": round(t_choice, 1)})
+    ground = tile_ground_bytes(tilename, grid, index, res["stats"], log=log)
+    publish_tile_step(tilename, res, choice["frames_path"], out_store, ground=ground)
+    return res["stats"]
+
+
 def batches(buildings: Sequence[Dict[str, Any]], size: int) -> List[List[str]]:
     """The buildings' ids in batches of ``size``, nearby ones together
     (ordered by their centres, in rows about 200 m tall), each building in

@@ -50,9 +50,7 @@ def tile_step(event, context):
     the LiDAR, splits, lists the frames over the tile, and writes
     ``tiles/<name>/buildings.json``, ``frames.gpkg`` and ``summary.json``.
     Returns the summary."""
-    from kyfromabove_3d.pieces import publish_tile_step, tile_ground_bytes
-    from kyfromabove_3d.pieces import tile_step as run_tile_step
-    from kyfromabove_3d.sources_choice import choose_sources
+    from kyfromabove_3d.pieces import run_tile_step
 
     t0 = time.time()
     store = _store()
@@ -63,25 +61,10 @@ def tile_step(event, context):
     tile = event["tile"]
     work = Path(tempfile.mkdtemp(dir=os.environ.get("WORK_DIR", "/tmp")))
     try:
-        t = time.time()
-        inputs = store.read_json(f"inputs/footprints/tile={tile}.json")
-        t_inputs = time.time() - t
-        # which LiDAR phase and oblique collection, closest in time (sources_choice)
-        t = time.time()
-        choice = choose_sources(tile, grid, idx, work)
-        t_choice = time.time() - t
-        index = idx[choice["phase"]]
-        res = run_tile_step(tile, inputs.get("owned", []), inputs.get("halo", []), grid, index,
-                            provenance=choice["provenance"])
-        frames_path = choice["frames_path"]
-        res["stats"].update({"frames": int(len(choice["frames"])), "seconds_choice": round(t_choice, 1),
-                             "sources_considered": choice["candidates"],
-                             "seconds_setup": round(t_setup, 1), "cold_container": cold,
-                             "seconds_inputs": round(t_inputs, 1)})
-        ground = tile_ground_bytes(tile, grid, index, res["stats"])
-        publish_tile_step(tile, res, frames_path, store, ground=ground)
-        res["stats"]["seconds_handler"] = round(time.time() - t0, 1)
-        print(json.dumps(res["stats"]))
-        return res["stats"]
+        stats = run_tile_step(tile, store, store, grid, idx, work)
+        stats.update({"seconds_setup": round(t_setup, 1), "cold_container": cold,
+                      "seconds_handler": round(time.time() - t0, 1)})
+        print(json.dumps(stats))
+        return stats
     finally:
         shutil.rmtree(work, ignore_errors=True)

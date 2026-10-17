@@ -10,7 +10,7 @@ take them from a queue (refactor step 4, October 2026).
 stage 0 (laptop, once per Overture release)
   Overture footprints ──> inputs/footprints/tile=<name>.json
                                    │
-step 1, tile      (Lambda, one per tile)          deploy/run_tile_step.py
+tile jobs        (EC2 Spot, one job per tile)    scripts/queue_run.py tile
   tiles/<name>/buildings.json, frames.gpkg        product 1 heights, frames listed
                                    │
 measure jobs      (EC2 Spot, one job per tile)    scripts/queue_run.py measure
@@ -376,19 +376,24 @@ In AWS (after `aws login`; the CDK CLI runs through `npx`), on downtown's
 2x2 block:
 
 ```bash
-cd deploy && npx aws-cdk deploy kyfromabove-3d-tile-step && cd ..
 python scripts/stage0_index.py --bbox -85.773 38.238 -85.735 38.269 --store s3://kyfromabove-3d --tiles N076E228 N076E229 N077E228 N077E229
-python deploy/run_tile_step.py --tiles N076E228 N076E229 N077E228 N077E229
 cd deploy && npx aws-cdk deploy kyfromabove-3d-queue -c queue_run=r2 && cd ..
 export QUEUE_URL=$(aws cloudformation describe-stacks --stack-name kyfromabove-3d-queue --query "Stacks[0].Outputs[?OutputKey=='QueueUrl'].OutputValue" --output text)
+python scripts/queue_run.py tile --run r2 --tiles N076E228 N076E229 N077E228 N077E229
 python scripts/queue_run.py measure --run r2 --tiles N076E228 N076E229 N077E228 N077E229
 python scripts/queue_run.py build --run r2 --tiles N076E228 N076E229 N077E228 N077E229
 python scripts/queue_run.py status --run r2
 ```
 
 The machines start when the jobs arrive and stop when the queue has been
-empty a while. Send the build jobs once `status` shows every measure job
-done: a building is built against its neighbours' measured levels.
+empty a while. Send each kind once `status` shows the one before done: a
+building is measured against the records of the tiles around its own, and
+built against its neighbours' measured levels.
+
+The tile step can still run as one Lambda per tile instead
+(`npx aws-cdk deploy kyfromabove-3d-tile-step`, then
+`python deploy/run_tile_step.py --tiles ...`); both run
+`pieces.run_tile_step`, as `scripts/tile_step.py` does on this machine.
 
 ## What has been checked
 

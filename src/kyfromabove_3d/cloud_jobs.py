@@ -1,9 +1,15 @@
 """The jobs a queue worker runs (``kyfromabove_3d.queue_worker``): the one
 building pipeline (``kyfromabove_3d.pipeline``), in the cloud.
 
-A run sends two kinds of message, all of the first before any of the
-second, as the laptop's run measures every building before building any:
+A run sends three kinds of message, each kind only once the one before is
+done -- a tile's buildings are measured against its neighbouring tiles'
+records, and built against their measured levels:
 
+* ``{"kind": "tile", "run": ..., "tile": T}`` -- step 1 for one LiDAR tile
+  (``pieces.run_tile_step``): its Overture outlines from
+  ``inputs/footprints/tile=T.json`` measured from the LiDAR and split, the
+  LiDAR and obliques taken closest together in time, the frames over it and
+  its ground grid. Published to ``tiles/T/``, ``summary.json`` last.
 * ``{"kind": "measure", "run": ..., "tile": T, "gers": [...]}`` -- the
   buildings of one LiDAR tile (from the tile step's ``tiles/T/buildings.json``)
   measured: each one's piece (``pieces.piece_step``, as the cloud has cut
@@ -57,6 +63,23 @@ def _indexes():
 def _record_failure(store, run: str, gers: str, error: str) -> None:
     store.put_json(f"runs/{run}/failed/{gers}.json", {"gers": gers, "error": error[-4000:],
                                                        "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+
+
+# ------------------------------------------------------------------ tile
+
+def tile_job(job: Dict[str, Any]) -> Dict[str, Any]:
+    """One tile's step 1 (see the module)."""
+    from .pieces import phase2_grid, run_tile_step
+
+    store, tile = _store(), job["tile"]
+    work = _work()
+    try:
+        grid = phase2_grid(Path(os.environ.get("RAW_DIR", "/opt/data/raw")))
+        s = run_tile_step(tile, store, store, grid, _indexes(), work)
+        return {"tile": tile, "buildings": s.get("buildings"), "measured": s.get("measured"),
+                "frames": s.get("frames"), "seconds": s.get("seconds")}
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
 
 
 # ------------------------------------------------------------------ measure
@@ -238,4 +261,4 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
 
 def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     """The worker's handler: a job by its kind."""
-    return {"measure": measure_job, "build": build_job}[job["kind"]](job)
+    return {"tile": tile_job, "measure": measure_job, "build": build_job}[job["kind"]](job)

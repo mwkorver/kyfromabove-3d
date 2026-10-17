@@ -58,7 +58,7 @@ byte-identical results in each.
 | Step | What it does | Runs on | Code |
 |---|---|---|---|
 | 0 | Groups Overture's footprints by the LiDAR tile they fall in | a laptop, once per Overture release | `scripts/stage0_index.py` |
-| 1 · tile | Measures every building's height from the LiDAR, splits outlines that hold two or three buildings, and picks the LiDAR survey and photo collection taken **closest together in time** | one Lambda per tile | `pieces.tile_step`, `sources_choice.py` |
+| 1 · tile | Measures every building's height from the LiDAR, splits outlines that hold two or three buildings, and picks the LiDAR survey and photo collection taken **closest together in time** | EC2 Spot machines, one tile a job (or one Lambda per tile) | `pieces.run_tile_step`, `sources_choice.py` |
 | 2 · measure | Cuts each building's LiDAR, lists the aerial frames that see it, and measures its class, outline and levels | EC2 Spot machines, one tile a job | `cloud_jobs.measure_job`, `pipeline.py` |
 | 3 · build | Fits walls to the LiDAR, colours them from the frames, builds the measured and completed meshes, and audits them | EC2 Spot machines, 8-16 nearby buildings a job | `cloud_jobs.build_job`, `scripts/build_mesh.py` |
 | 4 · publish | Batches each tile's buildings into 3D Tiles, builds the statewide tree and the terrain, writes the viewer | a Spot machine, or a laptop | `publish.py`, `terrain.py` |
@@ -180,7 +180,6 @@ about two minutes on a laptop:
 
 ```bash
 python scripts/stage0_index.py --bbox -85.764 38.25 -85.75 38.26 --store outputs/one_tile --tiles N076E229
-python scripts/tile_step.py --store outputs/one_tile --tiles N076E229
 python scripts/queue_run.py local --run one --store outputs/one_tile --tiles N076E229 --limit 5
 python scripts/publish_step.py --inputs outputs/one_tile --tiles N076E229 --tree --terrain --viewer --start -85.7522 38.25 700
 python -m http.server -d outputs/one_tile 8000
@@ -191,12 +190,11 @@ frames are read straight from KyFromAbove's public bucket.
 
 ### In AWS
 
-The stacks are in [`deploy/`](deploy/) (AWS CDK): the tile step (a Lambda),
-the queue run (an SQS queue and a group of Spot machines that take the
-measure and build jobs from it, the same code as on the laptop), the
-CloudFront viewer and the budget. `deploy/run_tile_step.py` starts the tile
-step over a list of tiles; `scripts/queue_run.py` sends a run's jobs and
-follows it. [`docs/CLOUD.md`](docs/CLOUD.md) walks through a full run.
+The stacks are in [`deploy/`](deploy/) (AWS CDK): the queue run (an SQS
+queue and a group of Spot machines that take the tile, measure and build
+jobs from it, the same code as on the laptop), the tile step as a Lambda
+(an alternative for step 1), the CloudFront viewer and the budget.
+`scripts/queue_run.py` sends a run's jobs and follows it. [`docs/CLOUD.md`](docs/CLOUD.md) walks through a full run.
 
 Before deploying your own copy: the bucket name `kyfromabove-3d` in the code
 and docs is the author's and bucket names are global, so change it; the Spot

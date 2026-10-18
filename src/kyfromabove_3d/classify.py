@@ -85,12 +85,14 @@ def measure(d: Path, a: ClassifySettings) -> dict:
     inner = shapely.contains_xy(poly.buffer(-0.5), X, Y) if not poly.buffer(-0.5).is_empty else np.zeros_like(X, bool)
     roof = inner & np.isfinite(g) & (g >= a.min_roof_m)
     rec["roof_cover"] = round(float(roof.sum() / max(inner.sum(), 1)), 2)
-    if roof.sum() >= 8:
+    # the roof away from its own edge; a roof too small to have any such cell
+    # (a 6 m shed: 3a7c18d7) is measured as one with too few cells
+    ok = roof & median_filter(roof.astype(np.uint8), size=3).astype(bool) if roof.sum() >= 8 else np.zeros_like(roof)
+    if ok.any():
         gs = median_filter(np.where(np.isfinite(g), g, 0.0), size=3)
         gy, gx = np.gradient(gs, c)
         slope = np.degrees(np.arctan(np.hypot(gx, gy)))
-        ok = roof & median_filter(roof.astype(np.uint8), size=3).astype(bool)   # away from the roof's own edge
-        n_ok = max(int(ok.sum()), 1)
+        n_ok = int(ok.sum())
         rec["flat_share"] = round(float((ok & (slope < 10)).sum() / n_ok), 2)
         rec["pitched_share"] = round(float((ok & (slope >= 15) & (slope <= 60)).sum() / n_ok), 2)
         flat_h = g[ok & (slope < 10)]

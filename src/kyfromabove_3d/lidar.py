@@ -450,7 +450,15 @@ class LidarTileIndex:
             grid = gpd.read_file(path)
             if grid.crs is None:
                 grid = grid.set_crs(self.GRID_CRS)
-            self.grids[phase] = grid.to_crs(self.GRID_CRS)
+            grid = grid.to_crs(self.GRID_CRS)
+            b = grid.geometry.bounds.to_numpy()
+            bad = ~np.isfinite(b).all(axis=1)
+            if bad.any():
+                # KyFromAbove's Phase 3 list of 2026-09-15 has every shape at infinity: no area
+                # would meet a tile, and every read would quietly find no LiDAR
+                raise ValueError(f"{path.name}: {int(bad.sum())} of {len(grid)} tile shapes are not finite "
+                                 f"(e.g. {grid.tilename[bad].iloc[0]}); repair it with scripts/repair_tile_grid.py")
+            self.grids[phase] = grid
 
     @property
     def phases(self) -> List[str]:

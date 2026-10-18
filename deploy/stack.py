@@ -181,7 +181,12 @@ class QueueRunStack(Stack):
                 instances_distribution=autoscaling.InstancesDistribution(
                     on_demand_base_capacity=0, on_demand_percentage_above_base_capacity=0,
                     spot_allocation_strategy=autoscaling.SpotAllocationStrategy.CAPACITY_OPTIMIZED,
-                    spot_max_price=QUEUE_MAX_PRICE)))
+                    spot_max_price=QUEUE_MAX_PRICE)),
+            # a deploy that changes the machines (a new image, a new script) replaces the
+            # running ones: they kept the old image and took jobs it could not run (trial1:
+            # 21 publish jobs parked in seconds). Their jobs in flight come back to the queue.
+            update_policy=autoscaling.UpdatePolicy.rolling_update(
+                max_batch_size=max_machines, min_instances_in_service=0, pause_time=Duration.seconds(0)))
         # all the machines while the queue holds work, none when it is empty; work in flight
         # counts (a job being built is not visible, and its machine must stay)
         work = cw.MathExpression(expression="visible + flight", period=Duration.minutes(1), using_metrics={

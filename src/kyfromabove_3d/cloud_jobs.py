@@ -25,6 +25,17 @@ records, and built against their measured levels:
   fingerprint: the checkpoint a later run, or another machine after a Spot
   interruption, skips by).
 
+Then the viewer's two (step 4, ``scripts/publish_step.py``'s parts):
+
+* ``{"kind": "publish", "run": ..., "tile": T}`` -- the tile's batched 3D
+  Tiles for every view (``tiles/T/3dtiles/<product>/``), its buildings read
+  from ``buildings/<gers>/`` beside it.
+* ``{"kind": "tree", "run": ...}`` -- once the tiles are published: the
+  statewide tree for each view (``kentucky/<product>/``) and the terrain
+  (``terrain/``), over every tile published in the store, so tiles published
+  before stay in the view. The viewer page and its settings are left as
+  they are.
+
 The store is ``STORE`` (``s3://bucket/prefix``, or a folder for a test), the
 LiDAR tile indexes ``RAW_DIR``, the working disk ``WORK_DIR``.
 """
@@ -259,6 +270,45 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
         shutil.rmtree(work, ignore_errors=True)
 
 
+# ------------------------------------------------------------------ publish
+
+def _publish_step():
+    import sys
+
+    from .pipeline import scripts_dir
+    scripts = scripts_dir()
+    if str(scripts) not in sys.path:
+        sys.path.insert(0, str(scripts))
+    import publish_step
+    return publish_step
+
+
+def publish_job(job: Dict[str, Any]) -> Dict[str, Any]:
+    """One tile's 3D Tiles for every view (see the module)."""
+    ps = _publish_step()
+    store, raw = os.environ["STORE"], os.environ.get("RAW_DIR", "/opt/data/raw")
+    res = ps.one_tile(job["tile"], store, store, raw, job.get("products") or ps.PRODUCTS)
+    return {"tile": job["tile"], **{s["product"]: {"meshed": s.get("meshed", 0), "boxed": s.get("boxed", 0)}
+                                    for s in res}}
+
+
+def tree_job(job: Dict[str, Any]) -> Dict[str, Any]:
+    """The statewide tree and the terrain over every published tile (see the module)."""
+    from .pieces import phase2_grid
+    from .publish import publish_tree
+
+    ps = _publish_step()
+    store = _store()
+    grid = phase2_grid(Path(os.environ.get("RAW_DIR", "/opt/data/raw")))
+    products = job.get("products") or ps.PRODUCTS
+    for p in products:
+        publish_tree(store, grid, p)                                    # tiles=None: every published tile
+    tiles = sorted({k.split("/")[1] for k in store.list("tiles/") if k.endswith("/3dtiles/measured/tileset.json")})
+    ps.terrain(tiles, store, store, grid, int(job.get("terrain_max_level", 15)))
+    return {"tiles": len(tiles), "products": list(products)}
+
+
 def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     """The worker's handler: a job by its kind."""
-    return {"tile": tile_job, "measure": measure_job, "build": build_job}[job["kind"]](job)
+    return {"tile": tile_job, "measure": measure_job, "build": build_job, "publish": publish_job,
+            "tree": tree_job}[job["kind"]](job)

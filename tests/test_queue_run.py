@@ -53,12 +53,13 @@ def test_the_tile_command_sends_one_tile_job_per_tile(sqs, tmp_path):
 
 
 def test_the_worker_runs_a_job_by_its_kind(monkeypatch):
+    kinds = ("tile", "measure", "build", "publish", "tree")
     seen = []
-    for kind in ("tile", "measure", "build"):
+    for kind in kinds:
         monkeypatch.setattr(cloud_jobs, f"{kind}_job", lambda job, k=kind: seen.append(k) or {"kind": k})
-    for kind in ("tile", "measure", "build"):
+    for kind in kinds:
         assert cloud_jobs.run_job({"kind": kind, "tile": "T"}) == {"kind": kind}
-    assert seen == ["tile", "measure", "build"]
+    assert seen == list(kinds)
     with pytest.raises(KeyError):
         cloud_jobs.run_job({"kind": "nope"})
 
@@ -92,3 +93,13 @@ def test_status_counts_each_kind_of_job_done(tmp_path, capsys):
     queue_run.main(["status", "--run", "r", "--store", str(tmp_path)])
     out = capsys.readouterr().out
     assert "6 job(s) done (2 tile, 1 measure, 3 build)" in out and "1 building(s) failed" in out
+
+
+def test_publish_sends_one_job_per_tile_and_tree_sends_one(sqs, tmp_path):
+    client, url = sqs
+    queue_run.main(["publish", "--run", "r9", "--queue-url", url, "--store", str(tmp_path), "--tiles", "A", "B"])
+    queue_run.main(["tree", "--run", "r9", "--queue-url", url, "--store", str(tmp_path)])
+    got = sorted(_bodies(client, url), key=lambda j: j["id"])
+    assert got == [{"id": "publish-A", "kind": "publish", "run": "r9", "tile": "A"},
+                   {"id": "publish-B", "kind": "publish", "run": "r9", "tile": "B"},
+                   {"id": "tree", "kind": "tree", "run": "r9"}]

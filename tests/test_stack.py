@@ -158,3 +158,6 @@ def test_the_queue_run_is_spot_machines_on_a_queue_with_a_patient_dead_letter_qu
     # a machine whose worker has stopped shuts down (terminates), after its log is saved
     assert ud.index("scripts/queue_worker.py") < ud.index("worker.log s3://") < ud.rindex("shutdown -h now")
     t.resource_count_is("AWS::EC2::SecurityGroupIngress", 0)
+    # a deploy that changes the template replaces the running machines
+    t.has_resource("AWS::AutoScaling::AutoScalingGroup", {"UpdatePolicy": {"AutoScalingRollingUpdate": assertions.Match.object_like(
+        {"MinInstancesInService": 0, "MaxBatchSize": 3})}})

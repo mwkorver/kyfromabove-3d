@@ -22,6 +22,8 @@ Usage::
     python scripts/queue_run.py status  --run r1
     python scripts/queue_run.py build   --queue-url <url> --run r1 --tiles N077E228 N077E229 --batch 12
     python scripts/queue_run.py retry-failed --queue-url <url> --run r1
+    python scripts/queue_run.py publish --queue-url <url> --run r1 --tiles N077E228 N077E229
+    python scripts/queue_run.py tree    --queue-url <url> --run r1
     python scripts/queue_run.py local   --run r1 --store outputs/one_tile --tiles N076E229 --limit 5
 """
 
@@ -58,6 +60,19 @@ def cmd_tile(args, store) -> int:
     return 0
 
 
+def cmd_publish(args, store) -> int:
+    n = _send(_sqs(args), args.queue_url, ({"id": f"publish-{t}", "kind": "publish", "run": args.run, "tile": t}
+                                           for t in args.tiles))
+    print(f"{n} publish job(s) sent")
+    return 0
+
+
+def cmd_tree(args, store) -> int:
+    n = _send(_sqs(args), args.queue_url, [{"id": "tree", "kind": "tree", "run": args.run}])
+    print(f"{n} tree job sent: the statewide tree and terrain over every published tile")
+    return 0
+
+
 def cmd_measure(args, store) -> int:
     n = _send(_sqs(args), args.queue_url, ({"id": f"measure-{t}", "kind": "measure", "run": args.run, "tile": t}
                                            for t in args.tiles))
@@ -82,7 +97,7 @@ def cmd_status(args, store) -> int:
     for key in store.list(f"runs/{args.run}/done/"):
         kind = key.rsplit("/", 1)[-1].split("-", 1)[0]          # the job ids: tile-T, measure-T, build-T-k
         kinds[kind] = kinds.get(kind, 0) + 1
-    by_kind = ", ".join(f"{kinds[k]} {k}" for k in ("tile", "measure", "build", "retry") if k in kinds)
+    by_kind = ", ".join(f"{kinds[k]} {k}" for k in ("tile", "measure", "build", "retry", "publish", "tree") if k in kinds)
     print(f"run {args.run}: {counts['done']} job(s) done{f' ({by_kind})' if by_kind else ''}, "
           f"{counts['attempts']} with a failed try, {counts['parked']} parked, {counts['failed']} building(s) failed")
     for key in list(store.list(f"runs/{args.run}/parked/"))[:10]:
@@ -130,7 +145,7 @@ def cmd_local(args, store) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=("tile", "measure", "build", "status", "retry-failed", "local"))
+    ap.add_argument("cmd", choices=("tile", "measure", "build", "publish", "tree", "status", "retry-failed", "local"))
     ap.add_argument("--run", required=True)
     ap.add_argument("--queue-url", default=os.environ.get("QUEUE_URL"))
     ap.add_argument("--tiles", nargs="*", default=[])
@@ -142,7 +157,7 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     from kyfromabove_3d.store import store_from
     store = store_from(args.store, endpoint_url=os.environ.get("AWS_ENDPOINT_URL") or None)
-    return {"tile": cmd_tile, "measure": cmd_measure, "build": cmd_build, "status": cmd_status,
+    return {"tile": cmd_tile, "measure": cmd_measure, "build": cmd_build, "publish": cmd_publish, "tree": cmd_tree, "status": cmd_status,
             "retry-failed": cmd_retry_failed, "local": cmd_local}[args.cmd](args, store)
 
 

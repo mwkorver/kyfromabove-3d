@@ -159,7 +159,11 @@ class QueueRunStack(Stack):
             f"-v kfa-cog-cache:/var/cache/nginx/cog -v /var/tmp/cog_log:/var/log/nginx {COG_CACHE_NGINX}",
             worker,
             "aws s3 cp /var/tmp/worker.log "
-            f"s3://{bucket_name}/runs/{run}/logs/$(cat /var/lib/cloud/data/instance-id).log || true")
+            f"s3://{bucket_name}/runs/{run}/logs/$(cat /var/lib/cloud/data/instance-id).log || true",
+            # the worker has stopped (the queue idle, or the Spot notice): the machine goes too
+            # (shutdown terminates it), and the group starts a fresh one while jobs remain --
+            # a machine left up without its worker held its place and took no jobs (trial1)
+            "shutdown -h now")
         lt = ec2.LaunchTemplate(
             self, "Template", machine_image=ec2.MachineImage.latest_amazon_linux2023(
                 cpu_type=ec2.AmazonLinuxCpuType.ARM_64),

@@ -155,4 +155,6 @@ def test_the_queue_run_is_spot_machines_on_a_queue_with_a_patient_dead_letter_qu
     lt = next(iter(t.find_resources("AWS::EC2::LaunchTemplate").values()))
     ud = json.dumps(lt["Properties"]["LaunchTemplateData"]["UserData"])
     assert f"shutdown -h +{QUEUE_LIFETIME_MIN}" in ud and "scripts/queue_worker.py" in ud and "--run r1" in ud
+    # a machine whose worker has stopped shuts down (terminates), after its log is saved
+    assert ud.index("scripts/queue_worker.py") < ud.index("worker.log s3://") < ud.rindex("shutdown -h now")
     t.resource_count_is("AWS::EC2::SecurityGroupIngress", 0)

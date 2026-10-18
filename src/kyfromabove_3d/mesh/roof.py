@@ -68,7 +68,9 @@ def roof_heightfield(xyz: np.ndarray, poly, ground_z: float, cell: float = ROOF_
     infp = contains_xy(poly, X.ravel(), Y.ravel()).reshape(X.shape)
     dist, (iy, ix) = distance_transform_edt(~have, return_indices=True)
     Zf = Z[iy, ix]
-    valid = infp & (have | (dist * cell <= 3.0))
+    # (with no cell of two returns there is no nearest one to copy: 37393d1b's
+    # eight cells were "valid" and every height was NaN)
+    valid = infp & (have | (dist * cell <= 3.0)) & np.isfinite(Zf)
     Zf[~valid] = np.nan
     # A 3x3 median where at least five neighbours are valid: a one-cell
     # spike (a lattice dome's rib, a mast) is not a wall, and left alone it
@@ -145,6 +147,7 @@ def tidy_roof_field(xyz: np.ndarray, poly, ground_z: float, xs, ys, Z, valid, le
     roof_heightfield returns it. Returns the new heights."""
     from scipy.interpolate import griddata
     from scipy.ndimage import generic_filter, label
+    from scipy.spatial import QhullError
     from shapely import contains_xy
 
     Z = np.array(Z, dtype=float, copy=True)
@@ -161,8 +164,16 @@ def tidy_roof_field(xyz: np.ndarray, poly, ground_z: float, xs, ys, Z, valid, le
     own = valid & (cnt >= 2)
     X, Y = np.meshgrid(xs, ys)
     fill = valid & ~own
+    zi = None
     if fill.any() and own.sum() >= 4:
-        zi = griddata((X[own], Y[own]), Z[own], (X[fill], Y[fill]), method="linear")
+        try:
+            zi = griddata((X[own], Y[own]), Z[own], (X[fill], Y[fill]), method="linear")
+        except QhullError:
+            # the cells with returns of their own lie on one line (a narrow
+            # roof seen along one scan line: 62e822b0, b6c453f9): nothing to
+            # interpolate between, so the filled cells keep their copies
+            zi = None
+    if zi is not None:
         Zl = Z.copy()
         Zl[fill] = np.where(np.isfinite(zi), zi, Z[fill])
         # A ramp only where it is no steeper than ``max_ramp_deg``: beside a
@@ -180,7 +191,9 @@ def tidy_roof_field(xyz: np.ndarray, poly, ground_z: float, xs, ys, Z, valid, le
         steep = rise > cell * np.tan(np.radians(max_ramp_deg))
         Z = np.where(fill & ~steep, Zl, Z)
     zv = Z[valid]
-    hist, edges = np.histogram(zv, bins=np.arange(np.floor(zv.min()), np.ceil(zv.max()) + level_bin_m, level_bin_m))
+    # at least one bin: a roof at one whole-metre height had floor == ceil, and no bins
+    z0 = np.floor(zv.min())
+    hist, edges = np.histogram(zv, bins=np.arange(z0, max(np.ceil(zv.max()), z0 + 1.0) + level_bin_m, level_bin_m))
     # a level's share: the cells within a bin either side of a local peak
     share = np.convolve(hist, np.ones(3), mode="same") / max(len(zv), 1)
     levels = []

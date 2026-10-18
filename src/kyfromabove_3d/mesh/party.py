@@ -61,7 +61,10 @@ def party_edges(ring_m: np.ndarray, neighbours: list, faces, within_m: float = 0
                 if s1 - s0 >= min_run_m:
                     stretches.append((s0, s1, None if t is None else float(t)))
         if stretches:
-            out[f.face] = sorted(stretches)
+            # by where they lie, an unknown roof (None) before a known one: two
+            # neighbours on the same stretch, one with no roof height, could not
+            # be compared (ce8b50e8)
+            out[f.face] = sorted(stretches, key=lambda s: (s[0], s[1], -np.inf if s[2] is None else s[2]))
     return out
 
 

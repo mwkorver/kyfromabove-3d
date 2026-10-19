@@ -97,7 +97,7 @@ def cmd_status(args, store) -> int:
     for key in store.list(f"runs/{args.run}/done/"):
         kind = key.rsplit("/", 1)[-1].split("-", 1)[0]          # the job ids: tile-T, measure-T, build-T-k
         kinds[kind] = kinds.get(kind, 0) + 1
-    by_kind = ", ".join(f"{kinds[k]} {k}" for k in ("tile", "measure", "build", "retry", "publish", "tree") if k in kinds)
+    by_kind = ", ".join(f"{kinds[k]} {k}" for k in ("tile", "measure", "build", "retry", "publish", "tree", "repack") if k in kinds)
     print(f"run {args.run}: {counts['done']} job(s) done{f' ({by_kind})' if by_kind else ''}, "
           f"{counts['attempts']} with a failed try, {counts['parked']} parked, {counts['failed']} building(s) failed")
     for key in list(store.list(f"runs/{args.run}/parked/"))[:10]:

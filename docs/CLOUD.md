@@ -334,6 +334,18 @@ holding two or three buildings, its part), the LiDAR clip (the footprint
 plus 90 ft, from 10 m below ground to 30 m above the roof), and the frames
 chosen to texture it. The crops are cut later, by the building step.
 
+**How a piece is stored** (October 2026): one `piece.zip` (the piece's files
+and what measuring added: the class, the LiDAR outline, the levels) and the
+marker `piece.json` last, which says `"layout": "zip-1"` -- two uploads a
+building instead of about twelve, and two downloads to build it instead of
+about twenty-two (`building.publish_piece`, `pull_piece`; a piece without the
+layout, a file each, is still read). Each tile's buildings' local frames and
+measured levels are also kept together in `tiles/<tile>/measured.json`: a
+build batch reads its own tile's and its eight neighbours' instead of two
+small objects for each of the 300-600 buildings within 450 m. On one trial
+tile (50 buildings) the stored pieces went from 500 objects to 100 and the
+buildings came out byte for byte the same.
+
 ## Why a tile is the unit
 
 - **The LiDAR is already cloud-optimised.** Phase 2 is 46,167 tiles, each a

@@ -15,7 +15,9 @@ records, and built against their measured levels:
   measured: each one's piece (``pieces.piece_step``, as the cloud has cut
   them since step 2), its class, its LiDAR outline and towers where the class
   builds on them, its levels as the LiDAR shows them. Published to
-  ``pieces/<gers>/``, the marker ``piece.json`` last.
+  ``pieces/<gers>/`` as one ``piece.zip`` and the marker ``piece.json`` last
+  (``building.publish_piece``); the tile's buildings' frames and levels to
+  ``tiles/T/measured.json``, which their neighbours' build batches read.
 * ``{"kind": "build", "run": ..., "tile": T, "gers": [...]}`` -- a batch of
   8-16 nearby buildings built: their pieces and their neighbours' measured
   levels fetched, the LiDAR around them read once, then per building -- unless
@@ -50,8 +52,6 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
-#: what the measure phase adds to a piece
-MEASURED_FILES = ("building_class.json", "footprint_lidar.json", "levels_measured.json")
 #: the texture check runs on this share of the buildings (pipeline: the same ones every run)
 CHECK_SAMPLE = float(os.environ.get("CHECK_SAMPLE", "0.1"))
 NEIGHBOUR_REACH_M = 450.0               # neighbours fetched within this of a batch: the fingerprint looks 350 m from each building
@@ -99,8 +99,8 @@ def measure_job(job: Dict[str, Any]) -> Dict[str, Any]:
     """One tile's buildings measured and published (see the module)."""
     import geopandas as gpd
 
-    from .building import neighbour_records
-    from .pieces import PIECE_FILES, piece_step
+    from .building import neighbour_records, publish_piece, publish_tile_measured
+    from .pieces import piece_step
     from .pipeline import MEASURED_LEVELS, write_measured_levels
     from .classify import classify_building
     from .settings import resolve
@@ -142,14 +142,12 @@ def measure_job(job: Dict[str, Any]) -> Dict[str, Any]:
                     write_measured_levels(folder, F.levels)
                 except ColouriseFailure:
                     (folder / MEASURED_LEVELS).unlink(missing_ok=True)
-                marker = json.loads((folder / "piece.json").read_text(encoding="utf-8"))
-                for name in PIECE_FILES + MEASURED_FILES:
-                    if (folder / name).exists():
-                        store.put_file(f"pieces/{g}/{name}", folder / name)
-                store.put_json(f"pieces/{g}/piece.json", marker)         # last
-                done.append(g)
+                publish_piece(folder, store)                            # piece.zip, the marker last
+                done.append(folder)
             except Exception as exc:                                    # noqa: BLE001
                 failed[g] = repr(exc)
+        if done:
+            publish_tile_measured(tile, done, store)
         for g, err in failed.items():
             _record_failure(store, run, g, f"measure: {err}")
         return {"tile": tile, "measured": len(done), "failed": len(failed)}
@@ -182,9 +180,10 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
 
     import numpy as np
 
-    from .building import BUILDINGS_PREFIX, neighbour_records, publish_building, pull_piece, scene_cloud_for
+    from .building import (BUILDINGS_PREFIX, adjacent_tiles, neighbour_records, publish_building, pull_neighbours,
+                           pull_piece, scene_cloud_for)
     from .coordinates import LocalCoordinateFrame
-    from .pipeline import MEASURED_LEVELS, cut_crops_from_piece, fingerprint, run_main
+    from .pipeline import cut_crops_from_piece, fingerprint, run_main
     from .sources_choice import index_for
 
     store, run, tile, gers = _store(), job.get("run", "run"), job["tile"], list(job["gers"])
@@ -197,10 +196,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
         markers = {}
         for g in gers:
             try:
-                markers[g] = pull_piece(g, store, work / "buildings" / g)
-                for name in MEASURED_FILES:
-                    if store.exists(f"pieces/{g}/{name}"):
-                        store.get_file(f"pieces/{g}/{name}", work / "buildings" / g / name)
+                markers[g] = pull_piece(g, store, work / "buildings" / g)       # with what measuring added
             except Exception as exc:                                    # noqa: BLE001
                 _record_failure(store, run, g, f"no piece: {exc!r}")
         if not markers:
@@ -208,13 +204,8 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
         # the neighbours' measured levels (they hide each building's walls from the frames)
         origins = [LocalCoordinateFrame.load_json(work / "buildings" / g / "coordinates.json").origin_source_xyz
                    for g in markers]
-        for nid in _near(records, origins, NEIGHBOUR_REACH_M):
-            d = work / "buildings" / nid
-            if nid in markers:
-                continue
-            for name in ("coordinates.json", MEASURED_LEVELS):
-                if store.exists(f"pieces/{nid}/{name}"):
-                    store.get_file(f"pieces/{nid}/{name}", d / name)
+        near = [nid for nid in _near(records, origins, NEIGHBOUR_REACH_M) if nid not in markers]
+        pull_neighbours(near, [tile] + adjacent_tiles(tile), store, work / "buildings")
         # the buildings already published from the same inputs, settings, neighbours and code are done
         prints = {g: fingerprint(work / "buildings" / g, work / "buildings") for g in markers}
         skipped = 0
@@ -308,7 +299,43 @@ def tree_job(job: Dict[str, Any]) -> Dict[str, Any]:
     return {"tiles": len(tiles), "products": list(products)}
 
 
+# ------------------------------------------------------------------ repack
+
+def repack_job(job: Dict[str, Any]) -> Dict[str, Any]:
+    """Pieces stored the old way, a file each, packed as ``piece.zip`` and
+    checked before their loose files go (``building.repack_piece``); the
+    tile's ``measured.json`` written from them. ``{"kind": "repack", "tile":
+    T, "gers": [...]}``."""
+    from .building import publish_tile_measured, repack_piece
+
+    store, run, tile = _store(), job.get("run", "run"), job["tile"]
+    work = _work()
+    try:
+        from concurrent.futures import ThreadPoolExecutor
+
+        def one(g):
+            try:
+                return g, repack_piece(g, store, work), None
+            except Exception as exc:                                    # noqa: BLE001
+                return g, None, exc
+        folders, repacked, removed, failed = [], 0, 0, 0
+        # the requests wait on the network: 16 pieces at a time (one job a tile, so
+        # the tile's measured.json is written by one job only)
+        with ThreadPoolExecutor(16) as ex:
+            for g, r, exc in ex.map(one, job["gers"]):
+                if exc is not None:
+                    _record_failure(store, run, g, f"repack: {exc!r}")
+                    failed += 1
+                else:
+                    folders.append(r["folder"]); repacked += r["repacked"]; removed += r["removed"]
+        if folders:
+            publish_tile_measured(tile, folders, store)
+        return {"tile": tile, "pieces": len(folders), "repacked": repacked, "loose_removed": removed, "failed": failed}
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
 def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     """The worker's handler: a job by its kind."""
     return {"tile": tile_job, "measure": measure_job, "build": build_job, "publish": publish_job,
-            "tree": tree_job}[job["kind"]](job)
+            "tree": tree_job, "repack": repack_job}[job["kind"]](job)

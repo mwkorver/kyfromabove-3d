@@ -53,7 +53,7 @@ def test_the_tile_command_sends_one_tile_job_per_tile(sqs, tmp_path):
 
 
 def test_the_worker_runs_a_job_by_its_kind(monkeypatch):
-    kinds = ("tile", "measure", "build", "publish", "tree")
+    kinds = ("tile", "measure", "build", "publish", "tree", "repack")
     seen = []
     for kind in kinds:
         monkeypatch.setattr(cloud_jobs, f"{kind}_job", lambda job, k=kind: seen.append(k) or {"kind": k})

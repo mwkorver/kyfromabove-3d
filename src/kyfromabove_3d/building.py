@@ -44,17 +44,134 @@ BUILDINGS_PREFIX = "buildings"
 
 # ------------------------------------------------------------------ the piece
 
+#: What the measure phase adds to a piece.
+MEASURED_FILES = ("building_class.json", "footprint_lidar.json", "levels_measured.json")
+#: A piece stored as one zip (``piece.zip``) beside its marker: two uploads
+#: and two downloads a building, not a dozen of each and an existence check
+#: per file. Its marker says so (``layout``); a piece without it is the old
+#: layout, a file each, and is still read.
+PIECE_ZIP = "piece.zip"
+PIECE_LAYOUT = "zip-1"
+#: Each tile's buildings' local frames and measured levels, in one object
+#: (``tiles/<tile>/measured.json``): a build batch reads its tile's and its
+#: neighbours' instead of two small objects per neighbour -- 300 to 600
+#: neighbours within reach of a suburban batch.
+TILE_MEASURED = "measured.json"
+NEIGHBOUR_FILES = ("coordinates.json", "levels_measured.json")
+
+
+def publish_piece(folder: Path, store, prefix: str = "pieces") -> Dict[str, Any]:
+    """A measured piece to ``<prefix>/<gers>/``: its files (the piece's and
+    what the measure phase added) as ``piece.zip``, then its marker. Returns
+    the marker as stored."""
+    from .archive import zip_bytes
+
+    folder = Path(folder)
+    marker = json.loads((folder / "piece.json").read_text(encoding="utf-8"))
+    members = {n: folder / n for n in PIECE_FILES + MEASURED_FILES if (folder / n).exists()}
+    store.put_bytes(f"{prefix}/{marker['gers']}/{PIECE_ZIP}", zip_bytes(members), "application/zip")
+    stored = {**marker, "layout": PIECE_LAYOUT}
+    store.put_json(f"{prefix}/{marker['gers']}/piece.json", stored)               # last
+    return stored
+
+
 def pull_piece(gers: str, store, folder: Path, prefix: str = "pieces") -> Dict[str, Any]:
-    """The piece's files into ``folder``; returns its marker."""
+    """The piece's files, and what the measure phase added, into ``folder``
+    (either layout); returns its marker. The folder's ``piece.json`` is the
+    marker as the piece wrote it, without the storage's ``layout``."""
+    from .archive import read_zip
+
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     marker = store.read_json(f"{prefix}/{gers}/piece.json")
-    for name in PIECE_FILES:
-        key = f"{prefix}/{gers}/{name}"
-        if store.exists(key):
-            store.get_file(key, folder / name)
+    if marker.pop("layout", None) == PIECE_LAYOUT:
+        z = read_zip(store, f"{prefix}/{gers}/{PIECE_ZIP}")
+        for name in z.namelist():
+            (folder / name).write_bytes(z.read(name))
+    else:
+        for name in PIECE_FILES + MEASURED_FILES:
+            key = f"{prefix}/{gers}/{name}"
+            if store.exists(key):
+                store.get_file(key, folder / name)
     (folder / "piece.json").write_text(json.dumps(marker, indent=1), encoding="utf-8")
     return marker
+
+
+def repack_piece(gers: str, store, work: Path, prefix: str = "pieces") -> Dict[str, Any]:
+    """A piece stored the old way (a file each) as ``piece.zip`` and its
+    marker; read back and checked file by file against what was there; and
+    only then its loose files removed. A piece already packed is checked and
+    any loose files left beside it removed, so a run cut short can be run
+    again. Returns {"folder", "repacked", "removed"}; raises if the check
+    fails, before anything is removed."""
+    work = Path(work)
+    marker = store.read_json(f"{prefix}/{gers}/piece.json")
+    folder = work / gers
+    pull_piece(gers, store, folder)                     # either layout
+    repacked = marker.get("layout") != PIECE_LAYOUT
+    if repacked:
+        publish_piece(folder, store)
+    check = work / f"{gers}.check"
+    pull_piece(gers, store, check)                      # from the zip now
+    a = {p.name: p.read_bytes() for p in folder.iterdir()}
+    b = {p.name: p.read_bytes() for p in check.iterdir()}
+    if a != b:
+        raise ValueError(f"{gers}: the zip does not give back the piece's files ({sorted(set(a) ^ set(b))})")
+    removed = 0
+    for name in PIECE_FILES + MEASURED_FILES:
+        key = f"{prefix}/{gers}/{name}"
+        if store.exists(key):
+            store.delete(key)
+            removed += 1
+    import shutil
+    shutil.rmtree(check, ignore_errors=True)
+    return {"folder": folder, "repacked": repacked, "removed": removed}
+
+
+def publish_tile_measured(tile: str, folders: Sequence[Path], store, prefix: str = "tiles") -> int:
+    """The measured buildings' local frames and levels into the tile's
+    ``measured.json``, merged with what it holds (a job that re-measures some
+    of a tile's buildings leaves the others). Each file is kept as its text,
+    so a building's neighbours write them back byte for byte. Returns how
+    many buildings it holds."""
+    key = f"{prefix}/{tile}/{TILE_MEASURED}"
+    have = store.read_json(key)["buildings"] if store.exists(key) else {}
+    for f in folders:
+        f = Path(f)
+        have[f.name] = {n: (f / n).read_text(encoding="utf-8") for n in NEIGHBOUR_FILES if (f / n).exists()}
+    store.put_json(key, {"tile": tile, "buildings": have})
+    return len(have)
+
+
+def pull_neighbours(ids: Sequence[str], tiles: Sequence[str], store, buildings_dir: Path,
+                    prefix: str = "tiles", pieces_prefix: str = "pieces") -> Dict[str, int]:
+    """The neighbours' local frames and measured levels into
+    ``buildings_dir/<gers>/``: from the tiles' ``measured.json`` where they
+    have one, else from each neighbour's piece (the old layout). Returns the
+    counts by source."""
+    want, n = set(ids), {"tile_files": 0, "from_tiles": 0, "files_from_pieces": 0}
+    for t in tiles:
+        key = f"{prefix}/{t}/{TILE_MEASURED}"
+        if not store.exists(key):
+            continue
+        n["tile_files"] += 1
+        for g, files in store.read_json(key)["buildings"].items():
+            if g in want:
+                d = Path(buildings_dir) / g
+                d.mkdir(parents=True, exist_ok=True)
+                for name, text in files.items():
+                    (d / name).write_text(text, encoding="utf-8")
+                want.discard(g)
+                n["from_tiles"] += 1
+    for g in sorted(want):
+        d = Path(buildings_dir) / g
+        for name in NEIGHBOUR_FILES:
+            key = f"{pieces_prefix}/{g}/{name}"
+            if store.exists(key):
+                d.mkdir(parents=True, exist_ok=True)
+                store.get_file(key, d / name)
+                n["files_from_pieces"] += 1
+    return n
 
 
 def chosen_from_piece(folder: Path) -> Optional[Dict[str, Any]]:

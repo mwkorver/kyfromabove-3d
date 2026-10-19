@@ -119,10 +119,14 @@ class S3Store(Store):
     def __init__(self, bucket: str, prefix: str = "", endpoint_url: Optional[str] = None,
                  region: Optional[str] = None, client: Any = None):
         import boto3
+        from botocore.config import Config
 
         self.bucket = bucket
         self.prefix = prefix.strip("/")
-        self.s3 = client or boto3.client("s3", endpoint_url=endpoint_url, region_name=region)
+        # S3 answers a busy prefix with 503 SlowDown; the default four tries gave up
+        # under 28 jobs at once (89 of 32,818 pieces in one repack): back off and try again
+        cfg = Config(retries={"max_attempts": 12, "mode": "adaptive"}, max_pool_connections=32)
+        self.s3 = client or boto3.client("s3", endpoint_url=endpoint_url, region_name=region, config=cfg)
 
     def _key(self, key: str) -> str:
         return f"{self.prefix}/{key}" if self.prefix else key

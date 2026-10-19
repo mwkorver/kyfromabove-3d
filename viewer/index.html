@@ -17,6 +17,11 @@
     #product button { font: 12px system-ui, sans-serif; margin: 6px 4px 0 0; padding: 3px 8px; border-radius: 4px;
                       border: 1px solid #888; background: #222; color: #ddd; cursor: pointer; }
     #product button.on { background: #2a78d6; border-color: #2a78d6; color: #fff; }
+    #places { margin-top: 6px; }
+    #places span { font-size: 12px; }
+    #places button { font: 12px system-ui, sans-serif; margin: 4px 4px 0 0; padding: 2px 7px; border-radius: 4px;
+                     border: 1px solid #666; background: #1b1b1b; color: #ddd; cursor: pointer; }
+    #places button:hover { border-color: #2a78d6; }
     #pick { bottom: 28px; left: 10px; display: none; max-width: 360px; }
     #pick table { border-collapse: collapse; }
     #pick td { padding: 1px 8px 1px 0; vertical-align: top; }
@@ -32,6 +37,7 @@
   <div id="hud" class="panel"><b>Kentucky buildings</b> · 3D Tiles<br>
     <span class="muted" id="info">loading…</span>
     <div id="product"></div>
+    <div id="places"></div>
     <div id="key" class="muted">height from: <i style="background:rgb(190,190,185)"></i>Overture
       <i style="background:rgb(150,165,190)"></i>floors × 3.5 m <i style="background:rgb(225,150,80)"></i>none, 6 m guessed</div>
     <span class="muted">drag to orbit · right drag to pan · scroll to zoom · click a building</span></div>
@@ -131,9 +137,27 @@
         choose(first && sets[first] ? first : Object.keys(sets)[0]);
         new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas).setInputAction(
           (e) => showPick(viewer.scene.pick(e.position)), Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        // "fly to" buttons: from far away the tree shows only the big buildings; 800 m
+        // from a place, inside the ~1 km where a tile's every building loads
+        const places = cfg.places || [];
+        const flyTo = (p, duration) => viewer.camera.flyToBoundingSphere(
+          new Cesium.BoundingSphere(Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.ground_m || 150), 150),
+          { offset: new Cesium.HeadingPitchRange(Cesium.Math.toRadians(15), Cesium.Math.toRadians(-35), 800), duration });
+        if (places.length) {
+          const row = document.getElementById("places");
+          row.innerHTML = '<span class="muted">fly to:</span><br>';
+          for (const p of places) {
+            const b = document.createElement("button");
+            b.textContent = p.name; b.onclick = () => flyTo(p, 2);
+            row.appendChild(b);
+          }
+        }
         const s = cfg.start || {};
         const lon = parseFloat(params.get("lon") || s.lon), lat = parseFloat(params.get("lat") || s.lat);
-        if (!isNaN(lon) && !isNaN(lat)) {
+        const place = places.find((p) => p.name === params.get("place"));
+        if (place) {
+          flyTo(place, 0);
+        } else if (!isNaN(lon) && !isNaN(lat)) {
           viewer.camera.setView({
             destination: Cesium.Cartesian3.fromDegrees(lon, lat, parseFloat(params.get("height") || s.height || 1500)),
             orientation: { heading: Cesium.Math.toRadians(parseFloat(params.get("heading") || s.heading || 0)),

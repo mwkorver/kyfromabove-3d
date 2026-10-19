@@ -27,6 +27,20 @@ sys.path.insert(0, str(ROOT / "src"))
 PRODUCTS = ("overture", "boxes", "measured", "complete")
 TITLES = {"overture": "Overture", "boxes": "LiDAR heights", "measured": "Measured", "complete": "Completed"}
 DEFAULT_VIEW = "measured"
+#: The viewer's "fly to" buttons. From far away the tree shows only the big
+#: buildings (publish.GROUP_LEVELS); a button lands the camera 800 m from the
+#: place, inside the ~1 km where every building of a tile loads. ``ground_m``
+#: is the ground above the ellipsoid (the tile's ground grid, NAVD88 less the
+#: geoid), what Cesium's heights are.
+PLACES = [
+    {"name": "Downtown Louisville", "lon": -85.7544, "lat": 38.2535, "ground_m": 106},   # N077E228
+    {"name": "St. Matthews", "lon": -85.655, "lat": 38.249, "ground_m": 132},            # N077E234
+    {"name": "Middletown", "lon": -85.539, "lat": 38.245, "ground_m": 189},              # N077E241
+    {"name": "Simpsonville", "lon": -85.355, "lat": 38.222, "ground_m": 208},            # N079E251
+    {"name": "Shelbyville", "lon": -85.2236, "lat": 38.2119, "ground_m": 193},           # N079E259, Main Street
+    {"name": "Somerset area (pilot)", "lon": -84.6908, "lat": 37.1364, "ground_m": 278},  # N158E291
+    {"name": "Hazard (pilot)", "lon": -83.1777, "lat": 37.2365, "ground_m": 258},        # N148E378
+]
 
 
 def one_tile(tile: str, inputs: str, store: str, raw: str, products, available=None,
@@ -90,7 +104,7 @@ def viewer(out, start: dict) -> None:
     out.put_bytes("viewer/index.html", (ROOT / "viewer" / "index.html").read_bytes(), "text/html; charset=utf-8")
     cfg = {"tilesets": {p: f"/kentucky/{p}/tileset.json" for p in PRODUCTS}, "titles": TITLES,
            "default": DEFAULT_VIEW,
-           "terrain": {"type": "heightmap", "url": "/terrain/"}, "start": start}
+           "terrain": {"type": "heightmap", "url": "/terrain/"}, "start": start, "places": PLACES}
     out.put_json("viewer/config.json", cfg)
 
 

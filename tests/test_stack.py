@@ -134,7 +134,7 @@ def test_the_project_tag_reaches_the_spot_machines_and_their_disks(tmp_path_fact
 def test_the_queue_run_is_spot_machines_on_a_queue_with_a_patient_dead_letter_queue(tmp_path_factory):
     from aws_cdk import aws_ec2 as ec2
     from aws_cdk.aws_ecr_assets import DockerImageAsset
-    from stack import QUEUE_INSTANCES, QUEUE_LIFETIME_MIN, QueueRunStack
+    from stack import QUEUE_INSTANCES, QUEUE_LIFETIME_MIN, QUEUE_WORKER_HOURS, QueueRunStack
 
     tiny = tmp_path_factory.mktemp("image6")
     (tiny / "Dockerfile").write_text("FROM public.ecr.aws/lambda/python:3.12\n")
@@ -158,6 +158,20 @@ def test_the_queue_run_is_spot_machines_on_a_queue_with_a_patient_dead_letter_qu
     # a machine whose worker has stopped shuts down (terminates), after its log is saved
     assert ud.index("scripts/queue_worker.py") < ud.index("worker.log s3://") < ud.rindex("shutdown -h now")
     t.resource_count_is("AWS::EC2::SecurityGroupIngress", 0)
+    # the worker: 2-hour jobs, and it stops taking jobs well before the machine's end
+    assert "--timeout-s 7200" in ud and f"--max-hours {QUEUE_WORKER_HOURS}" in ud
+    assert QUEUE_WORKER_HOURS * 60 + 120 < QUEUE_LIFETIME_MIN
+    # machines in proportion to the queue (14 jobs a machine), not all of them for one job
+    steps = next(iter(t.find_resources("AWS::AutoScaling::ScalingPolicy",
+                                       {"Properties": {"PolicyType": "StepScaling"}}).values()))
+    adj = sorted((a.get("MetricIntervalLowerBound", -1), a["ScalingAdjustment"])
+                 for p in t.find_resources("AWS::AutoScaling::ScalingPolicy").values()
+                 for a in p["Properties"].get("StepAdjustments", []))
+    assert [m for _, m in adj][-3:] == [1, 2, 3] and steps
+    # busy machines may protect themselves from scale-in
+    t.has_resource_properties("AWS::IAM::Policy", {"PolicyDocument": {"Statement": assertions.Match.array_with([
+        assertions.Match.object_like({"Action": ["autoscaling:DescribeAutoScalingInstances",
+                                                  "autoscaling:SetInstanceProtection"]})])}})
     # a deploy that changes the template replaces the running machines
     t.has_resource("AWS::AutoScaling::AutoScalingGroup", {"UpdatePolicy": {"AutoScalingRollingUpdate": assertions.Match.object_like(
         {"MinInstancesInService": 0, "MaxBatchSize": 3})}})

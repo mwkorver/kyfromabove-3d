@@ -91,7 +91,24 @@ COG_CACHE_NGINX = "public.ecr.aws/nginx/nginx:1.27-alpine"
 QUEUE_INSTANCES = ("c8g.4xlarge", "c7g.4xlarge", "m8g.4xlarge", "m7g.4xlarge")
 QUEUE_MAX_PRICE = "0.45"
 #: A machine's hard end: however the run goes, none lives past this.
-QUEUE_LIFETIME_MIN = 720
+QUEUE_LIFETIME_MIN = 760
+#: The worker takes no new job after this, and finishes the ones it has (each at
+#: most 2 hours) before the machine's hard end above.
+QUEUE_WORKER_HOURS = 10
+
+
+def queue_steps(max_machines: int, slots: int, most: int = 18):
+    """``(lower, upper, machines)`` for the queue's scaling: ceil(work / slots)
+    machines, up to ``max_machines``; at most ``most`` steps (a step policy
+    allows 20 with the zero step), larger fleets in coarser counts. The last
+    step is open above (``upper`` None)."""
+    n = min(max_machines, most)
+    counts = sorted({max(1, round(k * max_machines / n)) for k in range(1, n + 1)})
+    out, prev = [], 0
+    for i, c in enumerate(counts):
+        out.append((prev * slots + 1, None if i == len(counts) - 1 else c * slots + 1, c))
+        prev = c
+    return out
 
 
 class QueueRunStack(Stack):
@@ -135,6 +152,10 @@ class QueueRunStack(Stack):
         s3.Bucket.from_bucket_name(self, "Data", bucket_name).grant_read_write(role)
         queue.grant_consume_messages(role)
         image.repository.grant_pull(role)
+        # a busy machine protects itself from scale-in (queue_worker.asg_protector); the
+        # group's ARN would make the role depend on the group that uses it, so any group
+        role.add_to_policy(iam.PolicyStatement(
+            actions=["autoscaling:DescribeAutoScalingInstances", "autoscaling:SetInstanceProtection"], resources=["*"]))
         sg = ec2.SecurityGroup(self, "NoInbound", vpc=vpc, allow_all_outbound=True,
                                description="kyfromabove-3d queue run: no inbound; out to S3, SQS, ECR and KyFromAbove")
 
@@ -143,7 +164,8 @@ class QueueRunStack(Stack):
                   f"-e OMP_NUM_THREADS=1 -e COG_CACHE_URL=http://127.0.0.1:8001 -e STORE=s3://{bucket_name} "
                   f"-e WORK_DIR=/var/tmp/work -e AWS_REGION={self.region} -v /var/tmp/work:/var/tmp/work "
                   f"{image.image_uri} scripts/queue_worker.py --queue-url {queue.queue_url} --run {run} "
-                  f"--slots {slots} --idle-exit-s 1800 > /var/tmp/worker.log 2>&1")
+                  f"--slots {slots} --idle-exit-s 1800 --timeout-s 7200 --max-hours {QUEUE_WORKER_HOURS} "
+                  f"> /var/tmp/worker.log 2>&1")
         ud.add_commands(
             f"shutdown -h +{QUEUE_LIFETIME_MIN}",               # first: the machine's hard end
             "dnf install -y docker && systemctl start docker",
@@ -192,9 +214,13 @@ class QueueRunStack(Stack):
         work = cw.MathExpression(expression="visible + flight", period=Duration.minutes(1), using_metrics={
             "visible": queue.metric_approximate_number_of_messages_visible(period=Duration.minutes(1)),
             "flight": queue.metric_approximate_number_of_messages_not_visible(period=Duration.minutes(1))})
+        # as many machines as the work needs -- one per ``slots`` jobs, up to all of
+        # them -- so a run's tail does not keep (or relaunch) every machine for one
+        # straggler; busy machines protect themselves from scale-in (queue_worker)
         asg.scale_on_metric("ByQueue", metric=work, adjustment_type=autoscaling.AdjustmentType.EXACT_CAPACITY,
-                            scaling_steps=[autoscaling.ScalingInterval(upper=0, change=0),
-                                           autoscaling.ScalingInterval(lower=1, change=max_machines)],
+                            scaling_steps=[autoscaling.ScalingInterval(upper=0, change=0)] + [
+                                autoscaling.ScalingInterval(lower=lo, upper=hi, change=m)
+                                for lo, hi, m in queue_steps(max_machines, slots)],
                             evaluation_periods=5)
         CfnOutput(self, "QueueUrl", value=queue.queue_url)
         CfnOutput(self, "DeadLetterQueueUrl", value=dlq.queue_url)

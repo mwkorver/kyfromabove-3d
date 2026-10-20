@@ -233,22 +233,42 @@ def write_crops(cameras: Sequence[Any], readers: Dict[str, Any], volume, frame: 
 
 # ------------------------------------------------------------- the whole thing
 
+#: The last records list's outlines in state-plane feet and their spatial
+#: index: a tile's buildings all look among the same pool, so it is projected
+#: once, not once per building (N^2 parses and projections on a 3,000-building tile).
+_NEIGHBOUR_INDEX: list = [None, None, None]
+
+
+def _neighbour_index(records: Sequence[Dict[str, Any]]):
+    if _NEIGHBOUR_INDEX[0] is not records:
+        from pyproj import Transformer
+        from shapely import STRtree
+        from shapely.ops import transform as shp_transform
+        from shapely.wkt import loads as wkt_loads
+
+        to_ft = Transformer.from_crs("EPSG:4326", "EPSG:3089", always_xy=True).transform
+        geoms = [shp_transform(to_ft, wkt_loads(r["wkt"])) for r in records]
+        _NEIGHBOUR_INDEX[:] = [records, geoms, STRtree(geoms)]
+    return _NEIGHBOUR_INDEX[1], _NEIGHBOUR_INDEX[2]
+
+
 def neighbours_of(rec: Dict[str, Any], records: Sequence[Dict[str, Any]], within_m: float = 1.0) -> List[Dict[str, Any]]:
-    """The footprints within ``within_m`` of this one (party walls, mostly)."""
+    """The footprints within ``within_m`` of this one (party walls, mostly),
+    in the records' order."""
     from pyproj import Transformer
     from shapely.ops import transform as shp_transform
     from shapely.wkt import loads as wkt_loads
 
     to_ft = Transformer.from_crs("EPSG:4326", "EPSG:3089", always_xy=True).transform
     me = shp_transform(to_ft, wkt_loads(rec["wkt"])).buffer(within_m / METERS_PER_US_SURVEY_FOOT)
+    geoms, tree = _neighbour_index(records)
     out = []
-    for r in records:
+    for i in sorted(int(i) for i in tree.query(me, predicate="intersects")):
+        r = records[i]
         if r["id"] == rec["id"]:
             continue
-        g = shp_transform(to_ft, wkt_loads(r["wkt"]))
-        if g.intersects(me):
-            out.append({"gers": r["id"], "name": r.get("name"), "wkt": r["wkt"],
-                        "lidar_height_m": r.get("lidar_height_m"), "lidar_ground_z": r.get("lidar_ground_z")})
+        out.append({"gers": r["id"], "name": r.get("name"), "wkt": r["wkt"],
+                    "lidar_height_m": r.get("lidar_height_m"), "lidar_ground_z": r.get("lidar_ground_z")})
     return out
 
 

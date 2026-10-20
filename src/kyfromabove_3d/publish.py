@@ -627,7 +627,9 @@ def load_building(store, gers: str, product: str, prefix: Optional[str] = None,
     """A built building's glb, its tileset (placement) and its lossless
     pages, for ``product`` (the completed one falls back to the measured
     one where it was not made), from that product's zip; None if it has no
-    mesh. ``available`` (:func:`built_buildings`) spares asking the store."""
+    mesh. ``available`` (:func:`built_buildings`) spares asking the store;
+    without it each zip is read straight away and a missing one passed over --
+    no existence check first (a boxes-only building cost one per view's zip)."""
     from PIL import Image
 
     from .archive import read_zip
@@ -636,12 +638,12 @@ def load_building(store, gers: str, product: str, prefix: Optional[str] = None,
     prefix = prefix or BUILDINGS_PREFIX
     for sub in PRODUCTS[product]:
         key = f"{prefix}/{gers}/{sub}.zip"
-        if available is not None:
-            if sub not in available.get(gers, ()):
-                continue
-        elif not store.exists(key):
+        if available is not None and sub not in available.get(gers, ()):
             continue
-        z = read_zip(store, key)
+        try:
+            z = read_zip(store, key)
+        except FileNotFoundError:
+            continue
         names = set(z.namelist())
         ts = json.loads(z.read("tileset.json"))
         glb = z.read(ts["root"]["content"]["uri"])
@@ -861,9 +863,19 @@ def coarse_glb(records: Sequence[dict], grid, tiles: Sequence[str], keep: dict,
     return data
 
 
+def publish_trees(store, grid, products: Sequence[str], tiles: Optional[Sequence[str]] = None,
+                  log: Callable = print, **kw) -> Dict[str, dict]:
+    """:func:`publish_tree` for several views over one listing of the tiles,
+    each tile's ``buildings.json`` read once for all of them. Returns
+    {product: its summary, with ``tile_names``}."""
+    tiles = sorted(store.list_dirs(f"{kw.get('tiles_prefix', 'tiles')}/")) if tiles is None else list(tiles)
+    cache: Dict[str, list] = {}
+    return {p: publish_tree(store, grid, p, tiles=tiles, records_cache=cache, log=log, **kw) for p in products}
+
+
 def publish_tree(store, grid, product: str = "measured", tiles: Optional[Sequence[str]] = None,
                  tiles_prefix: str = "tiles", root_prefix: str = "kentucky", out_store=None,
-                 log: Callable = print) -> dict:
+                 log: Callable = print, records_cache: Optional[Dict[str, list]] = None) -> dict:
     """The statewide tree for ``product`` over the tiles that have a published
     tileset: ``<root_prefix>/<product>/tileset.json`` (the root, no content)
     and one external tileset per 16 x 16 group of tiles
@@ -879,17 +891,29 @@ def publish_tree(store, grid, product: str = "measured", tiles: Optional[Sequenc
         pyproj.network.set_network_enabled(True)
     out_store = out_store or store
     base = f"{root_prefix}/{product}"
+    from concurrent.futures import ThreadPoolExecutor
+
     if tiles is None:
-        tiles = sorted({k.split("/")[1] for k in store.list(f"{tiles_prefix}/")
-                        if k.endswith(f"/3dtiles/{product}/tileset.json")})
+        tiles = store.list_dirs(f"{tiles_prefix}/")                     # one level: not every key under them
+    cache = records_cache if records_cache is not None else {}
+
+    def read(t):
+        """The tile's tileset region and records; None where it has no tileset for the view."""
+        try:
+            reg = tileset_region(store.read_json(f"{tiles_prefix}/{t}/3dtiles/{product}/tileset.json"))
+        except FileNotFoundError:
+            return t, None, None
+        recs = cache.get(t)
+        if recs is None:
+            recs = store.read_json(f"{tiles_prefix}/{t}/buildings.json")["buildings"]
+        return t, reg, recs
     region = {}
     records = {}
-    for t in tiles:
-        key = f"{tiles_prefix}/{t}/3dtiles/{product}/tileset.json"
-        if not store.exists(key):
-            continue
-        region[t] = tileset_region(store.read_json(key))
-        records[t] = store.read_json(f"{tiles_prefix}/{t}/buildings.json")["buildings"]
+    with ThreadPoolExecutor(32) as ex:                                  # the reads wait on the network
+        for t, reg, recs in ex.map(read, sorted(tiles)):
+            if reg is not None:
+                region[t], records[t] = reg, recs
+                cache[t] = recs
     tiles = sorted(region)
     (n16, e16_err, keep16), (n4, e4_err, keep4) = GROUP_LEVELS
     by16: Dict[Tuple[int, int], List[str]] = {}
@@ -938,4 +962,4 @@ def publish_tree(store, grid, product: str = "measured", tiles: Optional[Sequenc
                  "geometricError": ROOT_ERROR_M, "refine": "REPLACE", "children": root_children},
         "extras": summary})
     log(f"tree {product}: {len(tiles)} tile(s) in {len(root_children)} group(s), {buildings:,} buildings")
-    return summary
+    return {**summary, "tile_names": tiles}

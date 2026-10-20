@@ -37,6 +37,15 @@ def test_a_tie_goes_to_the_newer_lidar_and_an_undated_candidate_loses():
         S.choose([], [_o("x", 2024, 3)])
 
 
+def test_no_photos_gives_the_newest_dated_lidar_and_no_collection():
+    undated = {"phase": "phase3", "date": None, "points_per_m2": 3.0}
+    l, o = S.choose([_l("phase2", 2019, 3), undated, _l("phase3", 2024, 2)], [])
+    assert l["phase"] == "phase3" and l["date"].year == 2024 and o is None
+    p = S.provenance(l, None)
+    assert p["lidar_phase"] == "phase3" and p["oblique_collection"] is None
+    assert p["oblique_date"] is None and p["gap_months"] is None
+
+
 def test_gps_times_read_as_the_dates_found_by_hand():
     # the COPC headers' midpoints of three tiles dated on 2026-09-27
     assert S.gps_to_datetime(354922918).strftime("%Y-%m-%d") == "2022-12-12"     # N076E229, Phase 2

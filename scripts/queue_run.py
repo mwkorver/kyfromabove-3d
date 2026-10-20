@@ -80,10 +80,19 @@ def cmd_measure(args, store) -> int:
     return 0
 
 
+def _has_photos(store, tile: str) -> bool:
+    """Whether the tile step found oblique photos over the tile (else its
+    buildings stay boxes: no build)."""
+    return store.exists(f"tiles/{tile}/frames.gpkg")
+
+
 def cmd_build(args, store) -> int:
     from kyfromabove_3d.pieces import batches
     jobs = []
     for t in args.tiles:
+        if not _has_photos(store, t):
+            print(f"{t}: no oblique photos -- its buildings stay boxes, no build jobs")
+            continue
         recs = store.read_json(f"tiles/{t}/buildings.json")["buildings"]
         for k, b in enumerate(batches(recs, args.batch)):
             jobs.append({"id": f"build-{t}-{k:03d}", "kind": "build", "run": args.run, "tile": t, "gers": b})
@@ -131,6 +140,9 @@ def cmd_local(args, store) -> int:
         print("measure", t, measure_job({"kind": "measure", "run": args.run, "tile": t}), flush=True)
     left = args.limit or None
     for t in args.tiles:
+        if not _has_photos(store, t):
+            print(f"{t}: no oblique photos -- its buildings stay boxes, no build")
+            continue
         recs = store.read_json(f"tiles/{t}/buildings.json")["buildings"]
         for b in batches(recs, args.batch):
             if left is not None:

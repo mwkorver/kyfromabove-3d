@@ -23,6 +23,10 @@ def _exercise(store, tmp_path):
     glb = b"glTF" + bytes(4000)                                    # compressible, as geometry is
     store.put_bytes("tiles/t/3dtiles/measured/boxes.glb", glb, "model/gltf-binary", content_encoding="gzip")
     assert store.get_bytes("tiles/t/3dtiles/measured/boxes.glb") == glb   # read back as it was written
+    with pytest.raises(FileNotFoundError):                         # a missing object: the same error from both
+        store.get_bytes("pieces/a/nothing.json")
+    assert store.list_dirs("pieces/") == ["a", "b"] and store.list_dirs("tiles/") == ["t"]   # one level down
+    assert store.list_dirs("nothing/") == []
 
 
 def test_a_local_store(tmp_path):

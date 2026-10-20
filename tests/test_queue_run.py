@@ -72,6 +72,7 @@ def test_local_makes_every_tile_before_measuring_any_and_measures_before_buildin
         sq = "POLYGON ((-85.76 38.25, -85.7599 38.25, -85.7599 38.2501, -85.76 38.2501, -85.76 38.25))"
         store.put_json(f"tiles/{t}/buildings.json", {"buildings": [{"id": f"{t}1", "wkt": sq},
                                                                    {"id": f"{t}2", "wkt": sq}]})
+        store.put_bytes(f"tiles/{t}/frames.gpkg", b"frames")             # photos over the tile
     calls = []
     monkeypatch.setattr(cloud_jobs, "tile_job", lambda job: calls.append(("tile", job["tile"])) or {})
     monkeypatch.setattr(cloud_jobs, "measure_job", lambda job: calls.append(("measure", job["tile"])) or {})
@@ -103,3 +104,18 @@ def test_publish_sends_one_job_per_tile_and_tree_sends_one(sqs, tmp_path):
     assert got == [{"id": "publish-A", "kind": "publish", "run": "r9", "tile": "A"},
                    {"id": "publish-B", "kind": "publish", "run": "r9", "tile": "B"},
                    {"id": "tree", "kind": "tree", "run": "r9"}]
+
+
+def test_a_tile_without_photos_is_measured_as_boxes_and_not_built(monkeypatch, tmp_path, sqs):
+    client, url = sqs
+    store = LocalStore(tmp_path)
+    sq = "POLYGON ((-85.76 38.25, -85.7599 38.25, -85.7599 38.2501, -85.76 38.2501, -85.76 38.25))"
+    for t, photos in (("A", True), ("B", False)):
+        store.put_json(f"tiles/{t}/buildings.json", {"buildings": [{"id": f"{t}1", "wkt": sq}], "halo": []})
+        if photos:
+            store.put_bytes(f"tiles/{t}/frames.gpkg", b"frames")
+    queue_run.main(["build", "--run", "r9", "--queue-url", url, "--store", str(tmp_path), "--tiles", "A", "B"])
+    assert [j["tile"] for j in _bodies(client, url)] == ["A"]
+    monkeypatch.setenv("STORE", str(tmp_path))
+    assert cloud_jobs.measure_job({"kind": "measure", "run": "r9", "tile": "B"}) == \
+        {"tile": "B", "measured": 0, "failed": 0, "no_photos": 1}

@@ -130,9 +130,13 @@ def oblique_candidates(bounds_ft: Tuple[float, float, float, float], work: Path,
 
 def choose(lidar: Sequence[dict], obliques: Sequence[dict]) -> Tuple[dict, dict]:
     """The pair closest together in time; a tie goes to the newer LiDAR. A
-    candidate with no date loses to any dated one."""
-    if not lidar or not obliques:
-        raise RuntimeError(f"no {'LiDAR' if not lidar else 'oblique frames'} for this tile")
+    candidate with no date loses to any dated one. No oblique collection over
+    the tile: the newest dated LiDAR, and None -- the tile's buildings still get
+    their LiDAR heights (product 1), as boxes, with nothing to colour a mesh."""
+    if not lidar:
+        raise RuntimeError("no LiDAR for this tile")
+    if not obliques:
+        return max(lidar, key=lambda c: (c["date"] is not None, c["date"] or dt.datetime.min)), None
     far = dt.timedelta(days=10 ** 5)
 
     def key(pair):
@@ -142,12 +146,13 @@ def choose(lidar: Sequence[dict], obliques: Sequence[dict]) -> Tuple[dict, dict]
     return min(((l, o) for l in lidar for o in obliques), key=key)
 
 
-def provenance(l: dict, o: dict) -> Dict[str, Any]:
-    """What goes on every building of the tile, and in its summary."""
-    gap = ((o["date"] - l["date"]).days / 30.44) if (l["date"] and o["date"]) else None
+def provenance(l: dict, o: Optional[dict]) -> Dict[str, Any]:
+    """What goes on every building of the tile, and in its summary (``o``
+    None: no photos; its fields None)."""
+    gap = ((o["date"] - l["date"]).days / 30.44) if (o and l["date"] and o["date"]) else None
     return {"lidar_phase": l["phase"], "lidar_date": l["date"].date().isoformat() if l["date"] else None,
-            "lidar_points_per_m2": l["points_per_m2"], "oblique_collection": o["collection"],
-            "oblique_date": o["date"].date().isoformat() if o["date"] else None,
+            "lidar_points_per_m2": l["points_per_m2"], "oblique_collection": o["collection"] if o else None,
+            "oblique_date": o["date"].date().isoformat() if (o and o["date"]) else None,
             "gap_months": None if gap is None else round(gap, 1) + 0.0}          # no "-0.0"
 
 
@@ -170,5 +175,5 @@ def choose_sources(tile: str, grid, idx: Dict[str, Any], work: Path, log: Callab
     log(f"{tile}: {prov['lidar_phase']} ({prov['lidar_date']}) with {prov['oblique_collection']} "
         f"({prov['oblique_date']}), {prov['gap_months']} months apart; considered "
         f"{[c['phase'] for c in lidar]} x {[c['collection'] for c in obliques]}")
-    return {"provenance": prov, "frames": o["frames"], "frames_path": o["frames_path"], "phase": l["phase"],
-            "candidates": cands}
+    return {"provenance": prov, "frames": o["frames"] if o else [], "frames_path": o["frames_path"] if o else None,
+            "phase": l["phase"], "candidates": cands}

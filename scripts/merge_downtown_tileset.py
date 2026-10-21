@@ -75,10 +75,12 @@ def building_child(tileset_path: Path, root_inv: np.ndarray, glb_dir: Path) -> d
 
 
 #: which of a building's tilesets each product merges: the measured mesh, or
-#: the completed one (and its tinted copy) where it has been built
+#: the completed / neural one (and its tinted copy) where it has been built
 VARIANTS = {None: ("3dtiles_mesh/tileset.json",),
             "complete": ("3dtiles_complete/tileset.json", "3dtiles_mesh/tileset.json"),
-            "complete_tint": ("3dtiles_complete/tileset_tint.json", "3dtiles_mesh/tileset.json")}
+            "complete_tint": ("3dtiles_complete/tileset_tint.json", "3dtiles_mesh/tileset.json"),
+            "neural": ("3dtiles_neural/tileset.json", "3dtiles_complete/tileset.json", "3dtiles_mesh/tileset.json"),
+            "neural_tint": ("3dtiles_neural/tileset_tint.json", "3dtiles_complete/tileset_tint.json", "3dtiles_mesh/tileset.json")}
 
 
 def building_tileset(d: Path, variant: str | None) -> Path | None:
@@ -106,7 +108,15 @@ def merge(out: Path, buildings_dir: Path, extra: list[Path], boxes: Path | None,
     if not (out / "coordinates.json").exists():               # a product merged beside the downtown's
         shutil.copy2(buildings_dir.parent / "coordinates.json", out / "coordinates.json")
     coords = json.loads((out / "coordinates.json").read_text(encoding="utf-8"))
-    transform, origin_geo = enu_transform(coords)
+    try:
+        transform, origin_geo = enu_transform(coords)
+    except SystemExit:
+        parent_ts = buildings_dir.parent / "tileset.json"
+        if not parent_ts.exists():
+            raise
+        pts = json.loads(parent_ts.read_text(encoding="utf-8"))
+        transform = pts["root"]["transform"]
+        origin_geo = pts["extras"]["origin_lon_lat_h"]
     T_root = col_major(transform)
     root_inv = np.linalg.inv(T_root)
     glb_dir = out / "glb"
@@ -159,8 +169,15 @@ def merge(out: Path, buildings_dir: Path, extra: list[Path], boxes: Path | None,
         if np.allclose(col_major(bt["root"]["transform"]), T_root, atol=1e-6):
             shutil.copy2(boxes.parent / bt["root"]["content"]["uri"], out / "boxes.glb")
             root["content"] = {"uri": "boxes.glb"}
+        elif (buildings_dir.parent / "boxes.glb").exists():
+            shutil.copy2(buildings_dir.parent / "boxes.glb", out / "boxes.glb")
+            root["content"] = {"uri": "boxes.glb"}
         else:
             print("[warn] boxes tileset is in a different frame; root has no coarse content")
+    elif (buildings_dir.parent / "boxes.glb").exists():
+        if (buildings_dir.parent / "boxes.glb").resolve() != (out / "boxes.glb").resolve():
+            shutil.copy2(buildings_dir.parent / "boxes.glb", out / "boxes.glb")
+        root["content"] = {"uri": "boxes.glb"}
     by_path = {}
     for c in children:
         by_path[c["extras"].get("path", "?")] = by_path.get(c["extras"].get("path", "?"), 0) + 1
@@ -182,8 +199,8 @@ def main() -> int:
     ap.add_argument("--extra", type=Path, nargs="*", default=[], help="other building dirs to include (the landmarks)")
     ap.add_argument("--boxes", type=Path, default=None, help="a boxes tileset built in the downtown frame, for the root")
     ap.add_argument("--cell-m", type=float, default=150.0)
-    ap.add_argument("--variant", choices=["complete", "complete_tint"], default=None,
-                    help="merge the completed product (or its tinted copy) instead of the measured one")
+    ap.add_argument("--variant", choices=["complete", "complete_tint", "neural", "neural_tint"], default=None,
+                    help="merge the completed or neural product (or its tinted copy) instead of the measured one")
     args = ap.parse_args()
     ex = merge(args.out, args.buildings or (args.out / "buildings"), args.extra, args.boxes, args.cell_m, args.variant)
     print(f"{ex['buildings']} buildings, {ex['triangles']:,} triangles, {ex['cells']} cells, paths {ex['paths']} -> {args.out / 'tileset.json'}")

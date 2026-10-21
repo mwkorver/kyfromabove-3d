@@ -33,6 +33,12 @@ SCRIPTS = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS.parent / "src"))
 
 from kyfromabove_3d.facade_fill import SEEN, holdout, patch_fill, rhythm_fill, twin_fill   # noqa: E402
+from kyfromabove_3d.mesh.textures import Texture                                            # noqa: E402
+
+try:                                         # the neural method needs PyTorch (pip install .[neural])
+    from kyfromabove_3d.neural_fill import neural_fill, train_building_model                # noqa: E402
+except ImportError:
+    neural_fill = train_building_model = None
 
 METHODS = {
     "rhythm": lambda t: (lambda i, s: rhythm_fill(i, s, t)),
@@ -60,6 +66,11 @@ def main() -> int:
         meta = json.loads(str(z["meta"])); t = float(z["texel_m"])
         twins = {int(k): v for k, v in json.loads(str(z["twins"])).items()} if "twins" in z else {}
         profile_of = {m["face"]: i for i, m in enumerate(meta) if m.get("kind") == "profile" and f"img_{i}" in z}
+        if train_building_model is not None:
+            tex_list = [Texture(z[f"img_{i}"], z[f"src_{i}"]) if f"img_{i}" in z
+                        else np.zeros((1, 1, 3), dtype=np.uint8) for i in range(len(meta))]
+            _, ref_list, model = train_building_model(tex_list, meta, t, exclude_holdout=True,
+                                                      holdout_gap_m=tuple(args.gap_m), holdout_trials=args.trials)
         for i, m in enumerate(meta):
             if f"img_{i}" not in z:
                 continue
@@ -67,6 +78,10 @@ def main() -> int:
             if (src == SEEN).sum() * t * t < args.min_seen_m2:
                 continue
             methods = dict(METHODS)
+            if train_building_model is not None:
+                methods["neural"] = lambda t_, _m=m, _refs=ref_list, _mod=model: (
+                    lambda i_, s_: neural_fill(i_, s_, t_, face=_m.get("face"), kind=_m.get("kind", ""),
+                                               ref_sources=_refs, model=_mod))
             j = profile_of.get(twins.get(m.get("face"))) if m.get("kind") == "profile" else None
             if j is not None:                      # a face with a mirror twin: fill from it
                 ti, ts, tm = z[f"img_{j}"], z[f"src_{j}"], meta[j]
@@ -79,7 +94,8 @@ def main() -> int:
         print("no textures to test"); return 1
     print(f"{len({r['building'] for r in rows})} buildings, {len(rows)} hidden rectangles")
     summary = {}
-    for name in list(METHODS) + ["twin"]:
+    all_methods = list(METHODS) + (["neural"] if train_building_model is not None else []) + ["twin"]
+    for name in all_methods:
         rs = [r for r in rows if r["method"] == name]
         if not rs:
             continue
@@ -116,13 +132,13 @@ def main() -> int:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     fig, axs = plt.subplots(1, 2, figsize=(12, 4.2))
-    names = list(METHODS) + (["twin"] if any(r["method"] == "twin" for r in rows) else [])
+    names = list(METHODS) + ["neural"] + (["twin"] if any(r["method"] == "twin" for r in rows) else [])
     data = [[r["ncc"] for r in rows if r["method"] == n and r["share_filled"] > 0.5 and np.isfinite(r["ncc"])] for n in names]
     axs[0].boxplot(data, orientation="horizontal", tick_labels=names, showfliers=False)
     axs[0].axvline(0, color="#898781", lw=1, ls="--")
     axs[0].set_xlabel("pattern agreement with what the frame saw (1 = same, 0 = unrelated; plain = 0)")
     axs[0].set_title("hidden rectangles of seen facade, filled by each method", fontsize=10)
-    for n, col in zip(names, ("#2a78d6", "#eb6834", "#1baf7a", "#e34948")):
+    for n, col in zip(names, ("#2a78d6", "#eb6834", "#1baf7a", "#8e44ad", "#e34948")):
         rs = [r for r in rows if r["method"] == n and r["share_filled"] > 0.5]
         axs[1].scatter([r["plain_colour_err"] for r in rs], [r["colour_err"] for r in rs], s=10, alpha=0.5, color=col, label=n)
     lim = max([r["plain_colour_err"] for r in rows] + [r["colour_err"] for r in rows] + [1.0])

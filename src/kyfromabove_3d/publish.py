@@ -51,7 +51,8 @@ MAX_DEPTH = 8
 #: "overture" (Overture's own heights) and "boxes" (LiDAR heights, product
 #: 1) have none: every building is a box.
 PRODUCTS = {"overture": (), "boxes": (),
-            "measured": ("3dtiles_mesh",), "complete": ("3dtiles_complete", "3dtiles_mesh")}
+            "measured": ("3dtiles_mesh",), "complete": ("3dtiles_complete", "3dtiles_mesh"),
+            "neural": ("3dtiles_neural", "3dtiles_complete", "3dtiles_mesh")}
 BOX_RGB = (205, 203, 196)
 #: The sources_choice fields shown on each building (see pieces.PROVENANCE).
 PROVENANCE_FIELDS = ("lidar_phase", "lidar_date", "oblique_collection", "oblique_date", "gap_months")

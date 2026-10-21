@@ -121,6 +121,9 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--complete", action="store_true",
                     help="also write the completed product (3dtiles_complete/): unseen texels filled from the "
                          "building's own facade, and a tinted copy showing what was invented")
+    ap.add_argument("--neural", action="store_true",
+                    help="also write the neural completed product (3dtiles_neural/): unseen texels filled by "
+                         "PyTorch multi-view context matching and a per-building trained FacadeRefineNet")
     ap.add_argument("--no-prism-occluders", action="store_true",
                     help="occlude with the LiDAR returns alone, in the colourise and the frame sampling here")
     ap.add_argument("--lidar-outline", action="store_true",
@@ -696,6 +699,10 @@ def main(argv=None) -> int:
         t_done = time.time()
         write_completed(args.building, glb, atlas, roof_tex, M, args.dump_textures, extras, tileset)
         print(f"[time] complete {time.time() - t_done:.1f} s")
+    if args.neural:
+        t_neur = time.time()
+        write_neural(args.building, glb, atlas, roof_tex, M, args.dump_textures, extras, tileset)
+        print(f"[time] neural {time.time() - t_neur:.1f} s")
     return 0
 
 
@@ -792,6 +799,57 @@ def write_completed(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, 
     np.savez_compressed(out / "fill_faces.npz", meta=json.dumps(metas), texel_m=M.texel_m,
                         twins=json.dumps(twins), **walls)
     print(f"completed -> {out / 'building.glb'}: " + ", ".join(f"{NAMES[k]} {fill[NAMES[k]]:.0%}" for k in sorted(NAMES)))
+
+
+def write_neural(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, M, dump_textures: bool, extras: dict,
+                 tileset: dict):
+    """The neural completed product (product 4): unseen texels filled by
+    PyTorch multi-view context matching and a per-building trained
+    :class:`kyfromabove_3d.neural_fill.FacadeRefineNet` --
+    ``3dtiles_neural/building.glb`` and ``building_tint.glb``."""
+    from kyfromabove_3d.facade_fill import KNOWN, NAMES, shares
+    from kyfromabove_3d.neural_fill import complete_textures_neural, neural_fill, train_building_model
+
+    out = b / "3dtiles_neural"
+    out.mkdir(parents=True, exist_ok=True)
+    _, ref_sources, model = train_building_model(atlas.images, atlas.meta, M.texel_m, exclude_holdout=False)
+    done = complete_textures_neural(atlas.images, atlas.meta, M.texel_m, model=model, ref_sources=ref_sources)
+    roof = None
+    if roof_tex is not None and getattr(roof_tex, "source", None) is not None:
+        roof = neural_fill(np.asarray(roof_tex), roof_tex.source, M.texel_m, kind="roof",
+                           ref_sources=ref_sources, model=model)
+    fill = shares([sv for _, sv in done] + ([roof[1]] if roof else []))
+
+    def pages_of(images):
+        a = TextureAtlas(atlas.page_px, atlas.gap)
+        for im in images:
+            a.add(im)
+        return a.pack() if images else []
+
+    def tint(img, src):
+        if src is None:
+            return img
+        img = np.asarray(img).astype(np.float64).copy()
+        inv = ~np.isin(src, KNOWN)
+        img[inv] = 0.45 * img[inv] + 0.55 * np.array([155.0, 80.0, 240.0])      # violet: neural
+        return np.clip(img, 0, 255).astype(np.uint8)
+
+    for name, images, roof_img in (
+            ("building.glb", [im for im, _ in done], roof[0] if roof else None),
+            ("building_tint.glb", [tint(im, sv) for im, sv in done], tint(*roof) if roof else None)):
+        swap = {f"walls_{k}": pg for k, pg in enumerate(pages_of(images))}
+        if roof_img is not None:
+            swap["roof"] = roof_img
+        w = GlbWriter(M.texture, dump_dir=(out / "textures") if dump_textures and name == "building.glb"
+                      else None)
+        glb.replay(w, swap)
+        w.write(out / name, {**extras, "product": "neural", "fill": fill})
+    for name, uri in (("tileset.json", "building.glb"), ("tileset_tint.json", "building_tint.glb")):
+        ts = json.loads(json.dumps(tileset))
+        ts["root"]["content"]["uri"] = uri
+        ts["extras"].update({"product": "neural", "fill": fill})
+        (out / name).write_text(json.dumps(ts, indent=1), encoding="utf-8")
+    print(f"neural -> {out / 'building.glb'}: " + ", ".join(f"{NAMES[k]} {fill[NAMES[k]]:.0%}" for k in sorted(NAMES)))
 
 
 if __name__ == "__main__":

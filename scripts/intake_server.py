@@ -46,9 +46,11 @@ LANDMARKS_FILE = ROOT / "configs" / "landmarks.yaml"
 #: Tilesets that are not one landmark building: name -> path under the repo.
 PSEUDO_TILESETS = {"downtown": "outputs/downtown/tileset.json",
                    "downtown_complete": "outputs/downtown_complete/tileset.json",
-                   "downtown_complete_tint": "outputs/downtown_complete_tint/tileset.json"}
+                   "downtown_complete_tint": "outputs/downtown_complete_tint/tileset.json",
+                   "downtown_neural": "outputs/downtown_neural/tileset.json",
+                   "downtown_neural_tint": "outputs/downtown_neural_tint/tileset.json"}
 
-#: the three products (docs/PRODUCTS.md): what each pane can show
+#: the products (docs/PRODUCTS.md): what each pane can show
 PRODUCTS = {
     "1": ("outputs/overture_boxes/downtown_lidar/tileset.json",
           "Product 1: Overture footprints at their LiDAR heights (measured)"),
@@ -60,6 +62,10 @@ PRODUCTS = {
           "Product 3: product 2 with unseen texels invented from each building's own frames"),
     "3t": ("outputs/downtown_complete_tint/tileset.json",
            "Product 3, invented texels tinted magenta"),
+    "4": ("outputs/downtown_neural/tileset.json",
+          "Product 4: PyTorch neural facade inpainter trained per building"),
+    "4t": ("outputs/downtown_neural_tint/tileset.json",
+           "Product 4, neural-filled texels tinted violet"),
 }
 
 
@@ -409,9 +415,16 @@ class Handler(BaseHTTPRequestHandler):
                     chosen = ts
                 else:
                     chosen = [landmark_by_key(k, ts) for k in keys if k not in PSEUDO_TILESETS]
-                # mesh=1 shows the textured surfaces (scripts/build_mesh.py)
+                # mesh=1, complete=1, or neural=1 shows the textured surfaces
                 # instead of the point tiles.
-                sub = "3dtiles_mesh" if q.get("mesh") == "1" else "3dtiles"
+                if q.get("neural") == "1":
+                    sub = "3dtiles_neural"
+                elif q.get("complete") == "1":
+                    sub = "3dtiles_complete"
+                elif q.get("mesh") == "1":
+                    sub = "3dtiles_mesh"
+                else:
+                    sub = "3dtiles"
                 ready = [t for t in chosen if (ROOT / t["building_dir"] / sub / "tileset.json").exists()]
                 purls = [u for u in (pseudo_tileset_url(k) for k in pseudo) if u]
                 if not ready and not purls:

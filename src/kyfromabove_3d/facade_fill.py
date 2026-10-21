@@ -34,8 +34,8 @@ from typing import Callable, Dict, Optional, Sequence, Tuple
 import numpy as np
 
 #: where a texel's colour came from
-SEEN, NEAR, PLAIN, TWIN, RHYTHM, PATCH = 1, 2, 3, 4, 5, 6
-NAMES = {SEEN: "seen", NEAR: "near", PLAIN: "plain", TWIN: "twin", RHYTHM: "rhythm", PATCH: "patch"}
+SEEN, NEAR, PLAIN, TWIN, RHYTHM, PATCH, NEURAL = 1, 2, 3, 4, 5, 6, 7
+NAMES = {SEEN: "seen", NEAR: "near", PLAIN: "plain", TWIN: "twin", RHYTHM: "rhythm", PATCH: "patch", NEURAL: "neural"}
 KNOWN = (SEEN, NEAR)
 
 

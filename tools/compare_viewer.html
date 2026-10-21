@@ -60,6 +60,15 @@
           <button class="layer-btn product-btn" data-key="2" title="LiDAR geometry, colour only where a frame saw it (measured)">2 · measured</button>
           <button class="layer-btn product-btn" data-key="3" title="Product 2 with unseen texels invented from each building's own frames">3 · completed</button>
           <button class="layer-btn product-btn" data-key="3t" title="Product 3 with every invented texel tinted magenta">3 · invented shown</button>
+          <button class="layer-btn product-btn" data-key="4" title="Product 2 with unseen texels filled by the per-building PyTorch neural facade inpainter">4 · neural</button>
+          <button class="layer-btn product-btn" data-key="4t" title="Product 4 with every neural-filled texel tinted violet">4 · neural shown</button>
+        </div>
+        <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <span class="muted" style="font-size: 11px;">Landmarks:</span>
+          <button class="layer-btn" onclick="flyToLandmark('pnc')" title="Fly to PNC Tower (1614a997)">PNC Tower</button>
+          <button class="layer-btn" onclick="flyToLandmark('400wm')" title="Fly to 400 West Market (df2fccca)">400 W Market</button>
+          <button class="layer-btn" onclick="flyToLandmark('humana')" title="Fly to Humana Building (d2786314)">Humana</button>
+          <button class="layer-btn" onclick="flyToLandmark('overview')" title="Reset to downtown overview">Overview</button>
         </div>
         <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
           <span class="muted" style="font-size: 11px;">Basemap:</span>
@@ -100,6 +109,8 @@
           <button class="layer-btn product-btn" data-key="2" title="LiDAR geometry, colour only where a frame saw it (measured)">2 · measured</button>
           <button class="layer-btn product-btn" data-key="3" title="Product 2 with unseen texels invented from each building's own frames">3 · completed</button>
           <button class="layer-btn product-btn" data-key="3t" title="Product 3 with every invented texel tinted magenta">3 · invented shown</button>
+          <button class="layer-btn product-btn" data-key="4" title="Product 2 with unseen texels filled by the per-building PyTorch neural facade inpainter">4 · neural</button>
+          <button class="layer-btn product-btn" data-key="4t" title="Product 4 with every neural-filled texel tinted violet">4 · neural shown</button>
         </div>
         <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
           <span class="muted" style="font-size: 11px;">Heights:</span>
@@ -310,6 +321,23 @@
       left.camera.setView({ destination: left.camera.positionWC.clone(),
                             orientation: { direction: left.camera.directionWC.clone(), up: left.camera.upWC.clone() } });
     }
+    const LANDMARK_VIEWS = {
+      pnc:    { lon: -85.75795, lat: 38.25620, h: 175, heading: 215, pitch: -16, range: 210, gers: "1614a997-3d6f-475f-9bc5-bb5a9dbc878d" },
+      "400wm":{ lon: -85.75715, lat: 38.25497, h: 185, heading: 225, pitch: -18, range: 240, gers: "df2fccca-d6bd-4d4d-b4bc-673cfb5245aa" },
+      humana: { lon: -85.75873, lat: 38.25645, h: 160, heading: 145, pitch: -16, range: 200, gers: "d2786314-4fb3-4da6-8f81-621873d40c08" },
+    };
+    function flyToLandmark(key) {
+      leader = left;
+      if (key === "overview" && window.center) {
+        frame(window.center, 225, -20, window.overviewRange || 1400);
+        return;
+      }
+      const v = LANDMARK_VIEWS[key];
+      if (!v) return;
+      const target = Cesium.Cartesian3.fromDegrees(v.lon, v.lat, v.h);
+      frame(target, v.heading, v.pitch, v.range);
+    }
+    window.flyToLandmark = flyToLandmark;
     async function snapshot(name) {
       left.render(); right.render();
       const c = document.createElement("canvas");
@@ -531,7 +559,13 @@
         Cesium.Cartesian3.divideByScalar(center, centers.length, center);
         const radius = Math.max(...leftTilesets.map((t) => Cesium.Cartesian3.distance(center, t.boundingSphere.center) + t.boundingSphere.radius));
         window.center = center;
-        frame(center, 225, -20, radius * 2.4);
+        window.overviewRange = radius * 2.4;
+        const lm = params.get("landmark");
+        if (lm && LANDMARK_VIEWS[lm]) {
+          flyToLandmark(lm);
+        } else {
+          frame(center, 225, -20, radius * 2.4);
+        }
       } catch (e) {
         document.getElementById("left-info").textContent = "failed: " + e.message;
       }

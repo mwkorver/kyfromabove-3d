@@ -209,6 +209,67 @@ class GlbRecorder:
             getattr(writer, name)(*a, **k)
 
 
+def replace_glb_images(
+    src_glb: Path,
+    dst_glb: Path,
+    swap: dict[str, np.ndarray],
+    extras_patch: dict | None = None,
+    texture_format: str = "ktx2",
+    dump_dir: Path | None = None,
+) -> int:
+    """Copy ``src_glb`` to ``dst_glb``, replacing any image bufferViews whose
+    image name is in ``swap`` while keeping all geometry bufferViews identical
+    triangle-for-triangle."""
+    raw = src_glb.read_bytes()
+    magic, version, _ = struct.unpack("<4sII", raw[:12])
+    if magic != b"glTF" or version != 2:
+        raise ValueError(f"{src_glb} is not a glTF 2.0 binary")
+    js_len, _ = struct.unpack("<II", raw[12:20])
+    gltf = json.loads(raw[20 : 20 + js_len].decode("utf-8"))
+    bin_off = 20 + js_len
+    bin_len, _ = struct.unpack("<II", raw[bin_off : bin_off + 8])
+    old_bin = raw[bin_off + 8 : bin_off + 8 + bin_len]
+
+    writer = GlbWriter(texture_format=texture_format, dump_dir=dump_dir)
+    view_to_img = {
+        int(im["bufferView"]): (idx, im["name"])
+        for idx, im in enumerate(gltf.get("images", []))
+        if im.get("name") in swap and "bufferView" in im
+    }
+    new_bin = bytearray()
+    for vi, v in enumerate(gltf.get("bufferViews", [])):
+        while len(new_bin) % 4:
+            new_bin += b"\0"
+        if vi in view_to_img:
+            img_idx, name = view_to_img[vi]
+            data, mime = writer._encode(np.ascontiguousarray(swap[name], dtype=np.uint8), name)
+            gltf["images"][img_idx]["mimeType"] = mime
+        else:
+            off, ln = int(v["byteOffset"]), int(v["byteLength"])
+            data = old_bin[off : off + ln]
+        v["byteOffset"] = len(new_bin)
+        v["byteLength"] = len(data)
+        new_bin += data
+    while len(new_bin) % 4:
+        new_bin += b"\0"
+    if gltf.get("buffers"):
+        gltf["buffers"][0]["byteLength"] = len(new_bin)
+    if extras_patch and gltf.get("nodes"):
+        gltf["nodes"][0].setdefault("extras", {}).update(extras_patch)
+
+    js = json.dumps(gltf, separators=(",", ":")).encode("utf-8")
+    js += b" " * ((4 - len(js) % 4) % 4)
+    total = 12 + 8 + len(js) + 8 + len(new_bin)
+    with open(dst_glb, "wb") as fh:
+        fh.write(struct.pack("<4sII", b"glTF", 2, total))
+        fh.write(struct.pack("<II", len(js), 0x4E4F534A))
+        fh.write(js)
+        fh.write(struct.pack("<II", len(new_bin), 0x004E4942))
+        fh.write(bytes(new_bin))
+    return total
+
+
+
 def quads_to_arrays(quads):
     P, N, T, I = [], [], [], []
     for corners, n, q_uv, _ in quads:

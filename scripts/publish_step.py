@@ -74,13 +74,21 @@ def terrain(tiles, src, out, grid, max_level: int, log=print) -> dict:
 
     bm, _ = _scripts()
     to_ll = Transformer.from_crs("EPSG:3089", "EPSG:4326", always_xy=True).transform
+    from concurrent.futures import ThreadPoolExecutor
+
+    def fetch(t):
+        try:
+            return src.get_bytes(f"tiles/{t}/ground.npz")
+        except FileNotFoundError:
+            return None
+    with ThreadPoolExecutor(32) as ex:                               # the reads wait on the network
+        data = dict(zip(tiles, ex.map(fetch, tiles)))
     grounds, shifts, boxes = {}, {}, {}
     for t in tiles:
-        key = f"tiles/{t}/ground.npz"
-        if not src.exists(key):
+        if data[t] is None:
             log(f"[warn] {t}: no ground.npz; the terrain there comes from its neighbours")
             continue
-        d = dict(np.load(io.BytesIO(src.get_bytes(key))))
+        d = dict(np.load(io.BytesIO(data[t])))
         g = {k: (v.item() if v.ndim == 0 else v) for k, v in d.items()}
         Z = g["Z_navd88_m"]
         cx = g["x0"] + g["cell_ft"] * Z.shape[1] / 2
@@ -110,7 +118,7 @@ def viewer(out, start: dict) -> None:
 
 def main() -> int:
     from kyfromabove_3d.pieces import phase2_grid
-    from kyfromabove_3d.publish import publish_tree
+    from kyfromabove_3d.publish import publish_trees
     from kyfromabove_3d.store import store_from
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -151,8 +159,7 @@ def main() -> int:
                         print(f"[{done}/{len(tiles)}] {s['tile']} {s['product']}: {s.get('meshed', 0)} meshed, "
                               f"{s.get('boxed', 0)} boxes, {s.get('areas', 0)} area file(s)", flush=True)
     if args.tree:
-        for p in args.products:
-            publish_tree(out, grid, p, tiles=tiles or None)
+        publish_trees(out, grid, args.products, tiles=tiles or None)
     if args.terrain:
         terrain(tiles, src, out, grid, args.terrain_max_level)
     if args.viewer:

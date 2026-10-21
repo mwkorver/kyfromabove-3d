@@ -22,7 +22,15 @@ Each message is one job -- one tile's buildings to measure, or a batch of
 * watches the machine's metadata for the Spot two-minute notice: on it, stops
   the running jobs, makes their messages visible again at once (another
   machine takes them; buildings already published are skipped there by their
-  fingerprint) and stops.
+  fingerprint) and stops. A stop request (``stop``: SIGTERM, a shutdown) does
+  the same;
+* keeps its machine from being scaled in while it has jobs running
+  (``protect(True)``, and ``protect(False)`` when idle): the group, sized to
+  the queue, removes idle machines at the tail of a run, never one finishing
+  a straggler;
+* after ``max_seconds`` takes no new job, finishes the ones it has and stops
+  -- before the machine's hard end, so no job is cut off there and its log is
+  saved.
 
 Intermediate files stay on the machine's own disk. What a job publishes --
 each building's products, ``building.json`` last -- is the checkpoint.
@@ -56,6 +64,35 @@ def spot_notice(timeout_s: float = 1.0) -> bool:
         return urllib.request.urlopen(req, timeout=timeout_s).status == 200
     except Exception:                                               # noqa: BLE001 (404, no IMDS, timeout)
         return False
+
+
+def asg_protector(log: Callable = print, timeout_s: float = 1.0) -> Callable[[bool], None]:
+    """``protect(on)`` for this machine in its Auto Scaling group (scale-in
+    protection while it has jobs running); a no-op off EC2 or outside a group."""
+    import urllib.request
+
+    try:
+        req = urllib.request.Request(f"{IMDS}/latest/api/token", method="PUT",
+                                     headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"})
+        token = urllib.request.urlopen(req, timeout=timeout_s).read().decode()
+        req = urllib.request.Request(f"{IMDS}/latest/meta-data/instance-id", headers={"X-aws-ec2-metadata-token": token})
+        instance = urllib.request.urlopen(req, timeout=timeout_s).read().decode()
+        import boto3
+        asg = boto3.client("autoscaling")
+        found = asg.describe_auto_scaling_instances(InstanceIds=[instance])["AutoScalingInstances"]
+        group = found[0]["AutoScalingGroupName"] if found else None
+    except Exception:                                               # noqa: BLE001 (no IMDS, no group)
+        return lambda on: None
+    if group is None:
+        return lambda on: None
+
+    def protect(on: bool) -> None:
+        try:
+            asg.set_instance_protection(InstanceIds=[instance], AutoScalingGroupName=group,
+                                        ProtectedFromScaleIn=bool(on))
+        except Exception as exc:                                    # noqa: BLE001
+            log(f"[warn] scale-in protection {on}: {exc}")
+    return protect
 
 
 def _run_job(handler_path: str, job: Dict[str, Any], conn) -> None:
@@ -105,6 +142,9 @@ class QueueWorker:
     poll_s: float = 5.0
     wait_s: int = 20                                 # SQS long poll
     notice: Callable[[], bool] = spot_notice
+    protect: Callable[[bool], None] = lambda on: None
+    max_seconds: Optional[float] = None              # take no new job after this; finish and stop
+    stop: threading.Event = field(default_factory=threading.Event)
     log: Callable = print
     stats: Dict[str, int] = field(default_factory=lambda: {"done": 0, "failed": 0, "parked": 0, "returned": 0})
 
@@ -166,14 +206,17 @@ class QueueWorker:
         """Until the Spot notice, ``max_jobs`` jobs taken, or the queue idle
         for ``idle_exit_s``. Returns the counts."""
         running: List[Dict[str, Any]] = []
-        taken, idle_since = 0, time.time()
-        stop = threading.Event()
+        taken, idle_since, t_start, busy = 0, time.time(), time.time(), False
         while True:
-            if self.notice():
-                self.log("Spot notice: stopping")
+            if self.stop.is_set() or self.notice():
+                self.log("stop requested" if self.stop.is_set() else "Spot notice: stopping")
                 for r in running:
                     self._return(r)
                 break
+            if busy != bool(running):                       # scale-in protection while jobs run
+                busy = bool(running)
+                self.protect(busy)
+            late = self.max_seconds is not None and time.time() - t_start >= self.max_seconds
             # results
             for r in list(running):
                 if r["conn"].poll():
@@ -196,7 +239,7 @@ class QueueWorker:
                     self._visible(r["msg"], self.visibility_s)          # the heartbeat
                     r["beat"] = time.time()
             # new work
-            if len(running) < self.slots and (max_jobs is None or taken < max_jobs) and not stop.is_set():
+            if len(running) < self.slots and (max_jobs is None or taken < max_jobs) and not late:
                 msg = self._receive()
                 if msg is not None:
                     running.append(self._start(msg))
@@ -204,9 +247,14 @@ class QueueWorker:
                     idle_since = time.time()
                     continue
             if not running:
+                if late:
+                    self.log("lifetime reached: stopping")
+                    break
                 if max_jobs is not None and taken >= max_jobs:
                     break
                 if idle_exit_s is not None and time.time() - idle_since >= idle_exit_s:
                     break
             time.sleep(self.poll_s if running else 0.0)
+        if busy:
+            self.protect(False)
         return dict(self.stats)

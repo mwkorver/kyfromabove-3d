@@ -106,3 +106,33 @@ def test_the_heartbeat_keeps_a_long_job_hidden(aws):
     spy = Spy(sqs)
     worker(spy, url, store, "slow", heartbeat_s=1, visibility_s=30).run(max_jobs=1)
     assert spy.visibility.count(30) >= 2
+
+
+def test_a_busy_machine_is_protected_from_scale_in_and_released_when_idle(aws):
+    sqs, url, store = aws
+    send(sqs, url)
+    seen = []
+    w = worker(sqs, url, store, "ok", protect=seen.append)
+    w.run(max_jobs=1)
+    assert seen == [True, False]
+
+
+def test_after_its_lifetime_the_worker_takes_no_new_job(aws):
+    sqs, url, store = aws
+    send(sqs, url)
+    w = worker(sqs, url, store, "ok", max_seconds=0.0)
+    stats = w.run(idle_exit_s=5)
+    assert stats["done"] == 0 and left(sqs, url) == 1                    # the job waits for another machine
+
+
+def test_a_stop_request_returns_the_running_job_at_once(aws):
+    import threading
+    sqs, url, store = aws
+    send(sqs, url, sleep=30)
+    w = worker(sqs, url, store, "slow")
+    threading.Timer(2.0, w.stop.set).start()                            # SIGTERM sets this
+    t0 = time.time()
+    stats = w.run(max_jobs=1)
+    assert stats["returned"] == 1 and time.time() - t0 < 20
+    assert left(sqs, url) == 1                                            # back on the queue, not counted
+    assert not list(store.list("runs/r1/attempts/"))

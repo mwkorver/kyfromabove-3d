@@ -117,6 +117,10 @@ def measure_job(job: Dict[str, Any]) -> Dict[str, Any]:
     work = _work()
     try:
         rec = store.read_json(f"tiles/{tile}/buildings.json")
+        if not store.exists(f"tiles/{tile}/frames.gpkg"):
+            # no oblique photos over the tile (sources_choice): its buildings stay
+            # LiDAR-height boxes; nothing to measure for a mesh
+            return {"tile": tile, "measured": 0, "failed": 0, "no_photos": len(rec["buildings"])}
         frames = gpd.read_file(store.get_file(f"tiles/{tile}/frames.gpkg", work / "frames.gpkg"))
         gers = job.get("gers") or [r["id"] for r in rec["buildings"]]
         made = piece_step(tile, gers, rec["buildings"], rec["halo"], frames, _indexes(), work)
@@ -286,15 +290,15 @@ def publish_job(job: Dict[str, Any]) -> Dict[str, Any]:
 def tree_job(job: Dict[str, Any]) -> Dict[str, Any]:
     """The statewide tree and the terrain over every published tile (see the module)."""
     from .pieces import phase2_grid
-    from .publish import publish_tree
+    from .publish import publish_trees
 
     ps = _publish_step()
     store = _store()
     grid = phase2_grid(Path(os.environ.get("RAW_DIR", "/opt/data/raw")))
     products = job.get("products") or ps.PRODUCTS
-    for p in products:
-        publish_tree(store, grid, p)                                    # tiles=None: every published tile
-    tiles = sorted({k.split("/")[1] for k in store.list("tiles/") if k.endswith("/3dtiles/measured/tileset.json")})
+    trees = publish_trees(store, grid, products)                        # every published tile, one listing
+    some = trees.get("measured") or next(iter(trees.values()))
+    tiles = some["tile_names"]
     ps.terrain(tiles, store, store, grid, int(job.get("terrain_max_level", 15)))
     return {"tiles": len(tiles), "products": list(products)}
 

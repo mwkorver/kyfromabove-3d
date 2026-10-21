@@ -86,7 +86,11 @@ class GroundMosaic:
         self.tiles = sorted(grounds)
         self.g = [grounds[t] for t in self.tiles]
         self.shift = np.array([shifts[t] for t in self.tiles])
-        self._to_ft = Transformer.from_crs("EPSG:4326", "EPSG:3089", always_xy=True).transform
+        import threading
+
+        # a pyproj Transformer is not safe to share between threads (the terrain
+        # tiles are made 32 at a time): one per thread
+        self._local = threading.local()
         self.lo = np.array([[g["x0"], g["y0"]] for g in self.g])
         self.hi = np.array([[g["x0"] + g["cell_ft"] * g["Z_navd88_m"].shape[1],
                              g["y0"] + g["cell_ft"] * g["Z_navd88_m"].shape[0]] for g in self.g])
@@ -103,15 +107,27 @@ class GroundMosaic:
         w, s, e, n = self.bbox
         lon = np.clip(np.asarray(lon, float).ravel(), w, e)
         lat = np.clip(np.asarray(lat, float).ravel(), s, n)
-        x, y = self._to_ft(lon, lat)
+        tf = getattr(self._local, "to_ft", None)
+        if tf is None:
+            from pyproj import Transformer
+            tf = self._local.to_ft = Transformer.from_crs("EPSG:4326", "EPSG:3089", always_xy=True).transform
+        x, y = tf(lon, lat)
         x, y = np.asarray(x), np.asarray(y)
         out = np.empty(len(x))
-        # inside a tile: that tile; outside all: the nearest tile, its edge
-        _, near = self.tree.query(np.column_stack([x, y]))
-        which = near.copy()
-        for i in range(len(self.tiles)):
-            inside = (x >= self.lo[i, 0]) & (x < self.hi[i, 0]) & (y >= self.lo[i, 1]) & (y < self.hi[i, 1])
-            which[inside] = i
+        # inside a tile: that tile (the highest-numbered where grids overlap, as
+        # a loop over every tile gave); outside all: the nearest tile, its edge.
+        # Only the 9 nearest tiles are tested -- a point inside a grid has that
+        # grid's centre among them -- not every tile for every point (statewide,
+        # ~41,000 tiles for each of ~450,000 terrain tiles)
+        k = min(9, len(self.tiles))
+        _, cand = self.tree.query(np.column_stack([x, y]), k=k)
+        cand = np.asarray(cand).reshape(len(x), k)
+        near = cand[:, 0]
+        lo, hi = self.lo[cand], self.hi[cand]
+        inside = ((x[:, None] >= lo[..., 0]) & (x[:, None] < hi[..., 0]) &
+                  (y[:, None] >= lo[..., 1]) & (y[:, None] < hi[..., 1]))
+        best = np.where(inside, cand, -1).max(axis=1)
+        which = np.where(best >= 0, best, near)
         for i in np.unique(which):
             m = which == i
             g = self.g[i]
@@ -167,17 +183,21 @@ def write_heightmap_tiles(mosaic: GroundMosaic, bboxes: Sequence[Tuple[float, fl
         have[z] = set()
         for bb in bboxes:
             have[z].update(tiles_over(z, bb))
-    n = 0
-    for z in range(max_level + 1):
-        for (x, y) in sorted(have[z]):
-            mask = 0
-            if z < max_level:
-                for bit, (cx, cy) in ((1, (2 * x, 2 * y)), (2, (2 * x + 1, 2 * y)),
-                                      (4, (2 * x, 2 * y + 1)), (8, (2 * x + 1, 2 * y + 1))):
-                    if (cx, cy) in have[z + 1]:
-                        mask |= bit
-            put(f"{z}/{x}/{y}.terrain", heightmap_tile(mosaic.heights, z, x, y, mask))
-            n += 1
+    from concurrent.futures import ThreadPoolExecutor
+
+    def one(zxy):
+        z, x, y = zxy
+        mask = 0
+        if z < max_level:
+            for bit, (cx, cy) in ((1, (2 * x, 2 * y)), (2, (2 * x + 1, 2 * y)),
+                                  (4, (2 * x, 2 * y + 1)), (8, (2 * x + 1, 2 * y + 1))):
+                if (cx, cy) in have[z + 1]:
+                    mask |= bit
+        put(f"{z}/{x}/{y}.terrain", heightmap_tile(mosaic.heights, z, x, y, mask))
+    todo = [(z, x, y) for z in range(max_level + 1) for (x, y) in sorted(have[z])]
+    with ThreadPoolExecutor(32) as ex:                               # the uploads wait on the network
+        list(ex.map(one, todo))
+    n = len(todo)
     available = [[{"startX": 0, "endX": 1, "startY": 0, "endY": 0}]]
     for z in range(1, max_level + 1):
         # one rectangle per bbox at this level

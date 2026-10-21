@@ -339,6 +339,13 @@ def test_a_building_comes_back_from_its_zip_with_its_texture_pages(tmp_path):
     assert got["source"] == "3dtiles_mesh" and got["glb"] == glb and got["tileset"] == ts
     assert np.array_equal(got["pages"]["walls_0"], pages["walls_0"])
     assert P.built_buildings(st, "buildings/v1") == {"g1": {"3dtiles_mesh"}}
+    # read straight away: no existence check per zip; a building with no mesh is None
+    calls = []
+    real = st.exists
+    st.exists = lambda k: calls.append(k) or real(k)
+    assert P.load_building(st, "g1", "complete", "buildings/v1")["source"] == "3dtiles_mesh"
+    assert P.load_building(st, "nobody", "complete", "buildings/v1") is None
+    assert calls == []
 
 
 # ------------------------------------------------------------- the views

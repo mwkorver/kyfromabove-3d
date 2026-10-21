@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
-from typing import Any, Iterator, Optional
+from typing import Any, Iterator, List, Optional
 
 
 class Store:
@@ -39,6 +39,12 @@ class Store:
         raise NotImplementedError
 
     def list(self, prefix: str) -> Iterator[str]:
+        raise NotImplementedError
+
+    def list_dirs(self, prefix: str) -> List[str]:
+        """The names one level below ``prefix`` (ending in ``/``) that hold
+        anything: ``list_dirs("tiles/")`` -> tile names, without listing every
+        object under them (tens of keys a tile)."""
         raise NotImplementedError
 
     def delete(self, key: str) -> None:
@@ -111,6 +117,12 @@ class LocalStore(Store):
                 if key.startswith(prefix):
                     yield key
 
+    def list_dirs(self, prefix: str) -> List[str]:
+        base = self._path(prefix.rstrip("/")) if prefix.strip("/") else self.root
+        if not base.is_dir():
+            return []
+        return sorted(p.name for p in base.iterdir() if p.is_dir() and any(f.is_file() for f in p.rglob("*")))
+
 
 class S3Store(Store):
     """A bucket and a prefix. ``endpoint_url`` points it at LocalStack (or
@@ -147,7 +159,16 @@ class S3Store(Store):
         self.s3.upload_file(str(path), self.bucket, self._key(key))
 
     def get_bytes(self, key: str) -> bytes:
-        r = self.s3.get_object(Bucket=self.bucket, Key=self._key(key))
+        """The object's bytes; ``FileNotFoundError`` when there is none, as a
+        folder store raises, so a caller can try a read instead of asking first."""
+        from botocore.exceptions import ClientError
+
+        try:
+            r = self.s3.get_object(Bucket=self.bucket, Key=self._key(key))
+        except ClientError as e:
+            if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
+                raise FileNotFoundError(key) from e
+            raise
         data = r["Body"].read()
         if r.get("ContentEncoding") == "gzip":
             import gzip
@@ -174,6 +195,13 @@ class S3Store(Store):
         for page in self.s3.get_paginator("list_objects_v2").paginate(Bucket=self.bucket, Prefix=self._key(prefix)):
             for o in page.get("Contents", []):
                 yield o["Key"][cut:]
+
+    def list_dirs(self, prefix: str) -> List[str]:
+        p = self._key(prefix.rstrip("/") + "/") if prefix.strip("/") else (self.prefix + "/" if self.prefix else "")
+        out = []
+        for page in self.s3.get_paginator("list_objects_v2").paginate(Bucket=self.bucket, Prefix=p, Delimiter="/"):
+            out += [c["Prefix"][len(p):].rstrip("/") for c in page.get("CommonPrefixes", [])]
+        return sorted(out)
 
 
 def store_from(spec: str, endpoint_url: Optional[str] = None) -> Store:

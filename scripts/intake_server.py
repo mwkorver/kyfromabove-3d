@@ -63,7 +63,7 @@ PRODUCTS = {
     "3t": ("outputs/downtown_complete_tint/tileset.json",
            "Product 3, invented texels tinted magenta"),
     "4": ("outputs/downtown_neural/tileset.json",
-          "Product 4: PyTorch neural facade inpainter trained per building"),
+          "Product 4: unseen texels borrowed from the best-matching seen walls"),
     "4t": ("outputs/downtown_neural_tint/tileset.json",
            "Product 4, neural-filled texels tinted violet"),
 }

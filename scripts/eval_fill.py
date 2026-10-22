@@ -35,10 +35,7 @@ sys.path.insert(0, str(SCRIPTS.parent / "src"))
 from kyfromabove_3d.facade_fill import SEEN, holdout, patch_fill, rhythm_fill, twin_fill   # noqa: E402
 from kyfromabove_3d.mesh.textures import Texture                                            # noqa: E402
 
-try:                                         # the neural method needs PyTorch (pip install .[neural])
-    from kyfromabove_3d.neural_fill import neural_fill, train_building_model                # noqa: E402
-except ImportError:
-    neural_fill = train_building_model = None
+from kyfromabove_3d.neural_fill import neural_fill, reference_bank                         # noqa: E402
 
 METHODS = {
     "rhythm": lambda t: (lambda i, s: rhythm_fill(i, s, t)),
@@ -66,11 +63,10 @@ def main() -> int:
         meta = json.loads(str(z["meta"])); t = float(z["texel_m"])
         twins = {int(k): v for k, v in json.loads(str(z["twins"])).items()} if "twins" in z else {}
         profile_of = {m["face"]: i for i, m in enumerate(meta) if m.get("kind") == "profile" and f"img_{i}" in z}
-        if train_building_model is not None:
-            tex_list = [Texture(z[f"img_{i}"], z[f"src_{i}"]) if f"img_{i}" in z
-                        else np.zeros((1, 1, 3), dtype=np.uint8) for i in range(len(meta))]
-            _, ref_list, model = train_building_model(tex_list, meta, t, exclude_holdout=True,
-                                                      holdout_gap_m=tuple(args.gap_m), holdout_trials=args.trials)
+        tex_list = [Texture(z[f"img_{i}"], z[f"src_{i}"]) if f"img_{i}" in z
+                    else np.zeros((1, 1, 3), dtype=np.uint8) for i in range(len(meta))]
+        ref_list = reference_bank(tex_list, meta, t, exclude_holdout=True,
+                                  holdout_gap_m=tuple(args.gap_m), holdout_trials=args.trials)
         for i, m in enumerate(meta):
             if f"img_{i}" not in z:
                 continue
@@ -78,10 +74,9 @@ def main() -> int:
             if (src == SEEN).sum() * t * t < args.min_seen_m2:
                 continue
             methods = dict(METHODS)
-            if train_building_model is not None:
-                methods["neural"] = lambda t_, _m=m, _refs=ref_list, _mod=model: (
-                    lambda i_, s_: neural_fill(i_, s_, t_, face=_m.get("face"), kind=_m.get("kind", ""),
-                                               ref_sources=_refs, model=_mod))
+            methods["neural"] = lambda t_, _m=m, _refs=ref_list: (
+                lambda i_, s_: neural_fill(i_, s_, t_, face=_m.get("face"), kind=_m.get("kind", ""),
+                                           ref_sources=_refs))
             j = profile_of.get(twins.get(m.get("face"))) if m.get("kind") == "profile" else None
             if j is not None:                      # a face with a mirror twin: fill from it
                 ti, ts, tm = z[f"img_{j}"], z[f"src_{j}"], meta[j]
@@ -94,7 +89,7 @@ def main() -> int:
         print("no textures to test"); return 1
     print(f"{len({r['building'] for r in rows})} buildings, {len(rows)} hidden rectangles")
     summary = {}
-    all_methods = list(METHODS) + (["neural"] if train_building_model is not None else []) + ["twin"]
+    all_methods = list(METHODS) + ["neural", "twin"]
     for name in all_methods:
         rs = [r for r in rows if r["method"] == name]
         if not rs:

@@ -122,8 +122,8 @@ def parser() -> argparse.ArgumentParser:
                     help="also write the completed product (3dtiles_complete/): unseen texels filled from the "
                          "building's own facade, and a tinted copy showing what was invented")
     ap.add_argument("--neural", action="store_true",
-                    help="also write the neural completed product (3dtiles_neural/): unseen texels filled by "
-                         "PyTorch multi-view context matching and a per-building trained FacadeRefineNet")
+                    help="also write the fourth product (3dtiles_neural/): unseen texels filled from the "
+                         "best-matching seen patches on any of the building's walls")
     ap.add_argument("--no-prism-occluders", action="store_true",
                     help="occlude with the LiDAR returns alone, in the colourise and the frame sampling here")
     ap.add_argument("--lidar-outline", action="store_true",
@@ -803,21 +803,20 @@ def write_completed(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, 
 
 def write_neural(b: Path, glb: "GlbRecorder", atlas: TextureAtlas, roof_tex, M, dump_textures: bool, extras: dict,
                  tileset: dict):
-    """The neural completed product (product 4): unseen texels filled by
-    PyTorch multi-view context matching and a per-building trained
-    :class:`kyfromabove_3d.neural_fill.FacadeRefineNet` --
-    ``3dtiles_neural/building.glb`` and ``building_tint.glb``."""
+    """The fourth product: unseen texels filled from the best-matching seen
+    patches on any of the building's walls (:mod:`kyfromabove_3d.neural_fill`)
+    -- ``3dtiles_neural/building.glb`` and ``building_tint.glb``."""
     from kyfromabove_3d.facade_fill import KNOWN, NAMES, shares
-    from kyfromabove_3d.neural_fill import complete_textures_neural, neural_fill, train_building_model
+    from kyfromabove_3d.neural_fill import complete_textures_neural, neural_fill, reference_bank
 
     out = b / "3dtiles_neural"
     out.mkdir(parents=True, exist_ok=True)
-    _, ref_sources, model = train_building_model(atlas.images, atlas.meta, M.texel_m, exclude_holdout=False)
-    done = complete_textures_neural(atlas.images, atlas.meta, M.texel_m, model=model, ref_sources=ref_sources)
+    ref_sources = reference_bank(atlas.images, atlas.meta, M.texel_m)
+    done = complete_textures_neural(atlas.images, atlas.meta, M.texel_m, ref_sources=ref_sources)
     roof = None
     if roof_tex is not None and getattr(roof_tex, "source", None) is not None:
         roof = neural_fill(np.asarray(roof_tex), roof_tex.source, M.texel_m, kind="roof",
-                           ref_sources=ref_sources, model=model)
+                           ref_sources=ref_sources)
     fill = shares([sv for _, sv in done] + ([roof[1]] if roof else []))
 
     def pages_of(images):

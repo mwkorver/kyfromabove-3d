@@ -2,20 +2,18 @@
 """Build Product 4 (``3dtiles_neural/``) for one or more already-built buildings.
 
 Reads ``<building>/3dtiles_mesh/{building.glb,tileset.json}`` and
-``<building>/3dtiles_complete/fill_faces.npz``, trains a building-specific
-:class:`kyfromabove_3d.neural_fill.FacadeRefineNet` self-supervised on synthetic
-holes carved from that building's own ``SEEN`` regions, inpaints every
-unseen/plain facade and roof texel via multi-view GPU cross-correlation +
-neural refinement, and writes:
+``<building>/3dtiles_complete/fill_faces.npz``, fills every unseen facade and
+roof texel from the best-matching seen patches on the building's walls
+(:mod:`kyfromabove_3d.neural_fill`), and writes:
 
 * ``<building>/3dtiles_neural/building.glb``
 * ``<building>/3dtiles_neural/building_tint.glb`` (neural-filled texels tinted violet)
 * ``<building>/3dtiles_neural/tileset.json``
 * ``<building>/3dtiles_neural/tileset_tint.json``
-* ``<building>/3dtiles_neural/refine_net.pt``
 
-Can run standalone on a GPU/Inf2 worker queue after ``build_mesh.py --complete``
-without re-running point-cloud colourisation or mesh construction.
+For buildings already built with ``build_mesh.py --complete``: refills
+them without re-running the colourise or the mesh (``build_mesh.py --neural``
+does the same during a build).
 """
 
 from __future__ import annotations
@@ -27,7 +25,6 @@ import time
 from pathlib import Path
 
 import numpy as np
-import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -35,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from kyfromabove_3d.facade_fill import KNOWN, NAMES, shares
 from kyfromabove_3d.mesh.gltf import TEXTURE_FORMATS, replace_glb_images
 from kyfromabove_3d.mesh.textures import Texture, TextureAtlas
-from kyfromabove_3d.neural_fill import complete_textures_neural, neural_fill, train_building_model
+from kyfromabove_3d.neural_fill import complete_textures_neural, neural_fill, reference_bank
 
 
 def build_building_neural(
@@ -73,18 +70,8 @@ def build_building_neural(
     out = b / "3dtiles_neural"
     out.mkdir(parents=True, exist_ok=True)
 
-    dev, ref_sources, model = train_building_model(
-        wall_imgs, wall_metas, texel_m, exclude_holdout=False
-    )
-    if model is not None:
-        torch.save(
-            {"state_dict": model.state_dict(), "texel_m": texel_m, "building": b.name},
-            out / "refine_net.pt",
-        )
-
-    done = complete_textures_neural(
-        wall_imgs, wall_metas, texel_m, model=model, ref_sources=ref_sources
-    )
+    ref_sources = reference_bank(wall_imgs, wall_metas, texel_m)
+    done = complete_textures_neural(wall_imgs, wall_metas, texel_m, ref_sources=ref_sources)
     roof = None
     if roof_tex is not None and getattr(roof_tex, "source", None) is not None:
         roof = neural_fill(
@@ -93,7 +80,6 @@ def build_building_neural(
             texel_m,
             kind="roof",
             ref_sources=ref_sources,
-            model=model,
         )
     fill = shares([sv for _, sv in done] + ([roof[1]] if roof else []))
 
@@ -135,10 +121,9 @@ def build_building_neural(
         (out / ts_name).write_text(json.dumps(ts, indent=1), encoding="utf-8")
 
     dt = time.time() - t0
-    dev_type = next(model.parameters()).device.type if model is not None else "cpu"
     b_name = tileset.get("extras", {}).get("name") or b.name
     summary = ", ".join(f"{NAMES[k]} {fill[NAMES[k]]:.0%}" for k in sorted(NAMES) if fill.get(NAMES[k], 0) > 0)
-    print(f"[neural] {b_name} ({b.name}) on {dev_type} in {dt:.1f}s -> {out / 'building.glb'}: {summary}")
+    print(f"[neural] {b_name} ({b.name}) in {dt:.1f}s -> {out / 'building.glb'}: {summary}")
     return {"building": b.name, "name": b_name, "seconds": round(dt, 2), "fill": fill}
 
 

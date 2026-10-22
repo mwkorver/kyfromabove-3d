@@ -52,11 +52,6 @@ overture = ["duckdb"]
 # mocked AWS (moto, with its server for the container test)
 cloud = ["aws-cdk-lib>=2.150", "constructs>=10", "moto[s3,sqs,dynamodb,events,server]>=5"]
 
-# the neural completed product (product 4: kyfromabove_3d.neural_fill,
-# scripts/build_neural.py, build_mesh.py --neural): PyTorch. Not in the cloud
-# image yet; the rest of the pipeline never imports it.
-neural = ["torch>=2.4"]
-
 [tool.setuptools.packages.find]
 where = ["src"]
 

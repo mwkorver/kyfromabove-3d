@@ -62,7 +62,7 @@ from kyfromabove_3d.lidar import LidarTileIndex, open_copc
 #: Matches scripts/fetch_overture_buildings.py. GERS ids are stable across
 #: releases but the geometry behind them is not, and every area and bearing here
 #: comes from that geometry.
-OVERTURE_RELEASE = "2026-08-19.0"
+OVERTURE_RELEASE = "2026-10-21.0"
 
 
 def load_candidates(path: Path):

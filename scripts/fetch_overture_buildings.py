@@ -34,7 +34,7 @@ import sys
 from pathlib import Path
 
 #: Same release as scripts/measure_case_complexity.py. Keep them together.
-OVERTURE_RELEASE = "2026-08-19.0"
+OVERTURE_RELEASE = "2026-10-21.0"
 OVERTURE_BUILDINGS = (
     f"s3://overturemaps-us-west-2/release/{OVERTURE_RELEASE}"
     "/theme=buildings/type=building/*"

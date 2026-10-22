@@ -44,7 +44,7 @@ from kyfromabove_3d.product1 import (_fit_seam, _one_patch, area_cloud_local, cu
                                      local_polygons_about, measure_heights, min_corner_deg, roof_returns,
                                      roof_step_split, roof_tiers, split_records)
 
-OVERTURE_RELEASE = "2026-08-19.0"
+OVERTURE_RELEASE = "2026-10-21.0"
 FLOOR_M = 3.5
 DEFAULT_HEIGHT_M = 6.0
 COLOURS = {"lidar": (185, 190, 180), "height": (190, 190, 185), "floors": (150, 165, 190), "default": (225, 150, 80)}

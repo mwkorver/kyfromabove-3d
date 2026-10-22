@@ -41,6 +41,9 @@ PLACES = [
     {"name": "Middletown", "lon": -85.539, "lat": 38.245, "ground_m": 189},              # N077E241
     {"name": "Simpsonville", "lon": -85.355, "lat": 38.222, "ground_m": 208},            # N079E251
     {"name": "Shelbyville", "lon": -85.2236, "lat": 38.2119, "ground_m": 193},           # N079E259, Main Street
+    {"name": "Covington", "lon": -84.5085, "lat": 39.0866, "ground_m": 120},             # N015E299, Madison Avenue
+    {"name": "Newport", "lon": -84.4950, "lat": 39.0905, "ground_m": 120},               # N015E300, Monmouth Street
+    {"name": "Lexington", "lon": -84.4970, "lat": 38.0465, "ground_m": 256},             # N091E301, Main Street
     {"name": "Somerset area (pilot)", "lon": -84.6908, "lat": 37.1364, "ground_m": 278},  # N158E291
     {"name": "Hazard (pilot)", "lon": -83.1777, "lat": 37.2365, "ground_m": 258},        # N148E378
 ]

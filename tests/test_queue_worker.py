@@ -136,3 +136,13 @@ def test_a_stop_request_returns_the_running_job_at_once(aws):
     assert stats["returned"] == 1 and time.time() - t0 < 20
     assert left(sqs, url) == 1                                            # back on the queue, not counted
     assert not list(store.list("runs/r1/attempts/"))
+
+
+def test_off_ec2_the_machine_type_is_none_and_asked_once(monkeypatch):
+    import kyfromabove_3d.queue_worker as qw
+
+    monkeypatch.setattr(qw, "IMDS", "http://127.0.0.1:9")          # nothing answers there
+    monkeypatch.setattr(qw, "_MACHINE", [])
+    assert qw.machine_type(timeout_s=0.2) is None and qw._MACHINE == [None]
+    monkeypatch.setattr(qw, "IMDS", "http://unused.invalid")
+    assert qw.machine_type() is None                                 # the first answer is kept

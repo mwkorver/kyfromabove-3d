@@ -148,10 +148,10 @@ def test_the_queue_run_is_spot_machines_on_a_queue_with_a_patient_dead_letter_qu
         "MinSize": "0", "MaxSize": "3", "MixedInstancesPolicy": assertions.Match.object_like({
             "InstancesDistribution": assertions.Match.object_like({
                 "OnDemandBaseCapacity": 0, "OnDemandPercentageAboveBaseCapacity": 0,
-                "SpotAllocationStrategy": "capacity-optimized"})})})
+                "SpotAllocationStrategy": "capacity-optimized-prioritized"})})})
     asg = next(iter(t.find_resources("AWS::AutoScaling::AutoScalingGroup").values()))["Properties"]
     types = [o["InstanceType"] for o in asg["MixedInstancesPolicy"]["LaunchTemplate"]["Overrides"]]
-    assert types == list(QUEUE_INSTANCES)
+    assert types == list(QUEUE_INSTANCES) and types[0] == "c8g.4xlarge"      # Graviton4 first, in order
     lt = next(iter(t.find_resources("AWS::EC2::LaunchTemplate").values()))
     ud = json.dumps(lt["Properties"]["LaunchTemplateData"]["UserData"])
     assert f"shutdown -h +{QUEUE_LIFETIME_MIN}" in ud and "scripts/queue_worker.py" in ud and "--run r1" in ud

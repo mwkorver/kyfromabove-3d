@@ -86,9 +86,12 @@ class TileStepStack(Stack):
 COG_CACHE_NGINX = "public.ecr.aws/nginx/nginx:1.27-alpine"
 
 
-#: The queue run's machines: Graviton, 16 processors, 32-64 GB, whichever a
-#: zone has Spot capacity for (capacity-optimized).
-QUEUE_INSTANCES = ("c8g.4xlarge", "c7g.4xlarge", "m8g.4xlarge", "m7g.4xlarge")
+#: The queue run's machines: Graviton, 16 processors, 32-64 GB, in order of
+#: preference -- Graviton4 first: on Spot it costs about what Graviton3 does
+#: an hour and does more work -- taken in that order where a zone has Spot
+#: capacity for it (capacity-optimized-prioritized); plain capacity-optimized
+#: ignored the order and chose c7g (cities1, 2026-10-22).
+QUEUE_INSTANCES = ("c8g.4xlarge", "m8g.4xlarge", "c7g.4xlarge", "m7g.4xlarge")
 QUEUE_MAX_PRICE = "0.45"
 #: A machine's hard end: however the run goes, none lives past this.
 QUEUE_LIFETIME_MIN = 760
@@ -202,7 +205,7 @@ class QueueRunStack(Stack):
                                            for t in QUEUE_INSTANCES],
                 instances_distribution=autoscaling.InstancesDistribution(
                     on_demand_base_capacity=0, on_demand_percentage_above_base_capacity=0,
-                    spot_allocation_strategy=autoscaling.SpotAllocationStrategy.CAPACITY_OPTIMIZED,
+                    spot_allocation_strategy=autoscaling.SpotAllocationStrategy.CAPACITY_OPTIMIZED_PRIORITIZED,
                     spot_max_price=QUEUE_MAX_PRICE)),
             # a deploy that changes the machines (a new image, a new script) replaces the
             # running ones: they kept the old image and took jobs it could not run (trial1:

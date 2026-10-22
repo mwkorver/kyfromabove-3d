@@ -66,6 +66,27 @@ def spot_notice(timeout_s: float = 1.0) -> bool:
         return False
 
 
+_MACHINE: List[Optional[str]] = []
+
+
+def machine_type(timeout_s: float = 1.0) -> Optional[str]:
+    """This machine's EC2 instance type (``c8g.4xlarge``), asked once; None
+    off EC2 or when the metadata service does not answer."""
+    import urllib.request
+
+    if not _MACHINE:
+        try:
+            req = urllib.request.Request(f"{IMDS}/latest/api/token", method="PUT",
+                                         headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"})
+            token = urllib.request.urlopen(req, timeout=timeout_s).read().decode()
+            req = urllib.request.Request(f"{IMDS}/latest/meta-data/instance-type",
+                                         headers={"X-aws-ec2-metadata-token": token})
+            _MACHINE.append(urllib.request.urlopen(req, timeout=timeout_s).read().decode())
+        except Exception:                                           # noqa: BLE001 (no IMDS, timeout)
+            _MACHINE.append(None)
+    return _MACHINE[0]
+
+
 def asg_protector(log: Callable = print, timeout_s: float = 1.0) -> Callable[[bool], None]:
     """``protect(on)`` for this machine in its Auto Scaling group (scale-in
     protection while it has jobs running); a no-op off EC2 or outside a group."""

@@ -189,6 +189,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
                            pull_piece, scene_cloud_for)
     from .coordinates import LocalCoordinateFrame
     from .pipeline import cut_crops_from_piece, fingerprint, run_main
+    from .queue_worker import machine_type
     from .sources_choice import index_for
 
     store, run, tile, gers = _store(), job.get("run", "run"), job["tile"], list(job["gers"])
@@ -252,6 +253,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
                 run_main("audit_building", ["--building", b])
                 ex = json.loads((b / "3dtiles_mesh" / "tileset.json").read_text(encoding="utf-8")).get("extras", {})
                 summary = {"gers": g, "tile": tile, "fingerprint": fp, "run": run, "seconds": round(time.time() - t, 1),
+                           "machine": machine_type(),                   # seconds by machine type (c8g vs c7g)
                            **{k: ex.get(k) for k in ("path", "triangles", "n_frames")}}
                 publish_building(b, summary, store)                     # building.json last: the checkpoint
                 built += 1

@@ -22,7 +22,8 @@ records, and built against their measured levels:
   8-16 nearby buildings built: their pieces and their neighbours' measured
   levels fetched, the LiDAR around them read once, then per building -- unless
   its fingerprint matches the one published -- the crops, the colourise, the
-  mesh and the completed product, the texture check (on a sample), the audit;
+  mesh, the completed product and the borrowed fill (product 4), the texture
+  check (on a sample), the audit;
   published to ``buildings/<gers>/``, ``building.json`` last (it holds the
   fingerprint: the checkpoint a later run, or another machine after a Spot
   interruption, skips by).
@@ -238,7 +239,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
                 t = time.time()
                 cut_crops_from_piece(b, log=lambda *a, **k: None)
                 cmd = ["--building", b, "--name", markers[g].get("name") or g, "--refresh", "--complete",
-                       "--dump-textures", "--neighbours", nb_path, "--neighbour-levels", work / "buildings"]
+                       "--neural", "--dump-textures", "--neighbours", nb_path, "--neighbour-levels", work / "buildings"]
                 if scene is not None:
                     cmd += ["--scene-cloud", scene]
                 r = run_main("build_mesh", cmd)
@@ -258,7 +259,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
                 _record_failure(store, run, g, f"build: {exc!r}")
                 failed += 1
             finally:
-                for sub in ("images", "validity_masks", "3dtiles_mesh", "3dtiles_complete"):
+                for sub in ("images", "validity_masks", "3dtiles_mesh", "3dtiles_complete", "3dtiles_neural"):
                     shutil.rmtree(b / sub, ignore_errors=True)
         return {"built": built, "skipped": skipped, "failed": failed, "seconds": round(time.time() - t0, 1)}
     finally:

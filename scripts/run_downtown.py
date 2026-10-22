@@ -182,7 +182,7 @@ def worker(args) -> int:
         if args.lidar_outline:
             cmd.append("--lidar-outline")
         if args.complete:
-            cmd.append("--complete")
+            cmd += ["--complete", "--neural"]
         t = time.time()
         from kyfromabove_3d.pipeline import run_main
         r = run_main("build_mesh", cmd[2:])           # in this process; the run's timeout covers the worker
@@ -409,6 +409,11 @@ def do_merge(out: Path, log=print) -> None:
             vout = out.parent / f"{out.name}_{variant}"
             merge(vout, out / "buildings", [], boxes if boxes.exists() else None, variant=variant)
         log(f"merged the completed product -> {out.parent / (out.name + '_complete')}")
+    if any((out / "buildings").glob("*/3dtiles_neural/tileset.json")):
+        for variant in ("neural", "neural_tint"):
+            vout = out.parent / f"{out.name}_{variant}"
+            merge(vout, out / "buildings", [], boxes if boxes.exists() else None, variant=variant)
+        log(f"merged the borrowed fill -> {out.parent / (out.name + '_neural')}")
     audit_summary(out, log=log)
 
 
@@ -574,7 +579,8 @@ def main() -> int:
                              "(a production run: 0.1)")
     common.add_argument("--no-audit", action="store_true", help="skip the audit after the mesh (audit_building.py)")
     common.add_argument("--complete", action="store_true",
-                        help="also build the completed product (unseen texels filled from each building's own facade)")
+                        help="also build the completed products: unseen texels filled from each face's own pattern (3) "
+                             "and borrowed from the building's best-matching seen walls (4)")
     common.add_argument("--no-prism-occluders", action="store_true",
                         help="texture with LiDAR-point occlusion alone (neighbours' facades mostly missing)")
     common.add_argument("--check-sheets", action="store_true", help="the check also draws texture_check.jpg")

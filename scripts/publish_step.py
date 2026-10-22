@@ -23,9 +23,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 #: The viewer's views, in its button order: Overture's own heights, the
-#: LiDAR heights (product 1), the measured meshes (2), the completed (3).
-PRODUCTS = ("overture", "boxes", "measured", "complete")
-TITLES = {"overture": "Overture", "boxes": "LiDAR heights", "measured": "Measured", "complete": "Completed"}
+#: LiDAR heights (product 1), the measured meshes (2), the completed (3),
+#: and the completed with unseen walls borrowed from the building's other
+#: seen walls (4; the completed where a building has none).
+PRODUCTS = ("overture", "boxes", "measured", "complete", "neural")
+TITLES = {"overture": "Overture", "boxes": "LiDAR heights", "measured": "Measured", "complete": "Completed",
+          "neural": "Borrowed fill"}
 DEFAULT_VIEW = "measured"
 #: The viewer's "fly to" buttons. From far away the tree shows only the big
 #: buildings (publish.GROUP_LEVELS); a button lands the camera 800 m from the

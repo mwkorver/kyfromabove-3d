@@ -8,6 +8,7 @@
 //   node build.mjs --tiles ../../outputs/downtown    # and local 3D Tiles at dist/tiles/downtown (a link)
 import { cpSync, rmSync, readFileSync, writeFileSync, mkdirSync, symlinkSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -18,8 +19,10 @@ cpSync(resolve(here, 'site'), dist, { recursive: true });
 cpSync(resolve(here, 'node_modules/geotiff/dist-browser/geotiff.js'), resolve(dist, 'geotiff.js'));
 
 // start the COG adapter (a service worker) before VC Map asks for any tile, and
-// show any tile it could not make in a line at the bottom of the page
+// show any tile it could not make in a line at the bottom of the page; the
+// oblique fill script is named by its contents so a browser never runs a stale copy
 const index = resolve(dist, 'index.html');
+const fillVersion = createHash('sha1').update(readFileSync(resolve(dist, 'oblique-fill.js'))).digest('hex').slice(0, 10);
 const register = `    <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js');
@@ -39,7 +42,7 @@ const register = `    <script>
         });
       }
     </script>
-    <script src="./oblique-fill.js"></script>
+    <script src="./oblique-fill.js?v=${fillVersion}"></script>
   </head>`;
 writeFileSync(index, readFileSync(index, 'utf8').replace('</head>', register));
 

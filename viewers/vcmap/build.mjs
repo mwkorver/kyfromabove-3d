@@ -17,10 +17,27 @@ cpSync(resolve(here, 'node_modules/@vcmap/ui/dist'), dist, { recursive: true });
 cpSync(resolve(here, 'site'), dist, { recursive: true });
 cpSync(resolve(here, 'node_modules/geotiff/dist-browser/geotiff.js'), resolve(dist, 'geotiff.js'));
 
-// start the COG adapter (a service worker) before VC Map asks for any tile
+// start the COG adapter (a service worker) before VC Map asks for any tile, and
+// show any tile it could not make in a line at the bottom of the page
 const index = resolve(dist, 'index.html');
 const register = `    <script>
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          const message = event.data && event.data.kyfaTileError;
+          if (!message) return;
+          let line = document.getElementById('kyfa-tile-error');
+          if (!line) {
+            line = document.createElement('div');
+            line.id = 'kyfa-tile-error';
+            line.style.cssText = 'position:fixed;left:8px;bottom:28px;z-index:9999;max-width:70vw;padding:4px 8px;'
+              + 'font:12px sans-serif;background:#fff3f3;color:#a00;border:1px solid #d99;border-radius:4px;';
+            line.onclick = () => line.remove();
+            document.body.appendChild(line);
+          }
+          line.textContent = 'Photo tile failed: ' + message + ' (click to hide)';
+        });
+      }
     </script>
   </head>`;
 writeFileSync(index, readFileSync(index, 'utf8').replace('</head>', register));

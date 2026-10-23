@@ -32,15 +32,35 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
+// The photo list (obl/<c>/cogs.json beside image.json) is kept in Cache Storage
+// once read: the browser stops an idle service worker and starts it afresh, and
+// the fresh one then needs no request to the (password-protected) site. A failed
+// read is not kept, so the next tile tries again.
+const LIST_CACHE = 'kyfa-obl-lists-v1';
+
+async function readList(url) {
+  const cache = await caches.open(LIST_CACHE);
+  const kept = await cache.match(url);
+  if (kept) return kept.json();
+  const r = await fetch(url, { credentials: 'include' });
+  if (!r.ok) throw new Error(`photo list ${url}: HTTP ${r.status}`);
+  await cache.put(url, r.clone());
+  return r.json();
+}
+
 function cogList(requestUrl, collection) {
   if (!lists.has(collection)) {
-    const url = new URL(`../../../cogs.json`, requestUrl).href; // obl/<c>/cogs.json beside image.json
-    lists.set(collection, fetch(url).then((r) => {
-      if (!r.ok) throw new Error(`${url}: ${r.status}`);
-      return r.json();
-    }));
+    const url = new URL(`../../../cogs.json`, requestUrl).href;
+    const p = readList(url);
+    p.catch(() => lists.delete(collection));
+    lists.set(collection, p);
   }
   return lists.get(collection);
+}
+
+// failures go to the open pages, which show them (see build.mjs)
+async function report(message) {
+  for (const client of await self.clients.matchAll()) client.postMessage({ kyfaTileError: message });
 }
 
 function openPhoto(url) {
@@ -67,41 +87,57 @@ function openPhoto(url) {
 }
 
 async function tile(requestUrl, collection, name, z, x, y) {
+  let cogs;
   try {
-    const cogs = await cogList(requestUrl, collection);
-    const url = cogs[name];
-    if (!url) return new Response('no such photo', { status: 404 });
-    const { tiff, W, H, levels } = await openPhoto(url);
-    // level z of VC Map's grid is overview (n - 1 - z): z = 0 the coarsest
-    const k = Math.max(0, Math.min(levels.length - 1, levels.length - 1 - z));
-    const r = 2 ** k; // full-resolution pixels per tile pixel at this level
-    const { w, h } = levels[k];
-    const sx = W / w, sy = H / h; // the overview's actual scale (r, give or take a rounding)
-    // the tile in full-resolution pixels, rows counted down from the top
-    const left = (x * TILE * r) / sx, right = ((x + 1) * TILE * r) / sx;
-    const top = (H - (y + 1) * TILE * r) / sy, bottom = (H - y * TILE * r) / sy;
-    const l = Math.max(0, Math.floor(left)), t = Math.max(0, Math.floor(top));
-    const rr = Math.min(w, Math.ceil(right)), b = Math.min(h, Math.ceil(bottom));
-    const canvas = new OffscreenCanvas(TILE, TILE);
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, TILE, TILE);
-    if (rr > l && b > t) {
-      const image = await tiff.getImage(k);
-      const rgb = await image.readRGB({ window: [l, t, rr, b], interleave: true });
-      const cw = rr - l, ch = b - t;
-      const rgba = new Uint8ClampedArray(cw * ch * 4);
-      for (let i = 0, j = 0; i < rgb.length; i += 3, j += 4) {
-        rgba[j] = rgb[i]; rgba[j + 1] = rgb[i + 1]; rgba[j + 2] = rgb[i + 2]; rgba[j + 3] = 255;
-      }
-      const src = new OffscreenCanvas(cw, ch);
-      src.getContext('2d').putImageData(new ImageData(rgba, cw, ch), 0, 0);
-      const fx = TILE / (right - left), fy = TILE / (bottom - top);
-      ctx.drawImage(src, (l - left) * fx, (t - top) * fy, cw * fx, ch * fy);
-    }
-    const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.88 });
-    return new Response(blob, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'max-age=86400' } });
+    cogs = await cogList(requestUrl, collection);
   } catch (err) {
-    return new Response(String(err), { status: 502 });
+    await report(String(err.message || err));
+    return new Response(String(err), { status: 503 });
   }
+  const url = cogs[name];
+  if (!url) return new Response('no such photo', { status: 404 });
+  try {
+    return await drawTile(url, z, x, y);
+  } catch {
+    photos.delete(url); // open the photo afresh and try once more
+    try {
+      return await drawTile(url, z, x, y);
+    } catch (err) {
+      await report(`${name} level ${z} tile ${x},${y}: ${err.message || err}`);
+      return new Response(String(err), { status: 502 });
+    }
+  }
+}
+
+async function drawTile(url, z, x, y) {
+  const { tiff, W, H, levels } = await openPhoto(url);
+  // level z of VC Map's grid is overview (n - 1 - z): z = 0 the coarsest
+  const k = Math.max(0, Math.min(levels.length - 1, levels.length - 1 - z));
+  const r = 2 ** k; // full-resolution pixels per tile pixel at this level
+  const { w, h } = levels[k];
+  const sx = W / w, sy = H / h; // the overview's actual scale (r, give or take a rounding)
+  // the tile in full-resolution pixels, rows counted down from the top
+  const left = (x * TILE * r) / sx, right = ((x + 1) * TILE * r) / sx;
+  const top = (H - (y + 1) * TILE * r) / sy, bottom = (H - y * TILE * r) / sy;
+  const l = Math.max(0, Math.floor(left)), t = Math.max(0, Math.floor(top));
+  const rr = Math.min(w, Math.ceil(right)), b = Math.min(h, Math.ceil(bottom));
+  const canvas = new OffscreenCanvas(TILE, TILE);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, TILE, TILE);
+  if (rr > l && b > t) {
+    const image = await tiff.getImage(k);
+    const rgb = await image.readRGB({ window: [l, t, rr, b], interleave: true });
+    const cw = rr - l, ch = b - t;
+    const rgba = new Uint8ClampedArray(cw * ch * 4);
+    for (let i = 0, j = 0; i < rgb.length; i += 3, j += 4) {
+      rgba[j] = rgb[i]; rgba[j + 1] = rgb[i + 1]; rgba[j + 2] = rgb[i + 2]; rgba[j + 3] = 255;
+    }
+    const src = new OffscreenCanvas(cw, ch);
+    src.getContext('2d').putImageData(new ImageData(rgba, cw, ch), 0, 0);
+    const fx = TILE / (right - left), fy = TILE / (bottom - top);
+    ctx.drawImage(src, (l - left) * fx, (t - top) * fy, cw * fx, ch * fy);
+  }
+  const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.88 });
+  return new Response(blob, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'max-age=86400' } });
 }

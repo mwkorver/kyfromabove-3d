@@ -22,8 +22,21 @@ const lists = new Map(); // collection -> Promise<{photo: COG url}>
 const photos = new Map(); // COG url -> Promise<{tiff, W, H, levels: [{w, h}]}> (most recent last)
 const MAX_OPEN = 300;
 
+// Finished tiles are kept in Cache Storage, so a place already looked at loads
+// at once on a later visit. Change the name when the drawing below changes; the
+// old store is then dropped. Kept to about MAX_TILES tiles (~60 KB each), the
+// oldest dropped first.
+const TILE_CACHE = 'kyfa-obl-tiles-v1';
+const MAX_TILES = 3000;
+let added = 0;
+
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('activate', (event) => event.waitUntil((async () => {
+  for (const name of await caches.keys()) {
+    if (name.startsWith('kyfa-obl-tiles-') && name !== TILE_CACHE) await caches.delete(name);
+  }
+  await self.clients.claim();
+})()));
 
 self.addEventListener('fetch', (event) => {
   const m = new URL(event.request.url).pathname.match(ROUTE);
@@ -87,6 +100,23 @@ function openPhoto(url) {
 }
 
 async function tile(requestUrl, collection, name, z, x, y) {
+  const cache = await caches.open(TILE_CACHE);
+  const kept = await cache.match(requestUrl);
+  if (kept) return kept;
+  const made = await makeTile(requestUrl, collection, name, z, x, y);
+  if (made.ok) {
+    await cache.put(requestUrl, made.clone());
+    if (++added % 100 === 0) await trim(cache);
+  }
+  return made;
+}
+
+async function trim(cache) {
+  const keys = await cache.keys(); // oldest first
+  for (const key of keys.slice(0, Math.max(0, keys.length - MAX_TILES))) await cache.delete(key);
+}
+
+async function makeTile(requestUrl, collection, name, z, x, y) {
   let cogs;
   try {
     cogs = await cogList(requestUrl, collection);

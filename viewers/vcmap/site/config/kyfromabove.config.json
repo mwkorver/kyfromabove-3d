@@ -1,0 +1,75 @@
+{
+  "name": "kyfromabove",
+  "_id": "kyfromabove",
+  "startingViewpointName": "downtownLouisville",
+  "startingMapName": "CesiumMap",
+  "startingObliqueCollectionName": "kyfa2024s1",
+  "projection": {
+    "epsg": "32616",
+    "proj4": "+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"
+  },
+  "maps": [
+    { "type": "OpenlayersMap", "name": "OpenlayersMap" },
+    { "type": "CesiumMap", "name": "CesiumMap", "maximumScreenSpaceError": 2, "fogEnabled": false },
+    {
+      "type": "ObliqueMap",
+      "name": "ObliqueMap",
+      "showObliqueImageName": true,
+      "obliqueImageNameTemplate": "KyFromAbove photo: {0}",
+      "maintainViewpointOnCollectionChange": true,
+      "fallbackToCurrentMap": true
+    }
+  ],
+  "layers": [
+    {
+      "type": "OpenStreetMapLayer",
+      "name": "osm",
+      "activeOnStartup": true,
+      "maxLevel": 19,
+      "properties": { "title": "OpenStreetMap" }
+    },
+    {
+      "type": "CesiumTilesetLayer",
+      "name": "measured",
+      "url": "tiles/downtown/tileset.json",
+      "activeOnStartup": true,
+      "screenSpaceError": 2,
+      "properties": { "title": "Downtown, measured (product 2)" }
+    }
+  ],
+  "viewpoints": [
+    {
+      "name": "downtownLouisville",
+      "type": "Viewpoint",
+      "groundPosition": [-85.7544, 38.2535, 106],
+      "distance": 1200,
+      "heading": 15,
+      "pitch": -40,
+      "roll": 0,
+      "animate": false,
+      "properties": { "title": "Downtown Louisville" }
+    }
+  ],
+  "obliqueCollections": [
+    {
+      "name": "kyfa2024s1",
+      "activeOnStartup": true,
+      "dataSets": [
+        {
+          "url": "obl/KY_KYAPED_2024_Season1_3IN/image.json",
+          "projection": {
+            "epsg": "32616",
+            "proj4": "+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"
+          }
+        }
+      ],
+      "properties": { "title": "KyFromAbove obliques, March 2024" }
+    }
+  ],
+  "contentTree": [
+    { "name": "base", "type": "SubContentTreeItem", "title": "Layers" },
+    { "name": "base.osm", "type": "LayerContentTreeItem", "layerName": "osm" },
+    { "name": "base.measured", "type": "LayerContentTreeItem", "layerName": "measured" },
+    { "name": "base.obliques", "type": "ObliqueCollectionContentTreeItem", "collectionName": "kyfa2024s1" }
+  ]
+}

@@ -128,3 +128,7 @@ outputs/one_tile/
 
 # the S3 orphan listing: regenerate with deploy/s3_orphans.py
 outputs/pilot/s3_orphans.txt
+
+# the VC Map oblique test: its installed packages and build
+viewers/vcmap/node_modules/
+viewers/vcmap/dist/

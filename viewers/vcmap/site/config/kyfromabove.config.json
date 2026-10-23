@@ -39,6 +39,24 @@
       }
     },
     {
+      "type": "WMSLayer",
+      "name": "naipDetail",
+      "url": "https://imagery.nationalmap.gov/arcgis/services/USGSNAIPImagery/ImageServer/WMSServer",
+      "layers": "USGSNAIPImagery:NaturalColor",
+      "version": "1.3.0",
+      "parameters": { "FORMAT": "image/jpeg", "TRANSPARENT": "false" },
+      "tilingSchema": "mercator",
+      "minLevel": 17,
+      "maxLevel": 18,
+      "minRenderingLevel": 16,
+      "zIndex": 1,
+      "activeOnStartup": true,
+      "properties": {
+        "title": "USGS NAIP imagery, close up",
+        "attributions": { "provider": "USGS The National Map: NAIP", "url": "https://www.usgs.gov/programs/national-geospatial-program/national-map" }
+      }
+    },
+    {
       "type": "OpenStreetMapLayer",
       "name": "osm",
       "activeOnStartup": false,
@@ -85,7 +103,7 @@
   ],
   "contentTree": [
     { "name": "base", "type": "SubContentTreeItem", "title": "Layers" },
-    { "name": "base.naip", "type": "LayerContentTreeItem", "layerName": "naip" },
+    { "name": "base.naip", "type": "LayerGroupContentTreeItem", "layerNames": ["naip", "naipDetail"], "title": "USGS NAIP imagery" },
     { "name": "base.osm", "type": "LayerContentTreeItem", "layerName": "osm" },
     { "name": "base.measured", "type": "LayerContentTreeItem", "layerName": "measured" },
     { "name": "base.obliques", "type": "ObliqueCollectionContentTreeItem", "collectionName": "kyfa2024s1" }

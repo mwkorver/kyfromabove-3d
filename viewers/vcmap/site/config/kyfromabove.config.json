@@ -10,7 +10,7 @@
   },
   "maps": [
     { "type": "OpenlayersMap", "name": "OpenlayersMap" },
-    { "type": "CesiumMap", "name": "CesiumMap", "maximumScreenSpaceError": 2, "fogEnabled": false },
+    { "type": "CesiumMap", "name": "CesiumMap", "maximumScreenSpaceError": 2, "fogEnabled": false, "preloadAncestors": true },
     {
       "type": "ObliqueMap",
       "name": "ObliqueMap",

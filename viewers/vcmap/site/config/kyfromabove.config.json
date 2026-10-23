@@ -17,6 +17,7 @@
       "showObliqueImageName": true,
       "obliqueImageNameTemplate": "KyFromAbove photo: {0}",
       "maintainViewpointOnCollectionChange": true,
+      "switchThreshold": 0.5,
       "fallbackToCurrentMap": true
     }
   ],

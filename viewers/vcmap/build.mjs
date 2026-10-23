@@ -39,6 +39,7 @@ const register = `    <script>
         });
       }
     </script>
+    <script src="./oblique-fill.js"></script>
   </head>`;
 writeFileSync(index, readFileSync(index, 'utf8').replace('</head>', register));
 

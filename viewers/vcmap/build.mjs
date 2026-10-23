@@ -30,4 +30,21 @@ if (i > 0) {
   mkdirSync(resolve(dist, 'tiles'), { recursive: true });
   symlinkSync(resolve(process.argv[i + 1]), resolve(dist, 'tiles/downtown'), 'dir');
 }
+
+// --cloud: the page served beside the viewer on CloudFront (/viewer/vcmap/):
+// the published statewide tree instead of local tiles, and the published
+// terrain under the 3D map and the oblique collection (ground heights)
+if (process.argv.includes('--cloud')) {
+  const file = resolve(dist, 'config/kyfromabove.config.json');
+  const cfg = JSON.parse(readFileSync(file, 'utf8'));
+  const measured = cfg.layers.find((l) => l.name === 'measured');
+  Object.assign(measured, { url: '/kentucky/measured/tileset.json', screenSpaceError: 16 });
+  measured.properties.title = 'Measured (product 2)';
+  cfg.layers.push({
+    type: 'TerrainLayer', name: 'terrain', url: '/terrain/', activeOnStartup: true,
+    requestVertexNormals: false, properties: { title: 'LiDAR ground' },
+  });
+  cfg.obliqueCollections.forEach((c) => c.dataSets.forEach((d) => { d.terrainProvider = { url: '/terrain/' }; }));
+  writeFileSync(file, JSON.stringify(cfg, null, 2));
+}
 console.log(`site -> ${dist}`);

@@ -7,6 +7,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -16,10 +18,18 @@ from kyfromabove_3d.pieces import phase2_grid                               # no
 from kyfromabove_3d.store import LocalStore                                 # noqa: E402
 
 
+def _grid():
+    """The real Phase 2 tile grid: in data/raw on the laptop, not in git (CI skips)."""
+    raw = ROOT / "data" / "raw"
+    if not (raw / "kyfromabove_phase2_pointcloud_5k_grid.gpkg").exists():
+        pytest.skip("the LiDAR tile grid is not on this machine")
+    return phase2_grid(raw)
+
+
 def test_the_box_holds_the_tiles_and_the_margin_around_them():
     from pyproj import Geod, Transformer
 
-    grid = phase2_grid(ROOT / "data" / "raw")
+    grid = _grid()
     tiles = ["N090E300", "N090E301", "N091E300"]
     lon0, lat0, lon1, lat1 = stage0_index.tiles_bbox(grid, tiles, 400.0)
     to_ll = Transformer.from_crs("EPSG:3857", "EPSG:4326", always_xy=True).transform
@@ -36,7 +46,7 @@ def test_the_tile_list_keeps_the_tiles_written_before(tmp_path, monkeypatch):
     store = LocalStore(tmp_path / "store")
     store.put_json("inputs/tiles.json", {"release": "old", "tiles": [{"tile": "N077E230", "owned": 5, "halo": 1},
                                                                      {"tile": "N090E300", "owned": 1, "halo": 0}]})
-    grid = phase2_grid(ROOT / "data" / "raw")
+    grid = _grid()
     c = grid[grid["tilename"] == "N090E300"].geometry.iloc[0].centroid
     from pyproj import Transformer
     lon, lat = Transformer.from_crs("EPSG:3857", "EPSG:4326", always_xy=True).transform(c.x, c.y)

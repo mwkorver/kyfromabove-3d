@@ -9,20 +9,25 @@ It runs completely without a Python backend server.
 ## Key Features
 
 1. **Dual-Pane Synchronized 3D Comparison**:
-   - Left: Photorealistic 3D textured mesh from Phase 2 LiDAR and aerial frames.
+   - Left: 3D textured mesh, its shape from the LiDAR and its colour from the aerial frames.
    - Right: Overture footprint boxes (with dynamic toggle between LiDAR-derived heights and Overture heights).
 2. **In-Browser Real-Time S3 Oblique Slicing (`geotiff.js`)**:
    - When a building is clicked, the viewer uses `geotiff.js` to perform **HTTP range requests directly against Kentucky's public S3 bucket** (`https://kyfromabove.s3.amazonaws.com`).
    - Only the specific sub-window pixels for the building are downloaded and decoded on the fly into an HTML `<canvas>`.
    - **Zero server and zero crop storage cost** on your hosting bucket!
 3. **Layer Options**:
-   - OpenStreetMap vector basemap.
+   - OpenStreetMap base map (the standard picture tiles).
    - **USGS National Map NAIP Imagery WMS** (`USGSNAIPImagery:NaturalColor`).
 4. **Interactive North Arrow**:
    - Real-time needle rotation tracking camera heading.
    - Click to smoothly animate camera to North-up (`heading: 0`).
 5. **Static Ground Elevation (DEM)**:
    - Drapes all tiles on a 100% static heightmap terrain derived from the LiDAR DEM (`data/terrain/`).
+
+**The data is not in the repository.** `data/` (frames, crops, terrain, building
+index) and `tilesets/` are written on your own machine by
+`scripts/export_s3_demo.py` (below); only the page, this README and the test
+server are checked in.
 
 ---
 
@@ -33,10 +38,10 @@ The viewer supports a **hybrid two-tier architecture** for oblique images:
 1. **Instant Static JPEG Tier (~5 ms)**:
    - Pre-cut JPEGs located in `data/crops/<gers>/<index>_1600.jpg` and `_320.jpg`.
    - When present, the browser loads these directly via static HTTP GET with zero decoding latency.
-   - 42 downtown buildings already have pre-cut crops cached.
+   - Written by `export_s3_demo.py --precut`; the author's last export had crops for 51 downtown buildings.
 
 2. **Cloud-Optimized GeoTIFF (COG) Live Slicing Tier (~50–150 ms)**:
-   - When static crops are absent, the viewer slices live from the Kentucky Phase 3 S3 COG bucket using `geotiff.js`.
+   - When static crops are absent, the viewer slices live from the 2024 oblique photos in KyFromAbove's public bucket (stored as Cloud-Optimized GeoTIFFs), using `geotiff.js`.
    - **TIFF Header Caching**: Header metadata is parsed exactly once per aerial exposure.
    - **Internal Overview Pyramid Matching**: Kentucky obliques have 5 downsampled overview levels (factors 2, 4, 8, 16, 32).
      - **Thumbnails** (`maxPx = 200`): Select overview factor 16 or 32, reducing tile reads from 49 tiles down to **1 single tile (~20 KB)**!

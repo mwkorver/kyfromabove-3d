@@ -7,8 +7,9 @@
 > **Public prototype, released under [MIT](LICENSE): use, fork, and adapt it
 > freely.** It is provided as-is, with no support or active maintenance; issues
 > and pull requests are not monitored, so please fork rather than wait on
-> changes here. The pilot covers four areas around Louisville, not all of
-> Kentucky.
+> changes here. It has been run for parts of Kentucky (Louisville and the
+> towns east of it, Covington and Newport, Lexington, and two small pilot
+> areas near Hazard and Somerset), not the whole state.
 
 **Every building in Kentucky in 3D, from the state's own open data.** The
 shape of each building comes from KyFromAbove's LiDAR, its colour from
@@ -29,7 +30,7 @@ nothing here is endorsed by it.
 
 ## What it makes
 
-The same buildings, four ways. The viewer has a button for each, so you can
+The same buildings, five ways. The viewer has a button for each, so you can
 switch between them in place and see what each step adds:
 
 | View | Shape | Colour |
@@ -38,6 +39,7 @@ switch between them in place and see what each step adds:
 | **LiDAR heights** (product 1) | the same footprint, pushed up to the height the LiDAR measured | plain grey |
 | **Measured** (product 2) | walls and roof from the LiDAR | from the aerial frames, only where a frame actually saw the surface |
 | **Completed** (product 3) | the same as Measured | what no frame saw is filled in, from the same building's own frames only, and labelled as filled |
+| **Borrowed fill** (product 4) | the same as Measured | what no frame saw is filled with patches copied from walls of the same building that the frames did see, matched to the hole's light; so far only in Covington, Newport and Lexington |
 
 Nothing is invented from outside the building's own KyFromAbove data: no
 internet photos, no generic textures. Clicking a building says which LiDAR
@@ -68,19 +70,22 @@ demo) to a CesiumJS page in [`viewer/`](viewer/). The cloud setup, the costs
 measured along the way, and everything that went wrong are in
 [`docs/CLOUD.md`](docs/CLOUD.md).
 
-## Where it stands (September 2026)
+## Where it stands (October 2026)
 
-A pilot ran every step end to end in AWS:
+Every step has run end to end in AWS:
 
-- **9,252 buildings built as textured meshes** in four areas: downtown
-  Louisville, the St. Matthews suburb, Hazard in the eastern hills, and a
-  rural edge near Somerset.
-- **315,970 buildings as boxes** across the 255 LiDAR tiles around
-  Louisville, so the view from far away has real content.
-- **Terrain** under all of it, and the viewer with its four views.
-- **Total AWS cost: $6.73.**
+- **About 75,000 buildings built as textured meshes**: downtown Louisville
+  and the towns east of it (St. Matthews, Middletown, Simpsonville,
+  Shelbyville), Covington and Newport, downtown Lexington, and two small
+  pilot areas, Hazard in the eastern hills and a rural edge near Somerset.
+- **368,456 buildings as boxes** across 302 LiDAR tiles, so the view from
+  far away has real content.
+- **Terrain** under all of it, and the viewer with its five views.
+- **Total AWS cost so far: about $45** (August to October 2026, everything
+  in the account, tax included): about $16 of early trials on Lambda before
+  the move to EC2 Spot machines, $11 of Spot machines, $14 of storage.
 
-What it showed:
+What the first pilot (four areas, September 2026) showed:
 
 - Buildings sit on the ground: at 10 buildings across the four areas, the
   typical gap between a building's base and the terrain is under 0.2 m.
@@ -90,15 +95,15 @@ What it showed:
   The textured files are the next to slim down.
 
 For all of Kentucky (2.79 million Overture buildings), the building step,
-the expensive one, is estimated at about $430 on Spot machines. Overture
+the expensive one, is estimated at about $450 on Spot machines. Overture
 lists about 5.3 million buildings in a rectangle drawn around Kentucky, but
 that rectangle takes in parts of the neighbouring states; the 2.79 million
 are the ones on Kentucky's own LiDAR tiles.
 
 ## Status and limits
 
-- A prototype: it ran end to end for four areas around Louisville, not for the
-  whole state. The statewide figures above are estimates, not a run.
+- A prototype: it ran end to end for the areas above, not for the whole
+  state. The statewide figures above are estimates, not a run.
 - The live demo is behind a password and is not public. To see it, run the
   [one-tile example](#one-tile-on-a-laptop) below, or read the figures here.
 - Built and tested on one laptop (macOS) and one AWS account. Nothing here has
@@ -169,7 +174,7 @@ PROJ on first use. Without them, PROJ silently places a building 1.2 m or
 pytest -q
 ```
 
-About 320 tests, a minute, no network needed.
+About 430 tests, a minute or two, no network needed.
 
 ### One tile on a laptop
 
@@ -198,13 +203,14 @@ jobs from it, the same code as on the laptop), the tile step as a Lambda
 
 Before deploying your own copy: the bucket name `kyfromabove-3d` in the code
 and docs is the author's and bucket names are global, so change it; the Spot
-machines have a price ceiling and a 12-hour lifetime but no spending cap, so
+machines have a price ceiling and a lifetime (no new jobs after 10 hours,
+shut down at 12 hours 40 minutes) but no spending cap, so
 deploy the budget stack too (`docs/CLOUD.md`, "Watching the spend"); and a deployed viewer is public unless the password is switched on. See
 [SECURITY.md](SECURITY.md).
 
 ### Checking a change
 
-A change to the meshing or colouring code is checked against 19 buildings
+A change to the meshing or colouring code is checked against 10 buildings
 that have broken before, without looking at them:
 
 ```bash
@@ -219,7 +225,7 @@ It fails, naming the building and the measure, if anything got worse
 | Document | Covers |
 |---|---|
 | [`docs/CLOUD.md`](docs/CLOUD.md) | The pipeline in AWS, step by step: what each step costs, the pilot, the bugs it found, serving the views |
-| [`docs/PRODUCTS.md`](docs/PRODUCTS.md) | The three products: what is measured, what is inferred, what is invented and how it is labelled |
+| [`docs/PRODUCTS.md`](docs/PRODUCTS.md) | Products 1 to 3: what is measured, what is inferred, what is invented and how it is labelled |
 | [`docs/BUILDING_MESH.md`](docs/BUILDING_MESH.md) | How a building becomes a textured mesh: wall bands, curved walls, the roof, textures |
 | [`docs/AUDIT.md`](docs/AUDIT.md) | Checking a code change against the buildings that have broken before |
 | [`docs/DOWNTOWN_RUN.md`](docs/DOWNTOWN_RUN.md) | Every footprint of downtown Louisville, built as a batch on a laptop |
@@ -246,6 +252,7 @@ src/kyfromabove_3d/
   colourise/           a building's points coloured from the frames: occlusion, colour, extra wall points, levels
   mesh/                the mesh: walls, roof, textures, party walls, and the glTF and 3D Tiles it is written as
   facade_fill.py       the completed product: fill what no frame saw, from the building itself
+  neural_fill.py       borrowed fill (product 4): fill it with patches from the building's seen walls
   publish.py           step 4: a tile's buildings as batched 3D Tiles, and the statewide tree
   terrain.py           the ground under the buildings, as the viewer's terrain
   store.py             where a step's results go: a folder, or S3
@@ -265,8 +272,9 @@ scripts/
   wall_match.py        how far back a wall stands, by matching the frames that see it
   ...                  surveys, diagnostics, the downtown batch run
 deploy/                the AWS stacks (CDK), the Lambda handlers, the runners, cost models
-viewer/index.html      the published viewer (CesiumJS, four views)
-tools/                 local viewer pages: tiles, compare, point cloud
+viewer/index.html      the published viewer (CesiumJS, five views)
+viewers/s3_compare/    a side-by-side compare page that needs no server (see its README)
+tools/                 local viewer pages: tiles, compare, point cloud, facade atlas
 configs/               the landmark buildings, the audit's reference set, per-building configs
 tests/                 no network needed
 docs/                  the documents above, and their figures

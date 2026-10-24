@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           enable-cache: true
       # the locked versions (uv.lock), the same the laptop and the cloud image run
       - run: uv sync --locked --extra overture --extra cloud

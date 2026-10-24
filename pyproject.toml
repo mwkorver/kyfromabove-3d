@@ -7,11 +7,11 @@ name = "kyfromabove-3d"
 version = "0.1.0"
 description = "Kentucky in 3D from KyFromAbove: building meshes from the LiDAR and aerial frames, on Overture footprints"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 classifiers = [
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: GIS",
 ]
 dependencies = [
@@ -40,7 +40,7 @@ dependencies = [
 # stages.overture_boxes): the buildings theme is 257 GiB, so a bbox query
 # against the remote files is the only practical route. It also writes the map
 # file of the published tiles (tile_index), with its spatial extension. Only
-# the laptop steps import it, lazily; the cloud image does not carry it yet.
+# the laptop steps and the cloud's index job import it, lazily.
 # The Kentucky attribute-coverage measurement it made:
 #
 #   Overture 2026-08-19.0, Kentucky bbox, 5,294,866 buildings

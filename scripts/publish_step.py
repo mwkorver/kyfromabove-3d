@@ -143,6 +143,8 @@ def main() -> int:
     ap.add_argument("--terrain", action="store_true")
     ap.add_argument("--terrain-max-level", type=int, default=15)
     ap.add_argument("--viewer", action="store_true")
+    ap.add_argument("--tile-index", action="store_true",
+                    help="the map file of the tiles, kentucky/tiles.parquet (every product, the review copies too)")
     ap.add_argument("--start", type=float, nargs=3, default=(-85.76, 38.24, 12000.0), metavar=("LON", "LAT", "HEIGHT"))
     ap.add_argument("--raw", type=Path, default=ROOT / "data" / "raw")
     args = ap.parse_args()
@@ -171,6 +173,13 @@ def main() -> int:
         publish_trees(out, grid, args.products, tiles=tiles or None)
     if args.terrain:
         terrain(tiles, src, out, grid, args.terrain_max_level)
+    if args.tile_index:
+        import tempfile
+
+        from kyfromabove_3d.tile_index import publish_tile_index
+
+        with tempfile.TemporaryDirectory() as work:              # every tile in the store, not only --tiles
+            publish_tile_index(out, grid, list(TITLES), Path(work))
     if args.viewer:
         lon, lat, h = args.start
         viewer(out, {"lon": lon, "lat": lat, "height": h, "heading": 15, "pitch": -40})

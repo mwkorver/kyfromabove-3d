@@ -59,7 +59,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-import wall_visibility as wv  # noqa: E402
+from kyfromabove_3d.stages import wall_visibility as wv  # noqa: E402
 
 from kyfromabove_3d.wall_match import (  # noqa: E402
     choose_cut,

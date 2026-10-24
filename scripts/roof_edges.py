@@ -48,7 +48,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import face_match as fm  # noqa: E402
-import wall_visibility as wv  # noqa: E402
+from kyfromabove_3d.stages import wall_visibility as wv  # noqa: E402
 
 from kyfromabove_3d.wall_match import bilinear_gray  # noqa: E402
 

@@ -38,12 +38,6 @@ from typing import Any, Callable, Dict, Optional, Sequence
 MEASURED_LEVELS = "levels_measured.json"
 
 
-def scripts_dir() -> Path:
-    """The pipeline's scripts: the repository's, or in the image SCRIPTS_DIR."""
-    import os
-    return Path(os.environ.get("SCRIPTS_DIR") or Path(__file__).resolve().parents[2] / "scripts")
-
-
 @dataclass
 class Area:
     """What every building of a run shares: the footprints (the neighbours,
@@ -71,17 +65,11 @@ def write_measured_levels(bdir: Path, levels) -> Path:
 def measure(rec: Dict[str, Any], bdir: Path, area: Area, log: Callable = print) -> Dict[str, Any]:
     """Phase 1 for one building (see the module's docstring). Returns what
     it found, for the run's state."""
-    import sys
-
     from .classify import classify_building
     from .pieces import frames_record
     from .prepare import prepare_piece
     from .settings import resolve
-
-    scripts = scripts_dir()
-    if str(scripts) not in sys.path:
-        sys.path.insert(0, str(scripts))
-    import lidar_outline
+    from .stages import lidar_outline
     from .colourise.levels import ColouriseFailure, footprint_and_levels
 
     bdir = Path(bdir)
@@ -137,10 +125,6 @@ def cut_crops_from_piece(bdir: Path, log: Callable = print) -> Dict[str, Any]:
 
 # ------------------------------------------------------------------ the fingerprint
 
-#: what the build is made of besides the package: the scripts the build phase
-#: runs, and the classes' settings
-_CODE = ("colorize_building.py", "build_mesh.py", "check_building.py", "audit_building.py", "lidar_outline.py",
-         "wall_visibility.py")
 #: the measure phase's files a building is built from
 _MEASURED = ("coordinates.json", "footprint.json", "clip.json", "check_features.json", "frame_coverage.csv",
              "frames.json", "building_class.json", "footprint_lidar.json", MEASURED_LEVELS)
@@ -149,18 +133,18 @@ _code_version: Optional[str] = None
 
 def code_files():
     """(name, path) of every file :func:`code_version` digests: the package's
-    modules, its subpackages' too (features/, mesh/, colourise/, each by its
-    path in the package), the build's scripts and the class settings."""
+    modules, its subpackages' too (features/, mesh/, colourise/, stages/,
+    each by its path in the package) and the class settings."""
     from .settings import CLASS_CONFIG
     pkg = Path(__file__).resolve().parent
     out = [(f.relative_to(pkg).as_posix(), f) for f in sorted(pkg.rglob("*.py"))]
-    out += [(f.name, f) for f in [scripts_dir() / c for c in _CODE] + [CLASS_CONFIG] if f.exists()]
+    out += [(f.name, f) for f in [CLASS_CONFIG] if f.exists()]
     return out
 
 
 def code_version() -> str:
     """A digest of the code a building is built with: the package and the
-    build's scripts and class settings, by content (no git needed, so the
+    build's steps and class settings, by content (no git needed, so the
     same in a container)."""
     global _code_version
     if _code_version is None:
@@ -213,7 +197,7 @@ def fingerprint(bdir: Path, buildings_dir: Path, radius_m: float = 250.0) -> str
 # ------------------------------------------------------------------ the stages in one process
 
 def run_main(script: str, argv) -> SimpleNamespace:
-    """A stage's ``main`` (scripts/<script>.py) called in this process, as
+    """A step's ``main`` (``kyfromabove_3d.stages.<script>``) called in this process, as
     if it ran on its own: its printed log captured, an exception or an exit
     a non-zero return code. Returns (returncode, stdout) as subprocess.run
     does. One Python start per building instead of one per stage -- the
@@ -221,14 +205,10 @@ def run_main(script: str, argv) -> SimpleNamespace:
     import contextlib
     import importlib
     import io
-    import sys
     import traceback
     from types import SimpleNamespace
 
-    scripts = scripts_dir()
-    if str(scripts) not in sys.path:
-        sys.path.insert(0, str(scripts))
-    mod = importlib.import_module(script)
+    mod = importlib.import_module(f"kyfromabove_3d.stages.{script}")
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         try:

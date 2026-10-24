@@ -102,7 +102,7 @@ def building_tileset(d: Path, variant: str | None) -> Path | None:
 
 def merge(out: Path, buildings_dir: Path, extra: list[Path], boxes: Path | None, cell_m: float = 150.0,
           variant: str | None = None) -> dict:
-    from build_mesh import enu_transform
+    from kyfromabove_3d.stages.build_mesh import enu_transform
 
     out.mkdir(parents=True, exist_ok=True)
     if not (out / "coordinates.json").exists():               # a product merged beside the downtown's

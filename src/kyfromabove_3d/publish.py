@@ -31,7 +31,6 @@ import hashlib
 import io
 import json
 import struct
-import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
@@ -68,13 +67,7 @@ GLTF_TO_ZUP = np.array([[1.0, 0, 0, 0], [0, 0, -1.0, 0], [0, 1.0, 0, 0], [0, 0, 
 
 def _scripts():
     """build_mesh.py's writer and packer, and overture_boxes.py's extrusion."""
-    from .pipeline import scripts_dir
-
-    scripts = scripts_dir()
-    if str(scripts) not in sys.path:
-        sys.path.insert(0, str(scripts))
-    import build_mesh
-    import overture_boxes
+    from .stages import build_mesh, overture_boxes
 
     return build_mesh, overture_boxes
 

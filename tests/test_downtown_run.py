@@ -106,7 +106,7 @@ def test_select_cameras_caps_per_head_and_relaxes_the_corner_test(monkeypatch):
 
 
 def test_edge_top_z_reads_the_roof_beside_the_edge_not_the_tower():
-    from build_mesh import edge_top_z
+    from kyfromabove_3d.stages.build_mesh import edge_top_z
 
     xs = np.arange(0.5, 40, 1.0); ys = np.arange(0.5, 20, 1.0)
     X, Y = np.meshgrid(xs, ys)
@@ -117,7 +117,7 @@ def test_edge_top_z_reads_the_roof_beside_the_edge_not_the_tower():
 
 
 def test_party_edges_are_the_ones_along_a_neighbour():
-    from build_mesh import party_edges
+    from kyfromabove_3d.stages.build_mesh import party_edges
     from kyfromabove_3d.features import wall_planes
 
     ring = np.array([[0.0, 0.0], [10.0, 0.0], [10.0, 10.0], [0.0, 10.0]])
@@ -129,7 +129,7 @@ def test_party_edges_are_the_ones_along_a_neighbour():
     (s0, s1, top), = party[east[0]]
     assert abs(s0) < 0.6 and abs(s1 - 10.0) < 0.6 and top is None      # the whole edge; no height known
     # a tall neighbour on the south half of the east edge, a low one on the north half
-    from build_mesh import party_steps
+    from kyfromabove_3d.stages.build_mesh import party_steps
     tall = Polygon([(10.0, 0.0), (20.0, 0.0), (20.0, 5.0), (10.0, 5.0)])
     low = Polygon([(10.0, 5.0), (20.0, 5.0), (20.0, 10.0), (10.0, 10.0)])
     party = party_edges(ring, [tall, low], faces, tops=[12.0, 4.0])
@@ -167,7 +167,7 @@ def test_split_parents_are_marked_and_left_out_of_the_merge(tmp_path):
 
 
 def test_atlas_packs_images_and_maps_uv_back_onto_them():
-    from build_mesh import TextureAtlas
+    from kyfromabove_3d.stages.build_mesh import TextureAtlas
 
     atlas = TextureAtlas(page_px=64, gap_px=0)
     a = np.full((10, 20, 3), 10, dtype=np.uint8); b = np.full((30, 30, 3), 200, dtype=np.uint8)
@@ -192,7 +192,7 @@ def test_merge_places_each_building_relative_to_the_downtown_root(tmp_path):
     (out / "coordinates.json").write_text(json.dumps({"origin_source_xyz": [4919402.0, 3980509.0, 460.0]}))
     b = out / "buildings" / "g1" / "3dtiles_mesh"; b.mkdir(parents=True)
     (b / "building.glb").write_bytes(b"glTF" + bytes(20))
-    from build_mesh import enu_transform
+    from kyfromabove_3d.stages.build_mesh import enu_transform
     t_b, _ = enu_transform({"origin_source_xyz": [4919500.0, 3980600.0, 458.0]})
     (b / "tileset.json").write_text(json.dumps({
         "root": {"transform": t_b, "boundingVolume": {"sphere": [1.0, 2.0, 10.0, 25.0]}, "content": {"uri": "building.glb"}},
@@ -235,7 +235,7 @@ def test_merge_refuses_a_building_placed_at_the_wrong_height(tmp_path):
     (out / "coordinates.json").write_text(json.dumps({"origin_source_xyz": [4919402.0, 3980509.0, 460.0]}))
     b = out / "buildings" / "g1" / "3dtiles_mesh"; b.mkdir(parents=True)
     (b / "building.glb").write_bytes(b"glTF" + bytes(20))
-    from build_mesh import enu_transform
+    from kyfromabove_3d.stages.build_mesh import enu_transform
     t_b, _ = enu_transform({"origin_source_xyz": [4919500.0, 3980600.0, 458.0]})
     # lift the building 34 m: the signature of a rebuild without the geoid
     M = np.array(t_b).reshape(4, 4).T
@@ -258,7 +258,7 @@ def _two_height_cloud(rng, low_h, high_h, x_cut=20.0, w=40.0, d=20.0, density=6)
 
 
 def test_roof_step_split_finds_two_buildings_side_by_side_but_not_a_tower_on_a_podium():
-    from overture_boxes import roof_step_split
+    from kyfromabove_3d.stages.overture_boxes import roof_step_split
 
     rng = np.random.default_rng(3)
     poly = Polygon([(0, 0), (40, 0), (40, 20), (0, 20)])
@@ -287,7 +287,7 @@ def _tiered_cloud(rng, heights, cuts, w=60.0, d=20.0, density=6):
 
 def test_three_roof_heights_in_a_row_are_three_buildings():
     """39a33bd6's case: one outline, three roofs stepping down along it."""
-    from overture_boxes import cut_into_tiers, roof_tiers
+    from kyfromabove_3d.stages.overture_boxes import cut_into_tiers, roof_tiers
 
     rng = np.random.default_rng(5)
     poly = Polygon([(0, 0), (60, 0), (60, 20), (0, 20)])
@@ -304,7 +304,7 @@ def test_three_roof_heights_in_a_row_are_three_buildings():
 
 
 def test_two_roof_heights_are_still_two_buildings_and_a_tower_on_a_podium_none():
-    from overture_boxes import cut_into_tiers, roof_tiers
+    from kyfromabove_3d.stages.overture_boxes import cut_into_tiers, roof_tiers
 
     rng = np.random.default_rng(6)
     poly = Polygon([(0, 0), (40, 0), (40, 20), (0, 20)])
@@ -322,7 +322,7 @@ def test_two_roof_heights_are_still_two_buildings_and_a_tower_on_a_podium_none()
 
 def test_a_cut_that_leaves_a_sliver_is_refused():
     """A seam running along the building from one corner, as 39a33bd6's did."""
-    from overture_boxes import cut_into_tiers, min_corner_deg
+    from kyfromabove_3d.stages.overture_boxes import cut_into_tiers, min_corner_deg
 
     poly = Polygon([(0, 0), (60, 0), (60, 20), (0, 20)])
     assert min_corner_deg(poly) == pytest.approx(90.0)
@@ -340,7 +340,7 @@ def test_a_cut_that_leaves_a_sliver_is_refused():
 def test_roof_height_is_measured_inside_the_edge_where_a_neighbours_wall_spills():
     """9947f2b0's case: a 15 m roof, and a 110 m neighbour's facade returns in a
     30 cm strip along one edge of the outline."""
-    from overture_boxes import roof_returns
+    from kyfromabove_3d.stages.overture_boxes import roof_returns
 
     rng = np.random.default_rng(8)
     poly = Polygon([(0, 0), (40, 0), (40, 20), (0, 20)])

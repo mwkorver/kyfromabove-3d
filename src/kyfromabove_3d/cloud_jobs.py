@@ -106,12 +106,7 @@ def measure_job(job: Dict[str, Any]) -> Dict[str, Any]:
     from .classify import classify_building
     from .settings import resolve
 
-    import sys
-    from .pipeline import scripts_dir
-    scripts = scripts_dir()
-    if str(scripts) not in sys.path:
-        sys.path.insert(0, str(scripts))
-    import lidar_outline
+    from .stages import lidar_outline
     from .colourise.levels import ColouriseFailure, footprint_and_levels
 
     store, run, tile = _store(), job.get("run", "run"), job["tile"]
@@ -271,13 +266,7 @@ def build_job(job: Dict[str, Any]) -> Dict[str, Any]:
 # ------------------------------------------------------------------ publish
 
 def _publish_step():
-    import sys
-
-    from .pipeline import scripts_dir
-    scripts = scripts_dir()
-    if str(scripts) not in sys.path:
-        sys.path.insert(0, str(scripts))
-    import publish_step
+    from .stages import publish_step
     return publish_step
 
 

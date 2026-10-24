@@ -15,8 +15,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import register_video as rv  # noqa: E402
-import render_flyaround as rf  # noqa: E402
+from kyfromabove_3d.stages import register_video as rv  # noqa: E402
+from kyfromabove_3d.stages import render_flyaround as rf  # noqa: E402
 
 cv2 = pytest.importorskip("cv2")
 

@@ -58,7 +58,8 @@ def test_defaults_then_class_then_command_line(tmp_path):
 
 @pytest.mark.parametrize("script, stage", [("colorize_building", S.ColouriseSettings), ("build_mesh", S.MeshSettings)])
 def test_a_scripts_defaults_are_the_settings_defaults(script, stage):
-    mod = __import__(script)
+    import importlib
+    mod = importlib.import_module(f"kyfromabove_3d.stages.{script}")
     args = mod.parser().parse_args(["--building", "x"])
     got = mod.settings_from_args(args)
     assert got == stage(), {f.name: (getattr(got, f.name), getattr(stage(), f.name))
@@ -66,8 +67,8 @@ def test_a_scripts_defaults_are_the_settings_defaults(script, stage):
 
 
 def test_the_ab_switches_reach_their_settings():
-    import build_mesh
-    import colorize_building
+    from kyfromabove_3d.stages import build_mesh
+    from kyfromabove_3d.stages import colorize_building
     m = build_mesh.settings_from_args(build_mesh.parser().parse_args(
         ["--building", "x", "--no-wall-cap", "--no-roof-tidy"]))
     assert (m.wall_cap, m.roof_tidy) == (False, False)

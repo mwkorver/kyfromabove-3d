@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-import publish_step                                                         # noqa: E402
+from kyfromabove_3d.stages import publish_step                              # noqa: E402
 
 from kyfromabove_3d.store import LocalStore                                # noqa: E402
 

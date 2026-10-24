@@ -80,7 +80,7 @@ def _deck_scene(deck: bool):
     stand-in with the identity transform."""
     import types
 
-    import render_flyaround as rf
+    from kyfromabove_3d.stages import render_flyaround as rf
 
     from kyfromabove_3d.features import wall_planes
     pl = wall_planes(np.array([[0.0, 0.0], [60.0, 0.0], [60.0, 30.0], [0.0, 30.0]]), z_lo=0.0, z_hi=20.0)[0]

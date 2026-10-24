@@ -38,7 +38,7 @@ def test_a_matched_band_is_never_mirrored():
 
 
 def test_match_profiles_finds_a_wall_behind_its_footprint_edge():
-    import render_flyaround as rf
+    from kyfromabove_3d.stages import render_flyaround as rf
 
     from kyfromabove_3d.features import FaceBand, wall_planes
     from kyfromabove_3d.wall_match import match_profiles
@@ -77,7 +77,7 @@ def test_match_profiles_finds_a_wall_behind_its_footprint_edge():
 
 
 def test_a_matched_band_moved_in_is_closed_at_its_corners():
-    import build_mesh as bm
+    from kyfromabove_3d.stages import build_mesh as bm
 
     from kyfromabove_3d.features import FaceBand, wall_planes
 

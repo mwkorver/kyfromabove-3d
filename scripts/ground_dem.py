@@ -38,8 +38,8 @@ def build(footprints: Path, frame: Path, out: Path, cell_m: float = 2.0, resolut
     from scipy.ndimage import distance_transform_edt, median_filter
     from scipy.stats import binned_statistic_2d
 
-    from build_mesh import enu_transform
-    from overture_boxes import area_cloud
+    from kyfromabove_3d.stages.build_mesh import enu_transform
+    from kyfromabove_3d.stages.overture_boxes import area_cloud
 
     recs = json.loads(footprints.read_text(encoding="utf-8"))["buildings"]
     _, xyz, cls, ox, oy = area_cloud(recs, frame, resolution_m)

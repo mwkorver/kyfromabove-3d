@@ -16,8 +16,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from build_mesh import GlbWriter                                            # noqa: E402
-import render_flyaround as rf                                                # noqa: E402
+from kyfromabove_3d.stages.build_mesh import GlbWriter                                            # noqa: E402
+from kyfromabove_3d.stages import render_flyaround as rf                                                # noqa: E402
 
 WALL_L, WALL_H = 20.0, 10.0
 

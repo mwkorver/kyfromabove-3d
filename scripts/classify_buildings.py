@@ -189,7 +189,7 @@ def audit_one(job) -> dict:
     LiDAR solid within its footprint), with its wall area for scale."""
     d, outline = job
     sys.path.insert(0, str(ROOT / "scripts"))
-    from audit_building import audit
+    from kyfromabove_3d.stages.audit_building import audit
     try:
         r = audit(d, outline=outline)
     except Exception as exc:                                    # noqa: BLE001

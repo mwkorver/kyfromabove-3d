@@ -52,7 +52,7 @@ def building_dir(b: dict, buildings: Path = BUILDINGS) -> Path:
 def current(cfg: dict, buildings: Path = BUILDINGS, fresh: bool = False) -> dict:
     """The set's audits as they are on disk (auditing any that has none, or
     all with ``fresh``): {id: audit record}."""
-    from audit_building import audit
+    from kyfromabove_3d.stages.audit_building import audit
 
     out = {}
     for b in cfg["buildings"]:
@@ -262,7 +262,7 @@ def main() -> int:
     if args.action == "snapshot":
         # every reference building audited now, against the outline asked for, into --to (the building's own
         # audit.json is left alone), so two builds can be compared against the same LiDAR solid
-        from audit_building import audit
+        from kyfromabove_3d.stages.audit_building import audit
         args.to.mkdir(parents=True, exist_ok=True)
         for b in cfg["buildings"]:
             d = building_dir(b)

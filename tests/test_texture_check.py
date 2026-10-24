@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "src"))
 
-from build_mesh import GlbWriter                                            # noqa: E402
-from colorize_building import project_visible                               # noqa: E402
+from kyfromabove_3d.stages.build_mesh import GlbWriter                                            # noqa: E402
+from kyfromabove_3d.stages.colorize_building import project_visible                               # noqa: E402
 from kyfromabove_3d.features import WallPlane                               # noqa: E402
 from kyfromabove_3d.texture_check import (face_grids, read_glb, score_face,  # noqa: E402
                                           summarise_face)
@@ -165,7 +165,7 @@ def test_a_neighbour_prism_hides_the_wall_behind_it(tmp_path):
     the Right camera sees it: with the block as a prism in the depth maps,
     those points are not seen -- with LiDAR points alone (none here) they
     would be."""
-    from colorize_building import add_prism_occluders
+    from kyfromabove_3d.stages.colorize_building import add_prism_occluders
     cams = [dict(c) for c in CAMS]
     for c in cams:
         w, h = c["wh"]

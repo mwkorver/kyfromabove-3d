@@ -12,7 +12,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import wall_visibility as wv  # noqa: E402
+from kyfromabove_3d.stages import wall_visibility as wv  # noqa: E402
 
 
 def podium_and_tower():

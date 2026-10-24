@@ -16,7 +16,7 @@ from scipy.spatial.transform import Rotation
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import render_flyaround as rf                                                # noqa: E402
+from kyfromabove_3d.stages import render_flyaround as rf                                                # noqa: E402
 import score_trajectory as st                                                # noqa: E402
 
 FPS = 10.0

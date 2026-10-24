@@ -61,7 +61,7 @@ def main() -> int:
         print(f"fetching over {len(args.tiles)} tile(s) and {args.margin_m:.0f} m around them: "
               + " ".join(f"{v:.5f}" for v in args.bbox))
     if args.bbox:
-        from overture_boxes import fetch
+        from kyfromabove_3d.stages.overture_boxes import fetch
         tmp = Path(tempfile.mkdtemp()) / "overture.json"
         fetch(args.bbox, tmp)
         args.overture = tmp

@@ -44,7 +44,7 @@ def test_the_fingerprint_holds_while_nothing_changes_and_moves_when_anything_doe
 
 def test_the_code_version_reads_the_subpackages_too():
     names = {n for n, _ in P.code_files()}
-    assert {"pipeline.py", "mesh/roof.py", "colourise/levels.py", "features/walls.py", "build_mesh.py"} <= names
+    assert {"pipeline.py", "mesh/roof.py", "colourise/levels.py", "features/walls.py", "stages/build_mesh.py"} <= names
 
 
 def test_the_code_version_is_a_digest_of_the_code():

@@ -35,7 +35,7 @@ def _hole_m2(h: dict, face: str, z_lo: float, z_hi: float) -> float:
 
 
 def test_the_omni_as_it_was_has_both_holes_and_as_it_is_has_neither():
-    from audit_building import audit
+    from kyfromabove_3d.stages.audit_building import audit
     _need(OMNI / "3dtiles_mesh" / "building.glb")
     before = audit(OMNI, glb=KNOWN / "omni_before_mesh.glb")["holes"]
     assert _hole_m2(before, "1012", 47, 72) >= 1000                       # the west tower wall's staircase

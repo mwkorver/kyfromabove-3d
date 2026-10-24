@@ -15,7 +15,7 @@ scripts_dir = str(Path(__file__).resolve().parent.parent / "scripts")
 if scripts_dir not in sys.path:
     sys.path.insert(0, scripts_dir)
 
-from build_mesh import (                                  # noqa: E402
+from kyfromabove_3d.stages.build_mesh import (                                  # noqa: E402
     GlbWriter, _fill_holes, face_texture, outside_modelled_wall, plane_bands, roll_quads,
     quads_to_arrays, roof_heightfield, roof_mesh, wall_geometry,
 )
@@ -168,7 +168,7 @@ def test_glb_writes_a_valid_binary_with_textures_and_extras(tmp_path):
 
 
 def test_overture_box_is_a_closed_prism_with_the_height_the_record_gives():
-    from overture_boxes import extrude, height_of, height_source
+    from kyfromabove_3d.stages.overture_boxes import extrude, height_of, height_source
 
     square = np.array([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]], dtype=float)
     P, N, I = extrude(square, z0=2.0, h=30.0)
@@ -186,7 +186,7 @@ def test_overture_boxes_stand_on_the_ground_in_the_frame(tmp_path):
     """lidar_ground_z is an absolute elevation; the box must be lowered by
     the frame's origin height, or it floats (every downtown box did, by
     140 m, until this test)."""
-    from overture_boxes import build
+    from kyfromabove_3d.stages.overture_boxes import build
 
     frame = tmp_path / "frame"; frame.mkdir()
     (frame / "coordinates.json").write_text(json.dumps({"origin_source_xyz": [4918763.6, 3981088.7, 455.0]}))
@@ -217,7 +217,7 @@ def test_a_wall_band_only_stands_where_there_is_roof_behind_it():
     is 60 m tall only between x = 14 and x = 26, the rest is a 12 m podium.
     A band at 40 m survives only over the tower; a band at 10 m spans the
     edge."""
-    from build_mesh import RoofField, _runs
+    from kyfromabove_3d.stages.build_mesh import RoofField, _runs
 
     xs, ys, Z, valid = _field(lambda X, Y: np.where((X > 14) & (X < 26), 60.0, 12.0))
     roof = RoofField(xs, ys, Z, valid)
@@ -232,7 +232,7 @@ def test_a_wall_band_only_stands_where_there_is_roof_behind_it():
 
 
 def test_edge_top_profile_steps_from_podium_to_tower():
-    from build_mesh import RoofField
+    from kyfromabove_3d.stages.build_mesh import RoofField
 
     xs, ys, Z, valid = _field(lambda X, Y: np.where(X > 20, 60.0, 12.0))
     roof = RoofField(xs, ys, Z, valid)
@@ -294,7 +294,7 @@ def test_wall_geometry_upper_level_remains_flat():
 
 
 def test_an_open_band_gets_its_back_wall_and_a_verified_plane_keeps_bands_over_blank_field():
-    from build_mesh import RoofField, _runs, wall_geometry
+    from kyfromabove_3d.stages.build_mesh import RoofField, _runs, wall_geometry
     from kyfromabove_3d.features import VerifiedWallPlane
 
     # a colonnade band between two observed bands: the wall is drawn 6 m back
@@ -319,7 +319,7 @@ def test_an_open_band_gets_its_back_wall_and_a_verified_plane_keeps_bands_over_b
 
 
 def test_roof_smoothing_drops_a_one_cell_spike_but_keeps_a_step():
-    from build_mesh import roof_heightfield, roof_mesh
+    from kyfromabove_3d.stages.build_mesh import roof_heightfield, roof_mesh
     from shapely.geometry import Polygon
 
     rng = np.random.default_rng(1)
@@ -413,7 +413,7 @@ def test_glb_writer_refuses_ktx2_without_the_encoder(monkeypatch):
 
 
 def test_texture_pages_and_roof_have_sides_in_multiples_of_four():
-    from build_mesh import TextureAtlas, _mult4
+    from kyfromabove_3d.stages.build_mesh import TextureAtlas, _mult4
     assert [_mult4(n) for n in (1, 4, 5, 8, 4095)] == [4, 4, 8, 8, 4096]
     atlas = TextureAtlas(page_px=64)
     a = atlas.add(np.full((10, 13, 3), 1, dtype=np.uint8))
@@ -471,7 +471,7 @@ def test_a_rounded_corner_is_not_a_curved_wall():
 
 def test_roof_field_queries_follow_a_curved_wall():
     from kyfromabove_3d.features import wall_planes, ArcWall
-    from build_mesh import RoofField
+    from kyfromabove_3d.stages.build_mesh import RoofField
     # roof only inside the circle (r < 8) at 12 m
     xs, ys, Z, valid = _field(lambda X, Y: np.where(np.hypot(X - 20, Y) < 7.5, 12.0, np.nan), y0=-15, y1=15)
     roof = RoofField(xs, ys, Z, valid)
@@ -485,7 +485,7 @@ def test_roof_field_queries_follow_a_curved_wall():
 
 
 def test_roof_texture_from_cloud():
-    from build_mesh import roof_texture_from_cloud
+    from kyfromabove_3d.stages.build_mesh import roof_texture_from_cloud
     # 20x20 m building with roof returns at z=10.0
     poly = Polygon([(0, 0), (20, 0), (20, 20), (0, 20), (0, 0)])
     xs = np.linspace(-5, 25, 31)
@@ -509,7 +509,7 @@ def test_roof_texture_from_cloud():
 
 
 def test_roof_sloped_fraction_tells_a_gable_from_a_flat_roof_with_a_step():
-    from build_mesh import roof_sloped_fraction
+    from kyfromabove_3d.stages.build_mesh import roof_sloped_fraction
     cell = 0.75
     x = np.arange(0, 30, cell)
     X, Y = np.meshgrid(x, x)
@@ -536,7 +536,7 @@ def _face_points(n, y, rgb, seed):
 
 
 def test_face_texture_never_borrows_a_facade_in_front_of_the_band():
-    from build_mesh import face_texture
+    from kyfromabove_3d.stages.build_mesh import face_texture
     band = [_band(0, 10, 0.0)]                        # outward is -y
     own, own_rgb = _face_points(10, 0.0, (120, 120, 120), 1)
     front, front_rgb = _face_points(600, -3.0, (200, 40, 40), 2)   # a neighbour 3 m out
@@ -576,7 +576,7 @@ def test_a_lone_point_stays_a_point_and_a_sparse_raster_still_fills():
 def test_roof_field_keeps_a_rooftop_structure_and_drops_a_neighbours_spill():
     """Above the building's top, returns along the edge are a neighbour's wall;
     returns inside are something standing on the roof."""
-    from build_mesh import roof_heightfield
+    from kyfromabove_3d.stages.build_mesh import roof_heightfield
     rng = np.random.default_rng(4)
     poly = Polygon([(0, 0), (30, 0), (30, 30), (0, 30)])
     roof = np.column_stack([rng.uniform(0, 30, 9000), rng.uniform(0, 30, 9000), rng.normal(70.0, 0.2, 9000)])
@@ -604,7 +604,7 @@ def test_an_open_band_is_a_recess_only_under_a_solid_band():
 
 def test_gap_fill_on_a_texture_narrower_than_its_reach():
     """A prism face two texels wide: the 10-texel reach runs off its edge."""
-    from build_mesh import _fill_holes
+    from kyfromabove_3d.stages.build_mesh import _fill_holes
     img = np.zeros((28, 2, 3)); cnt = np.zeros((28, 2))
     img[0] = 100; cnt[0] = 1; img[5] = 100; cnt[5] = 1
     t = _fill_holes(img, cnt, max_fill_px=10)
@@ -651,7 +651,7 @@ def test_a_small_seen_blob_grows_no_ring_and_a_speckled_floor_keeps_the_specks_c
 def test_an_edge_reads_the_roof_on_its_own_side_only():
     """A tower wing's edge stands on its podium: the podium's roof outside
     the edge must not pull the wall's height down (the Omni's south wing)."""
-    from build_mesh import RoofField
+    from kyfromabove_3d.stages.build_mesh import RoofField
     xs, ys, Z, valid = _field(lambda X, Y: np.where(Y > 0, 57.0, 17.0), y0=-10)   # wing north of y=0, podium south
     roof = RoofField(xs, ys, Z, valid)
     edge = WallPlane(face=1000, p0=np.array([0.0, 0.0]), p1=np.array([40.0, 0.0]), normal=np.array([0.0, -1.0]),
@@ -662,7 +662,7 @@ def test_an_edge_reads_the_roof_on_its_own_side_only():
 def test_a_coarse_roof_field_still_gives_every_stretch_of_an_edge_a_height():
     """1.5 m cells (sparse LiDAR): the inside strip must reach far enough to
     hold a cell in every 3 m stretch, or that stretch gets no wall."""
-    from build_mesh import RoofField
+    from kyfromabove_3d.stages.build_mesh import RoofField
     xs, ys, Z, valid = _field(lambda X, Y: np.full(X.shape, 24.0), y0=-0.6, cell=1.5)   # one row 0.5-2.5 m in
     roof = RoofField(xs, ys, Z, valid)
     edge = WallPlane(face=16, p0=np.array([0.0, 0.0]), p1=np.array([19.0, 0.0]), normal=np.array([0.0, -1.0]),

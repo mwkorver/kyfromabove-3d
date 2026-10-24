@@ -49,9 +49,9 @@ ENV PROJ_NETWORK=OFF
 
 COPY --from=basisu /usr/local/bin/basisu /usr/local/bin/basisu
 
-# The queue jobs run the laptop's scripts (kyfromabove_3d.pipeline.run_main).
+# The worker's command line (scripts/queue_worker.py); the build's steps are in
+# the package (kyfromabove_3d.stages), installed above.
 COPY scripts ${LAMBDA_TASK_ROOT}/scripts
-ENV SCRIPTS_DIR=${LAMBDA_TASK_ROOT}/scripts
 # and the classes' settings (configs/class_strategies.yaml): without them every
 # building would be built as before classes (kyfromabove_3d.settings now stops)
 COPY configs ${LAMBDA_TASK_ROOT}/configs

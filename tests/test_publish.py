@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from kyfromabove_3d import publish as P                                     # noqa: E402
 
-build_mesh = pytest.importorskip("build_mesh")
+build_mesh = pytest.importorskip("kyfromabove_3d.stages.build_mesh")
 
 
 def _building_glb(colour, name="b"):

@@ -408,6 +408,25 @@ built against its neighbours' measured levels.
 The tile job runs `pieces.run_tile_step`, as `scripts/tile_step.py` does on
 this machine.
 
+## Undoing a bad run
+
+A run overwrites the published files in place, the trees the viewer loads
+included. The bucket keeps every overwritten or deleted file for 7 days as
+an old version (S3 versioning, `deploy/bucket_settings.py`; the bucket was
+made by hand, so its settings live there rather than in the CDK app). To put
+a prefix back as it was before a run, pick a time between the runs:
+
+```bash
+python deploy/bucket_settings.py restore --prefix kentucky/measured/ --at 2026-10-24T20:00:00Z        # counts only
+python deploy/bucket_settings.py restore --prefix kentucky/measured/ --at 2026-10-24T20:00:00Z --go   # does it
+```
+
+Changed files get their old version back, files made since are deleted (a
+delete that can itself be undone), files deleted since come back. A change
+older than 7 days is gone. The cost is the old versions' storage for their
+week: a rerun that rewrites everything holds about one extra copy of what it
+rewrote, for 7 days.
+
 ## What has been checked
 
 - **Parity with the downtown run** (4 tiles, 392 pieces, 6 minutes on the

@@ -40,7 +40,7 @@ discard the building you want, without saying so:
 * **`largest`** — most points. Correct for an isolated structure, and what the
   pilot uses.
 * **`tallest`** — highest median elevation. Correct in a dense core, where a
-  tower's roof is small and its podium and neighbours are large, so `largest`
+  tower's roof is small and its podium and neighbors are large, so `largest`
   reliably picks the wrong building.
 
 Set with `aoi.roof.select`.
@@ -56,7 +56,7 @@ therefore merges surfaces 144 m apart into one cluster, and that cluster's
 median elevation belongs to whichever surface has more points: always the
 lower, larger one. `tallest` then faithfully returns the podium.
 
-Clustering on `roof_xyz[:, :3]` separates them. For an isolated single-storey
+Clustering on `roof_xyz[:, :3]` separates them. For an isolated single-story
 building nothing is stacked, so this changes nothing.
 
 | | selected roof |
@@ -81,7 +81,7 @@ Radial profile of the tower's crown, from the point cloud:
 | 6–8 m | 153.8 m | | 20–26 m | 138.9 m |
 
 The selected cluster spans **4.46 m vertically over an 8.3 m radius** and falls
-**2.71 m from centre to edge**. It is not a plane.
+**2.71 m from center to edge**. It is not a plane.
 
 ### What a rectangle does to a dome
 
@@ -91,7 +91,7 @@ for a measured position.
 
 They were not measured. A rectangle around a circular footprint puts its
 corners at **radius × √2**, so those four points sat *outside the dome
-entirely*. Not three metres too high — over no roof surface at all, in a
+entirely*. Not three meters too high — over no roof surface at all, in a
 project whose whole discipline is refusing to assert what it has not measured.
 
 ### The planarity test
@@ -121,7 +121,7 @@ RoofSurface_W   (-6.23, -0.00, 164.57)   lidar:surface_sample
 ```
 
 Four, not five. **`RoofSurface_E` is absent** for lack of measured support, and
-refusing to place it is the behaviour that matters. The 2.9 m spread between N
+refusing to place it is the behavior that matters. The 2.9 m spread between N
 and S is the dome's real asymmetry, which one median elevation erased.
 
 ---
@@ -144,7 +144,7 @@ They answer different questions:
 
 A minimum-area rectangle is a perfectly good bounding box for a dome. It is
 only dishonest as a set of surface positions. Conflating the two is precisely
-how four points that touch nothing came to be labelled as measurements.
+how four points that touch nothing came to be labeled as measurements.
 
 `roof_footprint` supplies the extent. The pilot's footprint is **bit-identical**
 to what the code produced before the split — max corner difference **0.0 m** —

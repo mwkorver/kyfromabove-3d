@@ -12,7 +12,7 @@ three of the five exposures originally shipped.
 (target < 2.0 px).
 
 This supersedes an earlier report that claimed 0.000 px over 35 observations.
-That figure was an artefact: the QA computed each "observed" image position by
+That figure was an artifact: the QA computed each "observed" image position by
 projecting the check feature through the camera it was testing, then differenced
 that against a second projection of the same point. The result was zero by
 construction and independent of whether the camera model was correct.
@@ -104,7 +104,7 @@ in a LiDAR overlay.
 For each LiDAR anchor, the image content around it is resampled onto the
 anchor's locally-fitted surface plane in two exposures. Rectifying through a
 common plane removes the perspective difference between views, so a correct
-camera model makes the two patches the same picture. Normalised
+camera model makes the two patches the same picture. Normalized
 cross-correlation locates the offset; the imagery decides the answer.
 
 Anchors are LiDAR points on locally planar surfaces (plane fit RMS ≤ 8 cm,
@@ -126,7 +126,7 @@ Two groupings are reported, because they answer different questions:
 Correlation-measured image positions are triangulated and compared with the
 LiDAR position of the same point. A relative metric cannot see an error common
 to every exposure; this one can, so it exercises absolute scale and the
-foot-to-metre conversion.
+foot-to-meter conversion.
 
 ### Sensitivity
 
@@ -135,8 +135,8 @@ Perturbing one exposure and re-measuring, on the real pilot data:
 | perturbation | median residual |
 |---|---|
 | none (baseline) | 0.82 px |
-| perspective centre +0.25 m | 3.91 px |
-| perspective centre +1.0 m | 14.23 px |
+| perspective center +0.25 m | 3.91 px |
+| perspective center +1.0 m | 14.23 px |
 | ω +0.01° | 6.12 px |
 | ω +0.05° | 29.07 px |
 
@@ -149,7 +149,7 @@ The metric it replaces returns 0.00 px for every row of that table.
 ### Frame coverage
 
 Coverage is decided by projecting the eight building-volume corners onto each
-sensor, not by asking whether a footprint polygon contains the AOI centre point.
+sensor, not by asking whether a footprint polygon contains the AOI center point.
 Restricted to the Fwd camera, two of five exposures fail: the building runs
 249 px and 482 px off the sensor. Admitting the other camera heads brings the
 usable set to **14 of 14 candidates**.
@@ -193,7 +193,7 @@ and the Color head adds the top-down view.
 | Right, line 2032 | 2 | 0.92 px |
 | **combined** | **18** | **1.02 px** (p90 2.58 px, 5,329 of 5,376 accepted, 99%) |
 
-Every camera head is individually well modelled — including the Color head,
+Every camera head is individually well modeled — including the Color head,
 whose different focal length and sensor size are read straight from the EO
 record. That is what confirms the principal-point sign fix.
 
@@ -254,7 +254,7 @@ Every figure above was re-measured after three corrections, so they will not
 match an earlier copy of this document:
 
 * **The bounding volume's base is measured, not assumed.** It was
-  `roof − 8 m`, which encodes a single-storey building; it is now
+  `roof − 8 m`, which encodes a single-story building; it is now
   `ground_elevation_under`. The pilot's volume changes from 15.93 m to 13.06 m
   tall, and crops from 1600 px to 1648 px.
 * **The LiDAR comes from Phase 2 COPC, not Phase 1 plain LAZ.** Tiles now
@@ -280,7 +280,7 @@ The within-group residual, which is what tests the camera model, moved from
 - **One crop is padded at the sensor edge.** `Bwd_2034_201839` contains the
   whole building (8/8 corners) but its 1648 px window runs off the sensor, so
   21% of that crop is padding. The validity mask records it,
-  and anything that uses the crop should honour the mask.
+  and anything that uses the crop should honor the mask.
 - **The published ortho is DTM-based, not a true ortho.** Measured with
   `scripts/check_ortho.py`: ground rectifies to 5.7 cm but roofs to 167 cm, a
   161 cm difference implying 16.1° off-nadir on this 5.61 m building. It

@@ -3,11 +3,11 @@
 Until September 2026 every serious fault in the meshes was found by a person
 looking at the viewer: a 60 m wide hole in the Omni's west tower wall, the
 Omni's south wing with almost no south wall, wall panels standing on Kentucky
-Home Life's roof, a building's height taken from its neighbour's wall, walls
+Home Life's roof, a building's height taken from its neighbor's wall, walls
 covered in round dots and then in straight lines. The unit tests are small
 made-up cases written *after* each report; they stop a fixed fault coming
 back but cannot find a new one. The texture check (`check_building.py`)
-scores walls that exist against frames they were not coloured from; a wall
+scores walls that exist against frames they were not colored from; a wall
 that does not exist has nothing to score.
 
 The audit measures each building against evidence it was not built from,
@@ -41,15 +41,15 @@ within 2 m of it. A tower on its podium, a penthouse, a lantern each stand on
 a step and are not counted; Kentucky Home Life's panels stood on flat roof.
 
 **Heights.** The mesh's top against the 99th percentile of the LiDAR returns
-more than 1.5 m inside the outline (a neighbour's wall spills over the edge),
+more than 1.5 m inside the outline (a neighbor's wall spills over the edge),
 and product 1's height against the same.
 
-**Texture.** From product 2's record of where each wall texel's colour came
+**Texture.** From product 2's record of where each wall texel's color came
 from (`3dtiles_complete/fill_faces.npz`): the share of wall left blank, and
 two faults of the small-gap fill. A *dot* is a roughly round patch 0.5–4 m
 across, standing in blank wall, less than a tenth of it seen by a frame:
-colour grown round a lone speck. A *line* is a strip of filled texels at most
-two texels wide and at least 1 m long with blank wall on both sides: colour
+color grown round a lone speck. A *line* is a strip of filled texels at most
+two texels wide and at least 1 m long with blank wall on both sides: color
 bridged between specks. The texture check's agreement is copied in.
 
 **Outline.** The sharpest corner and the thinnest width of the footprint (or
@@ -79,7 +79,7 @@ split part): 39a33bd6-a had been squashed to a point.
   West Market, whose domed crown came out right and must stay so, and PNC
   Tower.
 
-  A hole can be put down to a neighbouring face, or to a corner, from one
+  A hole can be put down to a neighboring face, or to a corner, from one
   build to the next while staying the same hole. So a face counts as worse
   only when a view that shows its hole got worse as a whole; each view's
   total is in the baseline. (The crown rule first read as six buildings

@@ -9,7 +9,7 @@ It runs completely without a Python backend server.
 ## Key Features
 
 1. **Dual-Pane Synchronized 3D Comparison**:
-   - Left: 3D textured mesh, its shape from the LiDAR and its colour from the aerial frames.
+   - Left: 3D textured mesh, its shape from the LiDAR and its color from the aerial frames.
    - Right: Overture footprint boxes (with dynamic toggle between LiDAR-derived heights and Overture heights).
 2. **In-Browser Real-Time S3 Oblique Slicing (`geotiff.js`)**:
    - When a building is clicked, the viewer uses `geotiff.js` to perform **HTTP range requests directly against Kentucky's public S3 bucket** (`https://kyfromabove.s3.amazonaws.com`).

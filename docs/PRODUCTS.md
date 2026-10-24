@@ -4,7 +4,7 @@ Each is built only from KyFromAbove data — the Phase 2 LiDAR and the 2024
 Season 1 oblique and nadir frames — on Overture's building footprints, and
 each says what it is: measured, or invented.
 
-| | Product | Geometry | Colour | Where |
+| | Product | Geometry | Color | Where |
 |---|---|---|---|---|
 | 1 | Footprints at LiDAR heights | Overture footprints, extruded to the LiDAR's height | none | `outputs/overture_boxes/downtown_lidar/` |
 | 2 | Measured 3D Tiles | from the LiDAR | only where a frame saw the texel | `outputs/downtown/` |
@@ -18,7 +18,7 @@ a product row — `1 · footprints`, `2 · measured`, `3 · completed`, and
 
 Overture's building outlines, each with its height measured from the LiDAR:
 the 99th percentile of the returns more than 1.5 m inside its outline (a
-tall neighbour's wall spills over the edge), above the median of the ground
+tall neighbor's wall spills over the edge), above the median of the ground
 returns within 15 m. An outline that holds two or three buildings side by
 side — roofs at different heights meeting on straight lines — is split
 into parts `<gers>-a`, `-b`, `-c` (tallest first) with `parent_gers`. Built
@@ -40,7 +40,7 @@ building.
 
 A wall stands on the wall below it: where a band's returns stop short of
 the band directly above it, at nearly the same offset, the band runs as far
-as the one above (`carry_extents_down`). A neighbour can hide part of a wall
+as the one above (`carry_extents_down`). A neighbor can hide part of a wall
 from the scanner while a frame sees it well; the Omni's west tower wall had
 a staircase-shaped hole 60 m wide and 25 m tall, 47–72 m up, until this
 rule. It only carries a wall downward, never up past a setback, and an open
@@ -81,7 +81,7 @@ worst-side hole fell from 41 to 28 m².
 
 Two rules keep the roofs honest. The roof height field drops returns
 above the building's top only within 2 m of its outline, where a taller
-neighbour's wall spills in; anything standing on the roof inside it — a
+neighbor's wall spills in; anything standing on the roof inside it — a
 penthouse, a lantern, a tank — stays (the Kentucky Home Life Building's
 rooftop structure had been cut at 77 m and left as a ring of panels). And
 an "open" band — returns behind the facade line, a colonnade or loggia — is
@@ -90,25 +90,25 @@ floors above it, and an open band with nothing solid above is the roof seen
 over the parapet (746 such bands on 214 buildings had each stood a wall
 panel 3–7 m inboard on the roof).
 
-The colour is **measured only**. A texel takes its colour from a frame that
+The color is **measured only**. A texel takes its color from a frame that
 saw it — the most face-on frame, through its camera model, not hidden by
-anything the LiDAR or the neighbours' footprints put in front of it.
+anything the LiDAR or the neighbors' footprints put in front of it.
 
-On a wall, a seen texel counts only where at least half of the metre
+On a wall, a seen texel counts only where at least half of the meter
 around it was seen too: a scattered speck is not trusted. From solidly
-seen patches about 2 m across or more, colour grows up to 1.5 m (10
-texels) into the unseen wall, nearest seen colour first; a smaller patch
+seen patches about 2 m across or more, color grows up to 1.5 m (10
+texels) into the unseen wall, nearest seen color first; a smaller patch
 grows nothing, or it would ring itself in a disc. Any wall texel further
-out reads plain: the median colour of its own floor (everything seen
+out reads plain: the median color of its own floor (everything seen
 within 1.5 m above or below, specks included — untrusted one by one, fair
 together), or of the nearest floor seen enough. On a roof, a
 small gap *between* seen texels — seen texels within reach on both sides,
-across, up or diagonally — takes the nearest seen colour, and the rest
-reads the roof's median colour.
+across, up or diagonally — takes the nearest seen color, and the rest
+reads the roof's median color.
 
 ![blank wall under each gap rule](figures/blank_walls_gap_rule.png)
 
-How this was arrived at. Until September 2026 colour grew 1.5 m from
+How this was arrived at. Until September 2026 color grew 1.5 m from
 *every* seen texel, specks included, so each speck on a sparsely seen wall
 became a disc up to 3 m across: round dots. The first fix filled only gaps
 *between* seen texels; the dots went, but specks were then bridged by
@@ -117,16 +117,16 @@ wall surface. Growing only from solid patches keeps the dots and lines out;
 on the eight buildings rebuilt first it cut their blank wall by 1 to 6
 points each (the Seelbach Hilton from 41% to 36%), and dropping the specks
 costs under 1% of the seen wall. A face-wide median had also painted blank
-wall a dark grey wherever shadow covered much of the face; the floor's own
+wall a dark gray wherever shadow covered much of the face; the floor's own
 median does not.
 
 ![the eight buildings rebuilt with the solid-patch rule](figures/blank_walls_eight_rebuilt.png)
 
-Party walls below a neighbour's roof are plain. Each building's
+Party walls below a neighbor's roof are plain. Each building's
 tileset states its own coverage, `texels`: the share seen, filled across a
 small gap (`near`), and plain.
 
-Until September 2026 this product also copied colour onto a hidden face
+Until September 2026 this product also copied color onto a hidden face
 from its twin across the building; that is an invention, it moved to
 product 3, and the held-out test below turned it off there too.
 
@@ -137,9 +137,9 @@ invention — learned only from **the same building's own** frames and LiDAR,
 never from other buildings, outside images or a generic model
 (`src/kyfromabove_3d/facade_fill.py`, `build_mesh.py --complete`):
 
-- **rhythm** — a facade repeats: its bay width (1–8 m) and storey height
+- **rhythm** — a facade repeats: its bay width (1–8 m) and story height
   (2.5–6 m) are found from the autocorrelation of its seen texels, and an
-  unseen texel takes the seen texel a whole number of bays or storeys away;
+  unseen texel takes the seen texel a whole number of bays or stories away;
 - **patch** — what is left, within 3 m of the seen part, takes 1 m blocks
   copied from the seen part of the same texture whose borders match best
   (image quilting); deeper stays plain.
@@ -157,14 +157,14 @@ invented ones.
 **A method runs only where it beat plain on the held-out test**
 (`scripts/eval_fill.py`): rectangles of facade a frame *did* see are hidden,
 invented from the rest, and compared with what the frame saw — pattern
-agreement (1 = the same windows in the same places; plain = 0) and colour
+agreement (1 = the same windows in the same places; plain = 0) and color
 error against the plain fill.
 
 ![held-out rectangles filled by each method](figures/fill_holdout.png)
 
 Over all of downtown — 16,759 hidden rectangles on 342 buildings:
 
-| texture | method | pattern agreement | colour closer than plain |
+| texture | method | pattern agreement | color closer than plain |
 |---|---|---|---|
 | fitted wall tile | rhythm, then patch | 0.50 | 79% |
 | profiled face | rhythm, then patch | 0.16 | 78% |
@@ -202,8 +202,8 @@ earns its keep where measurements are missing, and this project has them.
   Stable Diffusion. Needs street-level scans; airborne LiDAR barely touches
   walls.
 - **Hunyuan3D 2.1** (Tencent, 2025) — single-image generation of an object
-  with painted materials. Invents shape and colour, has no scale or
-  position, and its licence excludes the EU, UK and South Korea.
+  with painted materials. Invents shape and color, has no scale or
+  position, and its license excludes the EU, UK and South Korea.
 - **ReconFusion** (Google, CVPR 2024) — few-view NeRF with a diffusion
   prior learned from close-range photographs. Invents where the views are
   silent; no official code.

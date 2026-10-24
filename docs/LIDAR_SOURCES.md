@@ -84,7 +84,7 @@ Two different density measures appear below and they are **not interchangeable**
 - **tile density** — from the LAS header's own point count and bounding box, so
   a whole-tile average. One range request, no point data read.
 - **window density** — points actually returned by a COPC query over an
-  800 × 800 ft window at the tile centre. Local, and can differ from the tile
+  800 × 800 ft window at the tile center. Local, and can differ from the tile
   average by more than 2× in varied terrain.
 
 ### Tile density (LAS headers)
@@ -116,7 +116,7 @@ points ~1,900 ft above the ground.
 **Phase 2 is denser than Phase 3 on every comparison, by both measures**, despite
 Phase 3 being flown later. Newer is not better here.
 
-> Sampling note: a tile centre chosen blindly can land on water. An early sample
+> Sampling note: a tile center chosen blindly can land on water. An early sample
 > of `N013E302` came back 69% class 9 and said nothing about buildings. The
 > script now samples named built-up places for this reason.
 
@@ -172,7 +172,7 @@ LAS 1.4, point format 6, flown 2024-12-08, 8,759,469 points, 3.77 pts/m². Note
 the `.copz.laz` spelling — one of the 898.
 
 Point format 6 carries **no RGB**, and the intensity field is zero throughout, so
-colour is sampled from the imagery (median across contributing views) rather
+color is sampled from the imagery (median across contributing views) rather
 than from the cloud.
 
 ## 8. Re-running and extending

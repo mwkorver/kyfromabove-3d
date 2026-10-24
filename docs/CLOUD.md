@@ -34,7 +34,7 @@ A run's progress is kept under `runs/<run>/` (done, failed, parked).
 
 Every step can be rerun safely. A piece's marker carries a hash of its
 inputs; a building's `building.json` carries its fingerprint (the code, the
-measured files, the settings and the neighbours' measured levels), and a
+measured files, the settings and the neighbors' measured levels), and a
 build job skips a building whose fingerprint matches the one published.
 
 **Removed 2026-10-16** (cleanup after refactor step 4): the Lambda piece
@@ -91,7 +91,7 @@ On the 2x2 block: 2,361 pieces (510 MB), 95 Lambdas, about a minute of
 wall-clock time; 0.48 s a building, 23 s a batch (1.5 s of set-up: ~8%
 overhead, so 25 stays), 0.6 GB peak. A re-run writes nothing. Laptop and
 Lambda agree on every piece's `inputs_hash`, which now hashes values rounded
-to a millimetre (a thousandth of a foot or pixel), not bytes: Linux and macOS
+to a millimeter (a thousandth of a foot or pixel), not bytes: Linux and macOS
 differ in the 16th digit of a local origin.
 
 What the first runs taught: 45 Lambdas reading one tile's COPC file at once
@@ -107,16 +107,16 @@ Lambda for a calibration and then moved to EC2 Spot; both are below.)
 (`BuildingStepStack`) and not deployed. It is invoked with a few nearby
 buildings (`{"gers": [...]}`). For each one it reads the piece, rebuilds the
 chosen cameras from `frames.json`, cuts the crops into /tmp, and runs the
-laptop's own scripts: `build_mesh.py --complete` (which runs the colourise),
+laptop's own scripts: `build_mesh.py --complete` (which runs the colorize),
 `check_building.py` and `audit_building.py`. It writes
 `buildings/<gers>/` (the measured and completed 3D Tiles, the audit, the
 texture check, the wall profiles) with `building.json` last. That summary
 records the piece it was built from, and the seconds, peak memory and size of
 every stage; a building already built from the same piece by the same code is
 skipped. The LiDAR within 250 m, which hides what a frame cannot see, is read
-once per call for all its buildings. The neighbours stand as prisms: product 1's
+once per call for all its buildings. The neighbors stand as prisms: product 1's
 outlines at their LiDAR heights, from the tile's `buildings.json` and its
-neighbouring tiles'. The image carries `basisu` 2.50 (built for ARM) and the
+neighboring tiles'. The image carries `basisu` 2.50 (built for ARM) and the
 two grids that place a building (`us_noaa_g1999u07.tif`,
 `us_noaa_nadcon5_nad83_1986_nad83_harn_conus.tif`), with PROJ's network off.
 Inside the image, a downtown origin lands on the laptop's longitude,
@@ -137,7 +137,7 @@ a time showed that this made the computing stages 1.68 times slower and the
 crops 1.08 times slower, and those slowdowns are taken out.
 
 One building at a time, a house takes about 26 seconds: about 7 s cutting
-the crops (waiting on KyFromAbove's GeoTIFFs), 5 s colouring, 5 s the mesh,
+the crops (waiting on KyFromAbove's GeoTIFFs), 5 s coloring, 5 s the mesh,
 6 s the texture check, 1-2 s the audit, and 1 s reading the LiDAR around
 it. A building over 5,000 m² takes about 53 s, and the slowest took 85 s. The
 most memory any one script used was 1.1 GB, well inside the 3 GB Lambda. Kept
@@ -158,7 +158,7 @@ both ends are priced:
 | Kentucky, hours with 890 Lambdas at once | about 24 | about 49 |
 | kept afterwards | 651 GB, about $15 a month | the same |
 
-Nearly all of it is Lambda time. At the slow end, statewide: colouring
+Nearly all of it is Lambda time. At the slow end, statewide: coloring
 $1,650, the texture check $1,540, the mesh $1,480, the crops $730 (time spent
 waiting on the network is billed too), the audit $400, and writing 18 files a
 building to S3 $245. The completed product adds only $130. Where it could
@@ -175,15 +175,15 @@ come down:
 No sampled building came near Lambda's 15 minutes, even at 2.4 times slower
 (the calibration below found one that did).
 
-One difference from the downtown run: the neighbours' traced levels (a
-tower on its podium) are not known to the building step, so a neighbour
+One difference from the downtown run: the neighbors' traced levels (a
+tower on its podium) are not known to the building step, so a neighbor
 stands as its whole outline to its LiDAR height. On 7 of the 8 sampled
 buildings the downtown run also built, the audit is identical. On the eighth
-(`8c073582`, a parking structure), 81% of its wall area got no colour from a
+(`8c073582`, a parking structure), 81% of its wall area got no color from a
 frame, against 65% in the downtown run. The texture check reports that share
 as "blank". Rebuilt with the downtown levels, it is back to 65%. Reading
-neighbours' published `levels.json` from `buildings/` would fix it, at the
-cost of an order: the neighbour built first.
+neighbors' published `levels.json` from `buildings/` would fix it, at the
+cost of an order: the neighbor built first.
 
 Not built yet: events and queues, and finding buildings Overture lacks.
 
@@ -195,7 +195,7 @@ Not built yet: events and queues, and finding buildings Overture lacks.
 buildings, 2 from each size band, twice, with one Lambda each
 (`deploy/run_building_step.py`).
 - A house took 100-115 s, against about 26 s on the laptop.
-- The colouring, the mesh and the texture check each ran 4-5 times slower
+- The coloring, the mesh and the texture check each ran 4-5 times slower
   than on the laptop; the crops ran 1.5-3 times slower.
 - A container reused from the first run saved only 10-15%.
 - The 24,000 m² warehouse used 2.8-2.9 GB of the 3,008 MB allowed. On the
@@ -205,7 +205,7 @@ buildings, 2 from each size band, twice, with one Lambda each
 **EC2 Spot, one machine.** A c8g.4xlarge (Graviton4, 16 processors, 32 GB)
 ran at $0.253 an hour Spot, using the same image
 (`Ec2BenchStack`, `deploy/run_ec2_bench.py`).
-- One building at a time, a house took about 77 s. The colouring, the mesh
+- One building at a time, a house took about 77 s. The coloring, the mesh
   and the check take about 22 s each whatever the building's size. Most of
   that is hiding the building from the LiDAR within 250 m, which is the
   same work for a shed as for a tower.
@@ -300,7 +300,7 @@ Why these five and not one or twenty:
   the measured view downloads one small zip a building, not the review files.
 - **`building.json` stays separate and last**: a rerun reads it to skip a
   building whose fingerprint has not changed.
-- **`levels.json` stays separate**: it is small, and a neighbour's levels are
+- **`levels.json` stays separate**: it is small, and a neighbor's levels are
   the known fix for a tower drawn as its whole outline (see "What the
   building step costs" below), which would read them one building at a time.
 - **The zips are deterministic** (`archive.zip_bytes`: sorted members, one
@@ -317,8 +317,8 @@ stores (`STORE` for the queue run), not two folders of one.
 
 - the building's piece, `pieces/<gers>/` (the measure job: the LiDAR clip,
   the frames chosen, the local frame, the class, the outline and levels);
-- the tile's `tiles/<tile>/buildings.json` and its neighbours' (the
-  neighbouring buildings, standing as prisms);
+- the tile's `tiles/<tile>/buildings.json` and its neighbors' (the
+  neighboring buildings, standing as prisms);
 - the LiDAR within 250 m and the aerial frames themselves, read again from
   KyFromAbove's bucket. Crops are never stored (806 MB for the largest
   warehouse), so a rebuild depends on that bucket staying where it is.
@@ -343,21 +343,21 @@ building instead of about twelve, and two downloads to build it instead of
 about twenty-two (`building.publish_piece`, `pull_piece`; a piece without the
 layout, a file each, is still read). Each tile's buildings' local frames and
 measured levels are also kept together in `tiles/<tile>/measured.json`: a
-build batch reads its own tile's and its eight neighbours' instead of two
+build batch reads its own tile's and its eight neighbors' instead of two
 small objects for each of the 300-600 buildings within 450 m. On one trial
 tile (50 buildings) the stored pieces went from 500 objects to 100 and the
 buildings came out byte for byte the same.
 
 ## Why a tile is the unit
 
-- **The LiDAR is already cloud-optimised.** Phase 2 is 46,167 tiles, each a
+- **The LiDAR is already cloud-optimized.** Phase 2 is 46,167 tiles, each a
   COPC file on `s3://kyfromabove`, and `lidar.extract_lidar_for_aois` reads
   any box by HTTP range requests, across tile edges.
 - **Each building is cut once.** It belongs to the tile holding its
   footprint's centroid (`pieces.owner_tiles`).
 - **Party walls across tile edges still work.** Footprints of other tiles
   within 30 m are measured with the tile (its *halo*), so a building on the
-  edge knows its neighbour and the neighbour's height.
+  edge knows its neighbor and the neighbor's height.
 
 ## Incremental by construction
 
@@ -366,7 +366,7 @@ record, the clip's box and origin, the frames chosen, the clip's point
 count, and `pieces.CODE_VERSION` (bump it when the way pieces are cut
 changes). A building's fingerprint (`pipeline.fingerprint`) reads its
 measured files, so a build job rebuilds exactly the buildings whose pieces,
-settings, neighbours or code changed, and skips the rest.
+settings, neighbors or code changed, and skips the rest.
 
 ## The code
 
@@ -378,7 +378,7 @@ settings, neighbours or code changed, and skips the rest.
 | `src/kyfromabove_3d/pipeline.py` | the one pipeline, laptop and cloud: measure, then build; the fingerprint |
 | `src/kyfromabove_3d/cloud_jobs.py` | the queue's two jobs: `measure_job` (a tile's buildings) and `build_job` (a batch) |
 | `src/kyfromabove_3d/queue_worker.py` | a Spot machine's loop over the queue (heartbeat, retries, the Spot notice) |
-| `src/kyfromabove_3d/building.py` | a piece fetched, the neighbours, the LiDAR around a batch, a building packed and published |
+| `src/kyfromabove_3d/building.py` | a piece fetched, the neighbors, the LiDAR around a batch, a building packed and published |
 | `scripts/stage0_index.py` | footprints by tile, to a folder or `s3://` |
 | `scripts/queue_run.py` | a run's jobs sent (`measure`, `build`), its progress (`status`), its failures again (`retry-failed`) |
 | `scripts/queue_worker.py` | the worker a Spot machine starts |
@@ -403,7 +403,7 @@ python scripts/queue_run.py status --run r2
 The machines start when the jobs arrive and stop when the queue has been
 empty a while. Send each kind once `status` shows the one before done: a
 building is measured against the records of the tiles around its own, and
-built against its neighbours' measured levels.
+built against its neighbors' measured levels.
 
 The tile job runs `pieces.run_tile_step`, as `scripts/tile_step.py` does on
 this machine.
@@ -431,9 +431,9 @@ rewrote, for 7 days.
 
 - **Parity with the downtown run** (4 tiles, 392 pieces, 6 minutes on the
   laptop): the same 392 buildings and split parts; heights identical to the
-  centimetre; the same frames chosen for all 389 compared; the same LiDAR
+  centimeter; the same frames chosen for all 389 compared; the same LiDAR
   clip box for 386. The other three differ harmlessly: two split parts whose
-  outlines moved by centimetres because the split is now measured in the
+  outlines moved by centimeters because the split is now measured in the
   tile's frame, and one building without its own ground, whose fallback is
   now the tile's median ground (13 cm different).
 - **The Lambda image, locally.** Built for ARM (1.85 GB), run under the
@@ -445,7 +445,7 @@ rewrote, for 7 days.
 - **Tests** (plain `pytest`, no AWS): the stores agree (folder and mocked
   S3); tile ownership and halo; the marker written last and an unchanged
   piece skipped; the whole chain on mocked AWS with the
-  stack's own rule pattern; the synthesised stack (the rule, the queues and
+  stack's own rule pattern; the synthesized stack (the rule, the queues and
   their dead-letter queues, the Lambdas' size and architecture, the table).
 
 ## What it costs
@@ -492,15 +492,15 @@ completed product, wall planes and profiles, texture check, audit) on six
 sample buildings from a house to the 24,000 m² warehouse, and the reference
 set's audit is unchanged.
 
-- **The coordinate converter is made once per script.** The neighbour
+- **The coordinate converter is made once per script.** The neighbor
   prisms converted 2,433 outlines a script, each through a new WGS84 ->
   state plane transformer (1.6 ms each on the laptop, 2.8 ms in the ARM
-  image). Colourise, mesh and check on a house: 8.4 + 7.4 + 6.5 s -> 3.1 +
+  image). Colorize, mesh and check on a house: 8.4 + 7.4 + 6.5 s -> 3.1 +
   3.0 + 2.1 s on the laptop (`footprints.wgs84_to_state_plane`).
 - **Occlusion maps are made once and 4x faster.** About 2% of the ~840,000
   returns within 250 m land on a crop; a single-precision cull with a
   32 px margin drops the rest before the exact projection (identical maps,
-  0.66 -> 0.16 s). The colourise saves the maps as `occlusion.npz` under a
+  0.66 -> 0.16 s). The colorize saves the maps as `occlusion.npz` under a
   fingerprint of every input; the mesh and the check reuse them only when
   their inputs give the same fingerprint (`colorize_building.occlusion_maps`).
 - **Crops are not cut in threads.** Tried: byte-identical and 6x faster on
@@ -515,13 +515,13 @@ set's audit is unchanged.
 A frame's header is needed by about 59 of a downtown tile's buildings (84
 frames serve 270 buildings), and each 512 px tile by 3.5. `deploy/cog_cache`
 puts nginx between GDAL and S3 on a machine: an on-disk cache of aligned
-1 MB slices (the `slice` module; neighbours ask for overlapping but different
+1 MB slices (the `slice` module; neighbors ask for overlapping but different
 ranges, so the client's exact range would miss), `proxy_cache_lock`, HEAD
 kept a HEAD, and connections to S3 kept open (a new HTTPS connection costs
 about half of a small request). GDAL reads through it when
 `COG_CACHE_URL=http://127.0.0.1:8001` is set (`imagery.cog_url`).
 
-On 20 neighbouring downtown buildings (339 frames), each cut in a fresh
+On 20 neighboring downtown buildings (339 frames), each cut in a fresh
 process, from the laptop (`deploy/cog_cache/bench.py`):
 
 | | seconds a building's crops | requests to S3 | from S3 |
@@ -542,7 +542,7 @@ trust.
 One c8g.4xlarge Spot machine (16 cores, $0.254 an hour), 16 buildings at a
 time, the same image as the Lambda:
 
-- **The frame cache saves requests, not time, in-region.** 50 neighbouring
+- **The frame cache saves requests, not time, in-region.** 50 neighboring
   downtown buildings: 81 s direct, 81 s through an empty cache (90% hits,
   377 requests to S3 instead of about 3,700), 77 s through a full one. S3
   answers quickly in-region, and with 16 buildings at once one building's
@@ -554,7 +554,7 @@ time, the same image as the Lambda:
   scripts on the same machine and never published; PNG is lossless, so the
   pixels, and all 94 outputs of six test buildings, are unchanged. On the
   machine, alternating the two on the same runs: the 40-building sample
-  164 s -> 94 s (twice), 50 neighbours 77 s -> 54 s; a sample building's
+  164 s -> 94 s (twice), 50 neighbors 77 s -> 54 s; a sample building's
   crops 15.8 s -> 6.1 s. The price is disk: 2-2.6 times as much, 806 MB for
   the warehouse's crops.
 
@@ -676,7 +676,7 @@ On the CloudFront site, before the password went on:
   Hazard slope, where the terrain samples every 5 m.
 - **It downloaded far too much:** 28 MB for the overview from 12 km (where
   no building is visible), 51-73 MB downtown, 190 MB over St. Matthews from
-  400 m. Nearly all of it was the grey box files.
+  400 m. Nearly all of it was the gray box files.
 
 ### The box files, made lighter
 
@@ -730,14 +730,14 @@ directions as whole numbers too, as the boxes now are, is the next step.
 The viewer's buttons show what each stage adds, on every building:
 
 1. **Overture**: the footprints at Overture's own heights, what Cesium OSM
-   Buildings and the like show. The colour says where the height came from
-   (`overture_boxes.height_of`, `COLOURS`): grey for Overture's height,
-   blue-grey for floors x 3.5 m, orange for a 6 m guess where Overture has
+   Buildings and the like show. The color says where the height came from
+   (`overture_boxes.height_of`, `COLOURS`): gray for Overture's height,
+   blue-gray for floors x 3.5 m, orange for a 6 m guess where Overture has
    neither. In St. Matthews that is about a third of the buildings (957 of
    2,672).
 2. **LiDAR heights** (product 1): the same footprints at KyFromAbove's
    LiDAR heights.
-3. **Measured** (product 2): the meshes, photo colour only where a frame
+3. **Measured** (product 2): the meshes, photo color only where a frame
    saw the wall.
 4. **Completed** (product 3): unseen parts filled from the building's own
    photos.

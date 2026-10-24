@@ -12,7 +12,7 @@
 > areas near Hazard and Somerset), not the whole state.
 
 **Every building in Kentucky in 3D, from the state's own open data.** The
-shape of each building comes from KyFromAbove's LiDAR, its colour from
+shape of each building comes from KyFromAbove's LiDAR, its color from
 KyFromAbove's oblique aerial photographs, and its outline and identity from
 Overture's building footprints. The result is published as 3D Tiles and
 viewed in a web browser.
@@ -20,12 +20,12 @@ viewed in a web browser.
 ![Downtown Louisville: this project's buildings on the left, Overture's boxes on the right](docs/figures/compare_downtown_from_north.jpg)
 
 *Downtown Louisville from the north. Left: this project, walls and roofs
-from the LiDAR, coloured from the aerial frames. Right: the same footprints
+from the LiDAR, colored from the aerial frames. Right: the same footprints
 as plain boxes at Overture's heights, what most 3D maps show.*
 
 [KyFromAbove](https://kyfromabove.ky.gov) is the Commonwealth of Kentucky's
-aerial imagery and LiDAR programme, published as open data on AWS. This is
-an independent project built *on* that data, not a product of the programme;
+aerial imagery and LiDAR program, published as open data on AWS. This is
+an independent project built *on* that data, not a product of the program;
 nothing here is endorsed by it.
 
 ## What it makes
@@ -33,12 +33,12 @@ nothing here is endorsed by it.
 The same buildings, five ways. The viewer has a button for each, so you can
 switch between them in place and see what each step adds:
 
-| View | Shape | Colour |
+| View | Shape | Color |
 |---|---|---|
-| **Overture** | Overture's footprint, pushed up to Overture's own height | coloured by where that height came from: Overture's figure, floors × 3.5 m, or a 6 m guess |
-| **LiDAR heights** (product 1) | the same footprint, pushed up to the height the LiDAR measured | plain grey |
+| **Overture** | Overture's footprint, pushed up to Overture's own height | colored by where that height came from: Overture's figure, floors × 3.5 m, or a 6 m guess |
+| **LiDAR heights** (product 1) | the same footprint, pushed up to the height the LiDAR measured | plain gray |
 | **Measured** (product 2) | walls and roof from the LiDAR | from the aerial frames, only where a frame actually saw the surface |
-| **Completed** (product 3) | the same as Measured | what no frame saw is filled in, from the same building's own frames only, and labelled as filled |
+| **Completed** (product 3) | the same as Measured | what no frame saw is filled in, from the same building's own frames only, and labeled as filled |
 | **Borrowed fill** (product 4) | the same as Measured | what no frame saw is filled with patches copied from walls of the same building that the frames did see, matched to the hole's light; so far only in Covington, Newport and Lexington |
 
 Nothing is invented from outside the building's own KyFromAbove data: no
@@ -62,7 +62,7 @@ byte-identical results in each.
 | 0 | Groups Overture's footprints by the LiDAR tile they fall in | a laptop, once per Overture release | `scripts/stage0_index.py` |
 | 1 · tile | Measures every building's height from the LiDAR, splits outlines that hold two or three buildings, and picks the LiDAR survey and photo collection taken **closest together in time** | EC2 Spot machines, one tile a job | `pieces.run_tile_step`, `sources_choice.py` |
 | 2 · measure | Cuts each building's LiDAR, lists the aerial frames that see it, and measures its class, outline and levels | EC2 Spot machines, one tile a job | `cloud_jobs.measure_job`, `pipeline.py` |
-| 3 · build | Fits walls to the LiDAR, colours them from the frames, builds the measured and completed meshes, and audits them | EC2 Spot machines, 8-16 nearby buildings a job | `cloud_jobs.build_job`, `scripts/build_mesh.py` |
+| 3 · build | Fits walls to the LiDAR, colors them from the frames, builds the measured and completed meshes, and audits them | EC2 Spot machines, 8-16 nearby buildings a job | `cloud_jobs.build_job`, `scripts/build_mesh.py` |
 | 4 · publish | Batches each tile's buildings into 3D Tiles, builds the statewide tree and the terrain, writes the viewer | a Spot machine, or a laptop | `publish.py`, `terrain.py` |
 
 CloudFront serves the published files (behind a password while this is a
@@ -91,13 +91,13 @@ What the first pilot (four areas, September 2026) showed:
   typical gap between a building's base and the terrain is under 0.2 m.
 - The page draws at 60 frames a second.
 - The first version downloaded far too much (up to 190 MB for one view),
-  almost all of it grey boxes. The box files are now 13 to 32 times smaller.
+  almost all of it gray boxes. The box files are now 13 to 32 times smaller.
   The textured files are the next to slim down.
 
 For all of Kentucky (2.79 million Overture buildings), the building step,
 the expensive one, is estimated at about $450 on Spot machines. Overture
 lists about 5.3 million buildings in a rectangle drawn around Kentucky, but
-that rectangle takes in parts of the neighbouring states; the 2.79 million
+that rectangle takes in parts of the neighboring states; the 2.79 million
 are the ones on Kentucky's own LiDAR tiles.
 
 ## Status and limits
@@ -111,10 +111,10 @@ are the ones on Kentucky's own LiDAR tiles.
 - No support, and no promise to merge changes; see
   [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Why the LiDAR gives the shape and the photos only the colour
+## Why the LiDAR gives the shape and the photos only the color
 
 KyFromAbove's Phase 2 LiDAR covers the whole state at about one return every
-0.6 m on a roof, and it has no colour. The oblique photos are much finer (3
+0.6 m on a roof, and it has no color. The oblique photos are much finer (3
 inches a pixel, 25 times finer than the LiDAR on a wall the scanner reached)
 but a photo is a poor source of *shape*:
 
@@ -127,12 +127,12 @@ but a photo is a poor source of *shape*:
 
 The angle is there; the matching fails. A curtain wall repeats the same
 window every 1.2 to 1.5 m, fifty floors high, so a match that slips one bay is
-a metre wrong with a confident score, and glass reflects a different sky in
+a meter wrong with a confident score, and glass reflects a different sky in
 every view.
 
 So depth is never taken from a picture. Each wall is fitted as a plane to the
-LiDAR's own returns on it, and colour is read from the best-facing frame that
-can actually see each point, with neighbours tested for blocking the view
+LiDAR's own returns on it, and color is read from the best-facing frame that
+can actually see each point, with neighbors tested for blocking the view
 ([`docs/BUILDING_MESH.md`](docs/BUILDING_MESH.md)).
 
 ## What Overture is for
@@ -213,7 +213,7 @@ deploy the budget stack too (`docs/CLOUD.md`, "Watching the spend"); and a deplo
 
 ### Checking a change
 
-A change to the meshing or colouring code is checked against 10 buildings
+A change to the meshing or coloring code is checked against 10 buildings
 that have broken before, without looking at them:
 
 ```bash
@@ -228,7 +228,7 @@ It fails, naming the building and the measure, if anything got worse
 | Document | Covers |
 |---|---|
 | [`docs/CLOUD.md`](docs/CLOUD.md) | The pipeline in AWS, step by step: what each step costs, the pilot, the bugs it found, serving the views |
-| [`docs/PRODUCTS.md`](docs/PRODUCTS.md) | Products 1 to 3: what is measured, what is inferred, what is invented and how it is labelled |
+| [`docs/PRODUCTS.md`](docs/PRODUCTS.md) | Products 1 to 3: what is measured, what is inferred, what is invented and how it is labeled |
 | [`docs/BUILDING_MESH.md`](docs/BUILDING_MESH.md) | How a building becomes a textured mesh: wall bands, curved walls, the roof, textures |
 | [`docs/AUDIT.md`](docs/AUDIT.md) | Checking a code change against the buildings that have broken before |
 | [`docs/DOWNTOWN_RUN.md`](docs/DOWNTOWN_RUN.md) | Every footprint of downtown Louisville, built as a batch on a laptop |
@@ -252,7 +252,7 @@ src/kyfromabove_3d/
   cloud_jobs.py, queue_worker.py   the queue run's jobs, and a Spot machine's loop over the queue
   building.py          a piece fetched, a building packed and published to buildings/<gers>/
   features/            what the LiDAR shows of a building: planes, walls, face profiles, levels, ground, class
-  colourise/           a building's points coloured from the frames: occlusion, colour, extra wall points, levels
+  colourise/           a building's points colored from the frames: occlusion, color, extra wall points, levels
   mesh/                the mesh: walls, roof, textures, party walls, and the glTF and 3D Tiles it is written as
   facade_fill.py       the completed product: fill what no frame saw, from the building itself
   neural_fill.py       borrowed fill (product 4): fill it with patches from the building's seen walls
@@ -263,7 +263,7 @@ src/kyfromabove_3d/
   tile_index.py        the map file of the published tiles (GeoParquet, one row a tile)
   lidar.py, imagery.py, footprints.py, coordinates.py, cameras.py, crops.py, prepare.py, ...
   stages/              the build's steps, each with its own command line (scripts/<step>.py runs it):
-    colorize_building.py, build_mesh.py, check_building.py, audit_building.py   one building's colour, mesh, checks
+    colorize_building.py, build_mesh.py, check_building.py, audit_building.py   one building's color, mesh, checks
     lidar_outline.py     a building's outline and towers from the LiDAR
     overture_boxes.py    Overture footprints: fetched, measured on the LiDAR, split, boxed
     publish_step.py      step 4 on the laptop: tiles, tree, terrain, viewer, tile index
@@ -286,14 +286,14 @@ tests/                 no network needed
 docs/                  the documents above, and their figures
 ```
 
-## Licence
+## License
 
 The code is MIT; see [LICENSE](LICENSE). The data is licensed separately, and
 the two sources differ:
 
 - **KyFromAbove** imagery and LiDAR: public domain.
 - **Overture** building footprints: the buildings theme is primarily under the
-  [Open Database Licence (ODbL)](https://docs.overturemaps.org/attribution/),
+  [Open Database License (ODbL)](https://docs.overturemaps.org/attribution/),
   which includes a share-alike condition, and it draws on several sources that
   each ask for credit. The tiles and tilesets this project publishes contain
   Overture's footprints, so anything you publish from them is likely to carry
@@ -311,10 +311,10 @@ the Phase 2 and Phase 3 LiDAR (COPC), the oblique and nadir aerial frames of
 the 2022-2024 collections (read as COGs), and their exterior orientation and
 frame outline tables. Building footprints come from
 [Overture Maps](https://overturemaps.org/) (the buildings theme, under its
-published licence terms). The viewer's base map is ©
+published license terms). The viewer's base map is ©
 [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
 
-The KyFromAbove data is **public domain**: no licence, no attribution
+The KyFromAbove data is **public domain**: no license, no attribution
 requirement. It is credited here anyway, and named in this repository,
 because what makes the project possible is unusual: very few U.S. states
 publish oblique aerial frames openly, and fewer still publish the exterior

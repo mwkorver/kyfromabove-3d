@@ -90,9 +90,9 @@ ignore the walls**, which this measure does not currently do.
 ### PNC Tower is less simple than its shape suggests
 
 Its roof rates 16%, nearly three times the pilot's 6%, and that is not a wall
-artefact — the roof zone is 79% of its returns. Looking at the side view, the
+artifact — the roof zone is 79% of its returns. Looking at the side view, the
 reason is visible: the top is not one plate but a main roof at 153 m with a
-mechanical penthouse and setbacks above and below it. Forty storeys need lift
+mechanical penthouse and setbacks above and below it. Forty stories need lift
 machine rooms and cooling plant, and they go on the roof.
 
 So the control is not a perfectly simple building. It is a building that is
@@ -105,7 +105,7 @@ it does not discriminate at all.
 
 | clip | 001 | 002 | PNC |
 |---|---|---|---|
-| bbox (old behaviour) | 13.8% | 33.1% | 17.6% |
+| bbox (old behavior) | 13.8% | 33.1% | 17.6% |
 | polygon −1 m | 4.7% | 33.4% | 16.3% |
 | **polygon** | **7.7%** | **34.3%** | **18.1%** |
 | polygon +1 m | 9.6% | 34.0% | 19.3% |
@@ -115,14 +115,14 @@ range**, 4.7% to 9.6%. The towers barely move — ±1 m on 33-34% and 16-19%.
 
 The reason is what the boundary is worth in each case. The pilot is a flat plate,
 so almost all of its rough points are at the roof edge; move the edge and you
-take or leave most of the signal. The towers are mostly wall, and a metre of wall
+take or leave most of the signal. The towers are mostly wall, and a meter of wall
 looks like the rest of the wall.
 
 This is the same effect that made the bbox survey overstate: the bbox reaches
 past the wall onto the ground, and the wall-to-ground transition is coherent, so
 it reads as structure. It is worst exactly where the building is simplest.
 
-Since Overture's Kentucky footprints are largely ML-derived, a metre of footprint
+Since Overture's Kentucky footprints are largely ML-derived, a meter of footprint
 error is ordinary. **Footprint accuracy is the dominant error term for
 flat-roofed buildings**, which are the majority.
 
@@ -131,7 +131,7 @@ flat-roofed buildings**, which are the majority.
 **The wall rate is close to the floor, and may be entirely it.** See below.
 
 **There is a false-positive floor.** A rough point can read coherent by chance:
-the inner neighbourhood also contributes to the wide plane it is compared
+the inner neighborhood also contributes to the wide plane it is compared
 against, so the deviations are not independent. Measured on pure noise at
 KyFromAbove's density it is under 20% of rough points, so the contribution scales
 with `rough_frac` — about 1 point of the pilot's 7.7%, about 7 of 400 West
@@ -156,7 +156,7 @@ Tractor Supply correctly absent at 0.5. The two lists share 9 buildings out of
 **Overture height is reported for orientation only** and is not used in any
 measurement here. The pilot's 5.3 m is close to the 5.8 m the LiDAR puts between
 its lowest return inside the footprint and its roof plate; both towers' heights
-are OSM-sourced and land within a metre of the LiDAR's vertical span.
+are OSM-sourced and land within a meter of the LiDAR's vertical span.
 
 ## Reproducing
 

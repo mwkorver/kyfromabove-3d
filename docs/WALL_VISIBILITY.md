@@ -15,14 +15,14 @@ camera head each building keeps (`scripts/wall_visibility.py`).
 
 ## What counts as seeing a band
 
-Points a metre apart across and up each band's wall, and for each frame:
+Points a meter apart across and up each band's wall, and for each frame:
 
 - **in the picture**: inside the frame, clear of its edge;
 - **not blocked**: the downtown meshes, drawn through the frame's camera,
   show nothing nearer than the point;
 - **face-on enough**: the camera within 70 degrees of straight out from the
   wall; past that a wall is a sliver;
-- **detail**: centimetres of wall per pixel, from the distance and the angle.
+- **detail**: centimeters of wall per pixel, from the distance and the angle.
 
 A frame *sees* a band when half its points pass. Two frames that see it from
 directions at least 10 degrees apart are what matching between frames needs
@@ -68,7 +68,7 @@ band by four frames. Only 8 % are seen by none.
 - **By building**, the walls hidden from every frame are on a few: the
   Kentucky Home Life Building, the building beside 400 West Market and the
   Marmaduke Building (nearly all their unknown bands, a handful each: tight
-  between neighbours), and 18 % of the Hyatt's.
+  between neighbors), and 18 % of the Hyatt's.
 
 ## What it does not say
 
@@ -95,7 +95,7 @@ windows also agrees one bay off. The imagery is 408 windows of 73 frames,
 0.3 GB, read once.
 
 Below, two frames of a Chase Bank Plaza wall laid on top of each other, one
-in red, one in cyan: grey where they agree. At the LiDAR's depth and at the
+in red, one in cyan: gray where they agree. At the LiDAR's depth and at the
 depth matching found (9 cm apart) they agree; 2 m out, the windows split
 into red and cyan.
 
@@ -129,7 +129,7 @@ the cut now applies them before the margin:
 - **not at the end of the search** (within 0.5 m of 8 m in or 3 m out);
 - **the band's thirds agree**: matched on their own, its three lengths land
   within 0.5 m of each other. Where they do, 2.1 % of measured bands are off
-  by over a metre; where they do not, 14 %.
+  by over a meter; where they do not, 14 %.
 
 ![depth from matching against the LiDAR, under the stricter cut](figures/wall_match_score.png)
 
@@ -154,12 +154,12 @@ the cut now applies them before the margin:
   to say.
 
 **On the 575 unknown bands, the stricter cut passes 196 (34 %), and moves
-44 of them more than a metre** from the footprint edge (the first cut: 463
+44 of them more than a meter** from the footprint edge (the first cut: 463
 and 232). The Hampton Inn's, 5-10 m up, is 2.3 m in:
 
 ![Hampton Inn: an unknown wall 2.3 m behind the footprint edge](figures/wall_match_unknown.png)
 
-Twenty-four of the accepted unknown bands that move half a metre or more,
+Twenty-four of the accepted unknown bands that move half a meter or more,
 at random: about 14 clearly agree at the new depth and fringe at the old,
 8 do not show it either way (most move 0.5-0.6 m, too little to see here,
 or are LG&E's glass), and 2 do not agree at either -- one LG&E glass band
@@ -172,7 +172,7 @@ reading is by eye, by someone who knew which side was which.
 
 The obliques see the walls the LiDAR missed, in frames the pipeline already
 has, and on walls the LiDAR can check, matching between them finds a
-wall's depth within half a metre on five bands in six, against one in
+wall's depth within half a meter on five bands in six, against one in
 three for today's guess. On the walls the LiDAR could *not* see it is
 harder -- glass, rounded ends -- and a stricter cut keeps a third of them,
 of which by eye a little over half visibly agree at the new depth and few
@@ -186,7 +186,7 @@ measured walls can take out.
 matcher (`kyfromabove_3d.wall_match`) on a building's own crops, after the
 LiDAR profile and before the mirror: an unknown band that passes becomes
 `matched`, at the matched depth less the building's lean, drawn the face's
-length and coloured from the frames like any wall. It is never the evidence
+length and colored from the frames like any wall. It is never the evidence
 for a face -- a face with no LiDAR wall band keeps its prism, and the mirror
 and the bridges read measured bands only -- and `building_matched.glb` shows
 the matched walls tinted cyan. `match_report.json` records every band tried.

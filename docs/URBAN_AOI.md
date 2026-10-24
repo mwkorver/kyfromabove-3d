@@ -109,7 +109,7 @@ Predictions recorded before running, so they can be wrong on the record.
 
 1. **`required_extent` sizing.** The pilot needed 1611 × 1457 px for a 16 m
    volume. A 165 m volume at 1 : 3.4 aspect may not fit the source crop at all.
-2. **Occlusion.** Neighbouring towers block views; the isolated-building
+2. **Occlusion.** Neighboring towers block views; the isolated-building
    pipeline has never faced this. The validity masks model *sensor* coverage,
    not *occlusion*, so an occluded facade will look like valid pixels.
 3. **The `Left` head.** Four frames may leave one facade unreconstructed.

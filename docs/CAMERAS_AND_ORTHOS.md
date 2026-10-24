@@ -26,7 +26,7 @@ print(report)   # median, p90 and max residual in pixels
 Image content around each LiDAR anchor is resampled onto the anchor's local
 surface plane in two exposures. Rectifying through a common plane removes the
 perspective difference, so a correct camera model makes the two patches
-identical; normalised cross-correlation measures the offset. The imagery decides
+identical; normalized cross-correlation measures the offset. The imagery decides
 the result — no value is derived from the model under test.
 
 The measure is sensitive: a 0.01° pointing error registers as 6.12 px.

@@ -10,13 +10,13 @@ Three downtown Louisville buildings, 20,376 textured triangles between them:
 *Left to right: 400 West Market, PNC Tower, the Humana Building, seen from
 the north-east. Every surface here is either a plane the LiDAR verified, a
 band of the wall profile, a locally fitted wall tile, or a cell of the roof
-height field; every colour is a pixel of the state's aerial frames. No
+height field; every color is a pixel of the state's aerial frames. No
 internet photograph reaches the mesh.*
 
 ## What the mesh is made of
 
 Four kinds of surface, in the order the script builds them, each one a thing
-the colourise (`colorize_building.py`) already computed:
+the colorize (`colorize_building.py`) already computed:
 
 1. **Wall rectangles from the profile bands.** `wall_profiles.json` holds,
    for each face of the footprint and each 5 m of height, where the LiDAR
@@ -29,8 +29,8 @@ the colourise (`colorize_building.py`) already computed:
    the band below — a set-back tower on its podium. A face whose plane was
    verified by fitted tiles is the whole face at that plane, in the same
    height steps, minus the open bands and beyond the corner clips, exactly
-   as the colourise extruded it.
-2. **Fitted wall tiles.** The 12 m squares the colourise fits to the wall
+   as the colorize extruded it.
+2. **Fitted wall tiles.** The 12 m squares the colorize fits to the wall
    returns and keeps where they lie on a plane (within 0.35 m). These are the
    wall where the LiDAR saw it directly, at the LiDAR's own position, and
    each is a rectangle in its own plane with its own small texture.
@@ -42,29 +42,29 @@ the colourise (`colorize_building.py`) already computed:
    They are dropped where a wall rectangle already stands (within 1.5 m) and
    where they stand *outside* the wall the profile puts at that height (the
    underside of an overhang that a 2.5-D surface has filled in), and kept
-   otherwise as LiDAR-shaped wall, one colour per triangle from whichever
+   otherwise as LiDAR-shaped wall, one color per triangle from whichever
    aerial frame faces it.
-4. **Textures, from the aerial frames only.** Walls are rasterised from an
-   aerial-only coloured cloud — `colorized_aerial.laz` (`.ply` in older runs), the colourise run
+4. **Textures, from the aerial frames only.** Walls are rasterized from an
+   aerial-only colored cloud — `colorized_aerial.laz` (`.ply` in older runs), the colorize run
    with no photograph cameras, which `build_mesh.py` makes for itself and
-   checks (it refuses a cloud with a single photo-coloured point) — at
+   checks (it refuses a cloud with a single photo-colored point) — at
    0.15 m per pixel: a point counts for a face where it lies on one of that
-   face's band rectangles, so the texture carries the obliques' colour and,
+   face's band rectangles, so the texture carries the obliques' color and,
    where a face was mirrored, the face opposite's. The point view
    (`colorized.ply`) may still carry admitted photographs; the mesh never
    does. The roof is sampled
    straight from the aerial frames through each camera model, with the
    LiDAR depth test against the building's own returns; the nadir frame
    (the `Color` head) wins wherever it sees the roof because it is the most
-   face-on. A gap between returns takes the nearest colour; a stretch of
-   wall nothing saw, more than 1.5 m from any real colour, takes the face's
+   face-on. A gap between returns takes the nearest color; a stretch of
+   wall nothing saw, more than 1.5 m from any real color, takes the face's
    median so it reads as plain wall rather than as smear.
 
 The glTF is unlit (`KHR_materials_unlit`): the imagery already carries the
 sun, and a second lighting pass in the viewer darkened every face the
 viewer's sun was behind. The node's `extras` carry the name and the GERS
 id. The tileset is 3D Tiles 1.1 with the glTF as content and a root
-`transform` that places the building's local metre frame (east, north, up
+`transform` that places the building's local meter frame (east, north, up
 at the state-plane origin, converted through the geoid as for the points)
 on the Earth.
 
@@ -110,7 +110,7 @@ surface. A dome wants a fitted surface of revolution, not a grid.
 
 It is better than OSM Buildings on every row but coverage. Against
 Google's mesh it trades photographic completeness for clean geometry, ids,
-an open licence, and an honest gap where the evidence stops.
+an open license, and an honest gap where the evidence stops.
 
 ### Side by side with Overture
 
@@ -127,8 +127,8 @@ come from **Microsoft ML Buildings** (the machine-learned height model
 behind the Microsoft footprint releases), the other 14 from OSM tags — the
 three landmarks among them, PNC Tower 156 m, Humana 127 m, 400 West Market
 167 m. 50 more have only a floor count (drawn at 3.5 m a floor) and 228 —
-six in ten — have neither and are drawn at a 6 m guess. The box colour says
-which: grey, blue-grey, orange. So the honest comparison is not the three
+six in ten — have neither and are drawn at a 6 m guess. The box color says
+which: gray, blue-gray, orange. So the honest comparison is not the three
 landmarks, where OSM contributors typed the height from the building's own
 literature, but the block around them, where the LiDAR knows every roof
 and Overture knows one in four.

@@ -18,7 +18,7 @@ anchors inside the bounding volume, and both numbers are now printed:
 [qa] cross-direction, in volume   : median 2.96 px over 1631 matches (52% accepted)
 ```
 
-The measurement is not re-run. `ReprojectionReport.filter_anchors` re-summarises
+The measurement is not re-run. `ReprojectionReport.filter_anchors` re-summarizes
 the same matches over a smaller population, so the two numbers are exactly
 comparable.
 
@@ -28,12 +28,12 @@ The prediction was that restricting to the building would *lower* the pilot's
 2.10 px. It went **up, to 2.96 px**.
 
 The reasoning behind the prediction was wrong in a specific way worth recording.
-The anchor-visibility map colours each anchor by **acceptance rate**, and the
+The anchor-visibility map colors each anchor by **acceptance rate**, and the
 pilot's roof is green while its surround is red — which was read as "the roof
 matches well". Acceptance rate is not residual. The residual-versus-distance
 figure, built in the same batch, says the opposite:
 
-| distance from centre | median residual |
+| distance from center | median residual |
 |---|---|
 | 0–10 m | 2.8 px |
 | 10–20 m | 3.9 px |
@@ -56,7 +56,7 @@ harsh now.
 ```
 
 Three matches. Of `building_002`'s **392 anchors, only 24 fall inside the tower
-volume**, all between 140 and 143.6 m, and all labelled `roof`.
+volume**, all between 140 and 143.6 m, and all labeled `roof`.
 
 Not one anchor sits on a facade. So the tower's published Phase 1 numbers —
 1.89 px within-group, 4.43 px cross-direction, 1.82 m 3D discrepancy — were
@@ -95,9 +95,9 @@ Against **24** anchors from the current method. The facade is better sampled
 than the crown, and flatter than the roof filter's own 0.08 m threshold would
 suggest is available.
 
-Neighbourhood size matters: `k=8` gives median RMS 0.104 m, `k=16` gives 0.168,
+Neighborhood size matters: `k=8` gives median RMS 0.104 m, `k=16` gives 0.168,
 `k=32` gives 0.211. A facade is locally flat but globally curved around the
-building, so a tight neighbourhood fits it and a wide one straddles corners.
+building, so a tight neighborhood fits it and a wide one straddles corners.
 
 > A sampling correction worth keeping: an initial pass queried `10 < r < 18 m`
 > and found **nothing** below 105 m, which read as "the facades are not sampled".
@@ -163,15 +163,15 @@ counted as `low_ncc` rejections, which reads as the method failing.
 The sign of a facade normal is what says which side is visible, and
 `fit_local_planes` returns an arbitrary one. Two plausible rules are wrong:
 
-* **Local neighbourhood centroid** — sits *in* the wall plane, because on a
-  hollow cloud the neighbourhood is the wall. 68% correct on the tower.
+* **Local neighborhood centroid** — sits *in* the wall plane, because on a
+  hollow cloud the neighborhood is the wall. 68% correct on the tower.
 * **Occupancy probe** — "LiDAR never sees inside a building, so the emptier side
   is outside". False: the outside of a wall is air and is equally empty. **60%**
   on a clean hollow box, barely above chance.
 * **Cross-section centroid** — points in a thin z-slab within 40 m. A closed
   cross-section has its centroid inside it. Over 90% on the box, **88% on the
   tower shaft**, where the remaining errors are on setback faces and
-  neighbouring structures caught in the shaft band.
+  neighboring structures caught in the shaft band.
 
 ### The two blockers are cleared
 
@@ -212,7 +212,7 @@ is now weaker than it was.
 
 What the facade evidence settled, for the project rather than the QA: **facades
 stay in the deliverable.** They are the biggest surface on a tall building, they
-match as well as roofs, and the LiDAR has no colour on them any more than it
+match as well as roofs, and the LiDAR has no color on them any more than it
 does anywhere else. Building selection carries a facade term alongside the roof
 complexity score — see `docs/SURVEY_ZONES.md`. It also rules out a 2.5D TIN as
 the reconstruction target, since a 2.5D surface cannot represent a vertical

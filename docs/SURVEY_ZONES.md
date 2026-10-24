@@ -87,14 +87,14 @@ nothing to fix and everything to ignore: the facade term fires on **2 of 281**
 buildings statewide and **7 of 222** urban, adding just one and two buildings
 that the roof score had not already picked.
 
-That is correct behaviour, not a failure. **A footprint over 5,000 m² is wide
+That is correct behavior, not a failure. **A footprint over 5,000 m² is wide
 and low by construction**, with a facade-to-roof ratio around 0.4. The buildings
 where walls dominate are excluded from this survey entirely — 400 West Market
 and PNC Tower have ~1,800 m² footprints and ratios of 16.
 
 So facades get their own list, selected the opposite way:
 
-> A facade candidate is a building at least **12 m** tall (about four storeys)
+> A facade candidate is a building at least **12 m** tall (about four stories)
 > whose **wall area is at least twice its roof area**, and at least **500 m²** in
 > absolute terms.
 
@@ -114,7 +114,7 @@ stand in for the other.
 ### Where to start
 
 The default 500 m² floor is permissive — the median candidate is a 15 m building
-with 688 m² of wall, a four-storey downtown block.
+with 688 m² of wall, a four-story downtown block.
 
 | wall area floor | candidates | median height |
 |---|---|---|
@@ -138,11 +138,11 @@ and the temporal alignment point at the same ground.
 **Buildings with no height.** Unlike footprint area, height cannot be recovered
 from the geometry Overture ships, so a tall building with neither `height` nor
 `num_floors` is invisible. Where only floors are given, height is estimated at
-3.5 m per storey — deliberately under the 3.9 and 4.8 m the two Louisville
+3.5 m per story — deliberately under the 3.9 and 4.8 m the two Louisville
 towers actually have, so the estimate under-selects rather than over-selects.
 Only 147 of 3,640 rely on that fallback.
 
-**Occlusion.** Whether a *particular* wall face is visible needs neighbouring
+**Occlusion.** Whether a *particular* wall face is visible needs neighboring
 geometry. The survey's own `facade_returns_per_m2` is the empirical stand-in
 once a building is measured — if the LiDAR reached the wall, something could see
 it — but it cannot be computed from Overture alone.
@@ -160,7 +160,7 @@ rough point can read coherent by luck, under 20% of rough points on pure noise.
 Unchanged by any of this.
 
 **Footprint accuracy still dominates on flat buildings.** Splitting by zone does
-not fix a footprint off by a metre; it stops the ground the footprint admits from
+not fix a footprint off by a meter; it stops the ground the footprint admits from
 being scored as roof.
 
 ## Reproducing

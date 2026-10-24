@@ -1,7 +1,7 @@
 # Downtown Louisville, every footprint: the batch run
 
 Three buildings were made by hand — a config each, a preparation with its
-QA, a colourise, a mesh. The other 375 Overture footprints in the 1.2 km
+QA, a colorize, a mesh. The other 375 Overture footprints in the 1.2 km
 downtown box were run by `scripts/run_downtown.py` from LiDAR, obliques and
 nadir frames alone, and gathered into one tileset that `/compare` shows
 beside Overture's boxes at LiDAR heights.
@@ -12,7 +12,7 @@ beside Overture's boxes at LiDAR heights.
 on this Mac** (four workers; a median of 22 s per building, 90 % under
 36 s, the slowest — the arena — 114 s). Every one of the 375 footprints got
 a mesh: 345 by the profile path and 30 by the box path (too few returns, or
-the colourise declined); none failed after one resume, which re-ran five
+the colorize declined); none failed after one resume, which re-ran five
 buildings that a first-pass bug or an S3 hiccup had stopped.
 
 ![closer, from the north-east](figures/compare_downtown_close.jpg)
@@ -40,20 +40,20 @@ building) and, four buildings at a time in their own processes:
    whole area, the best four per camera head by how far the building sits
    from the sensor edge, all eight corners of the footprint's volume on the
    sensor, relaxed to six or four when fewer than three frames pass — and
-   their crops; a `footprint.json` carrying the record and the neighbouring
-   footprints within a metre. About 5–15 s.
-2. **colourise** (`colorize_building.py --out colorized_aerial.laz`): as for
+   their crops; a `footprint.json` carrying the record and the neighboring
+   footprints within a meter. About 5–15 s.
+2. **colorize** (`colorize_building.py --out colorized_aerial.laz`): as for
    the landmarks, with the occluder cloud windowed from one cached downtown
    cloud instead of range-read per building, vegetation and noise classes
-   left out, and the neighbours' returns cut out of the profile. When it
+   left out, and the neighbors' returns cut out of the profile. When it
    declines — no camera, too few returns to split ground from wall from
    roof — the building takes the box path and it is not a failure.
 3. **mesh** (`build_mesh.py`): profile bands where the returns gave them; a
    prism face at the roof's edge height (the median height-field cell within
    2 m of the edge, so a podium edge is not pulled up to the tower) where
    they did not, textured straight from the frames through the camera
-   models; a party wall — an edge lying mostly within half a metre of a
-   neighbour — drawn plain, because nothing sees it; the roof as the height
+   models; a party wall — an edge lying mostly within half a meter of a
+   neighbor — drawn plain, because nothing sees it; the roof as the height
    field, or flat at the building's height on the box path; every texture
    of the building packed into one atlas page, so a building is a few draw
    calls rather than one per face.
@@ -64,7 +64,7 @@ building) and, four buildings at a time in their own processes:
 `merge_downtown_tileset.py` then places every building's glTF as a child of
 one root, grouped into 150 m cells for culling, each child with its
 transform relative to the downtown frame, and the boxes as the root's own
-content so a far view shows grey prisms that the meshes replace up close.
+content so a far view shows gray prisms that the meshes replace up close.
 
 ## What was learned
 
@@ -77,11 +77,11 @@ content so a far view shows grey prisms that the meshes replace up close.
 * **Row buildings are the common case, not the landmark.** 127 of 375
   buildings share a wall. The profile has nothing to say about a wall no
   return reaches and no camera sees, and the mesh must know not to paint
-  it with the neighbour: the neighbours ride in each building's
+  it with the neighbor: the neighbors ride in each building's
   `footprint.json` for exactly that.
 * **The fallback does most of the small buildings.** The profile bands
   need 30 returns per 5 m band in an 8 m window; a 40 m² shop front under
-  a taller neighbour rarely has them. A prism face at the roof's edge
+  a taller neighbor rarely has them. A prism face at the roof's edge
   height, textured through the cameras, is the honest answer there, and
   it is what 168 of the 375 buildings are mostly made of.
 * **What still goes wrong.** Steep height-field cells on a busy roof (an
@@ -94,12 +94,12 @@ content so a far view shows grey prisms that the meshes replace up close.
 ## A wall needs a roof behind it, and a tower on a podium is two bodies
 
 RIVUE Tower showed the run's worst habit. Overture's footprint is the
-whole 6,858 m² block — a one-storey base with the 70 m tower well inside
+whole 6,858 m² block — a one-story base with the 70 m tower well inside
 it. The profile found the tower's west wall 12.3 m inside the block's edge
 and, through the "read a hidden face from the face opposite" rule, copied
 it onto the short faces opposite and the 104 m south edge: a full-length
 sheet of wall at tower height, floating at the edge of the envelope, where
-the tower is 30 m wide. The base itself was not modelled at all.
+the tower is 30 m wide. The base itself was not modeled at all.
 
 Two rules, both now in the run:
 
@@ -108,7 +108,7 @@ Two rules, both now in the run:
   the roof height field, sampled 1–4 m inside the wall line, reaches the
   band's bottom. The sheet on RIVUE's south edge had a 9 m roof behind it
   and vanished above 10 m. Prism faces follow the roof beside the edge
-  stretch by stretch, so a one-storey base gets its 13 m wall and a step
+  stretch by stretch, so a one-story base gets its 13 m wall and a step
   where the base ends.
 * **A distinct upper level is its own body.** From the roof returns inside
   the footprint: when the cells above 40 % of the top height cover 5–70 %
@@ -139,7 +139,7 @@ too big to look at.
 
 **A curved wall used to come out as slats.** Overture draws a curve as a
 chain of edges under 3 m; `wall_planes` dropped edges that short, so the
-colourise never profiled them, and the mesh drew each one as its own
+colorize never profiled them, and the mesh drew each one as its own
 rectangle at the roof's edge height, textured on its own — a fan of slats
 with a seam at every edge. Now a run of four or more consecutive edges no
 longer than 4 m, turning the same way by 3–35° at each vertex and by 35°
@@ -151,7 +151,7 @@ profile, the bands, the roof-behind clip, the wall rectangles and the
 texture are computed by exactly the code a straight face uses, and only
 the finished rectangles are rolled back onto the circle, cut every 1.5 m
 so they follow it. A curved prism face is textured as one image sampled
-along the curve rather than one per piece. A rounded corner of a metre or
+along the curve rather than one per piece. A rounded corner of a meter or
 two (an arc under 6 m long) stays a corner; a traced tower outline never
 grows arcs (its corners are rounded by the tracing, not by the building).
 
@@ -159,8 +159,8 @@ Nine downtown footprints have such runs; six were rebuilt: a round kiosk
 (a full circle of 25 edges, one face now instead of 25), the round tower
 on a block at 4bacf443 (252° of arc, radius 8 m), Papa John's semicircular
 end, One Innovation Center's rounded end, the two 22 m-radius corners of
-the Witherspoon garage and the convention centre's curved corner. Only the
-convention centre's arc found wall bands in the returns (the others are
+the Witherspoon garage and the convention center's curved corner. Only the
+convention center's arc found wall bands in the returns (the others are
 glass, or deck edges, and stay prism faces at the roof's edge) — but on
 every one the slats are gone.
 
@@ -175,7 +175,7 @@ with the tower inside the outline. Now `overture_boxes.py split` looks at
 the roof cells of every footprint with at least 200 returns: when they
 fall into two heights, each holding a quarter or more of the outline (and
 40 m²), each spread under 1.5 m, at least 3 m apart, each one patch, and
-the cells where they meet lie on a straight line within a metre, the
+the cells where they meet lie on a straight line within a meter, the
 outline is cut along that line into two buildings. A tower on a podium is
 told apart because its high patch is enclosed by low cells on most of its
 boundary; a second building meets the first along one side and the
@@ -183,12 +183,12 @@ outline everywhere else.
 
 Twelve of the 378 downtown outlines split. Each part is a record of its
 own with its own LiDAR height, ground and return count; the runner
-prepares, colourises and meshes it like any building, and the two parts
-are each other's neighbours, so the wall between them is a party wall.
+prepares, colorizes and meshes it like any building, and the two parts
+are each other's neighbors, so the wall between them is a party wall.
 Party walls changed with this: they are plain only **up to the
-neighbour's roof** and textured from the cameras above it, stretch by
+neighbor's roof** and textured from the cameras above it, stretch by
 stretch along the edge — the tall part's wall over the short part's roof
-is exactly that, and so is every row building taller than its neighbour,
+is exactly that, and so is every row building taller than its neighbor,
 which until now was plain to the top.
 
 **Ids.** A GERS id names one Overture entity, and a piece of it is not
@@ -208,7 +208,7 @@ followed the roof field cell by cell, so the roofs were right — and shows
 mainly at the wall between the parts, which now stops at the short roof
 and is textured above it, and in the building record, where each part
 has its own height. Where the split matters most is the box path and the
-grey boxes: a footprint with too few returns for a profile gets its roof
+gray boxes: a footprint with too few returns for a profile gets its roof
 at the taller building's height across both.
 
 ![the six split footprints before and after](figures/split_before_after.jpg)
@@ -221,7 +221,7 @@ python scripts/run_downtown.py run --footprints data/derived/louisville_downtown
 The remaining two curved buildings (a ninth candidate's arc is under 6 m
 and stays a corner) and the other six split footprints were then run the
 same way, and then the whole downtown once more with every rule in place
-(arcs, splits, party walls to the neighbour's roof, KTX2 textures, LAZ
+(arcs, splits, party walls to the neighbor's roof, KTX2 textures, LAZ
 clouds): **387 buildings in 38 minutes**, none failed, a median of 18 s
 a building (the crops re-cut where they had been deleted), 68 MB of glTF
 for the lot. The downtown tileset holds **390 buildings** — 378 outlines
@@ -260,11 +260,11 @@ split after the sliver guard; now 121, 73 and 168 m² at 12.0, 8.5 and
 more footprint, b575ad92 (Red7e), finds two heights but is refused for a
 3° sliver — it was not split before either.
 
-### A neighbour's wall is not the roof: heights measured inside the edge
+### A neighbor's wall is not the roof: heights measured inside the edge
 
 A footprint's LiDAR height is the 99th percentile of the returns above its
-ground. An Overture outline overlaps its neighbour's wall by a few
-decimetres, and a tall neighbour's facade returns land in that strip:
+ground. An Overture outline overlaps its neighbor's wall by a few
+decimeters, and a tall neighbor's facade returns land in that strip:
 9947f2b0, an 18 m building beside 400 West Market, measured 115 m, and its
 box on the right of `/compare` stood as a tower. Every one of its returns
 above 30 m lay within 2 m of its edge. The height is now taken from the
@@ -274,13 +274,13 @@ outline when too few lie inside). Over downtown the median change is
 9947f2b0 to 17.7 m, cc3f65d1 (beside Humana) from 88.9 to 20.2 m — and
 five rise by 1–4 m, where dropping the low eaves along the edge lets an
 inside feature count for more (the Cathedral of the Assumption, 61 to
-65 m, towards its spire). The same height caps the neighbour prisms in the
+65 m, towards its spire). The same height caps the neighbor prisms in the
 texturing and sets how high `build_mesh` draws a party wall plain; a
 building's meshes pick the new heights up the next time it is prepared.
 
 ## Why the buildings floated over the map, and the ground they stand on now
 
-Seen from the street, every building hung about a hundred metres above
+Seen from the street, every building hung about a hundred meters above
 the OpenStreetMap tiles. The buildings were not wrong: each sits at its
 true height above the ellipsoid (the smooth mathematical globe that GPS
 heights and Cesium's coordinates refer to), about 106 m in downtown
@@ -288,18 +288,18 @@ Louisville — the LiDAR's NAVD88 ground of ~140 m less the 34.5 m the
 geoid lies above the ellipsoid there. The *map* was wrong: the viewer
 drew it on the bare ellipsoid (`EllipsoidTerrainProvider`), a globe with
 no terrain at all, so the tiles lay at height zero and the buildings
-stood a hundred metres over them. From above the gap hides behind the
+stood a hundred meters over them. From above the gap hides behind the
 buildings; from a low angle it is the whole picture.
 
 The fix is not to lower the buildings but to give the viewer the ground,
 and the LiDAR has it: `scripts/ground_dem.py` grids the ground-classified
 returns over the area (2 m cells, the median height in each, the gaps
 under the buildings filled from the nearest ground cell) and writes the
-heights as ellipsoidal metres; the intake server serves it as heightmap
+heights as ellipsoidal meters; the intake server serves it as heightmap
 tiles (`/terrain?x=&y=&level=`) that Cesium's
 `CustomHeightmapTerrainProvider` reads, and both viewers use it. Checked
 against every building's own recorded ground: the DEM at the footprint's
-centre is within 0.14 m of it for half the buildings and within 0.74 m
+center is within 0.14 m of it for half the buildings and within 0.74 m
 for nine in ten (the rest are sloping lots). Outside the DEM the ground
 is clamped to its edge, so the far globe is a plateau at the downtown's
 height — fine for a downtown view, and the place to swap in a statewide
@@ -311,12 +311,12 @@ ground (the KyFromAbove DEM, also on S3) when the tileset grows.
 
 The LiDAR fixes each wall's plane — its offset, to about 0.10 m — but says
 little about where a face *ends*: the corners come from Overture's
-outline, a metre off as a matter of course, and from thin corner returns.
+outline, a meter off as a matter of course, and from thin corner returns.
 A building's edge, though, is a line the frames show crisply, on glass as
 well as brick. So for every end of every straight face, a strip of the
 wall's plane 6 m wide and up to 12 m tall is sampled from **one frame at
 a time** through its camera; past the wall's true end the strip holds
-sky, ground or the neighbour, and the silhouette is a strong vertical
+sky, ground or the neighbor, and the silhouette is a strong vertical
 edge. Only a silhouette counts — the texture's structure must *stop* past
 the edge, which rules out window jambs, piers and shadows, where it
 continues. Each frame votes; an observation needs two frames agreeing
@@ -327,9 +327,9 @@ line beside it that the LiDAR did *not* verify is slid — its offset, not
 its direction — to pass through the new corner; a verified line never
 moves. Moving a line moves its other corner, so the pass repeats round the
 outline until nothing moves more than 5 cm. A move over 2 m, or two faces
-whose observed ends disagree by more than a metre, is refused; corners on
+whose observed ends disagree by more than a meter, is refused; corners on
 a party wall (nothing to see) or on a curved wall are left alone. It runs
-in the colourise before any face is profiled, so the bands and the
+in the colorize before any face is profiled, so the bands and the
 textures use the snapped outline, and `corner_snap.json` records every
 corner's status and its gap before and after.
 
@@ -338,18 +338,18 @@ Measured on the twelve arc and split buildings, 290 corners:
 ![what happened to each corner, and the gap before and after](figures/corner_snap_gaps.png)
 
 **Where a corner can be seen, it snaps: 22 corners, from a median gap of
-1.20 m to 0.00 m.** The convention centre's south-east corner on
+1.20 m to 0.00 m.** The convention center's south-east corner on
 Jefferson Street moved 1.9 m; its wall had run on into the air past the
-last window, as a grey untextured slab, and now ends where the windows
+last window, as a gray untextured slab, and now ends where the windows
 end:
 
-![the convention centre's south-east corner before and after](figures/corner_snap_kicc_jefferson.jpg)
+![the convention center's south-east corner before and after](figures/corner_snap_kicc_jefferson.jpg)
 
 **But most corners in a downtown cannot be seen.** 48 are party-wall
 corners — the twelve split parts are attached buildings, every corner of
 theirs is one; 122 lie on curved walls or on edges too short for a plane;
 88 had no frame that showed a silhouette, mostly the parking garage's open
-decks and corners hidden behind neighbours; 10 were refused because the
+decks and corners hidden behind neighbors; 10 were refused because the
 two faces' edges disagreed. This is the honest shape of the result: the
 rule is safe (nothing moved that should not have) and it fixes the
 free-standing corners, which are the visible ones, and it has nothing to
@@ -363,7 +363,7 @@ python scripts/run_downtown.py run --only <gers> ... --force-step colorize mesh 
 python scripts/plot_corner_snap.py --only <gers> ...
 ```
 
-## A structure label is a label, and a metre of placement is not free
+## A structure label is a label, and a meter of placement is not free
 
 A later round of work added a *structure label* for every building —
 `simple_box`, `tiered_box`, `complex_roof` or `sculpted_facade`, from the
@@ -374,14 +374,14 @@ profiles or fitted wall tiles. A review of that work measured what it did
 and reversed three parts of it.
 
 **The label chose the mesh for 29 buildings, and each lost its LiDAR
-shape.** 42 buildings were labelled `simple_box`; 13 were already boxes
+shape.** 42 buildings were labeled `simple_box`; 13 were already boxes
 (the LiDAR barely touched them), and the other 29 went from hundreds or
 over a thousand triangles to a dozen — a median of 85% of the triangles
 gone. Every other building was unchanged. Now every building the LiDAR
 covers is built from its returns again, and the label is written to
 `classification.json` and the tileset's extras as information only:
 
-![the 42 buildings labelled simple_box: triangles on origin/main, as a box, and rebuilt](figures/structure_label_meshes.png)
+![the 42 buildings labeled simple_box: triangles on origin/main, as a box, and rebuilt](figures/structure_label_meshes.png)
 
 The reason is not that the label was wrong for those buildings; many of
 them are near enough to boxes. It is that where the LiDAR is dense — and
@@ -392,7 +392,7 @@ three quarters of downtown falls in `sculpted_facade`, the catch-all,
 because one building has a flat roof, a curved corner and a party wall at
 once. Choosing a model by type belongs where the returns are too thin to
 show the shape — a small rural building with a few returns per square
-metre, whose gable is better fitted as two planes than read off a noisy
+meter, whose gable is better fitted as two planes than read off a noisy
 grid — and there per roof region or face group, checked on a before/after
 sheet like the arcs and splits were. That has not been tried.
 
@@ -404,7 +404,7 @@ try. Counted cell by cell it called most downtown roofs sloped: the roof
 grid is a per-cell percentile, smoothed, so a sheer step between two flat
 roofs becomes a ramp one or two cells wide, and plant rooms and parapets
 do the same — on 45 roofs whose returns lie within 0.2 m of one plate, a
-fifth of the cells read as sloped. A pitched roof slopes over metres, so a
+fifth of the cells read as sloped. A pitched roof slopes over meters, so a
 sloping cell now counts only inside a sloping patch at least 3 m across.
 Over the 399 building records half the roofs now read 0–1.5% sloped;
 149 have 5% or more of their roof in sloping patches, and the six highest
@@ -430,10 +430,10 @@ round of work, 0.00 m from it.
 Three smaller repairs from the same review:
 - A small tower or lantern in the middle of a roof (under 5% of the
   footprint) was cut off at the lower roof's height, as if it were a
-  neighbour's wall spilling over the edge. Only upper returns along the
+  neighbor's wall spilling over the edge. Only upper returns along the
   footprint's edge are taken for spill now.
-- A wall band with few coloured points borrowed any denser surface within
-  4.5 m, in front of it too — a neighbour's facade across a party wall
+- A wall band with few colored points borrowed any denser surface within
+  4.5 m, in front of it too — a neighbor's facade across a party wall
   could be painted on. Only a wall up to 2 m *behind* the band, never on a
   party face, is taken now.
 - The batch rebuild (`scripts/rebuild_downtown_meshes.py`, since removed) counted a
@@ -443,7 +443,7 @@ Three smaller repairs from the same review:
 
 ## Checking a mesh against the frames it was not textured from
 
-The pipeline is one pass. Every texel takes its colour from the single
+The pipeline is one pass. Every texel takes its color from the single
 frame that faces it most squarely, and the building's other frames — about
 nineteen per building, from five heads and several flight lines — go
 unused. The texture check (`scripts/check_building.py`,
@@ -451,18 +451,18 @@ unused. The texture check (`scripts/check_building.py`,
 `building.glb` back, lays a grid over each face (a wall in its own
 along-and-up frame, the roof in plan), and looks at every grid point through
 every frame that sees it, with the same facing, crop and depth tests the
-colourise uses. Two rules keep it honest:
+colorize uses. Two rules keep it honest:
 
 - **A frame is scored only on the points it did not texture.** Comparing a
   texel with the frame it was copied from measures nothing; that
   comparison is kept only as the *ceiling* — how well a face can agree at
   all, given the texture and its compression.
-- **It compares the pattern, not the colour.** The frames differ in sun,
+- **It compares the pattern, not the color.** The frames differ in sun,
   exposure and, on glass, reflections. Both images are reduced to
   brightness with the slow shading removed and compared by correlation
-  (1 = the same pattern, 0 = unrelated); the shift, in metres on the face,
+  (1 = the same pattern, 0 = unrelated); the shift, in meters on the face,
   that lines them up best is searched within 1.5 m. A shift at the edge of
-  that search is not counted: on a curtain wall that repeats every metre
+  that search is not counted: on a curtain wall that repeats every meter
   and a half it is the next mullion lining up, not a measurement.
 
 On a synthetic wall (`tests/test_texture_check.py`) the check behaves as
@@ -480,11 +480,11 @@ PNC's facade. The depth maps that decide what a frame can see are built
 from LiDAR returns, and the LiDAR is flown from above: a tower's walls hold
 few returns, so seen from the side its facade is mostly empty in the
 depth map, whether that map is built from the building's clip or from the
-whole area's cloud. The check now also puts every neighbour into each depth
+whole area's cloud. The check now also puts every neighbor into each depth
 map as a solid prism — its Overture footprint up to its LiDAR height
 (`add_prism_occluders`). Humana went from 0.14 to 0.51, 400 West Market
 from 0.37 to 0.53; the Omni, with nothing tall in front of it, stayed at
-0.61. The texturing had the same blind spot; see "Solid neighbours in the
+0.61. The texturing had the same blind spot; see "Solid neighbors in the
 texturing" below.
 
 Over sixteen buildings (the twelve curved and split ones, the Omni, PNC
@@ -493,17 +493,17 @@ Tower, Humana and 400 West Market — 22 meshes counting split parts):
 ![each building's agreement beside its ceiling, and every face's agreement against its area](figures/texture_check.png)
 
 - Half the buildings agree at 0.53 or better, against ceilings of 0.8–0.9.
-  The large, plain ones do best: Papa John's 0.78, the convention centre
+  The large, plain ones do best: Papa John's 0.78, the convention center
   0.74, One Innovation Center 0.65, the Witherspoon garage 0.63.
 - **Roofs agree well** (0.5–0.8 almost everywhere). **Walls are where the
   disagreement is**, from −0.1 to 0.9 at every size.
 - Low scores so far have three kinds of cause, and a sheet tells which:
   a texture defect (the Omni's tower face has an untextured stepped patch
   where the frame shows it lit), a shape the model cannot be (a tower of
-  open columns modelled as a solid cylinder, seen through by every other
+  open columns modeled as a solid cylinder, seen through by every other
   frame), and glass (PNC Tower's dark curtain wall reflects something
   different in every frame — only its roof agrees). Small split parts
-  score low and noisily: a few hundred square metres seen by one or two
+  score low and noisily: a few hundred square meters seen by one or two
   frames.
 - A face whose agreement is low (under 0.3) with no clear shift to explain
   it is flagged `low_without_shift` in `texture_check.json`: glass, a
@@ -520,17 +520,17 @@ while the frame crops are still on disk (`--no-check` skips it,
 `--check-sheets` draws the sheets). Nothing has been adjusted from it yet;
 it measures.
 
-### Solid neighbours in the texturing: the first adjustment
+### Solid neighbors in the texturing: the first adjustment
 
-The colourise and the mesh's own frame sampling (prism faces, roofs) now
-put the neighbours into every frame's depth map as solid prisms, as the
+The colorize and the mesh's own frame sampling (prism faces, roofs) now
+put the neighbors into every frame's depth map as solid prisms, as the
 check does (`neighbour_prisms`, `add_prism_occluders` in
-`colorize_building.py`; `--no-prism-occluders` turns it off). A neighbour
-the colourise has seen stands as its levels — a podium at the podium's
+`colorize_building.py`; `--no-prism-occluders` turns it off). A neighbor
+the colorize has seen stands as its levels — a podium at the podium's
 height, a tower on its own outline above — and one it has not as its
 footprint at its LiDAR height. `build_mesh`'s own sampling also moved from
 the building's LiDAR clip (27 m past the footprint) to the area's cloud,
-as the colourise already used.
+as the colorize already used.
 
 Measured by building each mesh twice on the same code, once with and once
 without, and checking both — 169 faces on the thirteen downtown buildings,
@@ -541,18 +541,18 @@ Humana and 400 West Market:
 **12 faces are better by more than 0.05 (4,800 m²), none worse by as
 much, and the rest do not move.** Humana's tower face towards PNC goes from
 0.01 to 0.14, another Humana face from 0.06 to 0.30, nine faces of the
-convention centre by 0.05–0.09, a split part from 0.27 to 0.44. In the
+convention center by 0.05–0.09, a split part from 0.27 to 0.44. In the
 check's sheets Humana is no longer drawn through PNC Tower. The effect is
 modest because few downtown walls stand behind something much taller;
 where one does, it is the fix. It costs nothing measurable (2.4 against
 2.5 minutes for the thirteen).
 
-Two things this turned up. **Most neighbours' `levels.json` are stale**:
+Two things this turned up. **Most neighbors' `levels.json` are stale**:
 362 of 381 were written before the spill cap in `building_levels`, and
 some hold the tall building next door — cc3f65d1, an 18 m building beside
 Humana, has a level to 116 m, and its own mesh reaches 55 m. As prisms,
 those levels hid Humana's walls (the check fell to 0.08), so a level is
-now capped at the footprint's LiDAR height; re-colourising downtown will
+now capped at the footprint's LiDAR height; re-colorizing downtown will
 rewrite them properly and fix that building's mesh. And **scores are only
 comparable under the same check**: 400 West Market's old mesh scored 0.53
 under the first version of the check and 0.37 under this one; rebuilt, it
@@ -567,7 +567,7 @@ mesh-only rebuild in the round of work reviewed above
 (`rebuild_downtown_meshes.py`, since removed) ran after `run_downtown` had deleted the
 frame crops, as it does after every mesh. With no crops, `build_mesh`
 quietly textured every prism face and roof from the point cloud or left it
-grey: on `origin/main` all 390 buildings were textured from the frames, in
+gray: on `origin/main` all 390 buildings were textured from the frames, in
 the reviewed tileset 6 were. `build_mesh` now stops when a building's
 frames are listed but their crops are gone. The sixteen checked here were
 rebuilt with their frames (`run_downtown.py run --only ... --force-step
@@ -582,10 +582,10 @@ python scripts/plot_texture_check.py --dirs outputs/downtown/buildings/<gers> ..
 
 ## Three products: measured, measured, and invented
 
-The run now makes three products, each labelled for what it is
+The run now makes three products, each labeled for what it is
 ([PRODUCTS.md](PRODUCTS.md)): Overture footprints at their LiDAR heights
-(product 1); the measured 3D Tiles, colour only where a frame saw the
-texel (product 2 — the twin-face colour copy, an invention, is no longer
+(product 1); the measured 3D Tiles, color only where a frame saw the
+texel (product 2 — the twin-face color copy, an invention, is no longer
 part of it); and the completed 3D Tiles, product 2 with its unseen texels
 invented from the same building's own frames (product 3,
 `run_downtown.py run --complete`, merged into `outputs/downtown_complete/`
@@ -593,7 +593,7 @@ and a tinted copy that shows what was invented). Which invention runs on
 which kind of texture was set by a held-out test on 16,759 rectangles of
 facade the frames did see, over 342 buildings: the facade's own rhythm and
 patches of itself beat the plain fill on walls, the twin copy failed badly
-(its colour closer than plain in 13% of rectangles) and is off. The full
+(its color closer than plain in 13% of rectangles) and is off. The full
 run (57 minutes, 389 buildings, no failures) also put the frame textures
 back on every building of product 2.
 
@@ -604,15 +604,15 @@ back on every building of product 2.
 **What one building costs, measured.** The first downtown run spent 22 s
 of worker time on the median building: 2 s reading the LiDAR clip, 15 s
 cutting about 18 crops out of the aerial frames on S3, 5 s on the mesh
-and the rest on the colourise. The re-run, which had to cut the crops
+and the rest on the colorize. The re-run, which had to cut the crops
 again, took 56 s. Downtown is the hard case (18 frames at 1,150 px,
-6,900 m² blocks, 70 m towers); a house is one storey on 150 m² and needs
+6,900 m² blocks, 70 m towers); a house is one story on 150 m² and needs
 a quarter of that. The figure uses **25 s of one core per building** as
 the average over a mix, on the conservative side.
 
 **How many buildings.** Overture holds about 5.4 million footprints in
 Kentucky, 3.7 million of them under 200 m² (houses, garages, sheds). The
-obliques — the only thing that colours a wall — were flown over the
+obliques — the only thing that colors a wall — were flown over the
 cities: Louisville, Lexington, Northern Kentucky, Frankfort, Paducah,
 Owensboro, Bowling Green and a few more, roughly **600,000 buildings**.
 Everywhere else the pipeline still runs on LiDAR and nadir (shape, roof,
@@ -656,11 +656,11 @@ extrapolating from downtown.
 
 ## Output sizes: what to keep, and in what form
 
-The source data is on S3 under the AWS Open Data programme, so the
+The source data is on S3 under the AWS Open Data program, so the
 question for a statewide run is what the pipeline itself would add.
 Measured on the downtown directories, per building: the crops (about 19
 windows cut from the aerial frames) ~65 MB, deleted after the mesh; the
-LiDAR clip 0.95 MB as ASCII PLY; the coloured cloud 0.73 MB as binary
+LiDAR clip 0.95 MB as ASCII PLY; the colored cloud 0.73 MB as binary
 PLY; the mesh 0.11 MB (mean 0.33) with PNG textures; the building record
 (planes, profiles, levels, footprint, state, coverage) ~30 KB; the
 camera and crop manifests ~36 KB.
@@ -681,13 +681,13 @@ now written:
   mesh stops with a clear message if it is missing rather than falling
   back. Texture pages are padded to multiples of four pixels, which
   block compression needs.
-* **The coloured cloud** is the one intermediate worth keeping: it holds
+* **The colored cloud** is the one intermediate worth keeping: it holds
   the camera choice per return and the occlusion test, i.e. all the
   imagery work, so a re-mesh with new rules costs 5 s a building and
   reads no imagery (the second downtown run took 106 minutes instead of
   42 precisely because the crops were gone). It is also a product of its
-  own — the LiDAR coloured from the obliques — and insurance if a
-  collection ever leaves the Open Data programme. It is now written as
+  own — the LiDAR colored from the obliques — and insurance if a
+  collection ever leaves the Open Data program. It is now written as
   **LAZ** (`colorized_aerial.laz`, with `source` and `surface` as extra
   bytes); merged for the state it should become one COPC per LiDAR tile
   (PDAL's `writers.copc`, not in this environment), which viewers and
@@ -698,7 +698,7 @@ now written:
 * **The building record** should become one GeoParquet table for the
   state: the same content is ~160 GB as JSON files and ~10 GB as a table,
   and it is what Overture or the state would most want back — heights and
-  storey structure from LiDAR — and what a future drone update would
+  story structure from LiDAR — and what a future drone update would
   register against.
 
 Every reader takes either format (`kyfromabove_3d.clouds.find_cloud`

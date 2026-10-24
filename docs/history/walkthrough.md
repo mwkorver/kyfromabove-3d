@@ -46,7 +46,7 @@ For each LiDAR anchor point, the image content around it is resampled onto the
 anchor's locally-fitted surface plane in two different exposures. Rectifying
 both views through a common plane removes the perspective difference between
 them, so if the camera model is right the two patches are the same picture.
-Normalised cross-correlation finds the offset.
+Normalized cross-correlation finds the offset.
 
 The imagery decides the result. No number is derived from the model being
 tested.
@@ -67,8 +67,8 @@ Perturb one exposure, re-measure, on the real data:
 | perturbation | median residual |
 |---|---|
 | none (baseline) | 0.82 px |
-| perspective centre +0.25 m | 3.91 px |
-| perspective centre +1.0 m | 14.23 px |
+| perspective center +0.25 m | 3.91 px |
+| perspective center +1.0 m | 14.23 px |
 | ω +0.01° | 6.12 px |
 | ω +0.05° | 29.07 px |
 
@@ -79,7 +79,7 @@ The old metric returns 0.00 px for every row.
 ## 3. From 3 exposures to 18
 
 Frame selection used to test whether an image footprint polygon covered the AOI
-*centre point*. A frame can cover that point and still have the building running
+*center point*. A frame can cover that point and still have the building running
 off the top of the sensor. Coverage is now decided by projecting the eight
 building-volume corners.
 
@@ -194,7 +194,7 @@ carries line-to-line georeferencing bias.
 | **combined within-group** | **18** | **1.04 px** (p90 2.95, 99% accepted) |
 | across look directions | 18 | 1.54 px (2,749 matches) |
 
-Every camera head is individually well modelled — including Color, whose
+Every camera head is individually well modeled — including Color, whose
 different focal length and sensor size come straight from the EO record. That is
 what confirms the principal-point sign fix.
 
@@ -229,7 +229,7 @@ principal-point sign so neither can silently flip back.
   final.
 - **One crop is padded at the sensor edge.** `Bwd_2034_201839` holds the whole
   building (8/8 corners, 135 px margin) but 19% of its 1600 px window falls off
-  the sensor. The validity mask records it; anything that uses the crop should honour the mask.
+  the sensor. The validity mask records it; anything that uses the crop should honor the mask.
 - **All five heads over this AOI are now used.** Nothing further is available
   on this collection without relaxing the containment requirement.
 

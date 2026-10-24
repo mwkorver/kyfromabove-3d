@@ -251,7 +251,7 @@ cd deploy && npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@exampl
 ```
 
 The limit is $20 a month unless `budget_usd` says otherwise; raise it before
-a statewide run (about $430 for the building step). Two steps the stacks
+a statewide run (about $450 for the building step). Two steps the stacks
 cannot do, once per account:
 
 - **Tag the bucket.** It was made by hand, so no stack tags it, and its
@@ -546,7 +546,7 @@ at that day's Spot price ($0.2541 an hour), about 22 hours on 1,000
 processors; the account allows 32 Spot processors today. Of that, $262 was S3
 requests: about 20 uploads a building. Storing each building as five objects
 (see "What a building leaves behind") brings the same run to about $430
-(`deploy/ec2_cost.py`: computing $345, disks $4, S3 requests $81). The three Spot runs cost about $0.16 in all.
+(`deploy/ec2_cost.py`: computing $345, disks $4, S3 requests $81), rounded up to about $450 as the working figure. The three Spot runs cost about $0.16 in all.
 
 ## The pilot: four areas in a browser (September 2026)
 

@@ -28,7 +28,10 @@ sys.path.insert(0, str(ROOT / "src"))
 #: seen walls (4; the completed where a building has none).
 PRODUCTS = ("overture", "boxes", "measured", "complete", "neural")
 TITLES = {"overture": "Overture", "boxes": "LiDAR heights", "measured": "Measured", "complete": "Completed",
-          "neural": "Borrowed fill"}
+          "neural": "Borrowed fill", "complete_tint": "Completed, invented shown",
+          "neural_tint": "Borrowed fill, borrowed shown"}
+#: The review copies (publish.PRODUCTS), published only when asked for by name.
+REVIEW_PRODUCTS = ("complete_tint", "neural_tint")
 DEFAULT_VIEW = "measured"
 #: The viewer's "fly to" buttons. From far away the tree shows only the big
 #: buildings (publish.GROUP_LEVELS); a button lands the camera 800 m from the

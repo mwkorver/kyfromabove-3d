@@ -54,13 +54,24 @@ def _decode_image(data: bytes, mime: str) -> np.ndarray:
     import io
     if mime != "image/ktx2":
         return np.asarray(Image.open(io.BytesIO(data)).convert("RGB"))
-    # basisu writes every GPU format and mip; the uncompressed level 0 is the image
+    return decode_ktx2(data)
+
+
+def decode_ktx2(data: bytes) -> np.ndarray:
+    """A KTX2 texture's full-size image, (H, W, 3) uint8, by the ``basisu``
+    command. Ours are ETC1S (mesh.gltf.BASISU_ARGS), whose blocks are ETC1's:
+    unpacked to ETC1 alone the image is the same, pixel for pixel, as the
+    uncompressed one, in a fifteenth of the time (0.45 s, not 7, for a
+    1876 x 1112 roof) -- basisu otherwise writes every GPU format and mip."""
+    from PIL import Image
+    etc1s = struct.unpack_from("<I", data, 44)[0] == 1           # the header's supercompression: BasisLZ
     with tempfile.TemporaryDirectory() as tmp:
         src = Path(tmp) / "t.ktx2"
         src.write_bytes(data)
-        r = subprocess.run(["basisu", "-unpack", "-no_ktx", "-file", str(src)], cwd=tmp,
-                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        out = sorted(Path(tmp).glob("t_unpacked_rgb_RGBA32_level_0_*.png"))
+        r = subprocess.run(["basisu", "-unpack", "-no_ktx", *(["-format_only", "0"] if etc1s else []),
+                            "-file", str(src)], cwd=tmp, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        pattern = "t_unpacked_rgb_ETC1_RGB_level_0_*.png" if etc1s else "t_unpacked_rgb_RGBA32_level_0_*.png"
+        out = sorted(Path(tmp).glob(pattern))
         if r.returncode != 0 or not out:
             raise RuntimeError(f"basisu could not unpack a KTX2 texture: {r.stdout[-300:]}")
         return np.asarray(Image.open(out[0]).convert("RGB"))

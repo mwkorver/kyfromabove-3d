@@ -50,9 +50,16 @@ MAX_DEPTH = 8
 #: Each product and the mesh folders it draws from, in order of preference.
 #: "overture" (Overture's own heights) and "boxes" (LiDAR heights, product
 #: 1) have none: every building is a box.
+#: The "_tint" ones are the review copies of products 3 and 4, every
+#: invented texel tinted (magenta the completed fill, violet the borrowed),
+#: read from the tinted copy each build keeps in its review.zip (a source
+#: ending in TINT); a building without a fill shows its measured mesh.
 PRODUCTS = {"overture": (), "boxes": (),
             "measured": ("3dtiles_mesh",), "complete": ("3dtiles_complete", "3dtiles_mesh"),
-            "neural": ("3dtiles_neural", "3dtiles_complete", "3dtiles_mesh")}
+            "neural": ("3dtiles_neural", "3dtiles_complete", "3dtiles_mesh"),
+            "complete_tint": ("3dtiles_complete:tint", "3dtiles_mesh"),
+            "neural_tint": ("3dtiles_neural:tint", "3dtiles_complete:tint", "3dtiles_mesh")}
+TINT = ":tint"
 BOX_RGB = (205, 203, 196)
 #: The sources_choice fields shown on each building (see pieces.PROVENANCE).
 PROVENANCE_FIELDS = ("lidar_phase", "lidar_date", "oblique_collection", "oblique_date", "gap_months")
@@ -614,7 +621,7 @@ def built_buildings(store, prefix: Optional[str] = None) -> Dict[str, set]:
     from .building import BUILDINGS_PREFIX
 
     prefix = (prefix or BUILDINGS_PREFIX).rstrip("/")
-    subs = {s for v in PRODUCTS.values() for s in v}
+    subs = {s.removesuffix(TINT) for v in PRODUCTS.values() for s in v}
     out: Dict[str, set] = {}
     for k in store.list(f"{prefix}/"):
         parts = k[len(prefix) + 1:].split("/")
@@ -630,19 +637,30 @@ def load_building(store, gers: str, product: str, prefix: Optional[str] = None,
     one where it was not made), from that product's zip; None if it has no
     mesh. ``available`` (:func:`built_buildings`) spares asking the store;
     without it each zip is read straight away and a missing one passed over --
-    no existence check first (a boxes-only building cost one per view's zip)."""
+    no existence check first (a boxes-only building cost one per view's zip).
+    A tinted copy (a source ending in TINT) comes from the review zip, its
+    pages decoded from the glb's own textures (no lossless ones are kept)."""
     from PIL import Image
 
     from .archive import read_zip
-    from .building import BUILDINGS_PREFIX
+    from .building import BUILDINGS_PREFIX, REVIEW_ZIP
 
     prefix = prefix or BUILDINGS_PREFIX
+    review = None
     for sub in PRODUCTS[product]:
-        key = f"{prefix}/{gers}/{sub}.zip"
-        if available is not None and sub not in available.get(gers, ()):
+        folder = sub.removesuffix(TINT)
+        if available is not None and folder not in available.get(gers, ()):
             continue
+        if sub.endswith(TINT):
+            try:
+                review = review or read_zip(store, f"{prefix}/{gers}/{REVIEW_ZIP}")
+                ts = json.loads(review.read(f"{folder}/tileset_tint.json"))
+            except (FileNotFoundError, KeyError):
+                continue
+            glb = review.read(f"{folder}/{ts['root']['content']['uri']}")
+            return {"tileset": ts, "glb": glb, "pages": glb_pages(glb), "source": sub}
         try:
-            z = read_zip(store, key)
+            z = read_zip(store, f"{prefix}/{gers}/{sub}.zip")
         except FileNotFoundError:
             continue
         names = set(z.namelist())
@@ -657,6 +675,25 @@ def load_building(store, gers: str, product: str, prefix: Optional[str] = None,
                     pages[mat["name"]] = np.asarray(Image.open(io.BytesIO(z.read(k))).convert("RGB"))
         return {"tileset": ts, "glb": glb, "pages": pages, "source": sub}
     return None
+
+
+def glb_pages(glb: bytes) -> Dict[str, np.ndarray]:
+    """{material name: its base colour texture, (H, W, 3) uint8}, decoded
+    from the images in the glb itself."""
+    from .texture_check import _decode_image
+
+    js, binary = read_glb(glb)
+    pages = {}
+    for mat in js.get("materials", []):
+        ref = mat.get("pbrMetallicRoughness", {}).get("baseColorTexture")
+        if ref is None:
+            continue
+        tex = js["textures"][ref["index"]]
+        img = js["images"][tex.get("source", tex.get("extensions", {}).get("KHR_texture_basisu", {}).get("source"))]
+        view = js["bufferViews"][img["bufferView"]]
+        at = view.get("byteOffset", 0)
+        pages[mat["name"]] = _decode_image(binary[at:at + view["byteLength"]], img.get("mimeType", "image/png"))
+    return pages
 
 
 def publish_tile(tile: str, store, grid, product: str = "measured", tiles_prefix: str = "tiles",

@@ -348,6 +348,42 @@ def test_a_building_comes_back_from_its_zip_with_its_texture_pages(tmp_path):
     assert calls == []
 
 
+def test_the_tinted_views_read_the_tinted_copy_from_the_review_zip(tmp_path):
+    """complete_tint and neural_tint: the tinted copy the build keeps in
+    review.zip, its pages decoded from the glb's own images; a building
+    without one falls back as the plain products do."""
+    from kyfromabove_3d import building as B
+    from kyfromabove_3d.store import LocalStore
+    from PIL import Image
+
+    st = LocalStore(tmp_path / "bucket")
+    ts = {"root": {"content": {"uri": "building.glb"}, "transform": list(np.eye(4).ravel())}}
+    for gers, tinted in (("g1", True), ("g2", False)):
+        glb, pages = _building_glb((200, 20, 40), gers)
+        b = tmp_path / "work" / gers
+        for sub in ("3dtiles_mesh", "3dtiles_complete") if tinted else ("3dtiles_mesh",):
+            (b / sub / "textures").mkdir(parents=True)
+            (b / sub / "tileset.json").write_text(json.dumps(ts))
+            (b / sub / "building.glb").write_bytes(glb)
+            Image.fromarray(pages["walls_0"]).save(b / sub / "textures" / "walls_0.png")
+        if tinted:
+            tglb, tpages = _building_glb((230, 40, 200), gers)
+            (b / "3dtiles_complete" / "building_tint.glb").write_bytes(tglb)
+            tts = {"root": {**ts["root"], "content": {"uri": "building_tint.glb"}}}
+            (b / "3dtiles_complete" / "tileset_tint.json").write_text(json.dumps(tts))
+        B.publish_building(b, {"gers": gers}, st, "buildings/v1")
+    got = P.load_building(st, "g1", "complete_tint", "buildings/v1")
+    assert got["source"] == "3dtiles_complete:tint" and got["glb"] == tglb
+    assert np.array_equal(got["pages"]["walls_0"], tpages["walls_0"])
+    # no borrowed fill: the completed one's tinted copy
+    assert P.load_building(st, "g1", "neural_tint", "buildings/v1")["source"] == "3dtiles_complete:tint"
+    available = P.built_buildings(st, "buildings/v1")
+    assert P.load_building(st, "g1", "neural_tint", "buildings/v1", available)["source"] == "3dtiles_complete:tint"
+    # nothing invented: the measured mesh
+    assert P.load_building(st, "g2", "complete_tint", "buildings/v1")["source"] == "3dtiles_mesh"
+    assert P.load_building(st, "g2", "complete_tint", "buildings/v1", available)["source"] == "3dtiles_mesh"
+
+
 # ------------------------------------------------------------- the views
 
 def test_each_view_draws_its_own_height():

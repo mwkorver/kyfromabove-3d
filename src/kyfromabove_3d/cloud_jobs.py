@@ -302,7 +302,8 @@ def tree_job(job: Dict[str, Any]) -> Dict[str, Any]:
     trees = publish_trees(store, grid, products)                        # every published tile, one listing
     some = trees.get("measured") or next(iter(trees.values()))
     tiles = some["tile_names"]
-    ps.terrain(tiles, store, store, grid, int(job.get("terrain_max_level", 15)))
+    if job.get("terrain", True):
+        ps.terrain(tiles, store, store, grid, int(job.get("terrain_max_level", 15)))
     return {"tiles": len(tiles), "products": list(products)}
 
 

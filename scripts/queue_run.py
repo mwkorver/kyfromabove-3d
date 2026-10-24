@@ -60,16 +60,22 @@ def cmd_tile(args, store) -> int:
     return 0
 
 
+def _products(args) -> dict:
+    return {"products": args.products} if args.products else {}
+
+
 def cmd_publish(args, store) -> int:
-    n = _send(_sqs(args), args.queue_url, ({"id": f"publish-{t}", "kind": "publish", "run": args.run, "tile": t}
-                                           for t in args.tiles))
+    n = _send(_sqs(args), args.queue_url, ({"id": f"publish-{t}", "kind": "publish", "run": args.run, "tile": t,
+                                            **_products(args)} for t in args.tiles))
     print(f"{n} publish job(s) sent")
     return 0
 
 
 def cmd_tree(args, store) -> int:
-    n = _send(_sqs(args), args.queue_url, [{"id": "tree", "kind": "tree", "run": args.run}])
-    print(f"{n} tree job sent: the statewide tree and terrain over every published tile")
+    n = _send(_sqs(args), args.queue_url, [{"id": "tree", "kind": "tree", "run": args.run, **_products(args),
+                                            **({"terrain": False} if args.no_terrain else {})}])
+    print(f"{n} tree job sent: the statewide tree" + ("" if args.no_terrain else " and terrain")
+          + " over every published tile")
     return 0
 
 
@@ -162,6 +168,10 @@ def main(argv=None) -> int:
     ap.add_argument("--queue-url", default=os.environ.get("QUEUE_URL"))
     ap.add_argument("--tiles", nargs="*", default=[])
     ap.add_argument("--batch", type=int, default=12)
+    ap.add_argument("--products", nargs="+", default=None,
+                    help="publish / tree: these products only (default: publish_step.PRODUCTS; the tinted "
+                         "review copies, complete_tint and neural_tint, only when named)")
+    ap.add_argument("--no-terrain", action="store_true", help="tree: leave the terrain as it is")
     ap.add_argument("--limit", type=int, default=0, help="local: build only this many buildings (0: all)")
     ap.add_argument("--skip-tile", action="store_true", help="local: the tiles are made already (step 1)")
     ap.add_argument("--store", default=os.environ.get("STORE", "s3://kyfromabove-3d"))

@@ -70,6 +70,8 @@
       "url": "tiles/downtown/tileset.json",
       "activeOnStartup": true,
       "screenSpaceError": 2,
+      "exclusiveGroups": ["product"],
+      "tilesetOptions": { "enableDebugWireframe": true },
       "properties": { "title": "Downtown, measured (product 2)" }
     }
   ],
@@ -103,10 +105,11 @@
     }
   ],
   "contentTree": [
-    { "name": "base", "type": "SubContentTreeItem", "title": "Layers" },
-    { "name": "base.naip", "type": "LayerGroupContentTreeItem", "layerNames": ["naip", "naipDetail"], "title": "USGS NAIP imagery" },
-    { "name": "base.osm", "type": "LayerContentTreeItem", "layerName": "osm" },
-    { "name": "base.measured", "type": "LayerContentTreeItem", "layerName": "measured" },
-    { "name": "base.obliques", "type": "ObliqueCollectionContentTreeItem", "collectionName": "kyfa2024s1" }
+    { "name": "buildings", "type": "NodeContentTreeItem", "title": "Buildings (one at a time)", "initOpen": true },
+    { "name": "buildings.measured", "type": "LayerContentTreeItem", "layerName": "measured" },
+    { "name": "imagery", "type": "NodeContentTreeItem", "title": "Background", "initOpen": true },
+    { "name": "imagery.naip", "type": "LayerGroupContentTreeItem", "layerNames": ["naip", "naipDetail"], "title": "USGS NAIP imagery" },
+    { "name": "imagery.osm", "type": "LayerContentTreeItem", "layerName": "osm" },
+    { "name": "obliques", "type": "ObliqueCollectionContentTreeItem", "collectionName": "kyfa2024s1" }
   ]
 }

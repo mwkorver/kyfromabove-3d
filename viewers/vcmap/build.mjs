@@ -19,10 +19,13 @@ cpSync(resolve(here, 'site'), dist, { recursive: true });
 cpSync(resolve(here, 'node_modules/geotiff/dist-browser/geotiff.js'), resolve(dist, 'geotiff.js'));
 
 // start the COG adapter (a service worker) before VC Map asks for any tile, and
-// show any tile it could not make in a line at the bottom of the page; the
-// oblique fill script is named by its contents so a browser never runs a stale copy
+// show any tile it could not make in a line at the bottom of the page; our
+// page scripts are named by their contents so a browser never runs a stale copy
 const index = resolve(dist, 'index.html');
-const fillVersion = createHash('sha1').update(readFileSync(resolve(dist, 'oblique-fill.js'))).digest('hex').slice(0, 10);
+const scripts = ['oblique-fill.js', 'wireframe.js'].map((name) => {
+  const version = createHash('sha1').update(readFileSync(resolve(dist, name))).digest('hex').slice(0, 10);
+  return `    <script src="./${name}?v=${version}"></script>`;
+}).join('\n');
 const register = `    <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js');
@@ -42,7 +45,7 @@ const register = `    <script>
         });
       }
     </script>
-    <script src="./oblique-fill.js?v=${fillVersion}"></script>
+${scripts}
   </head>`;
 writeFileSync(index, readFileSync(index, 'utf8').replace('</head>', register));
 
@@ -53,14 +56,28 @@ if (i > 0) {
 }
 
 // --cloud: the page served beside the viewer on CloudFront (/viewer/vcmap/):
-// the published statewide tree instead of local tiles, and the published
-// terrain under the 3D map and the oblique collection (ground heights)
+// the published statewide trees instead of local tiles -- every product, one
+// shown at a time -- and the published terrain under the 3D map and the
+// oblique collection (ground heights)
+const PRODUCTS = [
+  ['overture', 'Footprints, Overture height'],
+  ['boxes', 'Footprints, LiDAR height'],
+  ['measured', 'Measured (2)'],
+  ['complete', 'Completed (3)'],
+  ['neural', 'Borrowed fill (4)'],
+];
 if (process.argv.includes('--cloud')) {
   const file = resolve(dist, 'config/kyfromabove.config.json');
   const cfg = JSON.parse(readFileSync(file, 'utf8'));
   const measured = cfg.layers.find((l) => l.name === 'measured');
-  Object.assign(measured, { url: '/kentucky/measured/tileset.json', screenSpaceError: 16 });
-  measured.properties.title = 'Measured (product 2)';
+  const at = cfg.layers.indexOf(measured);
+  cfg.layers.splice(at, 1, ...PRODUCTS.map(([name, title]) => ({
+    ...measured, name, url: `/kentucky/${name}/tileset.json`, screenSpaceError: 16,
+    activeOnStartup: name === 'measured', properties: { title },
+  })));
+  const item = cfg.contentTree.findIndex((c) => c.name === 'buildings.measured');
+  cfg.contentTree.splice(item, 1,
+    ...PRODUCTS.map(([name]) => ({ name: `buildings.${name}`, type: 'LayerContentTreeItem', layerName: name })));
   cfg.layers.push({
     type: 'TerrainLayer', name: 'terrain', url: '/terrain/', activeOnStartup: true,
     requestVertexNormals: false, properties: { title: 'LiDAR ground' },

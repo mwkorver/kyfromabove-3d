@@ -41,7 +41,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from building_cost import (BAND_NAMES, BANDS, STAGES, band_of, block_counts, load_sample,  # noqa: E402
+from building_cost import (BAND_NAMES, band_of, block_counts, load_sample,  # noqa: E402
                            per_band, state_counts)
 from cost_model import PRICE                                                  # noqa: E402
 

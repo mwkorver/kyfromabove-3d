@@ -32,13 +32,13 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import cv2
 import numpy as np
 
 from .cameras import VirtualObliqueCamera
-from .features import CheckFeature, PlanarAnchor
+from .features import PlanarAnchor
 from .imagery import FrameImageReader, ImageWindow
 
 

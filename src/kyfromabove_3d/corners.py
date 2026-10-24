@@ -165,7 +165,6 @@ def observe_end(plane: WallPlane, end: str, cams: Sequence[dict], make_sampler: 
     if not votes:
         return None, votes, "no frame sees the corner"
     # cluster the votes along the face; the observation is the best cluster
-    positions = np.array([v.along_m for v in votes])
     best = None
     for i, v in enumerate(votes):
         members = [w for w in votes if abs(w.along_m - v.along_m) <= agree_m]

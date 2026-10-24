@@ -7,13 +7,11 @@ depends on the working directory, and caches the expensive loads
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import numpy as np
 import yaml
 
 from .cameras import VirtualObliqueCamera, parse_camera_from_eo_record

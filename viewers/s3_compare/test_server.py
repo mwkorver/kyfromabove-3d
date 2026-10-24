@@ -4,8 +4,6 @@
 import argparse
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
-import os
-import sys
 
 DIR = Path(__file__).resolve().parent
 

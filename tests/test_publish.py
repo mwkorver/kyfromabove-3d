@@ -104,7 +104,6 @@ def test_a_batched_building_lands_where_its_own_tileset_put_it():
 def test_textures_survive_the_repacking_and_the_properties_come_back():
     from PIL import Image
 
-    T = np.eye(4)
     members = []
     colours = [(200, 20, 40), (20, 180, 60), (30, 40, 210)]
     for i, c in enumerate(colours):

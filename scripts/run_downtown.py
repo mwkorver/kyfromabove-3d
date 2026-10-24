@@ -421,7 +421,7 @@ def run(args) -> int:
     data = json.loads(args.footprints.read_text(encoding="utf-8"))
     records = data["buildings"]
     out = args.out
-    caches = build_caches(out, records)
+    build_caches(out, records)
     mark_split_parents(out, records)
     states = read_states(out)
     todo = list(records)

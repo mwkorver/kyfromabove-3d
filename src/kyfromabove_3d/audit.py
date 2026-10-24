@@ -30,7 +30,7 @@ Measures (all in plain units, per building and where it applies per face):
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, Optional, Sequence
 
 import numpy as np
 

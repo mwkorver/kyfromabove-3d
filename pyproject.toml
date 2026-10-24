@@ -36,10 +36,12 @@ dependencies = [
 
 [project.optional-dependencies]
 
-# duckdb queries Overture's GeoParquet on S3 with predicate pushdown. The
-# buildings theme is 257 GiB, so a bbox query against the remote files is the
-# only practical route. Nothing in src/ imports it; this extra exists so the
-# Kentucky attribute-coverage measurement can be reproduced:
+# duckdb queries Overture's GeoParquet on S3 with predicate pushdown (stage 0,
+# stages.overture_boxes): the buildings theme is 257 GiB, so a bbox query
+# against the remote files is the only practical route. It also writes the map
+# file of the published tiles (tile_index), with its spatial extension. Only
+# the laptop steps import it, lazily; the cloud image does not carry it yet.
+# The Kentucky attribute-coverage measurement it made:
 #
 #   Overture 2026-08-19.0, Kentucky bbox, 5,294,866 buildings
 #     height 71.8%  class 10.2%  num_floors 2.7%  roof_shape 0.1%
@@ -52,6 +54,10 @@ overture = ["duckdb"]
 # mocked AWS (moto, with its server for the container test)
 cloud = ["aws-cdk-lib>=2.150", "constructs>=10", "moto[s3,sqs,dynamodb,events,server]>=5"]
 
+# the tests and the checker; `uv sync` installs them with the project
+[dependency-groups]
+dev = ["pytest", "ruff"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -62,3 +68,12 @@ addopts = "-m 'not data'"
 markers = [
     "data: needs the downtown outputs on disk (scripts/audit_reference.py rebuild); run with pytest -m data",
 ]
+
+# Real errors only -- undefined names, unused imports and variables, syntax
+# (pyflakes and E9). No style rules and no `ruff format`: the code lines its
+# comments up by hand.
+[tool.ruff]
+extend-exclude = ["deploy/cdk.out", "viewers/vcmap/node_modules", "viewers/vcmap/dist"]
+
+[tool.ruff.lint]
+select = ["F", "E9"]

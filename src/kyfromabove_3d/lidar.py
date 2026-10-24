@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import laspy
 import numpy as np
 
-from .coordinates import LocalCoordinateFrame, us_survey_feet_to_meters
+from .coordinates import LocalCoordinateFrame
 
 
 @dataclass

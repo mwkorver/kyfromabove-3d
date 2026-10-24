@@ -11,7 +11,6 @@ explicitly, because on real data they are indistinguishable by eye.
 """
 
 import numpy as np
-import pytest
 
 from kyfromabove_3d.features import surface_coherence
 

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from typing import Any, Dict, Optional, Tuple, Union
+from dataclasses import dataclass
+from typing import Any, Dict, Optional, Tuple
 
 import cv2
 import numpy as np
 
-from .coordinates import LocalCoordinateFrame, us_survey_feet_to_meters
+from .coordinates import LocalCoordinateFrame
 
 
 def rot_x(rad: float) -> np.ndarray:

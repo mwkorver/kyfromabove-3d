@@ -22,7 +22,7 @@ from __future__ import annotations
 import io
 import json
 import struct
-from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Sequence, Tuple
 
 import numpy as np
 

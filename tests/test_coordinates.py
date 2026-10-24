@@ -1,8 +1,6 @@
 """Unit tests for coordinate conversions and local metric frame."""
 
-import json
 import numpy as np
-import pytest
 from kyfromabove_3d.coordinates import (
     METERS_PER_US_SURVEY_FOOT,
     US_SURVEY_FEET_PER_METER,

@@ -6,14 +6,13 @@ import sys
 from pathlib import Path
 
 import numpy as np
-import pytest
 
 # Add scripts directory to sys.path so colorize_building can be imported
 scripts_dir = str(Path(__file__).resolve().parent.parent / "scripts")
 if scripts_dir not in sys.path:
     sys.path.insert(0, scripts_dir)
 
-from kyfromabove_3d.stages.colorize_building import extrude_verified_faces, resample_walls, write_ply
+from kyfromabove_3d.stages.colorize_building import extrude_verified_faces, write_ply
 from kyfromabove_3d.features import WallPlane
 from kyfromabove_3d.geometry import read_ply
 

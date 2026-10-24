@@ -14,17 +14,16 @@ Two behaviours are deliberately different from the first implementation:
 
 from __future__ import annotations
 
-import json
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 
 from .cameras import VirtualObliqueCamera
 from .coordinates import LocalCoordinateFrame
-from .imagery import FrameImageReader, ImageWindow
+from .imagery import FrameImageReader
 
 
 @dataclass

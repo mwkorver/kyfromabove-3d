@@ -211,7 +211,6 @@ def cmd_baseline(a) -> int:
     share of its wall), and blank wall -- so a one-storey building counts as
     much as a tower."""
     import multiprocessing as mp
-    import shapely
     from kyfromabove_3d.footprints import footprint_wgs84_to_local
     recs = {r["building"]: r for r in json.loads((a.out / "building_classes.json").read_text(encoding="utf-8")) if r["status"] == "ok"}
     keys = sorted(k for k, r in recs.items() if r["architecture"] != "none" and (a.buildings / k / "3dtiles_mesh" / "building.glb").exists())

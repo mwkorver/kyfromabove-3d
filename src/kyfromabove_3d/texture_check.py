@@ -270,7 +270,6 @@ def face_grids(prims: Sequence[Primitive], planes: Sequence[Any], spacing_m: flo
     out = []
     for key, members in groups.items():
         pis = np.array([m[0] for m in members])
-        tis = np.array([m[1] for m in members])
         P = np.stack([prims[p].positions[prims[p].triangles[t]] for p, t in members])       # (T, 3, 3)
         UV = np.stack([prims[p].uv[prims[p].triangles[t]] for p, t in members])             # (T, 3, 2)
         if key == "roof":

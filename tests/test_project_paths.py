@@ -9,7 +9,6 @@ tests exist so that cannot come back.
 
 import textwrap
 
-import pytest
 
 from kyfromabove_3d.project import Project, repo_relative
 

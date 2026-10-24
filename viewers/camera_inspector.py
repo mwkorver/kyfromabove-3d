@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 -- registers the 3d projection
 import numpy as np
 import yaml
 

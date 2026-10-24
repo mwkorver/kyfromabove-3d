@@ -153,9 +153,11 @@ More in [`docs/SURVEY_ZONES.md`](docs/SURVEY_ZONES.md) and
 ### Set up
 
 ```bash
-uv venv .venv --python python3.11 && source .venv/bin/activate
-uv pip install -e ".[overture,cloud]" && uv pip install pytest
+uv sync --extra overture --extra cloud && source .venv/bin/activate
 ```
+
+That installs the versions recorded in `uv.lock`, the same ones the cloud
+image pins in `deploy/requirements-lambda.txt` (a test keeps the two in step).
 
 The LiDAR tile indexes come from KyFromAbove's public bucket; no AWS account
 is needed to read it:
@@ -174,7 +176,8 @@ PROJ on first use. Without them, PROJ silently places a building 1.2 m or
 pytest -q
 ```
 
-About 430 tests, a minute or two, no network needed.
+About 430 tests, a few minutes, no network needed. `ruff check` finds real
+errors (undefined names, unused imports); CI runs both.
 
 ### One tile on a laptop
 
@@ -257,18 +260,21 @@ src/kyfromabove_3d/
   terrain.py           the ground under the buildings, as the viewer's terrain
   store.py             where a step's results go: a folder, or S3
   audit.py, texture_check.py   a built mesh against evidence it was not built from
+  tile_index.py        the map file of the published tiles (GeoParquet, one row a tile)
   lidar.py, imagery.py, footprints.py, coordinates.py, cameras.py, crops.py, prepare.py, ...
+  stages/              the build's steps, each with its own command line (scripts/<step>.py runs it):
+    colorize_building.py, build_mesh.py, check_building.py, audit_building.py   one building's colour, mesh, checks
+    lidar_outline.py     a building's outline and towers from the LiDAR
+    overture_boxes.py    Overture footprints: fetched, measured on the LiDAR, split, boxed
+    publish_step.py      step 4 on the laptop: tiles, tree, terrain, viewer, tile index
+    wall_visibility.py   which aerial frames see each slice of wall, clearly and face-on enough to use
+    render_flyaround.py, register_video.py   a synthetic orbit round a building; a real video's camera path
 scripts/
-  stage0_index.py, tile_step.py, queue_run.py, publish_step.py   the steps (queue_run.py local: on this machine)
-  build_mesh.py, colorize_building.py, check_building.py   one building's mesh, colour, checks (the stages; their parts are in src/)
-  overture_boxes.py    Overture footprints: fetched, measured on the LiDAR, split, boxed
+  stage0_index.py, tile_step.py, queue_run.py   the steps (queue_run.py local: on this machine)
   audit_reference.py   the reference-set audit
   intake_server.py     local viewers: /tiles, /compare, frames and crops, terrain
-  render_flyaround.py  a synthetic orbit or walk round a built building, with its true camera path
   score_trajectory.py  camera poses estimated from video against the true ones: ATE, RPE, scale, drift
   video_poses.py       a video model's (LingBot-Map's) camera for every frame, run on a Mac or a GPU
-  register_video.py    a real video's true camera path, from landmarks and tracking against the meshes
-  wall_visibility.py   which aerial frames see each slice of wall, clearly and face-on enough to use
   wall_match.py        how far back a wall stands, by matching the frames that see it
   ...                  surveys, diagnostics, the downtown batch run
 deploy/                the AWS stacks (CDK), the Lambda handlers, the runners, cost models

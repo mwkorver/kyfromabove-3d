@@ -12,7 +12,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from kyfromabove_3d.facade_fill import (KNOWN, PATCH, PLAIN, RHYTHM, SEEN, TWIN,  # noqa: E402
+from kyfromabove_3d.facade_fill import (PATCH, PLAIN, RHYTHM, SEEN, TWIN,  # noqa: E402
                                         complete_textures, holdout, patch_fill, period, rhythm_fill,
                                         shares, twin_fill)
 

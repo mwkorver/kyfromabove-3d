@@ -49,7 +49,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from kyfromabove_3d.stages import wall_visibility as wv  # noqa: E402
 
-from kyfromabove_3d.wall_match import MIN_BASELINE_DEG, bilinear_gray  # noqa: E402
+from kyfromabove_3d.wall_match import bilinear_gray  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 GRID_M = 0.25                 # the search's pixel
@@ -706,7 +706,6 @@ def level_ends(b, plane, A, Z, lo, hi, d0, d1, views, edges) -> dict:
     bottom up and from the top down, each way stopping at the first piece that
     is wall, and never cutting more than ``LEVEL_MAX_CUT`` of the face's
     height. Returns the face's new bottom and top and every piece tested."""
-    p0 = np.asarray(plane.p0, float)
     n3 = np.r_[np.asarray(plane.normal, float), 0.0] @ b.M[:3, :3].T
     centre = make_to_world(b, plane, A, Z, lo, hi)(d0, d1).mean(axis=0)
     ref = max(views, key=lambda f: float((views[f]["C"] - centre) @ n3 / np.linalg.norm(views[f]["C"] - centre)) * views[f]["mask"].mean())
@@ -1144,7 +1143,7 @@ def trim_sheet(pics, path: Path) -> None:
     rows = []
     for r in pics:
         im = r["pic_before"].copy()
-        z0, z1 = r["z"][0], r["z"][1] + GRID_M
+        z1 = r["z"][1] + GRID_M
         h, w = im.shape[:2]
         if r["trimmed"]:
             ya = max(0, int(round((z1 - r["trimmed"]["z"][1]) / 0.1))); yb = int(round((z1 - r["trimmed"]["z"][0]) / 0.1))

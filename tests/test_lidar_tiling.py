@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from kyfromabove_3d.lidar import LidarCloud, LidarTile, LidarTileIndex, concat_clouds
+from kyfromabove_3d.lidar import LidarCloud, LidarTileIndex, concat_clouds
 
 
 def _cloud(n, x0=0.0):

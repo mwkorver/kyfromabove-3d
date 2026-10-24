@@ -8,7 +8,7 @@ side effect.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Optional, Sequence, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,7 +16,7 @@ import numpy as np
 from .cameras import VirtualObliqueCamera
 from .features import CheckFeature, PlanarAnchor
 from .imagery import ImageWindow
-from .qa import MatchResult, PlanePatch, ReprojectionReport, sample_plane_patch
+from .qa import MatchResult, ReprojectionReport, sample_plane_patch
 
 
 def _finish(fig: plt.Figure, save_to: Optional[Union[str, Path]]) -> plt.Figure:
@@ -57,7 +57,6 @@ def plot_match_pair(
             ax.text(0.5, 0.5, "unprojectable", ha="center")
             ax.axis("off")
             continue
-        n = patch.patch.shape[0]
         extent = [-patch.radius_m, patch.radius_m, patch.radius_m, -patch.radius_m]
         ax.imshow(patch.patch, extent=extent)
         ax.plot(0, 0, "+", color="cyan", markersize=14, markeredgewidth=2)

@@ -60,7 +60,6 @@ def main() -> int:
 
     import geopandas as gpd
     from pyproj import Transformer
-    from shapely.geometry import Point
 
     grid = gpd.read_file(args.raw_dir / "kyfromabove_phase2_pointcloud_5k_grid.gpkg")
     if grid.crs is None:

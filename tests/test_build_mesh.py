@@ -244,7 +244,7 @@ def test_edge_top_profile_steps_from_podium_to_tower():
 
 
 def test_wall_geometry_sloped_ground_draping():
-    from kyfromabove_3d.features import GroundField, LEVEL_FACE_STRIDE
+    from kyfromabove_3d.features import GroundField
 
     # Ring: 4 vertices (square from 0 to 40)
     # Vertex 0: z=1.0, Vertex 1: z=3.0 (slope of 2m along 40m edge)
@@ -417,7 +417,7 @@ def test_texture_pages_and_roof_have_sides_in_multiples_of_four():
     assert [_mult4(n) for n in (1, 4, 5, 8, 4095)] == [4, 4, 8, 8, 4096]
     atlas = TextureAtlas(page_px=64)
     a = atlas.add(np.full((10, 13, 3), 1, dtype=np.uint8))
-    b = atlas.add(np.full((7, 30, 3), 2, dtype=np.uint8))
+    atlas.add(np.full((7, 30, 3), 2, dtype=np.uint8))
     pages = atlas.pack()
     assert all(pg.shape[0] % 4 == 0 and pg.shape[1] % 4 == 0 for pg in pages)
     # the uv still lands on the image: the corner of the first image

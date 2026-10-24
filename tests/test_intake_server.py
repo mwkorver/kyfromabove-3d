@@ -161,7 +161,6 @@ def test_terrain_tiles_come_from_the_lidar_ground_dem(server, tmp_path, monkeypa
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
     from ground_dem import GroundDEM
     from pyproj import Transformer
-    ft = 0.3048006096012192
     lon0, lat0 = -85.7565, 38.2549
     to_ft = Transformer.from_crs("EPSG:4326", "EPSG:3089", always_xy=True).transform
     ox, oy = to_ft(lon0, lat0)

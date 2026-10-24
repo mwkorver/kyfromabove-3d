@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import argparse
 
-import json, csv, sys, numpy as np, matplotlib
+import json, csv, numpy as np, matplotlib
 from pathlib import Path
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt

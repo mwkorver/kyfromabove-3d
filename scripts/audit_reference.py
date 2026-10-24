@@ -297,7 +297,7 @@ def main() -> int:
         return 0
 
     if not BASELINE.exists():
-        print(f"no baseline yet: run  python scripts/audit_reference.py accept")
+        print("no baseline yet: run  python scripts/audit_reference.py accept")
         return 1
     base = json.loads(BASELINE.read_text(encoding="utf-8"))
     worse, better = compare(cfg, now, base)
@@ -310,7 +310,7 @@ def main() -> int:
                              for s in worse + better)})
     sheet(changed, now, base, ROOT / "outputs" / "audit_compare.png")
     print(f"{len(now)} buildings compared: {len(worse)} worse, {len(better)} better"
-          + (f"; pictures -> outputs/audit_compare.png" if changed else ""))
+          + ("; pictures -> outputs/audit_compare.png" if changed else ""))
     return 1 if worse else 0
 
 

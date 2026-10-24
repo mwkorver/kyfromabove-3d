@@ -47,7 +47,6 @@ from kyfromabove_3d.plots import (
 )
 from kyfromabove_3d.qa import (
     anchors_in_volume,
-    group_cameras,
     measure_cross_view_residuals,
     measure_within_group_residuals,
     prefetch_windows,

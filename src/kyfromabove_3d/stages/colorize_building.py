@@ -291,7 +291,6 @@ def main(argv=None) -> int:
           "z_lo": round(float(lv["z_lo"]), 3), "z_hi": round(float(lv["z_hi"]), 3)} for lv in levels],
         indent=1), encoding="utf-8")
     level_of = {pl.face: pl.face // LEVEL_FACE_STRIDE for pl in nominal_planes}
-    ring_of_level = {lv["level"]: np.asarray(lv["ring"]) for lv in levels}
     verified_planes: dict[int, VerifiedWallPlane] = {}
     new_surface = np.ones(len(new_xyz), dtype=np.uint8) if len(new_xyz) else np.empty(0, dtype=np.uint8)
 

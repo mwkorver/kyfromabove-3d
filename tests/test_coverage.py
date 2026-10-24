@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from kyfromabove_3d.coverage import FaceCoverage, facade_coverage
 

@@ -8,9 +8,8 @@ comes here for those.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict
 
 import numpy as np
 

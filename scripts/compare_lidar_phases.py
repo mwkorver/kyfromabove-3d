@@ -26,11 +26,14 @@ import json
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
 import numpy as np
 
 from kyfromabove_3d.lidar import LidarTileIndex, read_las_header
+
+if TYPE_CHECKING:
+    import geopandas as gpd
 
 # Built-up ground inside the Phase 3 re-flight footprint. Sampling a tile centre
 # blindly is how you end up comparing two phases over open water, which says

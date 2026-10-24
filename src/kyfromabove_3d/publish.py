@@ -31,7 +31,6 @@ import hashlib
 import io
 import json
 import struct
-from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np

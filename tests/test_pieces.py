@@ -137,10 +137,10 @@ def test_the_point_grid_finds_exactly_what_a_full_scan_finds():
     rng = np.random.default_rng(3)
     xy = np.column_stack([rng.uniform(-800, 800, 200_000), rng.uniform(-600, 700, 200_000)])
     g = PointGrid(xy)
-    for box in [(-10, -10, 25, 40), (-900, -900, -790, -500), (100.0, 100.0, 100.0, 100.0), (-2000, -2000, 2000, 2000),
+    for bx in [(-10, -10, 25, 40), (-900, -900, -790, -500), (100.0, 100.0, 100.0, 100.0), (-2000, -2000, 2000, 2000),
                 (790, 690, 900, 900), (3.3, -17.1, 3.4, 200.7)]:
-        full = np.flatnonzero((xy[:, 0] > box[0]) & (xy[:, 0] < box[2]) & (xy[:, 1] > box[1]) & (xy[:, 1] < box[3]))
-        assert np.array_equal(g.box(*box), full), box                     # same points, same order
+        full = np.flatnonzero((xy[:, 0] > bx[0]) & (xy[:, 0] < bx[2]) & (xy[:, 1] > bx[1]) & (xy[:, 1] < bx[3]))
+        assert np.array_equal(g.box(*bx), full), bx                     # same points, same order
     assert len(PointGrid(np.zeros((0, 2))).box(0, 0, 1, 1)) == 0
 
 

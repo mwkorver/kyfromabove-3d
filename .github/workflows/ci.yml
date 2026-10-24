@@ -15,13 +15,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.11"
-          cache: pip
+          enable-cache: true
+      # the locked versions (uv.lock), the same the laptop and the cloud image run
+      - run: uv sync --locked --extra overture --extra cloud
+      # real errors only: undefined names, unused imports, syntax (pyproject.toml)
+      - run: uv run ruff check
+      # the map file test writes Parquet geometry with DuckDB's spatial extension;
+      # fetched here once, so the tests themselves stay off the network
+      - run: uv run python -c "import duckdb; duckdb.sql('INSTALL spatial')"
       # Every AWS call in the tests goes to moto and every data read is a
       # fixture under tests/data, so the suite needs no credentials or network.
       # Tests marked `data` need the downtown outputs on disk and are skipped
       # by the pytest config.
-      - run: pip install -e ".[overture,cloud]" pytest
-      - run: python -m pytest -q
+      - run: uv run pytest -q

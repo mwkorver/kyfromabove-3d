@@ -4,10 +4,8 @@
 from __future__ import annotations
 
 import json
-import math
 import sys
 from pathlib import Path
-import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -54,10 +52,6 @@ def export_building_frames(out_dir: Path, copy_crops: bool = False, precut: bool
     crops_dir = out_dir.parent / "crops"
     crops_dir.mkdir(parents=True, exist_ok=True)
     bdir = ROOT / "outputs" / "downtown" / "buildings"
-
-    manifest_file = ROOT / "outputs" / "downtown" / "manifest.json"
-    manifest_data = json.loads(manifest_file.read_text(encoding="utf-8")) if manifest_file.exists() else {}
-    records = manifest_data.get("buildings", [])
 
     count = 0
     crops_count = 0

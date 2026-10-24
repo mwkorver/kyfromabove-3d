@@ -49,6 +49,29 @@ ${scripts}
   </head>`;
 writeFileSync(index, readFileSync(index, 'utf8').replace('</head>', register));
 
+// the places the Cesium viewer flies to (configs/places.json, one list for both
+// viewers): a viewpoint each, 800 m out as there, listed under "Places" in the
+// layer list, where a click flies the map to it
+{
+  const file = resolve(dist, 'config/kyfromabove.config.json');
+  const cfg = JSON.parse(readFileSync(file, 'utf8'));
+  const { places } = JSON.parse(readFileSync(resolve(here, '../../configs/places.json'), 'utf8'));
+  const slug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const start = cfg.viewpoints.find((v) => v.name === cfg.startingViewpointName);
+  cfg.viewpoints = [start, ...places.map((p) => ({
+    name: `place-${slug(p.name)}`, type: 'Viewpoint', groundPosition: [p.lon, p.lat, p.ground_m],
+    distance: 800, heading: 15, pitch: -35, roll: 0, animate: true, duration: 2,
+    properties: { title: p.name },
+  }))];
+  const at = cfg.contentTree.findIndex((c) => c.name === 'imagery');
+  cfg.contentTree.splice(at, 0, { name: 'places', type: 'NodeContentTreeItem', title: 'Places', initOpen: true },
+    ...places.map((p) => ({
+      name: `places.${slug(p.name)}`, type: 'ViewpointContentTreeItem', viewpointName: `place-${slug(p.name)}`,
+      title: p.name,
+    })));
+  writeFileSync(file, JSON.stringify(cfg, null, 2));
+}
+
 const i = process.argv.indexOf('--tiles');
 if (i > 0) {
   mkdirSync(resolve(dist, 'tiles'), { recursive: true });

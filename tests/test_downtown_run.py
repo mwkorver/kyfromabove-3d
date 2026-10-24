@@ -212,7 +212,7 @@ def test_to_ecef_uses_the_geoid_and_stops_without_it(monkeypatch):
     falls back to a ballpark 1.2 m (network off) or 34 m (no shift) out --
     so the export must stop instead."""
     import pyproj
-    from export_3dtiles import to_ecef
+    from kyfromabove_3d.coordinates import to_ecef
 
     coords = {"origin_source_xyz": [4919401.519615987, 3980508.6132660736, 460.66]}   # downtown's origin
     _, geo = to_ecef(np.zeros((1, 3)), coords)

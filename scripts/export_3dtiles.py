@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import struct
 import sys
 from pathlib import Path
@@ -33,48 +32,7 @@ from pathlib import Path
 import numpy as np
 
 from kyfromabove_3d.clouds import read_cloud
-
-
-def to_ecef(xyz_local: np.ndarray, coords: dict) -> tuple[np.ndarray, np.ndarray]:
-    """Local metres -> ECEF metres, and lon/lat/height for the record."""
-    import pyproj
-    from pyproj import Transformer
-
-    # the geoid grid: fetched over the network into PROJ's cache, unless
-    # PROJ_NETWORK=OFF (the Lambda image, which carries the grids itself)
-    if os.environ.get("PROJ_NETWORK", "").upper() != "OFF":
-        pyproj.network.set_network_enabled(True)
-    ox, oy, oz = coords["origin_source_xyz"]
-    ft = coords.get("scale_source_to_meter", 0.3048006096012192)
-    crs = coords.get("horizontal_crs", "EPSG:3089")
-    # NAVD88 height in US survey feet is EPSG:6360.
-    src = f"{crs}+6360"
-    x_ft = xyz_local[:, 0] / ft + ox
-    y_ft = xyz_local[:, 1] / ft + oy
-    z_ft = xyz_local[:, 2] / ft + oz
-    # Without the GEOID grid PROJ does not fail: it falls back to a
-    # "ballpark" operation. With no vertical shift at all that is 34 m too
-    # high in Louisville (the three landmarks were once rebuilt that way and
-    # hung above their neighbours' roofs); with the network switched off it
-    # found another ballpark and put the whole downtown 1.2 m high and
-    # 0.7 m aside (September 2026). ``only_best`` caught neither. Take the
-    # best operation only when PROJ says it is available, and stop
-    # otherwise, saying which grids are missing.
-    from pyproj.transformer import TransformerGroup
-    try:
-        group = TransformerGroup(src, "EPSG:4979", always_xy=True)
-    except Exception as exc:                                   # noqa: BLE001
-        raise SystemExit(f"[FAIL] no NAVD88 -> ellipsoid transform for {src}: {str(exc)[:200]}")
-    if not (group.best_available and group.transformers):
-        missing = sorted({g.short_name for op in group.unavailable_operations[:1] for g in op.grids if not g.available})
-        raise SystemExit("[FAIL] the NAVD88 -> ellipsoid transform needs grids that are not available "
-                         f"(offline, or an empty PROJ grid cache): {', '.join(missing) or 'unknown'}")
-    lon, lat, h = group.transformers[0].transform(x_ft, y_ft, z_ft)
-    if not (np.isfinite(lon).all() and np.isfinite(lat).all() and np.isfinite(h).all()):
-        raise SystemExit("[FAIL] the NAVD88 -> ellipsoid transform returned no height: the GEOID grid is missing")
-    to_ecef_t = Transformer.from_crs("EPSG:4979", "EPSG:4978", always_xy=True)
-    X, Y, Z = to_ecef_t.transform(lon, lat, h)
-    return np.column_stack([X, Y, Z]), np.column_stack([lon, lat, h])
+from kyfromabove_3d.coordinates import to_ecef
 
 
 def write_pnts(path: Path, ecef: np.ndarray, rgb: np.ndarray) -> dict:

@@ -285,7 +285,7 @@ def quads_to_arrays(quads):
 def enu_transform(coords: dict):
     """Column-major 4x4 placing the local metre frame (east, north, up at the
     origin) in ECEF, plus the origin's lon/lat/ellipsoidal height."""
-    from export_3dtiles import to_ecef
+    from ..coordinates import to_ecef
     ecef, geo = to_ecef(np.zeros((1, 3)), coords)
     lon, lat = np.radians(geo[0, 0]), np.radians(geo[0, 1])
     sl, cl, sp, cp = np.sin(lon), np.cos(lon), np.sin(lat), np.cos(lat)

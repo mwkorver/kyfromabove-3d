@@ -64,7 +64,9 @@ const PRODUCTS = [
   ['boxes', 'Footprints, LiDAR height'],
   ['measured', 'Measured (2)'],
   ['complete', 'Completed (3)'],
+  ['complete_tint', 'Completed, added in pink'],
   ['neural', 'Borrowed fill (4)'],
+  ['neural_tint', 'Borrowed fill, added in violet'],
 ];
 if (process.argv.includes('--cloud')) {
   const file = resolve(dist, 'config/kyfromabove.config.json');

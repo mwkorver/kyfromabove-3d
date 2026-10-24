@@ -611,7 +611,7 @@ About $1.30 of the machine time was wasted: the first run failed at once
 (below), the machines then sat idle about three hours while the session was
 paused, and a hang (below) stalled them for about 70 minutes. CloudFront and
 its function are inside the free tier. The ledger is
-`outputs/pilot/ledger.json`.
+[`docs/data/pilot_ledger.json`](data/pilot_ledger.json).
 
 ### Three bugs the pilot found
 
@@ -621,7 +621,7 @@ its function are inside the free tier. The ledger is
    the grid is missing, instead of failing 9,252 times.
 2. **All 16 workers hung about 35 minutes in.** Each was asleep in
    `getaddrinfo`, the C library's host-name lookup, waiting on a lock that
-   no living thread held (stacks in `outputs/pilot/deadlock_stacks_full.txt`).
+   no living thread held (stacks in [`docs/data/pilot_deadlock_stacks.txt`](data/pilot_deadlock_stacks.txt)).
    rasterio's bundled libcurl 8.16 stops its lookup threads from outside
    (`pthread_cancel`), which can leave that lock held for good; after that
    every connection in the process waits: the frame reads and the S3

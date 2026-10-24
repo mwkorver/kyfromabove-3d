@@ -58,7 +58,7 @@ For context, the survey's large-building medians, on roof returns only:
 roofs separately, for the reason the next section gives, and keeps a second list
 for facades.
 
-![Where the verdict comes from](../outputs/survey/case_complexity.png)
+![Where the verdict comes from](figures/case_complexity.png)
 
 ### Splitting walls from roof changes the answer
 
@@ -165,6 +165,6 @@ python scripts/measure_case_complexity.py
 ```
 
 Footprints are fetched from Overture release `2026-08-19.0`, pinned in the
-script, and cached to `outputs/survey/case_footprints.json` with their GERS ids.
+script, and cached to `configs/case_footprints.json` with their GERS ids.
 Overture revises footprints between releases and the clip is the dominant error
 term, so the release is part of the measurement, not an implementation detail.

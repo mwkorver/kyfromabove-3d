@@ -1,7 +1,7 @@
 """Where a building's footprint comes from, in one place.
 
 Three scripts used to carry their own copy of the same lookup -- a case name
-in ``outputs/survey/case_footprints.json``, or a GERS id in the facade CSV --
+in ``configs/case_footprints.json``, or a GERS id in the facade CSV --
 and a fourth source arrived with the downtown run: a ``footprint.json``
 written into the building's own directory by ``prepare``, which is the only
 one that knows the building's neighbours and its LiDAR ground. This module
@@ -21,7 +21,7 @@ import numpy as np
 
 from kyfromabove_3d.coordinates import METERS_PER_US_SURVEY_FOOT
 
-CASE_FOOTPRINTS = Path("outputs/survey/case_footprints.json")
+CASE_FOOTPRINTS = Path("configs/case_footprints.json")
 FACADE_CSV = Path("data/derived/ky_facade_tiled_wkt.csv")
 
 

@@ -286,7 +286,7 @@ The within-group residual, which is what tests the camera model, moved from
   161 cm difference implying 16.1° off-nadir on this 5.61 m building. It
   therefore cannot be segmented for building footprints, and it carries no
   camera model, so it cannot serve as a reconstruction view either. Result in
-  `outputs/phase1/building_001/qa/ortho_check.json`.
+  `docs/data/phase1_ortho_check.json` (written to `outputs/phase1/building_001/qa/ortho_check.json`).
 
 ## 6. What the crop package holds
 

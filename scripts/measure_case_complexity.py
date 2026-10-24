@@ -149,7 +149,7 @@ def main() -> int:
                     help="where to write the figure; the numbers alone do not say "
                          "whether a building's roughness is on its roof or its walls")
     ap.add_argument("--footprint-cache", type=Path,
-                    default=Path("outputs/survey/case_footprints.json"))
+                    default=Path("configs/case_footprints.json"))
     ap.add_argument("--out", type=Path,
                     default=Path("outputs/survey/case_complexity.json"))
     args = ap.parse_args()

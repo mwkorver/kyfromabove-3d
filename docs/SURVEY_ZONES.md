@@ -4,7 +4,7 @@ A building's LiDAR is scored on its **roof alone**, because the returns that are
 not roof score three times higher on nothing. And because that score cannot see
 facades at all, there is a **second list**, selected the opposite way.
 
-![What rating roofs separately does](../outputs/survey/survey_zones.png)
+![What rating roofs separately does](figures/survey_zones.png)
 
 ## Why roofs are scored alone
 

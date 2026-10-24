@@ -1,4 +1,4 @@
-# the Lambda image copies src/, scripts/, pyproject.toml, README.md, deploy/handlers.py
+# the image copies src/, scripts/, configs/, pyproject.toml, README.md
 # and the Phase 2 tile grid; nothing else needs to reach the build
 outputs
 .venv

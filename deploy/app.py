@@ -12,13 +12,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import aws_cdk as cdk                                                     # noqa: E402
 
-from stack import PROJECT_TAG, BudgetStack, QueueRunStack, TileStepStack, ViewerStack  # noqa: E402
+from stack import PROJECT_TAG, BudgetStack, QueueRunStack, ViewerStack  # noqa: E402
 
 app = cdk.App()
 env = cdk.Environment(account=os.environ.get("CDK_DEFAULT_ACCOUNT"), region="us-west-2")
-# step 1, each tile's inputs, one Lambda invoked per tile (deploy/run_tile_step.py)
-TileStepStack(app, "kyfromabove-3d-tile-step", env=env)
-# a run on Spot machines fed by SQS (refactor step 4), only when a run is named:
+# a run on Spot machines fed by SQS (every step, the tile step included), only when a run is named:
 # npx aws-cdk deploy kyfromabove-3d-queue -c queue_run=r1 [-c queue_machines=2]
 if app.node.try_get_context("queue_run"):
     QueueRunStack(app, "kyfromabove-3d-queue", env=env, run=app.node.try_get_context("queue_run"),

@@ -1,4 +1,5 @@
-# The Lambda image for the pipeline's steps (tile, piece, building).
+# The pipeline's image, which the queue run's Spot machines run (scripts/queue_worker.py,
+# started with --entrypoint python). Built on AWS's Lambda Python image, as it first ran there.
 # Build context: the repository root (deploy/stack.py sets it).
 
 # basisu, the KTX2 texture encoder the meshes need, built for ARM Linux at
@@ -65,12 +66,9 @@ COPY scripts ${LAMBDA_TASK_ROOT}/scripts
 COPY configs ${LAMBDA_TASK_ROOT}/configs
 ENV KFA_CONFIG_DIR=${LAMBDA_TASK_ROOT}/configs
 
-COPY deploy/handlers.py ${LAMBDA_TASK_ROOT}/
-
 # Lambda's home is read-only: matplotlib's and PROJ's caches go to /tmp.
 ENV MPLBACKEND=Agg MPLCONFIGDIR=/tmp/matplotlib PROJ_USER_WRITABLE_DIRECTORY=/tmp/proj
 # GDAL's block cache defaults to 5% of the RAM it can see, which in a 3 GB
 # Lambda may be the host's; fixed at 256 MB it cannot crowd a large
 # building's crops. Speed only: the pixels are the same.
 ENV GDAL_CACHEMAX=256
-CMD ["handlers.tile_step"]

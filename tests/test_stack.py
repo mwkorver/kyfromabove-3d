@@ -1,5 +1,5 @@
-"""The stacks, synthesised without AWS or Docker: the tile step's Lambda,
-the queue run on Spot, the viewer and the budget."""
+"""The stacks, synthesised without AWS or Docker: the queue run on Spot,
+the viewer and the budget."""
 
 from __future__ import annotations
 
@@ -11,28 +11,8 @@ import pytest
 
 cdk = pytest.importorskip("aws_cdk")
 from aws_cdk import assertions                                              # noqa: E402
-from aws_cdk import aws_lambda as lambda_                                   # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "deploy"))
-
-def test_step_one_is_one_named_lambda_on_the_existing_bucket_and_nothing_else(tmp_path_factory):
-    from stack import TileStepStack
-
-    tiny = tmp_path_factory.mktemp("image1")
-    (tiny / "Dockerfile").write_text("FROM public.ecr.aws/lambda/python:3.12\n")
-    t = assertions.Template.from_stack(TileStepStack(
-        cdk.App(), "Step1", image=lambda h: lambda_.DockerImageCode.from_image_asset(str(tiny), cmd=[h])))
-    t.resource_count_is("AWS::Lambda::Function", 1)
-    t.has_resource_properties("AWS::Lambda::Function", {
-        "FunctionName": "kyfromabove-3d-tile-step", "MemorySize": 3008, "Timeout": 900,
-        "Architectures": ["arm64"], "ImageConfig": {"Command": ["handlers.tile_step"]},
-        "Environment": {"Variables": {"BUCKET": "kyfromabove-3d", "RAW_DIR": "/opt/data/raw"}}})
-    t.has_resource_properties("AWS::IAM::Role", {"RoleName": "kyfromabove-3d-tile-step-role"})
-    t.has_resource_properties("AWS::Logs::LogGroup", {"LogGroupName": "/aws/lambda/kyfromabove-3d-tile-step",
-                                                      "RetentionInDays": 14})
-    for kind in ("AWS::S3::Bucket", "AWS::SQS::Queue", "AWS::Events::Rule", "AWS::DynamoDB::Table"):
-        t.resource_count_is(kind, 0)                      # the bucket is imported; no queue, rule or table
-
 
 def _run_gate(code: str, uri: str, auth: str | None = None) -> dict:
     """The CloudFront Function's own code, run under node on one request."""

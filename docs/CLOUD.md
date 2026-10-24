@@ -43,8 +43,10 @@ and building steps, the event chain that was designed but never deployed
 bench (`Ec2BenchStack`), their runners (`run_piece_step.py`,
 `run_building_step.py`, `run_spot_build.py`, `run_ec2_bench.py`,
 `migrate_buildings.py`) and `scripts/piece_step.py`, `building_step.py`,
-`make_pieces.py`. The sections below that describe September's runs name
-them as they were then.
+`make_pieces.py`. **Removed 2026-10-24:** the tile step's Lambda
+(`TileStepStack`, `deploy/handlers.py`, `deploy/run_tile_step.py`), a second
+way to run step 1 beside the queue's tile job. The sections below that
+describe September's runs name them as they were then.
 
 ## Built so far, step by step (September 2026)
 
@@ -381,7 +383,7 @@ settings, neighbours or code changed, and skips the rest.
 | `scripts/queue_run.py` | a run's jobs sent (`measure`, `build`), its progress (`status`), its failures again (`retry-failed`) |
 | `scripts/queue_worker.py` | the worker a Spot machine starts |
 | `deploy/building_cost.py`, `deploy/ec2_cost.py`, `deploy/cost_model.py` | what a run costs, from measurements |
-| `deploy/` | the CDK app (`stack.py`), the image (`Dockerfile`, ARM, Python 3.12), the tile step's handler, `run_tile_step.py` |
+| `deploy/` | the CDK app (`stack.py`), the image (`Dockerfile`, ARM, Python 3.12) |
 
 ## Running it
 
@@ -403,10 +405,8 @@ empty a while. Send each kind once `status` shows the one before done: a
 building is measured against the records of the tiles around its own, and
 built against its neighbours' measured levels.
 
-The tile step can still run as one Lambda per tile instead
-(`npx aws-cdk deploy kyfromabove-3d-tile-step`, then
-`python deploy/run_tile_step.py --tiles ...`); both run
-`pieces.run_tile_step`, as `scripts/tile_step.py` does on this machine.
+The tile job runs `pieces.run_tile_step`, as `scripts/tile_step.py` does on
+this machine.
 
 ## What has been checked
 
@@ -425,7 +425,7 @@ The tile step can still run as one Lambda per tile instead
   raised no event.
 - **Tests** (plain `pytest`, no AWS): the stores agree (folder and mocked
   S3); tile ownership and halo; the marker written last and an unchanged
-  piece skipped; the handlers; the whole chain on mocked AWS with the
+  piece skipped; the whole chain on mocked AWS with the
   stack's own rule pattern; the synthesised stack (the rule, the queues and
   their dead-letter queues, the Lambdas' size and architecture, the table).
 

@@ -1,8 +1,6 @@
-"""The AWS stacks: the tile step's Lambda (``TileStepStack``, each tile's
-inputs: product 1 and the frame list), the queue run on EC2 Spot fed by SQS
-(``QueueRunStack``, refactor step 4: the measure and build jobs of
-``kyfromabove_3d.cloud_jobs``), the CloudFront viewer (``ViewerStack``) and
-the monthly budget (``BudgetStack``).
+"""The AWS stacks: the queue run on EC2 Spot fed by SQS (``QueueRunStack``:
+every job of ``kyfromabove_3d.cloud_jobs``, the tile step included), the
+CloudFront viewer (``ViewerStack``) and the monthly budget (``BudgetStack``).
 """
 
 from __future__ import annotations
@@ -10,76 +8,18 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable, Optional
 
-from aws_cdk import CfnOutput, Duration, Fn, RemovalPolicy, Size, Stack
-from aws_cdk import aws_lambda as lambda_
+from aws_cdk import CfnOutput, Duration, Fn, Stack
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_sqs as sqs
 from constructs import Construct
 
 ROOT = Path(__file__).resolve().parents[1]
 
-#: The EventBridge pattern for a finished piece: its marker, last to be written.
-
 #: What the image build leaves out of the repository: outputs, the local
 #: environment, and every raw file but the tile grid the image copies.
 IMAGE_EXCLUDE = ["outputs", ".venv", ".git", "notebooks", "docs", "tests", "tools", "viewers", "cdk.out",
                  "deploy/cdk.out", "data/derived", "data/raw/photos", "data/raw/*.laz",
                  "data/raw/KY_*", "data/raw/kyfromabove_phase1_*"]
-
-
-#: Graviton: about 20% cheaper than x86 for the same work, and every library
-#: the pipeline uses publishes ARM wheels.
-ARCH = lambda_.Architecture.ARM_64
-
-
-def repo_image(handler: str) -> lambda_.DockerImageCode:
-    """The pipeline's image (deploy/Dockerfile), running ``handler``."""
-    from aws_cdk.aws_ecr_assets import Platform
-
-    return lambda_.DockerImageCode.from_image_asset(str(ROOT), file="deploy/Dockerfile", cmd=[handler],
-                                                    exclude=IMAGE_EXCLUDE, platform=Platform.LINUX_ARM64)
-
-
-def _step_function(stack: Stack, cid: str, function_name: str, handler: str, memory_mb: int, tmp_gb: int,
-                   description: str, bucket_name: str, image) -> lambda_.Function:
-    """One named Lambda from the pipeline's image, with its own role and log
-    group, reading and writing the project's bucket."""
-    from aws_cdk import aws_iam as iam
-    from aws_cdk import aws_logs as logs
-
-    bucket = s3.Bucket.from_bucket_name(stack, "Data", bucket_name)
-    role = iam.Role(stack, "Role", role_name=f"{function_name}-role",
-                    assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
-                    managed_policies=[iam.ManagedPolicy.from_aws_managed_policy_name(
-                        "service-role/AWSLambdaBasicExecutionRole")])
-    log_group = logs.LogGroup(stack, "Logs", log_group_name=f"/aws/lambda/{function_name}",
-                              retention=logs.RetentionDays.TWO_WEEKS, removal_policy=RemovalPolicy.DESTROY)
-    fn = lambda_.DockerImageFunction(
-        stack, cid, function_name=function_name, code=(image or repo_image)(handler),
-        architecture=ARCH, memory_size=memory_mb, timeout=Duration.minutes(15),
-        ephemeral_storage_size=Size.gibibytes(tmp_gb), role=role, log_group=log_group, description=description,
-        environment={"BUCKET": bucket_name, "RAW_DIR": "/opt/data/raw"})
-    bucket.grant_read_write(fn)
-    CfnOutput(stack, "FunctionName", value=fn.function_name)
-    CfnOutput(stack, "BucketName", value=bucket_name)
-    return fn
-
-
-class TileStepStack(Stack):
-    """Step 1 alone: one Lambda, invoked directly once per LiDAR tile,
-    writing to the project's existing bucket. No queue, no event rule."""
-
-    FUNCTION_NAME = "kyfromabove-3d-tile-step"
-
-    def __init__(self, scope: Construct, cid: str, *, bucket_name: str = "kyfromabove-3d",
-                 image: Optional[Callable[[str], lambda_.DockerImageCode]] = None, **kw):
-        super().__init__(scope, cid, **kw)
-        # 3008 MB: this account's ceiling for a Lambda's memory (new accounts
-        # get 3008 until a quota increase); the tile step peaked at 1.6 GB
-        self.function = _step_function(
-            self, "TileStep", self.FUNCTION_NAME, "handlers.tile_step", 3008, 10,
-            "Step 1: one LiDAR tile's Overture buildings measured (product 1) and its frames listed",
-            bucket_name, image)
 
 
 #: nginx for the frame cache, from ECR Public (no Docker Hub pull limits)

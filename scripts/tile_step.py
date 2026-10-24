@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Step 1, the tile step, on this machine: what the queue's tile job and the
-Lambda ``kyfromabove-3d-tile-step`` do (``pieces.run_tile_step``).
+"""Step 1, the tile step, on this machine: what the queue's tile job does
+(``pieces.run_tile_step``).
 
 For each tile: read its Overture outlines (``inputs/footprints/tile=<name>.json``,
 from ``stage0_index.py``), read the LiDAR around them at full resolution,

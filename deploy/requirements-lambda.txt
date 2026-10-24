@@ -18,3 +18,4 @@ boto3==1.43.89
 pyyaml==6.0.3
 matplotlib==3.11.1
 opencv-python-headless==5.0.0.93
+duckdb==1.5.5

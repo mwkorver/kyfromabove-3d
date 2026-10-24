@@ -11,12 +11,14 @@ can answer "which tiles ..." without walking the tile trees::
 
 Longitude and latitude (OGC:CRS84); times in UTC. Every column but ``tile`` and
 ``geometry`` can be null: a tile published before a field existed, or a
-product not published on it. Written by DuckDB, which the laptop has (the
-``overture`` extra); the cloud image does not yet.
+product not published on it. Written by DuckDB (the ``overture`` extra) with
+its spatial extension; the cloud image installs that when it is built, into
+``KFA_DUCKDB_EXTENSIONS``, since its machines do not fetch it at run time.
 """
 
 from __future__ import annotations
 
+import os
 from collections import Counter
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence
@@ -101,6 +103,8 @@ def write_tile_index(rows: Sequence[Dict[str, Any]], path: Path, products: Seque
             + [("code_version", "VARCHAR"), ("tile_step_at", "TIMESTAMP")]
             + [(f"{p}_{k}", t) for p in products for k, t in PER_PRODUCT])
     con = duckdb.connect()
+    if os.environ.get("KFA_DUCKDB_EXTENSIONS"):                         # the cloud image's, installed when it was built
+        con.execute("SET extension_directory = ?", [os.environ["KFA_DUCKDB_EXTENSIONS"]])
     con.execute("LOAD spatial")
     con.execute("CREATE TABLE tiles (" + ", ".join(f'"{c}" {t}' for c, t in cols) + ", wkb BLOB)")
     con.executemany(f"INSERT INTO tiles VALUES ({', '.join('?' * (len(cols) + 1))})",

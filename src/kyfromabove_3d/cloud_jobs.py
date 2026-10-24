@@ -34,8 +34,9 @@ Then the viewer's two (step 4, ``scripts/publish_step.py``'s parts):
   Tiles for every view (``tiles/T/3dtiles/<product>/``), its buildings read
   from ``buildings/<gers>/`` beside it.
 * ``{"kind": "tree", "run": ...}`` -- once the tiles are published: the
-  statewide tree for each view (``kentucky/<product>/``) and the terrain
-  (``terrain/``), over every tile published in the store, so tiles published
+  statewide tree for each view (``kentucky/<product>/``), the terrain
+  (``terrain/``) and the map file of the tiles (``kentucky/tiles.parquet``,
+  ``tile_index``), over every tile published in the store, so tiles published
   before stay in the view. The viewer page and its settings are left as
   they are.
 
@@ -280,9 +281,11 @@ def publish_job(job: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def tree_job(job: Dict[str, Any]) -> Dict[str, Any]:
-    """The statewide tree and the terrain over every published tile (see the module)."""
+    """The statewide tree, the terrain and the map file of the tiles over
+    every published tile (see the module)."""
     from .pieces import phase2_grid
     from .publish import publish_trees
+    from .tile_index import publish_tile_index
 
     ps = _publish_step()
     store = _store()
@@ -293,7 +296,14 @@ def tree_job(job: Dict[str, Any]) -> Dict[str, Any]:
     tiles = some["tile_names"]
     if job.get("terrain", True):
         ps.terrain(tiles, store, store, grid, int(job.get("terrain_max_level", 15)))
-    return {"tiles": len(tiles), "products": list(products)}
+    index = None
+    if job.get("tile_index", True):
+        work = _work()
+        try:                                                            # every product's columns, whichever trees were redone
+            index = publish_tile_index(store, grid, list(ps.TITLES), work)
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+    return {"tiles": len(tiles), "products": list(products), "tile_index": index}
 
 
 # ------------------------------------------------------------------ repack

@@ -23,6 +23,14 @@ FROM public.ecr.aws/lambda/python:3.12
 COPY deploy/requirements-lambda.txt /tmp/requirements-lambda.txt
 RUN pip install --no-cache-dir -r /tmp/requirements-lambda.txt
 
+# DuckDB's spatial extension, which writes the map file of the tiles
+# (tile_index), fetched now for this DuckDB and this machine: the jobs load it
+# from here and never download it.
+ENV KFA_DUCKDB_EXTENSIONS=/opt/duckdb/extensions
+RUN python -c "import duckdb, os; c = duckdb.connect(); \
+c.execute('SET extension_directory = ?', [os.environ['KFA_DUCKDB_EXTENSIONS']]); \
+c.execute('INSTALL spatial'); c.execute('LOAD spatial')"
+
 # rasterio's GDAL needs libexpat, which the minimal Lambda image leaves out.
 RUN dnf install -y expat && dnf clean all
 

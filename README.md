@@ -8,8 +8,8 @@
 > freely.** It is provided as-is, with no support or active maintenance; issues
 > and pull requests are not monitored, so please fork rather than wait on
 > changes here. It has been run for parts of Kentucky (Louisville and the
-> towns east of it, Covington and Newport, Lexington, and two small pilot
-> areas near Hazard and Somerset), not the whole state.
+> towns east of it, Covington and Newport, and Lexington), not the whole
+> state.
 
 **Every building in Kentucky in 3D, from the state's own open data.** The
 shape of each building comes from KyFromAbove's LiDAR, its color from
@@ -74,11 +74,10 @@ measured along the way, and everything that went wrong are in
 
 Every step has run end to end in AWS:
 
-- **About 75,000 buildings built as textured meshes**: downtown Louisville
+- **About 73,000 buildings built as textured meshes**: downtown Louisville
   and the towns east of it (St. Matthews, Middletown, Simpsonville,
-  Shelbyville), Covington and Newport, downtown Lexington, and two small
-  pilot areas, Hazard in the eastern hills and a rural edge near Somerset.
-- **368,456 buildings as boxes** across 302 LiDAR tiles, so the view from
+  Shelbyville), Covington and Newport, and downtown Lexington.
+- **367,161 buildings as boxes** across 294 LiDAR tiles, so the view from
   far away has real content.
 - **Terrain** under all of it, and the viewer with its five views.
 - **Total AWS cost so far: about $45** (August to October 2026, everything

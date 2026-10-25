@@ -34,6 +34,7 @@ self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil((async () => {
   for (const name of await caches.keys()) {
     if (name.startsWith('kyfa-obl-tiles-') && name !== TILE_CACHE) await caches.delete(name);
+    if (name.startsWith('kyfa-obl-lists-') && name !== LIST_CACHE) await caches.delete(name);
   }
   await self.clients.claim();
 })()));
@@ -48,8 +49,10 @@ self.addEventListener('fetch', (event) => {
 // The photo list (obl/<c>/cogs.json beside image.json) is kept in Cache Storage
 // once read: the browser stops an idle service worker and starts it afresh, and
 // the fresh one then needs no request to the (password-protected) site. A failed
-// read is not kept, so the next tile tries again.
-const LIST_CACHE = 'kyfa-obl-lists-v1';
+// read is not kept, so the next tile tries again. Change the name when the lists
+// change (v2: every published tile, not downtown alone); the old store is then
+// dropped. A list may name most photos by one pattern, "*": "<url>{name}.tif".
+const LIST_CACHE = 'kyfa-obl-lists-v2';
 
 async function readList(url) {
   const cache = await caches.open(LIST_CACHE);
@@ -124,7 +127,7 @@ async function makeTile(requestUrl, collection, name, z, x, y) {
     await report(String(err.message || err));
     return new Response(String(err), { status: 503 });
   }
-  const url = cogs[name];
+  const url = cogs[name] || (cogs['*'] && cogs['*'].replace('{name}', name));
   if (!url) return new Response('no such photo', { status: 404 });
   try {
     return await drawTile(url, z, x, y);

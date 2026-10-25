@@ -17,15 +17,20 @@ them back to their pixels is solved for. The fit's error is reported in pixels.
 
 The photos stay where KyFromAbove keeps them (512-pixel JPEG-tiled COGs with
 overviews); ``cogs.json`` beside ``image.json`` names each photo's COG, for the
-page's tile adapter. Usage::
+page's tile adapter. For every published tile (``--store``), each tile's photos
+are cast about its own ground height, and the list is split by map tile
+(``--tile-level``) so the page loads only the photos near the view. Usage::
 
     python scripts/oblique_collection.py --frames outputs/downtown/frames_2024s1.gpkg \\
         --out viewers/vcmap/app/obl/KY_KYAPED_2024_Season1_3IN
+    python scripts/oblique_collection.py --store s3://kyfromabove-3d --tile-level 14 \\
+        --out viewers/vcmap/dist/obl/KY_KYAPED_2024_Season1_3IN
 """
 
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import math
 import os
@@ -115,26 +120,38 @@ def overview_resolutions(width: int, height: int) -> list[int]:
     return res[::-1]
 
 
-def main() -> int:
-    import geopandas as gpd
+@functools.lru_cache(maxsize=1)
+def _to_mercator():
+    from pyproj import Transformer
 
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--frames", type=Path, required=True, help="frames with exterior orientation (frames_*.gpkg)")
-    ap.add_argument("--out", type=Path, required=True, help="folder for image.json and cogs.json")
-    ap.add_argument("--ground-navd88-m", type=float, default=140.0, help="the area's ground height, NAVD88 metres")
-    args = ap.parse_args()
+    return Transformer.from_crs(UTM16N, "EPSG:3857", always_xy=True)
 
-    frames = gpd.read_file(args.frames)
-    convert = to_utm_ellipsoid()
-    origin = (float(frames.X.mean()), float(frames.Y.mean()), args.ground_navd88_m / FT)
+
+def tile_of(center_utm, level: int) -> str:
+    """The web-mercator tile ``z/x/y`` (OpenLayers' grid, y counted down from
+    the top) holding a photo's ground centre: VC Map loads a tiled collection
+    one such tile at a time, the one nearest the view."""
+    e, n = center_utm[:2]
+    x, y = _to_mercator().transform(e, n)
+    half, k = 20037508.342789244, 2 ** level
+    return f"{level}/{int((x + half) / (2 * half) * k)}/{int((half - y) / (2 * half) * k)}"
+
+
+def photo_rows(frames, ground_navd88_m: float, convert, cams: dict, cogs: dict, worst: list) -> list:
+    """image.json's rows for the frames not already in ``cogs``, cast about
+    the given ground height; new cameras are added to ``cams``."""
+    origin = (float(frames.X.mean()), float(frames.Y.mean()), ground_navd88_m / FT)
     lcf = LocalCoordinateFrame(origin_source_xyz=origin)
 
     def local_to_utm(pts_m):
         src = pts_m / FT + np.asarray(origin)
         return convert(src[:, 0], src[:, 1], src[:, 2])
 
-    cams, images, cogs, worst = {}, [], {}, []
+    images = []
     for _, rec in frames.iterrows():
+        name = str(rec.ShotID)
+        if name in cogs:                                # a photo over two tiles is listed once
+            continue
         cam = parse_camera_from_eo_record(rec, lcf)
         key = str(rec.CameraID)
         W, H = cam.width_px, cam.height_px
@@ -164,11 +181,63 @@ def main() -> int:
         # the optical axis in UTM: from the centre through the ground point at the photo's middle
         axis = ground[4] - centre
         direction, angle = view_direction(axis / np.linalg.norm(axis))
-        name = str(rec.ShotID)
         cogs[name] = str(rec.S3URL)
         images.append([name, W, H, cams[key]["tile-resolution"], direction, angle,
                        ground[:4].round(3).tolist(), ground[4].round(3).tolist(), cams[key]["index"],
                        centre.round(4).tolist(), np.linalg.inv(M).tolist(), P.tolist()])
+    return images
+
+
+def store_sources(spec: str, log=print):
+    """(frames, ground NAVD88 m) for every published tile in a store: its
+    ``tiles/<t>/frames.gpkg`` and the middle height of its ground grid."""
+    import io
+    import tempfile
+    from concurrent.futures import ThreadPoolExecutor
+
+    import geopandas as gpd
+
+    from kyfromabove_3d.store import store_from
+
+    store = store_from(spec)
+    tiles = store.list_dirs("tiles/")
+
+    def read(t):
+        try:
+            return t, store.get_bytes(f"tiles/{t}/frames.gpkg"), store.get_bytes(f"tiles/{t}/ground.npz")
+        except FileNotFoundError:
+            return t, None, None
+    with ThreadPoolExecutor(32) as ex, tempfile.TemporaryDirectory() as work:   # the reads wait on the network
+        for t, gpkg, npz in ex.map(read, tiles):
+            if gpkg is None:
+                log(f"[warn] {t}: no frames.gpkg or ground.npz; no photos listed there")
+                continue
+            f = Path(work) / f"{t}.gpkg"
+            f.write_bytes(gpkg)
+            yield gpd.read_file(f), float(np.median(np.load(io.BytesIO(npz))["Z_navd88_m"]))
+
+
+def main() -> int:
+    import geopandas as gpd
+
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--frames", type=Path, default=None, help="frames with exterior orientation (frames_*.gpkg)")
+    ap.add_argument("--store", default=None,
+                    help="instead of --frames: every published tile's frames and ground in this store (s3://bucket)")
+    ap.add_argument("--out", type=Path, required=True, help="folder for image.json and cogs.json")
+    ap.add_argument("--ground-navd88-m", type=float, default=140.0, help="the area's ground height, NAVD88 metres")
+    ap.add_argument("--tile-level", type=int, default=None,
+                    help="list the photos in one file per web-mercator tile at this level, by their ground centre "
+                         "(z/x/y.json beside image.json); VC Map then loads only the tiles near the view")
+    args = ap.parse_args()
+    if bool(args.frames) == bool(args.store):
+        ap.error("give --frames or --store")
+
+    convert = to_utm_ellipsoid()
+    sources = store_sources(args.store) if args.store else [(gpd.read_file(args.frames), args.ground_navd88_m)]
+    cams, images, cogs, worst = {}, [], {}, []
+    for frames, ground in sources:
+        images += photo_rows(frames, ground, convert, cams, cogs, worst)
 
     header = ["name", "width", "height", "tile-resolution", "view-direction", "view-direction-angle",
               "groundCoordinates", "centerPointOnGround", "camera-index", "projection-center",
@@ -180,14 +249,29 @@ def main() -> int:
                                 "tile-resolution": first["tile-resolution"], "tile-width": TILE, "tile-height": TILE,
                                 "crs": UTM16N,
                                 "cameraParameter": [{"name": k, "size": v["size"], "principal-point": v["principal-point"],
-                                                     "tileResolution": v["tile-resolution"]} for k, v in ordered]},
-           "images": [header] + images}
+                                                     "tileResolution": v["tile-resolution"]} for k, v in ordered]}}
     args.out.mkdir(parents=True, exist_ok=True)
+    if args.tile_level is None:
+        doc["images"] = [header] + images
+    else:
+        by_tile = {}
+        for row in images:
+            by_tile.setdefault(tile_of(row[7], args.tile_level), []).append(row)
+        doc["tileLevel"], doc["availableTiles"] = args.tile_level, sorted(by_tile)
+        for t, rows in by_tile.items():
+            (args.out / t).parent.mkdir(parents=True, exist_ok=True)
+            (args.out / f"{t}.json").write_text(json.dumps({"images": [header] + rows}), encoding="utf-8")
     (args.out / "image.json").write_text(json.dumps(doc), encoding="utf-8")
+    # cogs.json: each photo's COG; those named <prefix><photo>.tif by one "*" pattern
+    prefixes = {u[: -len(n) - 4] for n, u in cogs.items() if u.endswith(f"/{n}.tif")}
+    if len(prefixes) == 1:
+        pattern = prefixes.pop() + "{name}.tif"
+        cogs = {"*": pattern, **{n: u for n, u in cogs.items() if u != pattern.replace("{name}", n)}}
     (args.out / "cogs.json").write_text(json.dumps(cogs, indent=0), encoding="utf-8")
     w = np.asarray(worst)
     sizes = ", ".join(f"{k} {v['size'][0]}x{v['size'][1]}" for k, v in ordered)
-    print(f"{len(images)} photos, cameras {sizes}; "
+    tiled = f" in {len(doc['availableTiles'])} tiles" if args.tile_level is not None else ""
+    print(f"{len(images)} photos{tiled}, cameras {sizes}; "
           f"matrix fit error: largest {w.max():.3f} px, median of each photo's largest {np.median(w):.3f} px "
           f"-> {args.out / 'image.json'}")
     return 0

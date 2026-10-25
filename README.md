@@ -84,6 +84,12 @@ Every step has run end to end in AWS:
   in the account, tax included): about $16 of early trials on Lambda before
   the move to EC2 Spot machines, $11 of Spot machines, $14 of storage.
 
+![Downtown Louisville looking south, as published: the arena in the middle, the towers with red roofs in front](docs/figures/louisville_looking_south.jpg)
+
+*Downtown Louisville looking south, as published and seen in the VC Map
+page: the Measured view, every wall and roof shaped from the LiDAR and
+colored from KyFromAbove's aerial photos.*
+
 What the first pilot (four areas, September 2026) showed:
 
 - Buildings sit on the ground: at 10 buildings across the four areas, the

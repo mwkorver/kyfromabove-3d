@@ -46,7 +46,7 @@ from kyfromabove_3d.outlines import main_directions, regularize  # noqa: E402
 ROOT = Path(__file__).resolve().parents[3]                                    # the repository (src/kyfromabove_3d/stages/..)
 REF = ROOT / "outputs" / "wall_visibility" / "reference"
 FOOTPRINTS = ROOT / "data" / "derived" / "louisville_downtown_overture_split.json"
-NOT_ROOF_CLASSES = (7, 18)             # low and high noise; ground stays, so the street reads as street, not as a gap
+NOT_ROOF_CLASSES = (3, 4, 5, 7, 18)    # trees (lidar.label_trees), low and high noise; ground stays, so the street reads as street, not as a gap
 
 
 def load_building(b, footprints_path: Path = FOOTPRINTS):

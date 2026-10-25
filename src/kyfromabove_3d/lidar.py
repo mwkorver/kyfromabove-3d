@@ -535,6 +535,132 @@ def concat_clouds(clouds: Sequence[LidarCloud]) -> LidarCloud:
     )
 
 
+#: the survey's vegetation classes (ASPRS low, medium, high)
+VEGETATION = (3, 4, 5)
+#: the class :func:`label_trees` gives a tree's returns (ASPRS high vegetation)
+TREE_CLASS = 5
+#: the tree rule's version: a building's clip cut before it is cut again
+#: (prepare_piece's clip.json)
+TREE_RULE = 3
+
+
+def label_trees(xyz_m: np.ndarray, cls: np.ndarray, number_of_returns: np.ndarray, smooth_m: float = 0.08,
+                k: int = 12, max_gap_m: float = 2.0, vote: float = 0.3, split_share: float = 0.6,
+                max_tree_m: float = 40.0, rejoin_m: float = 0.15, k_rejoin: int = 5, patch_link_m: float = 1.5,
+                min_patch: int = 40, patch_split_share: float = 0.5, edge_m: float = 2.0, edge_up_m: float = 1.0,
+                chunk: int = 500_000) -> np.ndarray:
+    """``cls`` with the unclassified returns (1) that are bare branches
+    relabeled trees (:data:`TREE_CLASS`); ``xyz_m`` in meters,
+    ``number_of_returns`` each return's pulse's echo count.
+
+    The state's Phase 2 LiDAR labels ground and noise only: no tree and no
+    building class on any of the 302 published tiles. Every step that leaves
+    vegetation out left nothing out, and a tree over a house was its roof: in
+    St. Matthews 41 of 218 houses measured over 15 m, 81288b3f 24.9 m for a
+    6.9 m roof. Flown leaves-off, a crown is a scatter whose pulses split:
+
+    * rough: fewer than ``vote`` of a return's ``k`` nearest unclassified
+      neighbors are smooth -- they and their own ``k - 1`` nearest (within
+      ``max_gap_m``) lie within ``smooth_m`` of one plane, at any angle, so
+      walls stay; a ridge, where two slopes meet in no one plane, is carried
+      by the smooth slopes either side;
+    * split: at least ``split_share`` of those neighbors' pulses gave more
+      than one echo. Rough alone took the Cathedral of the Assumption's spire
+      (its top 84 m to 50 m) and up to half a glass tower's own returns: stone,
+      glass and rooftop plant are rough, but their pulses mostly end in one
+      echo (26-46% split, against 83% in St. Matthews' crowns);
+    * low: no more than ``max_tree_m`` over the nearest ground return. A
+      lattice mast splits pulses as a crown does: the Kentucky Home Life
+      Building's, 70 to 94 m up, and PNC Tower's."""
+    from scipy.spatial import cKDTree
+
+    cls = np.asarray(cls).copy()
+    u = np.flatnonzero(cls == 1)
+    if len(u) < k:
+        return cls
+    xyz_m = np.asarray(xyz_m, dtype=np.float64)
+    o = xyz_m[u].mean(axis=0)
+    P = xyz_m[u] - o
+    split = np.asarray(number_of_returns)[u] > 1
+    g = np.flatnonzero(cls == 2)
+    if len(g):
+        G = xyz_m[g] - o
+        _, gi = cKDTree(G[:, :2]).query(P[:, :2], workers=-1)
+        low = P[:, 2] - G[gi, 2] <= max_tree_m
+    else:
+        low = np.ones(len(P), dtype=bool)
+    tree = cKDTree(P)
+    smooth = np.empty(len(P), dtype=bool)
+    for s in range(0, len(P), chunk):
+        d, ii = tree.query(P[s:s + chunk], k=k, workers=-1)
+        Q = P[ii]
+        Q = Q - Q.mean(axis=1, keepdims=True)
+        spread = np.linalg.eigvalsh(np.einsum("nki,nkj->nij", Q, Q) / k)[:, 0]
+        smooth[s:s + chunk] = (np.sqrt(np.maximum(spread, 0.0)) < smooth_m) & (d[:, -1] <= max_gap_m)
+    # the vote, a second query rather than every neighbor list kept (a
+    # tile's area holds tens of millions of returns)
+    is_tree = np.empty(len(P), dtype=bool)
+    branchy = np.empty(len(P), dtype=bool)
+    for s in range(0, len(P), chunk):
+        _, ii = tree.query(P[s:s + chunk], k=k, workers=-1)
+        branchy[s:s + chunk] = (split[ii].mean(axis=1) >= split_share) & low[s:s + chunk]
+        is_tree[s:s + chunk] = (smooth[ii].mean(axis=1) < vote) & branchy[s:s + chunk]
+    # A roof return with crown returns among its neighbors fits no plane and
+    # was called a tree (18% of a test roof under a crown): it rejoins the
+    # surface when it lies within ``rejoin_m`` of the plane through its k
+    # nearest kept neighbors, those smooth themselves. A crown return far
+    # off any surface stays a tree.
+    cand, kept = np.flatnonzero(is_tree), np.flatnonzero(~is_tree)
+    if len(cand) and len(kept) >= k_rejoin:
+        ktree = cKDTree(P[kept])
+        for s in range(0, len(cand), chunk):
+            c = cand[s:s + chunk]
+            d, ii = ktree.query(P[c], k=k_rejoin, workers=-1)
+            Q = P[kept[ii]]
+            mu = Q.mean(axis=1, keepdims=True)
+            w, v = np.linalg.eigh(np.einsum("nki,nkj->nij", Q - mu, Q - mu) / k_rejoin)
+            off = np.abs(np.einsum("ni,ni->n", P[c] - mu[:, 0], v[:, :, 0]))
+            ok = (np.sqrt(np.maximum(w[:, 0], 0.0)) < smooth_m) & (d[:, -1] <= max_gap_m) & (off < rejoin_m)
+            is_tree[c[ok]] = False
+    # A few branches can lie smooth by chance: a clump of a dozen returns,
+    # standing alone, set 6453e105's top at 18.7 m for an 8.7 m roof. A
+    # roof is one surface of hundreds: a kept patch (returns linked within
+    # ``patch_link_m`` of one of their ``k_rejoin`` nearest) of fewer than
+    # ``min_patch`` returns -- about 10 m2 at the survey's 4 a square metre
+    # -- is a tree, when its own pulses split (``patch_split_share``) or its
+    # neighborhood's do, and it stands low enough: a piece of spire does not.
+    kept = np.flatnonzero(~is_tree)
+    if len(kept) > k_rejoin:
+        from scipy.sparse import coo_matrix
+        from scipy.sparse.csgraph import connected_components
+        d, ii = cKDTree(P[kept]).query(P[kept], k=k_rejoin + 1, workers=-1)
+        link = d[:, 1:] < patch_link_m
+        rows = np.repeat(np.arange(len(kept)), k_rejoin)[link.ravel()]
+        _, lab = connected_components(coo_matrix((np.ones(len(rows)), (rows, ii[:, 1:][link])),
+                                                 shape=(len(kept), len(kept))), directed=False)
+        n = np.bincount(lab)
+        clump_split = (np.bincount(lab, weights=split[kept]) / n)[lab] >= patch_split_share
+        small = (n[lab] < min_patch) & (clump_split | branchy[kept]) & low[kept]
+        is_tree[kept[small]] = True
+    # A building's edges -- parapet, cornice, eave -- fit no one plane and a
+    # pulse that clips one splits: 81% of what the rule called a tree on the
+    # Courtyard Louisville Downtown lay within 1.5 m of its outline, and its
+    # walls came out short of their parapets (holes 97 -> 244 m2). An edge
+    # stands at or below the surface beside it, a crown that matters over
+    # it: a return with kept smooth returns within ``edge_m`` across, and no
+    # more than ``edge_up_m`` above the highest of them, rejoins (once, not
+    # chained: a crown's lowest tips just over a roof come back, adding at
+    # most that to a house's top, never the crown).
+    cand, kept = np.flatnonzero(is_tree), np.flatnonzero(~is_tree & smooth)     # surfaces, not a crown's leftovers
+    if len(cand) and len(kept) >= 8:
+        d, ii = cKDTree(P[kept, :2]).query(P[cand, :2], k=8, distance_upper_bound=edge_m, workers=-1)
+        near = np.isfinite(d)
+        top = np.where(near, P[kept[np.minimum(ii, len(kept) - 1)], 2], -np.inf).max(axis=1)
+        is_tree[cand[near.any(axis=1) & (P[cand, 2] <= top + edge_up_m)]] = False
+    cls[u[is_tree]] = TREE_CLASS
+    return cls
+
+
 def extract_lidar_for_aois(
     aois: Dict[str, Tuple[float, float, float, float, float, float]],
     coord_frame,
@@ -629,4 +755,7 @@ def extract_lidar_for_aois(
             f"allow_missing_tiles=True to accept partial clouds."
         )
 
-    return {aoi_id: concat_clouds(p) for aoi_id, p in parts.items()}
+    out = {aoi_id: concat_clouds(p) for aoi_id, p in parts.items()}
+    for c in out.values():                      # the survey labels no trees (label_trees)
+        c.classification = label_trees(c.xyz_local_m, c.classification, c.number_of_returns)
+    return out

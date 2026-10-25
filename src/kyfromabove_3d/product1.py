@@ -121,8 +121,9 @@ def read_boxes(allb: np.ndarray, pad: float, lo: np.ndarray, hi: np.ndarray, cel
 
 def area_cloud_local(polys, ox: float, oy: float, resolution_m=None, index=None, log=print):
     """The LiDAR over ``polys`` (local metres about ``ox, oy``, EPSG:3089 ft)
-    plus 20 m, by COPC range read: (xyz local metres, classes), vegetation,
-    noise and water left out. ``index`` is a LidarTileIndex (default: the
+    plus 20 m, by COPC range read: (xyz local metres, classes), vegetation
+    (found by :func:`~kyfromabove_3d.lidar.label_trees`), noise and water
+    left out. ``index`` is a LidarTileIndex (default: the
     grids in data/raw).
 
     Full resolution unless ``resolution_m`` is given: a COPC query's
@@ -131,7 +132,7 @@ def area_cloud_local(polys, ox: float, oy: float, resolution_m=None, index=None,
     identical heights and splits, but would silently thin denser LiDAR."""
     import laspy
 
-    from kyfromabove_3d.lidar import LidarTileIndex, copc_query, copc_reader
+    from kyfromabove_3d.lidar import VEGETATION, LidarTileIndex, copc_query, copc_reader, label_trees
 
     allb = np.array([p.bounds for p in polys])
     pad = 20.0
@@ -144,7 +145,7 @@ def area_cloud_local(polys, ox: float, oy: float, resolution_m=None, index=None,
     boxes = read_boxes(allb, pad, lo, hi)
     log(f"{len(polys)} footprints over {hi[0] - lo[0]:.0f} x {hi[1] - lo[1]:.0f} m in {len(boxes)} box(es); "
         f"{len(tiles)} LiDAR tile(s)")
-    xyz, cls = [], []
+    xyz, cls, echoes = [], [], []
     for t in tiles:
         h = copc_reader(t.url).header
         for bx0, by0, bx1, by1 in boxes:
@@ -153,18 +154,24 @@ def area_cloud_local(polys, ox: float, oy: float, resolution_m=None, index=None,
             pts = copc_query(t.url, box, None if resolution_m is None else resolution_m / ft)
             c = np.asarray(pts.classification)
             x, y = (np.asarray(pts.x) - ox) * ft, (np.asarray(pts.y) - oy) * ft
-            # drop noise (7), water (9) and vegetation (3-5): a tree over a low
-            # roof would otherwise be the roof. And trim to the box on every
+            # drop noise (7) and water (9), and trim to the box on every
             # side: a COPC query can return a point a hair past its bounds
             # (1 in 22,031 on a downtown test), which the next box, sharing
             # that edge, returns too -- counted twice, it moved 11 buildings'
             # return counts by one or two
-            keep = (~np.isin(c, (3, 4, 5, 7, 9)) & (x >= bx0) & (x < bx1) & (y >= by0) & (y < by1))
+            keep = (~np.isin(c, (7, 9)) & (x >= bx0) & (x < bx1) & (y >= by0) & (y < by1))
             xyz.append(np.column_stack([x[keep], y[keep], np.asarray(pts.z)[keep] * ft]))
             cls.append(c[keep])
+            echoes.append(np.asarray(pts.number_of_returns)[keep])
     if not xyz:
         return np.zeros((0, 3)), np.zeros(0, dtype=np.uint8)
-    xyz = np.vstack(xyz); cls = np.concatenate(cls)
+    xyz = np.vstack(xyz); cls = np.concatenate(cls); echoes = np.concatenate(echoes)
+    # and vegetation (3-5): a tree over a low roof would otherwise be the
+    # roof. The survey labels none, so the trees are found here, over the
+    # whole area at once (label_trees)
+    cls = label_trees(xyz, cls, echoes)
+    veg = np.isin(cls, VEGETATION)
+    xyz, cls = xyz[~veg], cls[~veg]
     log(f"{len(xyz):,} returns ({'full resolution' if resolution_m is None else f'{resolution_m} m resolution'}); "
         f"{int((cls == 2).sum()):,} ground")
     return xyz, cls

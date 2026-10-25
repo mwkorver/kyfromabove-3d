@@ -29,6 +29,7 @@ import numpy as np
 
 from kyfromabove_3d import audit as A                                            # noqa: E402
 from kyfromabove_3d.clouds import find_cloud, read_cloud                         # noqa: E402
+from kyfromabove_3d.lidar import VEGETATION                                     # noqa: E402
 from kyfromabove_3d.project import repo_relative                                 # noqa: E402
 
 
@@ -52,6 +53,8 @@ def lidar_model(b: Path, outline: str = "footprint") -> dict:
         poly, fp = resolve_footprint(b, ox, oy)
     lidar = read_cloud(find_cloud(b, "lidar_local"))
     xyz = np.column_stack([lidar["x"], lidar["y"], lidar["z"]]).astype(np.float64)
+    if "classification" in lidar:                # trees (lidar.label_trees) are no part of it
+        xyz = xyz[~np.isin(np.asarray(lidar["classification"]), VEGETATION)]
     ground_z = 0.0
     height_m = fp.get("height_m") or fp.get("lidar_height_m")
     n_on = int(fp.get("lidar_n") or 0) or int(shapely.contains_xy(poly, xyz[:, 0], xyz[:, 1]).sum())

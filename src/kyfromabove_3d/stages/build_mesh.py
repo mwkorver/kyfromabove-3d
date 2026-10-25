@@ -51,6 +51,7 @@ from kyfromabove_3d.features import (                                  # noqa: E
     rectify_footprint_corners, ground_field_for_building,
 )
 from kyfromabove_3d.clouds import find_cloud, read_cloud               # noqa: E402
+from kyfromabove_3d.lidar import VEGETATION                           # noqa: E402
 from kyfromabove_3d.mesh.walls import (  # noqa: E402,F401
     _orient, _runs, ArcGround, corner_returns, plane_bands, roll_quads, RoofField, wall_geometry,
 )
@@ -173,6 +174,13 @@ def main(argv=None) -> int:
     name = args.name or name
     lidar = read_cloud(find_cloud(b, "lidar_local"))
     xyz = np.column_stack([lidar["x"], lidar["y"], lidar["z"]]).astype(np.float64)
+    # the trees (lidar.label_trees) hide the frames' view but are no part of
+    # the building: kept for the occlusion, left out of its shape
+    cls_arr = np.asarray(lidar["classification"]) if "classification" in lidar else None
+    xyz_all = xyz
+    if cls_arr is not None:
+        tree = np.isin(cls_arr, VEGETATION)
+        xyz, cls_arr = xyz[~tree], cls_arr[~tree]
     ply_path = find_cloud(b, "colorized_aerial")
     if args.refresh or not ply_path.exists():
         # The mesh's colour comes from the state's aerial frames alone: a
@@ -242,7 +250,7 @@ def main(argv=None) -> int:
     cams = load_cameras(b) if (b / "cameras_normalized.json").exists() else []
     if cams:
         from kyfromabove_3d.stages.colorize_building import FOOTPRINTS, levels_dir, neighbour_prisms, occluder_cloud, occlusion_maps
-        occ = occluder_cloud(b, args.scene_cloud, 250.0, xyz) if args.scene_cloud else xyz
+        occ = occluder_cloud(b, args.scene_cloud, 250.0, xyz_all) if args.scene_cloud else xyz_all
         kw = {} if args.neighbour_levels is None else {"buildings_dir": levels_dir(args.neighbour_levels)}
         prisms = [] if not BS.colourise.prism_occluders else neighbour_prisms(b, args.neighbours or FOOTPRINTS, **kw)
         occlusion_maps(b, cams, occ, prisms)
@@ -311,7 +319,6 @@ def main(argv=None) -> int:
         rect_by_face = {p.face: p for p in rect_planes}
         planes = [rect_by_face.get(p.face, p) for p in planes]
 
-    cls_arr = np.asarray(lidar["classification"]) if "classification" in lidar else None
     ground_field = ground_field_for_building(
         xyz,
         np.asarray(levels[0]["ring"]),
@@ -473,12 +480,14 @@ def main(argv=None) -> int:
             max_parapet_m = 2.0
             if seen:
                 off = float(np.median([x.offset_m for x in seen]))
-                along, across = edge.local(xyz[:, :2])
-                near = (np.abs(across - off) <= 0.75) & (xyz[:, 2] > lv_floor + 0.5)
+                # the wall's own returns, the trees' too: a parapet can pass
+                # for twigs (colourise.levels, wall_xyz)
+                along, across = edge.local(xyz_all[:, :2])
+                near = (np.abs(across - off) <= 0.75) & (xyz_all[:, 2] > lv_floor + 0.5)
                 raised = []
                 for a, c, z in stations:
                     m = near & (along >= a) & (along <= c)
-                    top = float(np.percentile(xyz[m, 2], 98)) if m.sum() >= 10 else -np.inf
+                    top = float(np.percentile(xyz_all[m, 2], 98)) if m.sum() >= 10 else -np.inf
                     raised.append((a, c, min(max(z, min(top, z + max_parapet_m)), lv_ceiling)))
                 stations = raised
         # merge neighbouring stretches at the same height

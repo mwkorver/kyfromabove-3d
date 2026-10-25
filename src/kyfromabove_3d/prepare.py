@@ -301,7 +301,7 @@ def prepare_piece(rec: Dict[str, Any], out_dir: Path, frames_gdf, index, records
     from shapely.wkt import loads as wkt_loads
 
     from kyfromabove_3d.footprints import largest_ring, ring_local_m
-    from kyfromabove_3d.lidar import extract_lidar_for_aois
+    from kyfromabove_3d.lidar import TREE_RULE, extract_lidar_for_aois
 
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -326,13 +326,15 @@ def prepare_piece(rec: Dict[str, Any], out_dir: Path, frames_gdf, index, records
     }, indent=1), encoding="utf-8")
 
     # LiDAR. The clip is reused only when it was cut for the same box
-    # about the same origin (clip.json): a re-drawn or split footprint, a
-    # new padding or a new origin cuts it again.
+    # about the same origin by the same tree rule (clip.json): a re-drawn
+    # or split footprint, a new padding, a new origin or a new rule cuts it
+    # again.
     t = time.time()
     laz_path = out_dir / "lidar_local.laz"
     key_path = out_dir / "clip.json"
     aoi = aoi_bounds_ft(ring_ft, oz, height_m, pad_ft)
-    key = {"aoi_ft": [round(v, 3) for v in aoi], "origin_source_xyz": [round(float(v), 3) for v in (ox, oy, oz)]}
+    key = {"aoi_ft": [round(v, 3) for v in aoi], "origin_source_xyz": [round(float(v), 3) for v in (ox, oy, oz)],
+           "trees": TREE_RULE}
     from shapely import contains_xy
     from shapely.geometry import Polygon
     cached = (laz_path.exists() and key_path.exists()

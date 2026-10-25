@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from kyfromabove_3d.clouds import find_cloud, read_cloud
+from kyfromabove_3d.lidar import VEGETATION
 
 
 class ColouriseFailure(Exception):
@@ -39,10 +40,15 @@ def footprint_and_levels(building: Path, CS, cli_lidar_outline: bool = False):
     # the classification rides along with the points through every filter
     cls = np.asarray(ply["classification"]) if "classification" in ply else None
     if CS.drop_classes and cls is not None:
-        # vegetation, noise, water: a tree over a low roof is not its wall
-        drop = np.isin(cls, CS.drop_classes)
+        # noise and water; the trees (lidar.label_trees) are left out of the
+        # building's own returns alone (on_building, b_xyz below): a wall's plane, its edges and its profile
+        # keep them, since a parapet or a sparse wall under a cornice can pass
+        # for twigs (the Courtyard Louisville Downtown's walls stopped short,
+        # holes 97 -> 228 m2), and a wall stands no higher than its level,
+        # which the roof without the trees sets
+        drop = np.isin(cls, tuple(c for c in CS.drop_classes if c not in VEGETATION))
         if drop.any():
-            print(f"  {drop.sum():,} returns of class {CS.drop_classes} left out")
+            print(f"  {drop.sum():,} returns of class {sorted(set(cls[drop].tolist()))} left out")
             xyz, cls = xyz[~drop], cls[~drop]
 
     # No fallback anywhere below. An earlier version quietly took the first
@@ -135,6 +141,11 @@ def footprint_and_levels(building: Path, CS, cli_lidar_outline: bool = False):
     if on_building.sum() < 200:
         print("[FAIL] the footprint and the LiDAR do not overlap")
         raise ColouriseFailure(2, "[FAIL] the footprint and the LiDAR do not overlap")
+    if cls is not None and CS.drop_classes:
+        tree = on_building & np.isin(cls, VEGETATION)
+        if tree.any():
+            print(f"  {tree.sum():,} tree returns over the footprint left out of the building")
+            on_building = on_building & ~tree
     b_xyz = xyz[on_building]
     # The profile looks 3 m outside the footprint edge and 8 m inside; the
     # 2 m clip above would cut off a wall standing 2-3 m proud of a

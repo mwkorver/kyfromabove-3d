@@ -33,6 +33,7 @@ from typing import Optional
 
 import numpy as np
 
+from .lidar import VEGETATION
 from .settings import ClassifySettings
 
 NOISE = (7, 18)
@@ -63,7 +64,7 @@ def measure(d: Path, a: ClassifySettings) -> dict:
     rec["name"] = fp.get("name") if fp.get("name") and fp.get("name") != d.name else None
     xyz = np.column_stack([L["x"], L["y"], L["z"]]).astype(float)
     if "classification" in L:
-        xyz = xyz[~np.isin(np.asarray(L["classification"]), NOISE)]
+        xyz = xyz[~np.isin(np.asarray(L["classification"]), NOISE + VEGETATION)]
     on = shapely.contains_xy(poly, xyz[:, 0], xyz[:, 1])
     if on.sum() < 30:
         return dict(rec, status="too few returns on the footprint")

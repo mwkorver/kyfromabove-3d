@@ -352,3 +352,27 @@ def test_roof_height_is_measured_inside_the_edge_where_a_neighbours_wall_spills(
     tiny = Polygon([(0, 0), (2.5, 0), (2.5, 2.5), (0, 2.5)])          # no inside to speak of: all of it
     few = np.column_stack([rng.uniform(0, 2.5, 30), rng.uniform(0, 2.5, 30), np.full(30, 6.0)])
     assert len(roof_returns(tiny, few)) == 30
+
+
+def test_a_deck_the_survey_labeled_ground_is_not_the_buildings_ground():
+    """The Ovation Car Park's case: a 7 m deck whose returns the survey labeled
+    ground, the street around it at 0 m, and a crane on the deck. The ground is
+    the street's, so the height is the deck's, not the crane's; a building
+    whose roof is labeled as a roof keeps the ground of every return near it."""
+    from kyfromabove_3d.product1 import measure_heights
+
+    rng = np.random.default_rng(3)
+    poly = Polygon([(0, 0), (100, 0), (100, 60), (0, 60)])
+    street = np.column_stack([rng.uniform(-15, 115, 20000), rng.uniform(-15, 75, 20000), rng.normal(0.0, 0.1, 20000)])
+    street = street[~((street[:, 0] > 0) & (street[:, 0] < 100) & (street[:, 1] > 0) & (street[:, 1] < 60))]
+    deck = np.column_stack([rng.uniform(0, 100, 18000), rng.uniform(0, 60, 18000), rng.normal(7.0, 0.1, 18000)])
+    crane = np.column_stack([rng.uniform(40, 42, 150), rng.uniform(20, 22, 150), rng.uniform(7, 88, 150)])
+    xyz = np.vstack([street, deck, crane])
+    r = {}
+    measure_heights([r], [poly], xyz, np.r_[np.full(len(street) + len(deck), 2), np.full(len(crane), 1)])
+    assert abs(r["lidar_ground_z"]) < 0.1 and 6.5 < r["lidar_height_m"] < 8.0
+    roofed = {}                                                    # the same deck labeled a roof: unchanged rule
+    cls = np.r_[np.full(len(street), 2), np.full(len(deck), 6), np.full(len(crane), 1)]
+    measure_heights([roofed], [poly], xyz, cls)
+    assert roofed["lidar_ground_z"] == float(np.median(street[(street[:, 0] > -15) & (street[:, 0] < 115)
+                                                             & (street[:, 1] > -15) & (street[:, 1] < 75), 2]))

@@ -577,15 +577,27 @@ def measure_heights(recs, polys, xyz: np.ndarray, cls: np.ndarray, min_returns: 
     Returns how many were measured."""
     from shapely import contains_xy
 
+    from .features.ground import top_labeled_ground
+
     ground = xyz[cls == 2]
     all_grid, ground_grid = PointGrid(xyz), PointGrid(ground)
     n_ok = 0
     for r, p in zip(recs, polys):
         minx, miny, maxx, maxy = p.bounds
         near = ground[ground_grid.box(minx - 15, miny - 15, maxx + 15, maxy + 15)]
+        cand_i = all_grid.box(minx, miny, maxx, maxy)
+        on = contains_xy(p, xyz[cand_i, 0], xyz[cand_i, 1])
+        inside = xyz[cand_i][on]
+        # A building's top the survey labeled ground (features.ground.
+        # top_labeled_ground): the ground is what lies around the footprint,
+        # not on it. The Ovation Car Park's deck stands 7 m above the street;
+        # taken as the ground, it left a crane as the building's height (88 m)
+        # and the class "no building".
+        if top_labeled_ground(cls[cand_i][on]):
+            around = near[~contains_xy(p, near[:, 0], near[:, 1])]
+            if len(around) >= 5:
+                near = around
         gz = float(np.median(near[:, 2])) if len(near) >= 5 else None
-        cand = xyz[all_grid.box(minx, miny, maxx, maxy)]
-        inside = cand[contains_xy(p, cand[:, 0], cand[:, 1])]
         r["lidar_ground_z"] = gz
         if gz is None or len(inside) < min_returns:
             r["lidar_height_m"] = None; r["lidar_n"] = int(len(inside)); continue

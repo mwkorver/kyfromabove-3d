@@ -10,6 +10,18 @@ import numpy as np
 
 from .walls import WallPlane
 
+#: A footprint whose own returns are this share or more labeled ground is a
+#: top the survey took for ground -- a parking deck, a plaza over a garage --
+#: and its ground is what lies around it (product1.measure_heights, and the
+#: wall bases below). The Ovation Car Park's deck, 7 m above the street.
+GROUND_TOP_SHARE = 0.5
+
+
+def top_labeled_ground(on_footprint_classes: np.ndarray) -> bool:
+    """Whether the survey labeled a footprint's own top as ground."""
+    c = np.asarray(on_footprint_classes)
+    return bool(len(c)) and float(np.mean(c == 2)) >= GROUND_TOP_SHARE
+
 
 @dataclass
 class GroundField:
@@ -67,6 +79,11 @@ def ground_field_for_building(
 
     if has_cls2:
         ground_pts = xyz[cls == 2]
+        inside = MplPath(ring[:-1]).contains_points(xyz[:, :2])
+        if top_labeled_ground(cls[inside]):              # the walls stand on the street, not the deck
+            around = xyz[(cls == 2) & ~inside]
+            if len(around) >= 20:
+                ground_pts = around
     else:
         centre = ring[:-1].mean(axis=0)
         inner = MplPath(ring[:-1])

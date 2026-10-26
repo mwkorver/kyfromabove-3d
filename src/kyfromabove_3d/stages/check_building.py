@@ -72,7 +72,11 @@ def check(b: Path, spacing_m: float = 0.25, scene_cloud: Path | None = None, rad
     if not cams:
         raise SystemExit(f"[FAIL] no frame crops on disk in {b}; re-cut them (run_downtown.py ... --keep-crops)")
     project = lambda p, n, c: project_visible(p, n, c, 0.15, 1.5)                 # noqa: E731
-    scores = {g.key: score_face(g, cams, project) for g in grids}
+    # the frames that painted each wall section are its sources, not held out
+    from kyfromabove_3d.mesh.paint import PAINT_FILE, painted_by
+    records = json.loads((b / PAINT_FILE).read_text(encoding="utf-8")) if (b / PAINT_FILE).exists() else []
+    scores = {g.key: score_face(g, cams, project, painted=painted_by(records, g.xyz[g.valid]) if
+                                (records and g.kind == "wall") else None) for g in grids}
     faces = {g.key: summarise_face(g, scores[g.key]) for g in grids}
     return faces, grids, cams, scores
 

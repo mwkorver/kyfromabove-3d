@@ -400,15 +400,20 @@ class FrameScore:
 
 
 def score_face(g: FaceGrid, cams: Sequence[dict], project: Callable, min_points: int = 150,
-               min_share: float = 0.10, sigma_m: float = 1.0, max_shift_m: float = 1.5) -> List[FrameScore]:
+               min_share: float = 0.10, sigma_m: float = 1.0, max_shift_m: float = 1.5,
+               painted: Optional[Sequence[frozenset]] = None) -> List[FrameScore]:
     """Every frame's view of face ``g``, scored against the model.
 
     ``project(xyz, normals, cam)`` is colorize_building.project_visible (the
     facing, crop, mask and depth-buffer tests). The source of each grid
     point is the frame that faces it most squarely among those that see it
-    -- the rule the texturing used. A frame is scored on the points it is
-    not the source of; its score on its own points is returned too, marked
-    ``source``, as the ceiling the texture and its compression allow.
+    -- the rule the texturing used -- unless ``painted`` (one set per valid
+    point, ``mesh.paint.painted_by``) names the frames that painted the
+    section the point lies on: a wall painted from whole photographs takes
+    a section from one frame and patches it from others, whichever faces
+    it most squarely. A frame is scored on the points it is not the source
+    of; its score on its own points is returned too, marked ``source``, as
+    the ceiling the texture and its compression allow.
     """
     pts = g.xyz[g.valid]; nrm = g.normal[g.valid]
     n = len(pts)
@@ -425,11 +430,16 @@ def score_face(g: FaceGrid, cams: Sequence[dict], project: Callable, min_points:
     sigma_px = sigma_m / g.spacing_m
     max_px = int(round(max_shift_m / g.spacing_m))
     model_hp = highpass(luminance(g.model), g.valid, sigma_px)
+    has = np.array([bool(p) for p in painted], dtype=bool) if painted is not None else np.zeros(n, dtype=bool)
     out = []
     for k, cam in enumerate(cams):
         seen = np.isfinite(views[k][:, 0])
+        own = src == k
+        if has.any():
+            cid = cam.get("id", str(k))
+            own = np.where(has, np.array([cid in p for p in painted], dtype=bool), own)
         for is_src in (False, True):
-            use = seen & seen_any & ((src == k) if is_src else (src != k))
+            use = seen & seen_any & (own if is_src else ~own)
             if use.sum() < min_points or use.sum() < min_share * n:
                 continue
             mask = np.zeros((H, W), dtype=bool); mask[g.valid] = use

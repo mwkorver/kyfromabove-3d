@@ -64,6 +64,9 @@ from kyfromabove_3d.mesh.roof import (  # noqa: E402,F401
     roof_texture_from_cloud, tidy_roof_field,
 )
 from kyfromabove_3d.mesh.party import edge_top_z, party_edges, party_steps  # noqa: E402,F401
+from kyfromabove_3d.mesh.paint import (  # noqa: E402
+    PAINT_FILE, paint_quad, paint_record, paint_section, section_uv, wall_sections,
+)
 from kyfromabove_3d.mesh.gltf import (  # noqa: E402,F401
     enu_transform, GlbRecorder, GlbWriter, quads_to_arrays, TEXTURE_FORMATS,
 )
@@ -363,6 +366,7 @@ def main(argv=None) -> int:
     n_profile = n_prism = n_party = 0
     n_matched_faces, matched_m2 = 0, 0.0              # walls whose depth came from the frames (wall_match)
     used_bands = {}
+    painted = []                                     # what painted each wall section (mesh.paint)
     n_arc = 0
     def neighbour_wall_at(pl, end: int, z: float):
         """Where the face meeting ``pl`` at its p0 (``end`` 0) or p1 (1)
@@ -428,30 +432,58 @@ def main(argv=None) -> int:
             quads = quads + corner_returns(plane, bands, lambda end, z, pl=plane: neighbour_wall_at(pl, end, z), roof)
         if quads:
             used_bands[plane.face] = bands
-            if arc is not None:
-                # texture from the coloured points in the unrolled frame; the
-                # rectangles back onto the circle, cut every 1.5 m along it
-                near = np.abs(np.hypot(*(cxyz[:, :2] - arc.centre).T) - arc.radius) <= 12.0
-                tex, n_pts = face_texture(plane, bands, extent, cxyz[near], crgb[near], M.texel_m,
-                                          party=edge.face in party)
-                quads = roll_quads(quads, arc)
-                n_arc += 1
-            else:
-                tex, n_pts = face_texture(plane, bands, extent, cxyz, crgb, M.texel_m, party=edge.face in party)
-            walls = [q for q in quads if q[3] == "wall"]
             matched = [(float(b.z_lo), float(b.z_hi)) for b in bands if b.status == "matched"]
             matched_m2 += sum((b.z_hi - b.z_lo) * (b.along_hi - b.along_lo) for b in bands if b.status == "matched")
             n_matched_faces += bool(matched)
-            textured.append((atlas.add(tex, {"face": edge.face, "kind": "profile", "z": (extent[0], extent[1]),
-                                             "along": (0.0, extent[2]), **({"matched": matched} if matched else {})}), walls))
+            # a flat face is painted from whole photographs, one per flat
+            # section of it (mesh.paint); a section no frame sees, and a
+            # curved face, take the coloured points as before
+            sections = wall_sections(plane, [q for q in quads if q[3] == "wall"]) if (arc is None and cams) else []
+            from_points, colors, how = [], [], []
+            for sec in sections:
+                tex, info = paint_section(plane, sec, cams, M.texel_m)
+                if tex is None:
+                    from_points.extend(sec["quads"])
+                    continue
+                in_sec = [(max(z0, sec["z_lo"]), min(z1, sec["z_hi"])) for z0, z1 in matched
+                          if min(z1, sec["z_hi"]) > max(z0, sec["z_lo"])]
+                pieces = [(q[0], q[1], section_uv(plane, sec, np.asarray(q[0], dtype=np.float64)), q[3])
+                          for q in sec["quads"]]
+                textured.append((atlas.add(tex, {"face": edge.face, "kind": "profile", "z": (sec["z_lo"], sec["z_hi"]),
+                                                 "along": (sec["a_lo"], sec["a_hi"]), "frames": info["frames"],
+                                                 **({"matched": in_sec} if in_sec else {})}), pieces))
+                painted.append(paint_record(plane, edge.face, sec, info["frames"]))
+                colors.append(np.asarray(tex).reshape(-1, 3).mean(axis=0))
+                how.append(f"{tex.shape[1]}x{tex.shape[0]} px from {info['frames'][0]}"
+                           + (f" (+{len(info['frames']) - 1})" if len(info["frames"]) > 1 else ""))
+            if not sections:
+                from_points = [q for q in quads if q[3] == "wall"]
+            if from_points:
+                if arc is not None:
+                    # texture from the coloured points in the unrolled frame; the
+                    # rectangles back onto the circle, cut every 1.5 m along it
+                    near = np.abs(np.hypot(*(cxyz[:, :2] - arc.centre).T) - arc.radius) <= 12.0
+                    tex, n_pts = face_texture(plane, bands, extent, cxyz[near], crgb[near], M.texel_m,
+                                              party=edge.face in party)
+                    quads = roll_quads(quads, arc)
+                    from_points = [q for q in quads if q[3] == "wall"]
+                    n_arc += 1
+                else:
+                    tex, n_pts = face_texture(plane, bands, extent, cxyz, crgb, M.texel_m, party=edge.face in party)
+                textured.append((atlas.add(tex, {"face": edge.face, "kind": "profile", "z": (extent[0], extent[1]),
+                                                 "along": (0.0, extent[2]), **({"matched": matched} if matched else {})}),
+                                 from_points))
+                colors.append(np.asarray(tex).reshape(-1, 3).mean(axis=0))
+                how.append(f"{tex.shape[1]}x{tex.shape[0]} px from {n_pts:,} points")
+            walls = [q for q in quads if q[3] == "wall"]
             flat = [q for q in quads if q[3] != "wall"]
             if flat:
-                flat_quads.append((tex.reshape(-1, 3).mean(axis=0), flat))
+                flat_quads.append((np.mean(colors, axis=0), flat))
             all_wall_quads.extend(quads)
             n_profile += 1
             z0, z1, L = extent
             print(f"  face {edge.face}: {len(walls)} wall rectangle(s), {len(flat)} ledge/return(s), "
-                  f"{L:.0f} m x {z1 - z0:.0f} m, texture {tex.shape[1]}x{tex.shape[0]} px from {n_pts:,} points")
+                  f"{L:.0f} m x {z1 - z0:.0f} m, texture " + "; ".join(how))
             continue
         # prism faces at the roof's height beside this edge, stretch by
         # stretch: a one-storey base gets its 13 m wall along the whole
@@ -525,7 +557,17 @@ def main(argv=None) -> int:
                         plain_any = True
                         flat_quads.append((None, pieces))
                         continue
-                    tex, n_seen = quad_texture_from_cameras(corners, n3, cams, arc=arc)
+                    if arc is None:
+                        # painted whole, as a measured wall is (mesh.paint), and
+                        # as finely: at the 0.3 m the texel-by-texel sampling
+                        # used, a house's porch columns were one blur
+                        tex, info = paint_quad(corners, n3, cams, M.texel_m)
+                        if tex is not None:
+                            painted.append(paint_record(edge, edge.face, {"off": 0.0, "a_lo": c0, "a_hi": c1,
+                                                                          "z_lo": float(min(z_a, z_b)),
+                                                                          "z_hi": float(z_t)}, info["frames"], kind="prism"))
+                    else:
+                        tex, n_seen = quad_texture_from_cameras(corners, n3, cams, arc=arc)
                     if tex is None:
                         if len(cxyz):
                             dummy_band = FaceBand(float(z_a), float(z_t), 0.0, 10, 0.0, 0.0, L, "observed")
@@ -541,6 +583,9 @@ def main(argv=None) -> int:
                 n_party += 1
             else:
                 n_prism += 1
+    # which frames painted which wall: the texture check scores a frame only
+    # where it did not paint (texture_check.score_face)
+    (args.building / PAINT_FILE).write_text(json.dumps(painted), encoding="utf-8")
     if n_prism or n_party or n_arc:
         print(f"  {n_profile} face(s) from the profile ({n_arc} curved), {n_prism} prism face(s) at the roof's edge height, "
               f"{n_party} party wall(s) drawn plain")

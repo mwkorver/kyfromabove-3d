@@ -29,7 +29,8 @@ SCENE_RADIUS_M = 250.0
 #: What is published per building; the crops, the clip and the coloured
 #: cloud stay behind (the piece holds the clip; the crops are cut again).
 OUTPUT_FILES = ("audit.json", "audit.png", "texture_check.json", "classification.json", "levels.json",
-                "wall_planes.json", "wall_profiles.json", "mirror_report.json", "colorized_aerial_coverage.json")
+                "wall_planes.json", "wall_profiles.json", "mirror_report.json", "colorized_aerial_coverage.json",
+                "wall_paint.json")
 OUTPUT_DIRS = ("3dtiles_mesh", "3dtiles_complete", "3dtiles_neural")
 #: Kept as its own object: small, and a neighbour will read it one by one.
 LOOSE_FILES = ("levels.json",)

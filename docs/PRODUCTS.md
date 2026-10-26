@@ -9,6 +9,7 @@ each says what it is: measured, or invented.
 | 1 | Footprints at LiDAR heights | Overture footprints, extruded to the LiDAR's height | none | `outputs/overture_boxes/downtown_lidar/` |
 | 2 | Measured 3D Tiles | from the LiDAR | only where a frame saw the texel | `outputs/downtown/` |
 | 3 | Completed 3D Tiles | product 2's, unchanged | product 2's, with unseen texels **invented from the building's own frames** | `outputs/downtown_complete/` |
+| 4 | Borrowed-fill 3D Tiles | product 2's, unchanged | unseen texels filled from the best-matching seen patches across the building's walls | `outputs/downtown_neural/` |
 
 On `/compare` (and the static viewer in `viewers/s3_compare`) each pane has
 a product row — `1 · footprints`, `2 · measured`, `3 · completed`, and
@@ -129,6 +130,58 @@ small gap (`near`), and plain.
 Until September 2026 this product also copied color onto a hidden face
 from its twin across the building; that is an invention, it moved to
 product 3, and the held-out test below turned it off there too.
+
+### How walls are colored
+
+Each flat section of a wall is painted whole from one photograph: the
+frame that sees most of it, most squarely, and whose pattern agrees best
+with the other frames' (`src/kyfromabove_3d/mesh/paint.py`). What that frame
+cannot see is painted from the next, its color matched to the first where
+both see, unless its pattern clearly disagrees with what is painted: the
+nadir frame, seeing the Hyatt's 4 m pier at a grazing angle, had painted it
+half a floor out of step. A wall that steps back (400 West Market's crown)
+is one section per depth, so no photograph is warped onto a wall that is not
+where the building is. Walls drawn up to the roof's edge are painted the
+same way, at the same 0.15 m (they had been sampled at 0.3 m).
+Curved walls, and a section no frame sees, keep the older way: each LiDAR
+point on the wall colored from its own most face-on frame, the points
+rasterized.
+
+What blocks a frame's view is the depth map every color here uses: every
+LiDAR return within 250 m, trees included, and each neighbor as a solid
+prism. A tree in front of a house is not painted onto the house; the next
+frame paints that part, or it stays unseen. `wall_paint.json` records which
+frames painted each section, so the texture check never scores a frame
+against the wall it painted.
+
+The held-out test (`scripts/eval_wall_paint.py`): for each section and each
+frame seeing at least 30% of it, leave that frame out, color the section
+both ways without it, and compare with what the left-out frame shows —
+pattern agreement, 1 when the same windows sit in the same places. On the
+52 safety-net buildings and four St. Matthews houses (2,149 comparisons;
+walls up to the roof's edge before at their 0.3 m, shown on the 0.15 m grid
+as a viewer sees them):
+
+| walls | before | painted | painted better in |
+|---|---|---|---|
+| measured | 0.61 | 0.67 | 61-70% of comparisons at every height; 43 of 47 buildings |
+| up to the roof's edge | 0.47 | 0.55 | 66-74% of comparisons at every height; 42 of 45 buildings |
+
+On walls up to the roof's edge the gain is the finer texel: at the same
+0.3 m the two ways tie (painted better in 53-55% of comparisons, and on 3 or
+4 of 11 buildings 30-80 m tall). These are walls the LiDAR did not see,
+drawn on the outline under the roof's edge; where the outline is off, no
+frame paints them right, and the one nearest the viewer's angle looks least
+wrong.
+
+![held-out agreement, before and painted, by building size](figures/wall_paint_holdout.png)
+
+The shape of every building is unchanged (the same triangles, checked on
+six); the mesh step takes 5-30% longer on a tower and no longer on a
+house. Product 3's fills still beat plain on the painted walls (the same 56
+buildings, 8,263 hidden rectangles): rhythm then patch agrees 0.29 on
+measured walls and is closer in color than plain in 78%; on walls up to the
+roof's edge 0.17 and 70%.
 
 ## 3 · Completed 3D Tiles
 

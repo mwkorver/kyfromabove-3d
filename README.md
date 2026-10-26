@@ -329,3 +329,39 @@ became the
 [first state in the nation to complete statewide oblique aerial coverage](https://www.kentucky.gov/Pages/Activity-stream.aspx?n=FinanceandAdministrationCabinet&prId=266).
 
 Errors in this repository are ours, not the data provider's.
+
+## Open-source software and standards
+
+This pipeline is built on the open geospatial (FOSS4G) stack and open formats
+that can be read in place over HTTP without downloading whole archives first
+(*OSGeo* marks a project of the Open Source Geospatial Foundation):
+
+- **[GDAL](https://gdal.org/)** *(OSGeo)* and **[Rasterio](https://rasterio.readthedocs.io/)** —
+  windowed `/vsicurl/` range reads from KyFromAbove's oblique and ortho
+  **Cloud-Optimized GeoTIFFs (COGs)** on S3, behind a shared
+  **[nginx](https://nginx.org/)** slice cache on the worker machines.
+- **[PROJ](https://proj.org/)** *(OSGeo)* and **[PyProj](https://pyproj4.github.io/pyproj/)** —
+  transforms between Kentucky Single Zone (`EPSG:3089`), WGS84, and ECEF
+  (`EPSG:4978`), and vertical datum grid shifts (`NAVD88` to the ellipsoid via
+  NOAA's `GEOID99` and `NADCON5` grids).
+- **[GEOS](https://libgeos.org/)** *(OSGeo)*, **[Shapely](https://shapely.readthedocs.io/)**, and **[GeoPandas](https://geopandas.org/)** —
+  footprint geometry, polygon splitting across shared roofs, and reading OGC
+  **GeoPackage (`.gpkg`)** tile grids and exterior orientation tables.
+- **[DuckDB](https://duckdb.org/) and [DuckDB Spatial](https://duckdb.org/docs/extensions/spatial/overview)** —
+  bounding-box queries with predicate pushdown straight against Overture's
+  **GeoParquet** buildings release on S3, and writing the published
+  `tiles.parquet` index.
+- **[laspy](https://laspy.readthedocs.io/) and [lazrs](https://github.com/laz-rs/laz-rs)** —
+  reading octree-indexed **COPC (Cloud Optimized Point Cloud)** `.copc.laz`
+  chunks over HTTP range requests and decompressing them in Rust.
+- **[CesiumJS](https://cesium.com/platform/cesiumjs/)**, **[VC Map](https://vc.systems/en/products/vc-map/)**, and **[OpenLayers](https://openlayers.org/)** *(OSGeo)* —
+  viewing the published **[OGC 3D Tiles](https://www.ogc.org/standards/3dtiles/)**,
+  **[glTF 2.0](https://www.khronos.org/gltf/)** building meshes, heightmap
+  terrain, and oblique COGs in the browser.
+- **[Basis Universal (`basisu`)](https://github.com/BinomialLLC/basis_universal)** —
+  encoding roof and facade texture atlases as `KTX2` (`KHR_texture_basisu`)
+  inside the `.glb` tiles.
+- **[OpenCV](https://opencv.org/), [NumPy](https://numpy.org/), [SciPy](https://scipy.org/), and [Pillow](https://python-pillow.org/)** —
+  plane and roof fitting on the LiDAR, depth-buffer occlusion, perspective wall
+  warping from the aerial frames, and FFT patch matching for facade completion.
+

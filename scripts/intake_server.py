@@ -65,7 +65,7 @@ PRODUCTS = {
     "4": ("outputs/downtown_neural/tileset.json",
           "Product 4: unseen texels borrowed from the best-matching seen walls"),
     "4t": ("outputs/downtown_neural_tint/tileset.json",
-           "Product 4, neural-filled texels tinted violet"),
+           "Product 4, borrowed texels tinted violet"),
 }
 
 
@@ -79,7 +79,7 @@ def products(bdir: Optional[Path] = None, bname: str = "") -> Dict[str, Dict[str
             "2": (rel_base / "3dtiles_mesh" / "tileset.json", f"{prefix}Product 2: Measured (5 m bands)"),
             "3": (rel_base / "3dtiles_complete" / "tileset.json", f"{prefix}Product 3: Completed (band rhythm/patch)"),
             "3t": (rel_base / "3dtiles_complete" / "tileset_tint.json", f"{prefix}Product 3: Invented shown (magenta)"),
-            "4": (rel_base / "3dtiles_neural" / "tileset.json", f"{prefix}Product 4: Borrowed fill (neural)"),
+            "4": (rel_base / "3dtiles_neural" / "tileset.json", f"{prefix}Product 4: Borrowed fill"),
             "4t": (rel_base / "3dtiles_neural" / "tileset_tint.json", f"{prefix}Product 4: Borrowed shown (violet)"),
         }
         out = {}

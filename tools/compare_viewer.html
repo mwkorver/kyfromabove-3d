@@ -64,11 +64,15 @@
           <button class="layer-btn product-btn" data-key="4t" title="Product 4 with every neural-filled texel tinted violet">4 · neural shown</button>
         </div>
         <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-          <span class="muted" style="font-size: 11px;">Landmarks:</span>
-          <button class="layer-btn" onclick="flyToLandmark('pnc')" title="Fly to PNC Tower (1614a997)">PNC Tower</button>
-          <button class="layer-btn" onclick="flyToLandmark('400wm')" title="Fly to 400 West Market (df2fccca)">400 W Market</button>
-          <button class="layer-btn" onclick="flyToLandmark('humana')" title="Fly to Humana Building (d2786314)">Humana</button>
-          <button class="layer-btn" onclick="flyToLandmark('overview')" title="Reset to downtown overview">Overview</button>
+          <span class="muted" style="font-size: 11px;">Inspect individual:</span>
+          <button class="layer-btn" onclick="inspectBuilding('pnc_tower')" title="Inspect PNC Tower (1614a997) individually">PNC Tower</button>
+          <button class="layer-btn" onclick="inspectBuilding('400_west_market')" title="Inspect 400 West Market (df2fccca) individually">400 W Market</button>
+          <button class="layer-btn" onclick="inspectBuilding('humana')" title="Inspect Humana Building (d2786314) individually">Humana</button>
+          <button class="layer-btn" onclick="inspectBuilding('33468401-514a-42c2-9de5-a420e4bd453c')" title="Inspect St. Matthews Home 33468401">Home 33468401</button>
+          <button class="layer-btn" onclick="inspectBuilding('1c940688-060a-48dd-b297-1e8e4fc4816f')" title="Inspect St. Matthews Home 1c940688">Home 1c940688</button>
+          <button class="layer-btn" onclick="inspectBuilding('4333ace3-8950-4bb1-88ab-dca0e4209637')" title="Inspect St. Matthews Home 4333ace3">Home 4333ace3</button>
+          <button class="layer-btn" onclick="inspectBuilding('255b49dc-c6a6-46a8-a091-4f28b0c66b61')" title="Inspect St. Matthews Home 255b49dc">Home 255b49dc</button>
+          <button class="layer-btn" onclick="inspectBuilding('')" title="Return to full downtown view">All Downtown</button>
         </div>
         <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
           <span class="muted" style="font-size: 11px;">Basemap:</span>
@@ -338,6 +342,20 @@
       frame(target, v.heading, v.pitch, v.range);
     }
     window.flyToLandmark = flyToLandmark;
+    function inspectBuilding(key) {
+      const u = new URL(window.location.href);
+      if (key) {
+        u.searchParams.set("building", key);
+        u.searchParams.set("left_product", "3");
+        u.searchParams.set("right_product", "2");
+      } else {
+        u.searchParams.delete("building");
+        u.searchParams.set("left_product", "2");
+        u.searchParams.set("right_product", "1");
+      }
+      window.location.href = u.toString();
+    }
+    window.inspectBuilding = inspectBuilding;
     async function snapshot(name) {
       left.render(); right.render();
       const c = document.createElement("canvas");
@@ -561,10 +579,17 @@
         window.center = center;
         window.overviewRange = radius * 2.4;
         const lm = params.get("landmark");
+        const isSingle = Boolean(params.get("building"));
         if (lm && LANDMARK_VIEWS[lm]) {
           flyToLandmark(lm);
         } else {
-          frame(center, 225, -20, radius * 2.4);
+          frame(center, 225, -20, isSingle ? Math.max(40, radius * 2.6) : radius * 2.4);
+        }
+        if (isSingle && params.get("building")) {
+          // Automatically open oblique inspector for the selected individual building
+          const bKey = params.get("building");
+          const gers = (leftTilesets[0] && leftTilesets[0].extras && leftTilesets[0].extras.gers) || bKey;
+          showBuilding(gers, left);
         }
       } catch (e) {
         document.getElementById("left-info").textContent = "failed: " + e.message;

@@ -69,8 +69,24 @@ PRODUCTS = {
 }
 
 
-def products() -> Dict[str, Dict[str, Optional[str]]]:
-    """Each product's tileset URL (cache-busting mtime; None when not built) and title."""
+def products(bdir: Optional[Path] = None, bname: str = "") -> Dict[str, Dict[str, Optional[str]]]:
+    """Each product's tileset URL (cache-busting mtime; None when not built) and title.
+    When ``bdir`` is given, returns that single building's per-product tilesets."""
+    if bdir is not None:
+        rel_base = bdir.relative_to(ROOT)
+        prefix = f"{bname} · " if bname else ""
+        b_map = {
+            "2": (rel_base / "3dtiles_mesh" / "tileset.json", f"{prefix}Product 2: Measured (5 m bands)"),
+            "3": (rel_base / "3dtiles_complete" / "tileset.json", f"{prefix}Product 3: Completed (band rhythm/patch)"),
+            "3t": (rel_base / "3dtiles_complete" / "tileset_tint.json", f"{prefix}Product 3: Invented shown (magenta)"),
+            "4": (rel_base / "3dtiles_neural" / "tileset.json", f"{prefix}Product 4: Borrowed fill (neural)"),
+            "4t": (rel_base / "3dtiles_neural" / "tileset_tint.json", f"{prefix}Product 4: Borrowed shown (violet)"),
+        }
+        out = {}
+        for k, (rel, title) in b_map.items():
+            f = ROOT / rel
+            out[k] = {"url": f"/files/{rel}?v={int(f.stat().st_mtime)}" if f.exists() else None, "title": title}
+        return out
     out = {}
     for k, (rel, title) in PRODUCTS.items():
         f = ROOT / rel
@@ -162,7 +178,9 @@ def building_index() -> List[Dict[str, Any]]:
     if _BUILDINGS is None:
         from shapely.wkt import loads as wkt_loads
         rows: List[Dict[str, Any]] = []
-        for fp in sorted((ROOT / DOWNTOWN_DIR / "buildings").glob("*/footprint.json")):
+        for fp in sorted((ROOT / DOWNTOWN_DIR / "buildings").glob("*/footprint.json")) + sorted(
+            (ROOT / "outputs" / "st_matthews" / "inspect_buildings").glob("*/footprint.json")
+        ):
             try:
                 e = json.loads(fp.read_text(encoding="utf-8"))
                 rows.append({"gers": e["gers"], "name": e.get("name") or e["gers"], "dir": fp.parent,
@@ -443,6 +461,41 @@ class Handler(BaseHTTPRequestHandler):
                             .replace("__TILESETS__", json.dumps(urls)))
                     self._send_bytes(html.encode("utf-8"), "text/html; charset=utf-8")
             elif u.path == "/compare":
+                # Individual building inspection mode (?building=<gers_or_key>)
+                b_key = q.get("building", "").strip()
+                if b_key:
+                    b_rec = None
+                    try:
+                        lm = landmark_by_key(b_key)
+                        b_rec = {"gers": lm["gers"], "name": lm["name"], "dir": ROOT / lm["building_dir"]}
+                    except KeyError:
+                        b_rec = building_dir_of(b_key)
+                        if b_rec is None:
+                            for cand in sorted((ROOT / DOWNTOWN_DIR / "buildings").glob(f"{b_key}*")) + sorted(
+                                (ROOT / "outputs" / "st_matthews" / "inspect_buildings").glob(f"{b_key}*")
+                            ):
+                                if cand.is_dir():
+                                    b_rec = {"gers": cand.name, "name": cand.name[:8], "dir": cand}
+                                    break
+                    if b_rec is None:
+                        self._send(404, {"error": f"unknown building {b_key!r}"})
+                        return
+                    b_prods = products(b_rec["dir"], b_rec["name"])
+                    lp = q.get("left_product") or ("3" if b_prods.get("3", {}).get("url") else "2")
+                    rp = q.get("right_product") or "2"
+                    left = [b_prods[lp]["url"]] if b_prods.get(lp, {}).get("url") else []
+                    right = [b_prods[rp]["url"]] if b_prods.get(rp, {}).get("url") else []
+                    tpl = ROOT / "tools" / "compare_viewer.html"
+                    html = (tpl.read_text(encoding="utf-8").replace("__NAME__", f"{b_rec['name']} — Product Comparison")
+                            .replace("__LEFT_NAME__", html_escape(b_prods.get(lp, {}).get("title") or b_rec["name"]))
+                            .replace("__RIGHT_NAME__", html_escape(b_prods.get(rp, {}).get("title") or b_rec["name"]))
+                            .replace("__LEFT__", json.dumps(left)).replace("__RIGHT__", json.dumps(right))
+                            .replace("__PRODUCTS__", json.dumps(b_prods))
+                            .replace("__LEFT_PRODUCT__", json.dumps(lp))
+                            .replace("__RIGHT_PRODUCT__", json.dumps(rp))
+                            .replace("__TERRAIN__", "false"))
+                    self._send_bytes(html.encode("utf-8"), "text/html; charset=utf-8")
+                    return
                 # Two globes side by side, one camera: this project's meshes on
                 # the left, Overture's buildings as boxes on the right (or any
                 # two tileset lists: left=, right= as comma-separated /files/

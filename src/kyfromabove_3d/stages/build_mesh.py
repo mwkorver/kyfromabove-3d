@@ -496,7 +496,7 @@ def main(argv=None) -> int:
         lv_floor, lv_ceiling = max(ground_z, float(lv["z_lo"])), float(lv["z_hi"]) + 1.0
         edge_ground = ArcGround(ground_field, arc) if (arc is not None and ground_field is not None) else ground_field
         if roof is not None:
-            stations = [(a, b, min(z, lv_ceiling)) for a, b, z in roof.top_along(edge)
+            stations = [(a, b, min(z, lv_ceiling)) for a, b, z in roof.top_along(edge, nearest=True)
                         if np.isfinite(z) and z - lv_floor >= 0.5]
         else:
             stations = [(0.0, L, ground_z + roof_top)] if roof_top >= 0.5 else []

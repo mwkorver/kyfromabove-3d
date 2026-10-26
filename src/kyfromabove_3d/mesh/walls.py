@@ -31,6 +31,15 @@ def _orient(corners: np.ndarray, want_normal: np.ndarray) -> np.ndarray:
     return corners if np.dot(n, want_normal) >= 0 else corners[::-1].copy()
 
 
+#: (least, most) rise of a roof per metre in from an edge for the wall under
+#: it to stop at the nearest row of roof (RoofField.top_along, ``nearest``):
+#: a pitched roof's 10-50 degrees; and at most ``EAVE_RISE_M`` from that row
+#: to the strip's median (a 45 degree roof's 1.5 m; the Marriott's 3 m corner
+#: edge, with a few cells either side of a 4.3 m step, fitted a slope of one)
+EAVE_SLOPE = (0.18, 1.2)
+EAVE_RISE_M = 1.5
+
+
 class RoofField:
     """The roof height field, queryable along an edge: is there roof at a
     given height just inside a wall line, and how high is the roof beside
@@ -159,13 +168,23 @@ class RoofField:
             runs.append((start, a1))
         return [(a, b) for a, b in runs if b - a >= min_run_m]
 
-    def top_along(self, edge: WallPlane, within_m: float = 2.0, step_m: float = 3.0):
+    def top_along(self, edge: WallPlane, within_m: float = 2.0, step_m: float = 3.0, nearest: bool = False):
         """The roof height beside an edge, per ``step_m`` stretch: the
         median valid cell within ``within_m`` *inside* the edge; nan where
         there is none. Inside only: a tower's edge stands on its podium's
         roof, and the cells on both sides mixed the two -- the Omni's 57 m
         south wing read 38-49 m along its south wall, and 17 m (no wall at
-        all) wherever the podium's cells were the majority."""
+        all) wherever the podium's cells were the majority.
+
+        ``nearest``: where the roof slopes up from the edge as a pitched
+        roof does (``EAVE_SLOPE``, fitted to the strip's cells), the median
+        of the row of cells nearest the edge, where the roof's own triangles
+        meet the outline (roof_from_outline). On such a roof the strip's
+        median stands part way up it: a house's wall drawn to it stood 1.3 m
+        over the eaves, and the frames painted its top with the roof behind
+        (4333ace3). A steeper rise is another roof: the Omni's and Truist
+        Tower's 2-4 m corner edges have their podiums' roofs nearest, 8-68 m
+        below the tower's, and keep the strip's median."""
         L = edge.length_m
         n_st = max(1, int(np.ceil(L / step_m)))
         edges = np.linspace(0.0, L, n_st + 1)
@@ -183,6 +202,12 @@ class RoofField:
         reach = max(within_m, 2.0 * self.cell) + skip
         for a, b in zip(edges[:-1], edges[1:]):
             m = (dist <= reach) & (off <= -skip) & (t >= a) & (t < b)
+            if nearest and m.sum() >= 2:
+                d, z = dist[m], self.zs[m]
+                slope = np.polyfit(d, z, 1)[0] if np.ptp(d) > 0.25 * self.cell else 0.0
+                row = d <= d.min() + 0.5 * self.cell
+                if EAVE_SLOPE[0] < slope <= EAVE_SLOPE[1] and np.median(z) - np.median(z[row]) <= EAVE_RISE_M:
+                    m &= dist <= d.min() + 0.5 * self.cell
             out.append((float(a), float(b), float(np.median(self.zs[m])) if m.any() else np.nan))
         return out
 

@@ -57,6 +57,20 @@ The Omni's L-shaped tower has a 57 m south wing on a 17 m podium: its
 south wall read anything from 17 m (no wall at all) to 49 m, and was
 mostly missing.
 
+Under a roof that slopes up from its edge — a house's eaves — the strip's
+median stands part way up the slope, and a wall drawn to it stood above
+where the roof begins: 4333ace3's 13 m side stood to 4.9 m under eaves at
+3.6 m, and the frames painted its top with the shingles behind. There the
+wall stops at the row of roof cells nearest the edge, where the roof's own
+triangles meet the outline (`RoofField.top_along`, `nearest`), when the
+roof rises 10-50 degrees from it and no more than 1.5 m across the strip.
+A steeper or bigger rise is another roof: the Omni's and Truist Tower's
+2-4 m corner edges have their podiums nearest, 8-68 m below, and keep the
+median. On the 52 safety-net buildings the walls of 30 changed, and holes
+went down (10 m2 in the largest views, 61 m2 over all views).
+
+![a house's side, seen end-on: the wall before and now under its eaves](figures/roof_edge_wall_eaves.png)
+
 ![the Omni from the south, the wing's wall restored](figures/omni_south_wall.jpg)
 
 A wall's crown reaches its roof. The top band of a tall wall often holds

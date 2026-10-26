@@ -669,3 +669,32 @@ def test_a_coarse_roof_field_still_gives_every_stretch_of_an_edge_a_height():
                      z_lo=0.0, z_hi=24.0)
     tops = [z for _, _, z in roof.top_along(edge, within_m=2.0, step_m=3.0)]
     assert all(np.isfinite(z) and abs(z - 24.0) < 1e-9 for z in tops)
+
+
+def test_a_wall_up_to_a_sloping_roof_stops_at_its_eaves():
+    """A house's roof rises 0.7 m per metre from eaves at 3.6 m: the wall
+    under it stops where the roof starts, not half way up the slope (the
+    shingles painted on 4333ace3's walls)."""
+    from kyfromabove_3d.stages.build_mesh import RoofField
+    xs, ys, Z, valid = _field(lambda X, Y: 3.6 + 0.7 * np.clip(Y, 0, None), y0=-0.6, cell=1.5)
+    roof = RoofField(xs, ys, Z, valid)
+    edge = WallPlane(face=2, p0=np.array([0.0, 0.0]), p1=np.array([13.0, 0.0]), normal=np.array([0.0, -1.0]),
+                     z_lo=0.0, z_hi=7.0)
+    strip = [z for _, _, z in roof.top_along(edge, within_m=2.0, step_m=3.0)]
+    near = [z for _, _, z in roof.top_along(edge, within_m=2.0, step_m=3.0, nearest=True)]
+    first_row = 3.6 + 0.7 * 0.15                                     # the cells 0.15 m in
+    assert all(abs(z - first_row) < 1e-9 for z in near)
+    assert all(z > first_row + 0.4 for z in strip)                    # the strip's median: further up
+
+
+def test_an_edge_beside_a_far_higher_roof_keeps_the_strip_median():
+    """A tower's 3 m corner edge with its podium's roof nearest: a rise of
+    tens of metres is another roof, not a pitch, and the wall keeps the
+    strip's height (the Omni's and Truist Tower's corners)."""
+    from kyfromabove_3d.stages.build_mesh import RoofField
+    xs, ys, Z, valid = _field(lambda X, Y: np.where(Y < 1.0, 43.0, 100.0), y0=0, cell=0.75)
+    roof = RoofField(xs, ys, Z, valid)
+    edge = WallPlane(face=1012, p0=np.array([0.0, 0.0]), p1=np.array([3.0, 0.0]), normal=np.array([0.0, -1.0]),
+                     z_lo=0.0, z_hi=100.0)
+    near = [z for _, _, z in roof.top_along(edge, within_m=2.0, step_m=3.0, nearest=True)]
+    assert all(z == 100.0 for z in near)

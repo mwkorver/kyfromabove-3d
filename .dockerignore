@@ -1,7 +1,7 @@
 # the image copies src/, scripts/, configs/, pyproject.toml, README.md
 # and the Phase 2 tile grid; nothing else needs to reach the build
 outputs
-.venv
+.venv*
 .git
 docs
 tests
@@ -15,3 +15,9 @@ data/raw/*.laz
 data/raw/KY_*
 data/raw/kyfromabove_phase1_*
 data/raw/old_grids
+backups
+.claude
+.pytest_cache
+.ruff_cache
+**/__pycache__
+**/*.egg-info

@@ -16,10 +16,14 @@ from constructs import Construct
 ROOT = Path(__file__).resolve().parents[1]
 
 #: What the image build leaves out of the repository: outputs, the local
-#: environment, and every raw file but the tile grid the image copies.
-IMAGE_EXCLUDE = ["outputs", ".venv", ".git", "notebooks", "docs", "tests", "tools", "viewers", "cdk.out",
+#: environments and caches, and every raw file but the tile grid the image
+#: copies (as .dockerignore). The caches matter beyond their size: they are in
+#: the asset's hash, so running pytest or ruff made the next deploy build and
+#: push the image again; backups/ (148 MB) had doubled every asset.
+IMAGE_EXCLUDE = ["outputs", ".venv*", ".git", "notebooks", "docs", "tests", "tools", "viewers", "cdk.out",
                  "deploy/cdk.out", "data/derived", "data/raw/photos", "data/raw/*.laz",
-                 "data/raw/KY_*", "data/raw/kyfromabove_phase1_*"]
+                 "data/raw/KY_*", "data/raw/kyfromabove_phase1_*", "data/raw/old_grids",
+                 "backups", ".claude", ".pytest_cache", ".ruff_cache", "**/__pycache__", "**/*.egg-info"]
 
 
 #: nginx for the frame cache, from ECR Public (no Docker Hub pull limits)

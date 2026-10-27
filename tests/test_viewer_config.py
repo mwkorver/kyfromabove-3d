@@ -21,7 +21,7 @@ def test_the_viewer_config_has_its_views_its_start_and_places_in_kentucky(tmp_pa
     cfg = store.read_json("viewer/config.json")
     assert set(cfg["tilesets"]) == set(publish_step.PRODUCTS) and cfg["start"] == start
     names = [p["name"] for p in cfg["places"]]
-    assert "Downtown Louisville" in names and "Shelbyville" in names and len(set(names)) == len(names)
+    assert "Downtown Louisville" in names and "Lexington" in names and len(set(names)) == len(names)
     for p in cfg["places"]:
         assert -89.6 < p["lon"] < -81.9 and 36.4 < p["lat"] < 39.2                 # Kentucky
         assert math.isfinite(p["ground_m"]) and 0 < p["ground_m"] < 1300

@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 BUCKET = os.environ.get("KFA_BUCKET", "kyfromabove-3d")
-PRODUCTS = ("overture", "boxes", "measured", "complete")
+PRODUCTS = ("overture", "boxes", "measured", "complete", "neural", "complete_tint", "neural_tint")
 
 
 def referenced(s3, product: str) -> set:

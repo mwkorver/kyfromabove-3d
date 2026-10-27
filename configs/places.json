@@ -2,10 +2,6 @@
  "_comment": "The viewers' fly-to places: the Cesium viewer (viewer/config.json, publish_step.viewer) and VC Map (viewers/vcmap/build.mjs). ground_m: the ground above the ellipsoid, where the camera aims; tile: the LiDAR tile it is on.",
  "places": [
   {"name": "Downtown Louisville", "lon": -85.7544, "lat": 38.2535, "ground_m": 106, "tile": "N077E228"},
-  {"name": "St. Matthews", "lon": -85.655, "lat": 38.249, "ground_m": 132, "tile": "N077E234"},
-  {"name": "Middletown", "lon": -85.539, "lat": 38.245, "ground_m": 189, "tile": "N077E241"},
-  {"name": "Simpsonville", "lon": -85.355, "lat": 38.222, "ground_m": 208, "tile": "N079E251"},
-  {"name": "Shelbyville", "lon": -85.2236, "lat": 38.2119, "ground_m": 193, "tile": "N079E259"},
   {"name": "Covington", "lon": -84.5085, "lat": 39.0866, "ground_m": 120, "tile": "N015E299"},
   {"name": "Newport", "lon": -84.495, "lat": 39.0905, "ground_m": 120, "tile": "N015E300"},
   {"name": "Lexington", "lon": -84.497, "lat": 38.0465, "ground_m": 256, "tile": "N091E301"}

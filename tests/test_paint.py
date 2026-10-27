@@ -108,3 +108,23 @@ def test_the_frames_that_painted_a_section_are_found_on_it():
     pts = np.array([[3.0, 0.0, 4.0], [9.0, 0.1, 2.0], [9.0, -3.0, 2.0], [20.0, 0.0, 2.0]])
     assert painted_by([rec, rec2], pts) == [frozenset({"Front_1"}), frozenset({"Front_2", "Back_3"}),
                                              frozenset(), frozenset()]
+
+
+# a wall up to the roof's edge on ground rising 1 m along it: its foot slopes,
+# its top is level (build_mesh's prism quad, corners in the drawn order)
+SLOPED = np.array([[0.0, 0.0, 0.0], [12.0, 0.0, 1.0], [12.0, 0.0, 8.0], [0.0, 0.0, 8.0]])
+
+
+def test_a_sloped_foot_takes_its_place_in_the_upright_picture():
+    from kyfromabove_3d.mesh.paint import section_uv
+    sec = {"off": 0.0, "a_lo": 0.0, "a_hi": 12.0, "z_lo": 0.0, "z_hi": 8.0}
+    assert np.allclose(section_uv(PLANE, sec, SLOPED), [[0, 0], [1, 0.125], [1, 1], [0, 1]])
+
+
+def test_texel_by_texel_sampling_follows_a_sloped_foot():
+    """The far top texel is sampled at the wall's top (7.9 m, an odd check),
+    not 1 m higher where corners 0, 1 and 3 alone would put it."""
+    from kyfromabove_3d.mesh.textures import quad_texture_from_cameras
+    tex, _ = quad_texture_from_cameras(SLOPED, np.array([0.0, -1.0, 0.0]), [_cam(6.0)], texel_m=0.2)
+    top_right = np.asarray(tex)[0, -1]                    # rows run top-down
+    assert top_right[1] == 220                            # green: floor(z) odd

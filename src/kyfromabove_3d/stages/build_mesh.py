@@ -65,7 +65,7 @@ from kyfromabove_3d.mesh.roof import (  # noqa: E402,F401
 )
 from kyfromabove_3d.mesh.party import edge_top_z, party_edges, party_steps  # noqa: E402,F401
 from kyfromabove_3d.mesh.paint import (  # noqa: E402
-    PAINT_FILE, paint_quad, paint_record, paint_section, section_uv, wall_sections,
+    PAINT_FILE, paint_record, paint_section, section_uv, wall_sections,
 )
 from kyfromabove_3d.mesh.gltf import (  # noqa: E402,F401
     enu_transform, GlbRecorder, GlbWriter, quads_to_arrays, TEXTURE_FORMATS,
@@ -560,12 +560,15 @@ def main(argv=None) -> int:
                     if arc is None:
                         # painted whole, as a measured wall is (mesh.paint), and
                         # as finely: at the 0.3 m the texel-by-texel sampling
-                        # used, a house's porch columns were one blur
-                        tex, info = paint_quad(corners, n3, cams, M.texel_m)
+                        # used, a house's porch columns were one blur. The picture
+                        # is upright, from the lower foot to the top; each corner
+                        # takes its place in it from its own position, so a foot
+                        # on sloping ground does not shear the picture
+                        sec = {"off": 0.0, "a_lo": c0, "a_hi": c1, "z_lo": float(min(z_a, z_b)), "z_hi": float(z_t)}
+                        tex, info = paint_section(edge, sec, cams, M.texel_m)
                         if tex is not None:
-                            painted.append(paint_record(edge, edge.face, {"off": 0.0, "a_lo": c0, "a_hi": c1,
-                                                                          "z_lo": float(min(z_a, z_b)),
-                                                                          "z_hi": float(z_t)}, info["frames"], kind="prism"))
+                            painted.append(paint_record(edge, edge.face, sec, info["frames"], kind="prism"))
+                            pieces = [(corners, n3, section_uv(edge, sec, corners), "wall")]
                     else:
                         tex, n_seen = quad_texture_from_cameras(corners, n3, cams, arc=arc)
                     if tex is None:

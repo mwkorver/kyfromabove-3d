@@ -255,8 +255,13 @@ def quad_texture_from_cameras(corners: np.ndarray, normal: np.ndarray, cams, tex
     W = max(2, min(MAX_TEX_PX, int(np.ceil(L1 / texel_m))))
     H = max(2, min(MAX_TEX_PX, int(np.ceil(L2 / texel_m))))
     u = (np.arange(W) + 0.5) / W; v = (np.arange(H) + 0.5) / H
-    U, V = np.meshgrid(u, v)
-    pts = corners[0][None, :] + U.ravel()[:, None] * e1[None, :] + V.ravel()[:, None] * e2[None, :]
+    U, V = (x.ravel()[:, None] for x in np.meshgrid(u, v))
+    # each texel where the drawn face puts it: the four corners blended, as
+    # roll_quads cuts the face into its strips. On sloping ground the face is
+    # no parallelogram, and corners 0, 1 and 3 alone sampled its far top up
+    # to the slope's drop off the wall
+    c0, c1, c2, c3 = (c[None, :] for c in corners)
+    pts = (1 - V) * ((1 - U) * c0 + U * c1) + V * ((1 - U) * c3 + U * c2)
     nrm = np.repeat(normal[None, :], len(pts), axis=0)
     if arc is not None:
         pts, nrm = arc.to_world_3d(pts, nrm)

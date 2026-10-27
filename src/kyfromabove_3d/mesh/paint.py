@@ -130,18 +130,6 @@ def section_grid(plane: WallPlane, sec: Dict[str, Any], texel_m: float) -> Tuple
     return xyz, np.array([nv[0], nv[1], 0.0])
 
 
-def quad_grid(corners: np.ndarray, texel_m: float) -> np.ndarray:
-    """A rectangle's texel centres, ``(H, W, 3)``, row 0 along ``corners[0]``
-    to ``corners[1]``: the frame ``quad_texture_from_cameras`` samples in, so
-    the quad's uv ``[[0, 0], [1, 0], [1, 1], [0, 1]]`` stands."""
-    corners = np.asarray(corners, dtype=np.float64)
-    e1 = corners[1] - corners[0]; e2 = corners[3] - corners[0]
-    W = _size_px(float(np.linalg.norm(e1)), texel_m)
-    H = _size_px(float(np.linalg.norm(e2)), texel_m)
-    U, V = np.meshgrid((np.arange(W) + 0.5) / W, (np.arange(H) + 0.5) / H)
-    return corners[0] + U[..., None] * e1 + V[..., None] * e2
-
-
 def match_color_transfer(src: np.ndarray, ref: np.ndarray, overlap_mask: np.ndarray) -> np.ndarray:
     """``src`` with each channel's gain and bias matched to ``ref`` over
     ``overlap_mask``: two frames see a wall in different sun and exposure."""
@@ -303,8 +291,3 @@ def painted_by(records: Sequence[Dict[str, Any]], xyz: np.ndarray, tol_m: float 
     pattern, inv = np.unique(on.T, axis=0, return_inverse=True)
     sets = [frozenset(f for k in np.flatnonzero(p) for f in records[k]["frames"]) for p in pattern]
     return [sets[i] for i in np.ravel(inv)]
-
-
-def paint_quad(corners: np.ndarray, normal: np.ndarray, cams: Sequence[dict], texel_m: float):
-    """:func:`paint_grid` over one rectangle, in its uv frame (:func:`quad_grid`)."""
-    return paint_grid(quad_grid(corners, texel_m), np.asarray(normal, dtype=np.float64), cams, texel_m)

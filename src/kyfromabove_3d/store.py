@@ -4,7 +4,7 @@ The pipeline writes a building's files into a local folder, as it always
 has; publishing that folder is the one step that knows about storage. A
 ``Store`` is the few operations that step needs -- put a file or bytes, read
 bytes back, ask whether a key exists, list a prefix -- so the same stage code
-runs on the laptop (``LocalStore``) and in Lambda (``S3Store``), and the
+runs on the laptop (``LocalStore``) and in AWS (``S3Store``), and the
 tests run against either (``S3Store`` over moto, a mocked S3).
 
 Keys are always forward-slash paths relative to the store's root, e.g.

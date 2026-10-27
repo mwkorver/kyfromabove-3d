@@ -204,13 +204,14 @@ frames are read straight from KyFromAbove's public bucket.
 ### In AWS
 
 The stacks are in [`deploy/`](deploy/) (AWS CDK): the queue run (an SQS
-queue and a group of Spot machines that take the tile, measure and build
-jobs from it, the same code as on the laptop), the tile step as a Lambda
-(an alternative for step 1), the CloudFront viewer and the budget.
-`scripts/queue_run.py` sends a run's jobs and follows it. [`docs/CLOUD.md`](docs/CLOUD.md) walks through a full run.
+queue and a group of Spot machines that take the tile, measure, build and
+publish jobs from it, the same code as on the laptop), the CloudFront viewer
+and the budget. `scripts/queue_run.py` sends a run's jobs and follows it.
+[`docs/CLOUD.md`](docs/CLOUD.md) walks through a full run.
 
-Before deploying your own copy: the bucket name `kyfromabove-3d` in the code
-and docs is the author's and bucket names are global, so change it; the Spot
+Before deploying your own copy: the default bucket name `kyfromabove-3d` is the
+author's and bucket names are global, so pass your own with `-c bucket=<name>`
+or `KFA_BUCKET=<name>` (and `--store s3://<name>`); the Spot
 machines have a price ceiling and a lifetime (no new jobs after 10 hours,
 shut down at 12 hours 40 minutes) but no spending cap, so
 deploy the budget stack too (`docs/CLOUD.md`, "Watching the spend"); and a deployed viewer is public unless the password is switched on. See
@@ -353,7 +354,7 @@ that can be read in place over HTTP without downloading whole archives first
   `tiles.parquet` index.
 - **[laspy](https://laspy.readthedocs.io/) and [lazrs](https://github.com/laz-rs/laz-rs)** —
   reading octree-indexed **COPC (Cloud Optimized Point Cloud)** `.copc.laz`
-  chunks over HTTP range requests and decompressing them in Rust.
+  chunks over HTTP range requests without downloading whole tile files.
 - **[CesiumJS](https://cesium.com/platform/cesiumjs/)**, **[VC Map](https://vc.systems/en/products/vc-map/)**, and **[OpenLayers](https://openlayers.org/)** *(OSGeo)* —
   viewing the published **[OGC 3D Tiles](https://www.ogc.org/standards/3dtiles/)**,
   **[glTF 2.0](https://www.khronos.org/gltf/)** building meshes, heightmap

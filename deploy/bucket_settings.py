@@ -18,11 +18,12 @@ down.
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
-BUCKET = "kyfromabove-3d"
+BUCKET = os.environ.get("KFA_BUCKET", "kyfromabove-3d")
 REGION = "us-west-2"
 #: how long an overwritten or deleted file is kept
 KEEP_DAYS = 7

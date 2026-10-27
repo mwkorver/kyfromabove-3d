@@ -115,6 +115,8 @@ class QueueRunStack(Stack):
                   f"> /var/tmp/worker.log 2>&1")
         ud.add_commands(
             f"shutdown -h +{QUEUE_LIFETIME_MIN}",               # first: the machine's hard end
+            f'log_s3="s3://{bucket_name}/runs/{run}/logs/$(cat /var/lib/cloud/data/instance-id).log"',
+            'trap \'[ -s /var/tmp/worker.log ] && aws s3 cp /var/tmp/worker.log "$log_s3" || true\' EXIT',
             "dnf install -y docker && systemctl start docker",
             f"aws ecr get-login-password --region {self.region} | docker login --username AWS "
             f"--password-stdin {self.account}.dkr.ecr.{self.region}.amazonaws.com",
@@ -137,9 +139,12 @@ class QueueRunStack(Stack):
             self, "Template", machine_image=ec2.MachineImage.latest_amazon_linux2023(
                 cpu_type=ec2.AmazonLinuxCpuType.ARM_64),
             role=role, security_group=sg, user_data=ud,
+            require_imdsv2=True, http_put_response_hop_limit=2,
             instance_initiated_shutdown_behavior=ec2.InstanceInitiatedShutdownBehavior.TERMINATE,
             block_devices=[ec2.BlockDevice(device_name="/dev/xvda", volume=ec2.BlockDeviceVolume.ebs(
                 60, volume_type=ec2.EbsDeviceVolumeType.GP3, delete_on_termination=True))])
+        # Public subnets of the default VPC so S3 and ECR traffic does not pay for a NAT
+        # Gateway ($0.045/hour + $0.045/GB); the NoInbound security group allows no ingress.
         asg = autoscaling.AutoScalingGroup(
             self, "Machines", vpc=vpc, vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
             min_capacity=0, max_capacity=max_machines,

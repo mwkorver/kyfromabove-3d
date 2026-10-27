@@ -16,15 +16,17 @@ from stack import PROJECT_TAG, BudgetStack, QueueRunStack, ViewerStack  # noqa: 
 
 app = cdk.App()
 env = cdk.Environment(account=os.environ.get("CDK_DEFAULT_ACCOUNT"), region="us-west-2")
+bucket = app.node.try_get_context("bucket") or os.environ.get("KFA_BUCKET") or "kyfromabove-3d"
 # a run on Spot machines fed by SQS (every step, the tile step included), only when a run is named:
-# npx aws-cdk deploy kyfromabove-3d-queue -c queue_run=r1 [-c queue_machines=2]
+# npx aws-cdk deploy kyfromabove-3d-queue -c queue_run=r1 [-c queue_machines=2] [-c bucket=my-bucket]
 if app.node.try_get_context("queue_run"):
-    QueueRunStack(app, "kyfromabove-3d-queue", env=env, run=app.node.try_get_context("queue_run"),
+    QueueRunStack(app, "kyfromabove-3d-queue", env=env, bucket_name=bucket,
+                  run=app.node.try_get_context("queue_run"),
                   max_machines=int(app.node.try_get_context("queue_machines") or 2))
 # the demo viewer: CloudFront over the served prefixes; the password (a
 # git-ignored file) only with -c viewer_password=on
 _pw = Path(__file__).with_name("viewer_password.txt")
-ViewerStack(app, "kyfromabove-3d-viewer", env=env,
+ViewerStack(app, "kyfromabove-3d-viewer", env=env, bucket_name=bucket,
             password=_pw.read_text().strip() if app.node.try_get_context("viewer_password") == "on" and _pw.exists()
             else None)
 # a monthly budget on the project's tag, only when an address is given:

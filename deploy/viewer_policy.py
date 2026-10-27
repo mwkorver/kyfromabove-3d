@@ -18,9 +18,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
-BUCKET = "kyfromabove-3d"
+BUCKET = os.environ.get("KFA_BUCKET", "kyfromabove-3d")
 
 
 def merged(current: dict, statement: dict) -> dict:
@@ -33,6 +34,7 @@ def main() -> int:
     import boto3
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--bucket", default=BUCKET)
     ap.add_argument("--stack", default="kyfromabove-3d-viewer")
     ap.add_argument("--region", default="us-west-2")
     ap.add_argument("--apply", action="store_true")
@@ -41,13 +43,13 @@ def main() -> int:
     outs = {o["OutputKey"]: o["OutputValue"] for o in cf.describe_stacks(StackName=args.stack)["Stacks"][0]["Outputs"]}
     statement = json.loads(outs["BucketPolicyStatement"])
     s3 = boto3.client("s3", region_name=args.region)
-    current = json.loads(s3.get_bucket_policy(Bucket=BUCKET)["Policy"])
+    current = json.loads(s3.get_bucket_policy(Bucket=args.bucket)["Policy"])
     new = merged(current, statement)
     kept = [s.get("Sid") for s in current["Statement"] if s.get("Sid") != statement["Sid"]]
     print(json.dumps(new, indent=1))
     print(f"kept: {kept}; added: {statement['Sid']}", file=sys.stderr)
     if args.apply:
-        s3.put_bucket_policy(Bucket=BUCKET, Policy=json.dumps(new))
+        s3.put_bucket_policy(Bucket=args.bucket, Policy=json.dumps(new))
         print("written", file=sys.stderr)
     return 0
 

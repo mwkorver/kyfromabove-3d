@@ -174,7 +174,7 @@ def main(argv=None) -> int:
     ap.add_argument("--no-terrain", action="store_true", help="tree: leave the terrain as it is")
     ap.add_argument("--limit", type=int, default=0, help="local: build only this many buildings (0: all)")
     ap.add_argument("--skip-tile", action="store_true", help="local: the tiles are made already (step 1)")
-    ap.add_argument("--store", default=os.environ.get("STORE", "s3://kyfromabove-3d"))
+    ap.add_argument("--store", default=os.environ.get("STORE") or f"s3://{os.environ.get('KFA_BUCKET', 'kyfromabove-3d')}")
     ap.add_argument("--region", default=os.environ.get("AWS_REGION", "us-west-2"))
     args = ap.parse_args(argv)
     from kyfromabove_3d.store import store_from

@@ -21,11 +21,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import posixpath
 import sys
 from pathlib import Path
 
-BUCKET = "kyfromabove-3d"
+BUCKET = os.environ.get("KFA_BUCKET", "kyfromabove-3d")
 PRODUCTS = ("overture", "boxes", "measured", "complete")
 
 

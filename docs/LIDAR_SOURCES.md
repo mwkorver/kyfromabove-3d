@@ -102,14 +102,20 @@ Two different density measures appear below and they are **not interchangeable**
 
 ### Tile density (LAS headers)
 
-| place | phase | tile | flown | points | pts/m² | z span |
-|---|---|---|---|---|---|---|
-| Ashland | Phase 2 | N057E407 | 2024-02-29 | 9,166,976 | **3.95** | 504 ft |
-| Ashland | Phase 3 | N057E407 | 2025-12-13 | 7,329,894 | 3.16 | 541 ft |
-| Ashland | Phase 1 | N057E407 | 2013-05-17 | 3,646,044 | 1.57 | **1461 ft** |
-| Pikeville | Phase 2 | N130E416 | 2024-03-06 | 26,788,759 | **11.53** | 1633 ft |
-| Pikeville | Phase 3 | N130E416 | 2024-02-26 | 20,441,874 | 8.80 | 1480 ft |
-| Pikeville | Phase 1 | N130E416 | 2017-10-10 | 7,458,909 | 3.21 | 844 ft |
+*Flown* is the GPS time of the tile's returns (from its COPC header, as
+`sources_choice` and `scripts/survey_statewide_dates.py` read it); *file
+written* is the header's creation date, which this table once called
+"flown". The two are years apart: a file is written when it is processed.
+Phase 1's plain LAZ is not read for its GPS time here.
+
+| place | phase | tile | flown | file written | points | pts/m² | z span |
+|---|---|---|---|---|---|---|---|
+| Ashland | Phase 2 | N057E407 | 2019-03-20 | 2024-02-29 | 9,166,976 | **3.95** | 504 ft |
+| Ashland | Phase 3 | N057E407 | 2025-03-18 | 2025-12-13 | 7,329,894 | 3.16 | 541 ft |
+| Ashland | Phase 1 | N057E407 | — | 2013-05-17 | 3,646,044 | 1.57 | **1461 ft** |
+| Pikeville | Phase 2 | N130E416 | 2019-03-07 | 2024-03-06 | 26,788,759 | **11.53** | 1633 ft |
+| Pikeville | Phase 3 | N130E416 | 2023-02-16 | 2024-02-26 | 20,441,874 | 8.80 | 1480 ft |
+| Pikeville | Phase 1 | N130E416 | — | 2017-10-10 | 7,458,909 | 3.21 | 844 ft |
 
 Pikeville's large z spans are real — it is mountainous. Ashland's are not: a
 **1461 ft** span in a Phase 1 tile whose Phase 2 twin spans 504 ft is blunder
@@ -156,8 +162,15 @@ or segmentation on the imagery. That is not a preference — it is the only rout
 takes the LiDAR phase flown closest in time to its oblique photos
 (`sources_choice.choose`; a tie goes to the newer LiDAR, and a tile with no
 photos takes the newest LiDAR), so a building's shape and its colors come
-from nearly the same day. The choice is recorded on every building. The
-order below is what `LidarTileIndex` falls back to when no such choice is
+from captures as close in time as the flights allow: statewide the median
+building's two are 15 months apart, and only a quarter are within six
+months ([CLOUD.md](CLOUD.md), "What all of Kentucky costs"). The choice is recorded on every building.
+
+![when each LiDAR phase and oblique collection was flown](figures/statewide_flown.png)
+
+![tile by tile: the LiDAR, the photos, and the time between them](figures/statewide_pairs_map.png)
+
+The order below is what `LidarTileIndex` falls back to when no such choice is
 made, as in the diagnostic scripts.
 
 `LidarTileIndex.PHASE_PREFERENCE = ("phase2", "phase3", "phase1")`
@@ -189,7 +202,7 @@ phase2  N067E390  copc=True
 https://kyfromabove.s3.us-west-2.amazonaws.com/elevation/PointCloud/Phase2/N067E390_LAS_Phase2.copz.laz
 ```
 
-LAS 1.4, point format 6, flown 2024-12-08, 8,759,469 points, 3.77 pts/m². Note
+LAS 1.4, point format 6, flown 2024-02-05 (file written 2024-12-08), 8,759,469 points, 3.77 pts/m². Note
 the `.copz.laz` spelling — one of the 898.
 
 Point format 6 carries **no RGB**, and the intensity field is zero throughout, so

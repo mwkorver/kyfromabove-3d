@@ -76,8 +76,11 @@ CloudFront serves the result to two public pages: the
   boxes, on the 98 tiles around downtown Louisville.
 - **AWS cost so far: about $47** (August to October 2026, tax included):
   $16 of early trials on Lambda, $15 of storage, $12 of Spot machines.
-- **All of Kentucky** (2.79 million buildings) is estimated at about $390
-  and five days on eight Spot machines, from the last run's measured cost.
+- **All of Kentucky** (2.79 million buildings) is estimated at about $440
+  ($290-590) and five days on eight Spot machines, tile by tile from the two
+  queue runs' measured jobs. A quarter of its buildings have LiDAR and
+  oblique photos flown within six months of each other; the median pair is
+  15 months apart ([CLOUD.md](docs/CLOUD.md), "What all of Kentucky costs").
   It has not been run.
 
 ## Limits

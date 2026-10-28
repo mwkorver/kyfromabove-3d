@@ -615,9 +615,9 @@ three inputs have since been measured again. The cloud pipeline's own count
 is 2.79 million Overture buildings on the LiDAR tiles; the four oblique
 collections cover
 99.6% of the state, not only its cities; and two runs on the queue put the
-whole state at about $390 and five days on eight machines. The figures and
-how they were measured are in [CLOUD.md](CLOUD.md), "Measured on the
-queue". The things this section said would be needed first (batching by
+whole state at about $440 and five days on eight machines. The figures and
+how they were measured are in [CLOUD.md](CLOUD.md), "What all of Kentucky
+costs". The things this section said would be needed first (batching by
 LiDAR tile, a queue of workers writing to S3, a quadtree of tiles, curved
 walls, split footprints) are all done.
 

@@ -255,7 +255,7 @@ cd deploy && npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@exampl
 
 The limits are $20 a month for the project and $5 for the viewer unless
 `budget_usd` and `viewer_usd` say otherwise; raise the first before a
-statewide run (about $390, "Measured on the queue" below). The viewer's budget counts
+statewide run (about $440, "What all of Kentucky costs" below). The viewer's budget counts
 CloudFront only: the bucket requests it causes stay under the project's tag.
 
 A budget reads the bill, which lags by hours. `ViewerAlarmStack` watches the
@@ -462,16 +462,108 @@ the laptop but the sending:
   (348,000 objects, 8.4 a building) and a little else; 22 GB stored.
 
 At cities1's rate, 14 cents per 1,000 buildings, all of Kentucky's 2.79
-million buildings come to **about $390, and about 5 days on 8 machines**.
-Almost every building gets the full treatment: the four oblique collections
-together cover 99.6% of the state, not only its cities
+million buildings came to about $390 and about 5 days on 8 machines. That
+scaled a city run by its buildings alone; "What all of Kentucky costs",
+next, works it out tile by tile and comes to about $440. Almost every
+building gets the full treatment: the four oblique collections together
+cover 99.6% of the state, not only its cities
 (`scripts/plot_oblique_coverage.py`):
 
 ![where the oblique photos were flown](figures/oblique_coverage.png)
 
-Since cities1 the walls are painted from whole photos (PRODUCTS.md), which
-takes a tower's mesh step 5-30% longer and a house's no longer; the
-estimate does not include that.
+## What all of Kentucky costs (October 28, 2026)
+
+**About $440 and about 5 days on 8 Spot machines**, for one run of every
+step over the state's 2.79 million buildings; between $290 and $590 with the
+spread the two runs themselves show. Storing what it makes, about 1.5 TB,
+then costs about $34 a month.
+
+How it was worked out (`scripts/survey_statewide_dates.py`, then
+`scripts/estimate_statewide_cost.py`; numbers in
+[data/statewide_cost.json](data/statewide_cost.json); the pictures from
+`scripts/plot_statewide_dates.py`):
+
+- **The work, tile by tile.** Every one of the 46,167 Phase 2 tiles, with
+  Overture's buildings on it (2,791,844 on 41,628 tiles; the median tile
+  holds 28, and 89% of tiles hold under 100), and whether an oblique
+  collection covers it. 5,967 buildings, on tiles no collection covers, are
+  boxes and get no build job.
+- **The time of each job**, from the 5,927 job records of trial1 and
+  cities1. A tile's tile, measure and publish jobs take about 63 s for the
+  tile plus 1.1 s a building, fitted on the 16 tiles under 500 buildings
+  (Kentucky's tile is one of those; the city tiles alone put the measure
+  job's start at 95 s). A build takes 13.6 s for a building under 100 m²,
+  10.6 s at 100-300 m², 10.3 s at 300-1,000 m² and 36 s above, fitted
+  over all 58 tiles; on Kentucky's mix of sizes (28%, 60%, 11% and 1.4%)
+  that is 11.8 s a building, the same as trial1's measured 11.8 s, and 2%
+  more for walls painted whole since cities1.
+- **What a job-hour costs.** cities1 ran 149 job-hours on 13.7
+  machine-hours: 10.9 jobs at once on a 16-processor machine, idle time and
+  boots included. A c7g.4xlarge's Spot price in us-west-2 in the week to
+  October 28 was $0.215-0.29 an hour by zone (cities1 paid $0.284); disks
+  and addresses add 4%.
+- **S3**: cities1's 9.3 uploads and 12.4 reads a building, and 0.53 MB
+  stored a building.
+
+![the statewide run's cost by part](figures/statewide_cost.png)
+
+The build job is 85% of the machine time. Uploads are the second cost, $130:
+six objects a building and the published tiles. The low end ($290) is a
+build at trial1's quicker tiles (8.6 s a building) packed 13.4 to a machine
+as cities1's build phase was; the high end ($590) is its slower tiles
+(13.6 s) and trial1's 16.8 uploads a building. Not in it: the tile step's
+tree labeling (added October 25, after both runs: the tile job is 4% of the
+work, so even doubling it adds about $10), and retries (none in cities1).
+
+### Which LiDAR and which photos, and when each was flown
+
+A building is shaped from one LiDAR flight and colored from one oblique
+collection, chosen per tile (`sources_choice`): the pair flown closest
+together in time, a tie to the newer LiDAR. The dates here are flight
+dates: the LiDAR's from the GPS time of its returns, read from each of the
+54,831 COPC files' headers; the photos' from the `FlightDate` of every one of
+the 4.4 million photos in the four collections' `ImageFrameCentroids.gpkg`.
+(A LAS header's file-creation date is when the file was processed, not
+flown: Ashland's Phase 2 tile was flown on March 20, 2019 and written on
+February 29, 2024.)
+
+![when each LiDAR phase and oblique collection was flown](figures/statewide_flown.png)
+
+| capture | flown | used for |
+|---|---|---|
+| LiDAR Phase 2 | February 2019 to November 2024, region by region | 2.12 million buildings (76%) |
+| LiDAR Phase 3 | February 2023 to March 2026: the north-east and east, two patches in the north, one in the far west | 0.67 million (24%): every tile it covers but 18 |
+| Obliques 2022 Season 2 | November 20-23, 2022 | 3,000 buildings |
+| Obliques 2023 Season 1 | January 28 to April 27, 2023 | 0.85 million (30%) |
+| Obliques 2023 Season 2 | November 10-29, 2023 | 0.16 million (6%) |
+| Obliques 2024 Season 1 | February 1 to April 13, 2024 | 1.77 million (63%) |
+
+![tile by tile: the LiDAR, the photos, and the time between them](figures/statewide_pairs_map.png)
+
+Only a quarter of the state's buildings (27%) would have their two captures
+within six months of each other: most of the east, where Phase 2 or Phase 3
+was flown in the same spring as the 2023 photos. Half (52%) have photos
+taken one to five years after the LiDAR: the west and center, flown for
+LiDAR in 2019-2022 and photographed in 2024. One in six (16%) have LiDAR a
+year or more newer than the photos: Phase 3's 2025-2026 flights over 2023
+photos. The median building's two captures are 15 months apart; one in ten
+are more than three years apart, the most five. A building built, extended
+or torn down between the two is shaped from one moment and colored from
+the other.
+
+![buildings by the time between their LiDAR and their photos](figures/statewide_gap.png)
+
+The run's cost follows its buildings, so building only the closest pairs
+costs that share of it:
+
+| the two captures within | buildings | about |
+|---|---|---|
+| 6 months | 0.74 million (27%) | $120 |
+| 12 months | 0.91 million (32%) | $140 |
+| 18 months | 1.89 million (68%) | $300 |
+| 24 months | 2.21 million (79%) | $350 |
+| 36 months | 2.56 million (92%) | $400 |
+| any | 2.79 million | $440 |
 
 ## What has been checked
 
@@ -618,7 +710,7 @@ processors; the account allowed 32 Spot processors then. Of that, $262 was S3
 requests: about 20 uploads a building. Storing each building as five objects
 (see "What a building leaves behind") brings the same run to about $430
 (`deploy/ec2_cost.py`: computing $345, disks $4, S3 requests $81), rounded up to about $450 as the working figure until the queue runs measured
-about $390 ("Measured on the queue"). The three Spot runs cost about $0.16 in all.
+it ("What all of Kentucky costs": about $440). The three Spot runs cost about $0.16 in all.
 
 ## The pilot: four areas in a browser (September 2026)
 

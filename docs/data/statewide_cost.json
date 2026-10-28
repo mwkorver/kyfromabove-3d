@@ -1,0 +1,89 @@
+{
+ "tiles_with_buildings": 41628,
+ "buildings": 2791844,
+ "buildings_built": 2785877,
+ "buildings_boxes_only": 5967,
+ "storage_tb": 1.48,
+ "storage_usd_month": 34,
+ "fits": {
+  "tile_s": {
+   "per_tile": 27.690308609922372,
+   "per_building": 0.09245786693059363
+  },
+  "measure_s": {
+   "per_tile": 22.200591831969568,
+   "per_building": 0.5909565496187461
+  },
+  "publish_s": {
+   "per_tile": 13.551431734437383,
+   "per_building": 0.3854584570491285
+  },
+  "build_s": {
+   "<100": 13.636932643836913,
+   "100-300": 10.642676901321506,
+   "300-1k": 10.304150103969496,
+   ">=1k": 36.045779232597766
+  },
+  "build_spread": [
+   8.55942610062893,
+   10.634144181318856,
+   13.553801896044464
+  ]
+ },
+ "cases": {
+  "low": {
+   "build_s_per_building": 8.56,
+   "job_hours": {
+    "tile": 392,
+    "measure": 715,
+    "build": 6756,
+    "publish": 456,
+    "tree": 27
+   },
+   "machine_hours": 623,
+   "days_on_machines": 3.2,
+   "usd": {
+    "machines": 142,
+    "s3_uploads": 130,
+    "s3_reads": 14,
+    "total": 286
+   }
+  },
+  "middle": {
+   "build_s_per_building": 11.77,
+   "job_hours": {
+    "tile": 392,
+    "measure": 715,
+    "build": 9293,
+    "publish": 456,
+    "tree": 27
+   },
+   "machine_hours": 998,
+   "days_on_machines": 5.2,
+   "usd": {
+    "machines": 295,
+    "s3_uploads": 130,
+    "s3_reads": 14,
+    "total": 439
+   }
+  },
+  "high": {
+   "build_s_per_building": 13.55,
+   "job_hours": {
+    "tile": 392,
+    "measure": 715,
+    "build": 10698,
+    "publish": 456,
+    "tree": 27
+   },
+   "machine_hours": 1127,
+   "days_on_machines": 5.9,
+   "usd": {
+    "machines": 340,
+    "s3_uploads": 235,
+    "s3_reads": 14,
+    "total": 588
+   }
+  }
+ }
+}

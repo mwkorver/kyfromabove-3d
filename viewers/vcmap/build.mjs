@@ -98,7 +98,7 @@ if (process.argv.includes('--cloud')) {
   const at = cfg.layers.indexOf(measured);
   cfg.layers.splice(at, 1, ...PRODUCTS.map(([name, title]) => ({
     ...measured, name, url: `/kentucky/${name}/tileset.json`, screenSpaceError: 16,
-    activeOnStartup: name === 'measured', properties: { title },
+    activeOnStartup: name === 'measured', properties: { title, attributions: measured.properties.attributions },
   })));
   const item = cfg.contentTree.findIndex((c) => c.name === 'buildings.measured');
   cfg.contentTree.splice(item, 1,

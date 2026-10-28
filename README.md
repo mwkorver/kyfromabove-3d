@@ -49,7 +49,8 @@ height came from. More in [`docs/PRODUCTS.md`](docs/PRODUCTS.md).
 ![The pipeline: stage 0 and four steps, each writing to one store](docs/figures/pipeline.png)
 
 The unit of work is one LiDAR tile, a square about 1.5 km across. Kentucky
-has 46,167 of them, 41,566 with buildings. Every step reads from and writes
+has 46,167 of them, 41,628 with buildings in Overture's 2026-10-21.0
+release. Every step reads from and writes
 to one *store*: an S3 bucket for real runs, or a folder on a laptop for
 testing. The code is the same in both.
 
@@ -174,8 +175,8 @@ Before deploying your own copy:
 
 ### Checking a change
 
-A change to the meshing or coloring code is checked against 10 buildings that
-have broken before:
+A change to the meshing or coloring code is checked against 19 buildings that
+have broken before, in about 10 minutes:
 
 ```bash
 python scripts/audit_reference.py rebuild && python scripts/audit_reference.py compare
@@ -191,6 +192,7 @@ It fails, naming the building and what got worse
 | [`docs/CLOUD.md`](docs/CLOUD.md) | The pipeline in AWS: costs, the pilot, the bugs it found, serving the views |
 | [`docs/PRODUCTS.md`](docs/PRODUCTS.md) | Products 1 to 4: what is measured, what is invented, and how it is labeled |
 | [`docs/BUILDING_MESH.md`](docs/BUILDING_MESH.md) | How a building becomes a textured mesh |
+| [`docs/WALL_VISIBILITY.md`](docs/WALL_VISIBILITY.md) | The walls the LiDAR missed: which photos see them, and how far back they stand |
 | [`docs/AUDIT.md`](docs/AUDIT.md) | Checking a change against buildings that have broken before |
 | [`docs/DOWNTOWN_RUN.md`](docs/DOWNTOWN_RUN.md) | All of downtown Louisville, built on a laptop |
 | [`docs/LIDAR_SOURCES.md`](docs/LIDAR_SOURCES.md) | KyFromAbove's LiDAR phases, their density and dates |
@@ -236,7 +238,7 @@ The code is MIT; see [LICENSE](LICENSE). The data has its own terms:
 KyFromAbove is credited even though it needs no credit, because few states
 publish oblique photos openly, and fewer publish the camera positions that
 make them measurable. Kentucky publishes both, with statewide LiDAR, free. In
-2025 it became the
+2024 it became the
 [first state to complete statewide oblique aerial coverage](https://www.kentucky.gov/Pages/Activity-stream.aspx?n=FinanceandAdministrationCabinet&prId=266).
 Errors here are ours, not KyFromAbove's.
 

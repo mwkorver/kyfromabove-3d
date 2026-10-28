@@ -48,7 +48,7 @@ const register = `    <script>
 ${scripts}
   </head>`;
 writeFileSync(index, readFileSync(index, 'utf8').replace('</head>', register)
-  .replace('<title>VC Map</title>', '<title>KyFromAbove Prototype</title>'));
+  .replace('<title>VC Map</title>', '<title>Kentucky buildings in 3D, from KyFromAbove data</title>'));
 
 // the places the Cesium viewer flies to (configs/places.json, one list for both
 // viewers): a viewpoint each, 800 m out as there, listed under "Places" in the

@@ -85,6 +85,18 @@ def test_verified_plane_bands_cover_the_face_and_skip_open_bands():
     assert all(b.offset_m == 0.0 and b.along_hi == 40.0 for b in out)
 
 
+def test_a_band_across_a_verified_planes_top_keeps_its_part_above():
+    """400 West Market's west wall: its plane stops at 110.6 m inside the
+    110-115 m band; the band was cut at the plane's top and the 4.4 m above it
+    dropped, a line of hole at the crown's foot."""
+    plane = VerifiedWallPlane(face=1, p0=np.array([0.0, 0.0]), p1=np.array([40.0, 0.0]),
+                              normal=np.array([0.0, -1.0]), z_lo=0.0, z_hi=110.6, z_top=110.6)
+    prof = [_band(105, 110, 0.1), _band(110, 115, 0.12), _band(115, 120, 0.15)]
+    out = plane_bands(plane, prof)
+    assert [(b.z_lo, round(b.z_hi, 1)) for b in out] == [(105, 110), (110, 110.6), (110.6, 115), (115, 120)]
+    assert out[2].offset_m == 0.12 and out[1].offset_m == 0.0
+
+
 def test_face_texture_rasterises_points_on_the_band_only():
     plane = _plane()
     bands = [_band(0, 10, 0.0)]

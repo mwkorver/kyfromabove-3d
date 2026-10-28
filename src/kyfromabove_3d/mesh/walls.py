@@ -269,6 +269,12 @@ def plane_bands(plane: WallPlane, bands: list[FaceBand], dense_per_m2: float = 0
             if b is not None:
                 out.append(b)
             continue
+        if b is not None and z_hi > plane.z_hi + 0.05:
+            # a band across the plane's top: the plane takes what is below it,
+            # the profile speaks for the rest -- cut at the top and dropped, 400
+            # West Market's west wall stood open from its plane's 110.6 m to 115 m
+            from dataclasses import replace
+            out.append(replace(b, z_lo=float(plane.z_hi)))
         z_hi = min(z_hi, plane.z_hi)
         if b is not None and b.status == "open":
             continue
@@ -282,7 +288,7 @@ def plane_bands(plane: WallPlane, bands: list[FaceBand], dense_per_m2: float = 0
         out.append(FaceBand(z_lo=z_lo, z_hi=z_hi, offset_m=0.0, n_returns=b.n_returns if b else 0,
                             spread_m=0.0, along_lo=0.0, along_hi=L, status="observed",
                             segments=[], clip_lo=clip_lo, clip_hi=clip_hi))
-    return out
+    return sorted(out, key=lambda x: x.z_lo)
 
 
 def wall_geometry(plane: WallPlane, bands: list[FaceBand], roof: "RoofField | None" = None,

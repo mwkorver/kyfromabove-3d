@@ -244,6 +244,16 @@ Every downtown building has been rebuilt with these rules since.
 * **Textures are coarser than the photos.** Walls are textured at 0.15 m a
   pixel; the best oblique sees a typical wall at about 0.10 m
   ([WALL_VISIBILITY.md](WALL_VISIBILITY.md)).
+* **Walls standing outside the outline leave slits at some corners.** Where
+  a wall's measured depth wobbles past 1 m inside the outline at a few
+  heights, the rule that stops the next wall at a set-back corner
+  (`clip_profiles_by_neighbours`) trims it there, and the two walls no longer
+  meet: 400 West Market's east corners, about 60 m² seen from the east.
+  Small gaps of the same size remain on RIVUE Tower's west side (about 30 m²
+  more in each view than on October 14, 2026) and on the Hampton Inn's roof
+  from above (16 m² more); cfb7194a stands 145 m² of wall where the LiDAR
+  shows no building (69 m² then). Left for later; the audit's accepted
+  numbers (`tests/data/audit_baseline.json`, October 28) include them.
 
 Build one with:
 

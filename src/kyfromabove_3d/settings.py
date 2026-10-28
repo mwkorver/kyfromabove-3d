@@ -92,6 +92,10 @@ class ColouriseSettings:
     # median 2 m strip along the face (a roof's sit at one height); 0: the
     # whole face's span only (before)
     band_local_rise: float = 0.25
+    # an open band whose deeper surface lies flat (a roof, not a wall behind
+    # piers) is drawn as wall at its front (features.roof_behind_bands); 1.0
+    # would take every open band, 0 none (before)
+    roof_behind_fill: float = 0.5
 
 
 @dataclass(frozen=True)
@@ -116,6 +120,10 @@ class MeshSettings:
     # inside it takes the full wall along the outline, as a face with nothing
     # measured does (0: it keeps its short walls, before)
     short_face_share: float = 0.5
+    # a face the LiDAR shows a taller neighbour against over half its length or
+    # more is a party wall drawn whole, whatever the class (mesh.party.hidden_by_taller;
+    # False: only the classes with party_walls: whole, before)
+    hidden_party: bool = True
 
 
 @dataclass(frozen=True)

@@ -63,7 +63,7 @@ from kyfromabove_3d.mesh.roof import (  # noqa: E402,F401
     outside_modelled_wall, roof_heightfield, roof_mesh, roof_sloped_fraction, roof_texture,
     roof_texture_from_cloud, tidy_roof_field,
 )
-from kyfromabove_3d.mesh.party import edge_top_z, party_edges, party_steps  # noqa: E402,F401
+from kyfromabove_3d.mesh.party import edge_top_z, hidden_by_taller, party_edges, party_steps  # noqa: E402,F401
 from kyfromabove_3d.mesh.paint import (  # noqa: E402
     PAINT_FILE, paint_record, paint_section, section_uv, wall_sections,
 )
@@ -111,6 +111,9 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--no-wall-cap", dest="wall_cap", action="store_false",
                     help="walls carried up or copied keep their band's top, and seen ones too; only a wall drawn "
                          "under a roof edge stops at the roof (before)")
+    ap.add_argument("--no-hidden-party", dest="hidden_party", action="store_false",
+                    help="a face against a taller neighbour (from the LiDAR) is not drawn whole as a party wall "
+                         "unless the class says party_walls: whole (before)")
     ap.add_argument("--roof-cell-m", type=float, default=D.roof_cell_m,
                     help="roof height-field cell; 0 = 0.75 m where the returns are dense (>= 4/m2), else 1.5 m")
     ap.add_argument("--out", type=Path, default=None, help="default <building>/3dtiles_mesh/")
@@ -148,7 +151,7 @@ def settings_from_args(args):
     """The mesh's settings as the command line gives them (kyfromabove_3d.settings)."""
     from kyfromabove_3d.settings import MeshSettings
     return MeshSettings(texel_m=args.texel_m, roof_tidy=args.roof_tidy, wall_cap=args.wall_cap,
-                        roof_cell_m=args.roof_cell_m, texture=args.texture)
+                        roof_cell_m=args.roof_cell_m, texture=args.texture, hidden_party=args.hidden_party)
 
 
 def main(argv=None) -> int:
@@ -356,6 +359,23 @@ def main(argv=None) -> int:
     # mirrored bands ran a 104 m sheet along the block's edge at tower
     # height; the tower is 30 m wide.
     roof = RoofField(xs, ys, Z, valid) if valid.any() else None
+    # A face a taller neighbour stands against, over half its length, is a
+    # party wall drawn whole whatever the class: nothing saw it, and what its
+    # profile caught is the neighbour's wall above and the roof inside
+    # (mesh.party.hidden_by_taller)
+    hidden_faces = set()
+    if M.hidden_party and roof is not None and path != "box":
+        solid = xyz if cls_arr is None else xyz[~np.isin(cls_arr, (7, 18))]
+        for e in edges:
+            if edge_level[e.face]["level"] != 0 or isinstance(e, ArcWall) or e.face in whole_party:
+                continue
+            hid = hidden_by_taller(e, solid, roof.top_along(e))
+            if sum(s1 - s0 for s0, s1, _ in hid) >= 0.5 * e.length_m:
+                whole_party.add(e.face)
+                hidden_faces.add(e.face)
+                party[e.face] = sorted(party.get(e.face, []) + hid, key=lambda s: (s[0], s[1]))
+                print(f"  face {e.face}: a taller neighbour against {sum(s1 - s0 for s0, s1, _ in hid):.0f} of "
+                      f"{e.length_m:.0f} m (to {max(t for _, _, t in hid) - ground_z:.0f} m); drawn whole as a party wall")
 
     glb = GlbRecorder(GlbWriter(M.texture, dump_dir=(out / "textures") if args.dump_textures else None))
     atlas = TextureAtlas()
@@ -500,7 +520,9 @@ def main(argv=None) -> int:
                         if np.isfinite(z) and z - lv_floor >= 0.5]
         else:
             stations = [(0.0, L, ground_z + roof_top)] if roof_top >= 0.5 else []
-        if edge.face in whole_party and stations:
+        if edge.face in whole_party and edge.face not in hidden_faces and stations:
+            # (against a taller neighbour every return along the line is the
+            # neighbour's wall: the wall stops at the roof)
             # a party wall drawn whole stands to the top of the wall the LiDAR
             # saw on it, where that is above the roof just inside -- a parapet
             # (644a6ecb's party wall stopped 1.5 m short of its own top) -- but

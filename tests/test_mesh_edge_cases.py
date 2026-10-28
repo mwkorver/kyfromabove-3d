@@ -50,3 +50,21 @@ def test_a_wall_shared_with_two_neighbours_on_one_stretch_one_of_unknown_height(
     nb = Polygon([(0, -5), (10, -5), (10, 0), (0, 0)])
     out = party_edges(np.zeros((4, 2)), [nb, nb], [_Face()], tops=[6.0, None])
     assert [t for _, _, t in out[7]] == [None, 6.0]
+
+
+def test_a_wall_against_a_taller_neighbour_is_found_from_the_lidar():
+    """9947f2b0's west wall: the neighbour's roof at 23 m stands just outside
+    an edge whose roof inside is at 14 m, over two of its three stretches; an
+    equally tall neighbour, or a tall one across a 4 m alley, is not."""
+    from kyfromabove_3d.mesh.party import hidden_by_taller
+
+    rng = np.random.default_rng(0)
+    tops = [(0.0, 3.0, 14.0), (3.0, 6.0, 14.0), (6.0, 9.0, 14.0)]
+    nb = np.column_stack([rng.uniform(0, 6, 200), rng.uniform(0.5, 2.5, 200), rng.normal(23.0, 0.1, 200)])
+    ground = np.column_stack([rng.uniform(0, 9, 100), rng.uniform(0.5, 2.5, 100), np.zeros(100)])
+    out = hidden_by_taller(_Face(), np.vstack([nb, ground]), tops)
+    assert len(out) == 1 and out[0][:2] == (0.0, 6.0) and abs(out[0][2] - 23.0) < 0.2
+    same = nb * [1, 1, 0] + [0, 0, 14.5]
+    assert hidden_by_taller(_Face(), same, tops) == []
+    alley = nb + [0, 4.0, 0]
+    assert hidden_by_taller(_Face(), alley, tops) == []

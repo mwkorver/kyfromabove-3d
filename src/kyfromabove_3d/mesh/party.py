@@ -68,6 +68,39 @@ def party_edges(ring_m: np.ndarray, neighbours: list, faces, within_m: float = 0
     return out
 
 
+def hidden_by_taller(edge, xyz: np.ndarray, roof_tops, near_m=(0.5, 2.5), min_rise_m: float = 2.0,
+                     min_returns: int = 5) -> list:
+    """The stretches of an edge where the LiDAR just outside it (``near_m``
+    beyond the outline) stands ``min_rise_m`` or more above this building's
+    roof just inside it (``roof_tops``: RoofField.top_along's stretches): a
+    taller neighbour stands against the wall there, and nothing saw it.
+    ``(along_lo, along_hi, the neighbour's top)``, as party_edges gives them,
+    from the LiDAR rather than the neighbour's outline: 9947f2b0's west wall
+    stands against a 23 m building whose Overture outline is 1.2 m off, over
+    party_edges' 0.5 m, and with nothing drawn below the 10 m the LiDAR saw
+    of it the wall was a 429 m2 hole. ``xyz``: the returns, ground and trees
+    left out."""
+    if not len(xyz):
+        return []
+    along, across = edge.local(xyz[:, :2])
+    out_strip = (across >= near_m[0]) & (across <= near_m[1])
+    out = []
+    for a, b, z in roof_tops:
+        if not np.isfinite(z):
+            continue
+        m = out_strip & (along >= a) & (along <= b) & (xyz[:, 2] > z)
+        if m.sum() < min_returns:
+            continue
+        top = float(np.median(xyz[m, 2]))
+        if top < z + min_rise_m:
+            continue
+        if out and abs(out[-1][1] - a) < 1e-6:
+            out[-1] = (out[-1][0], b, max(out[-1][2], top))
+        else:
+            out.append((float(a), float(b), top))
+    return out
+
+
 def party_steps(stretches, a: float, b: float, z_top: float, min_open_m: float = 0.5):
     """Cut one prism run ``[a, b]`` up to ``z_top`` by the party stretches:
     ``(c0, c1, plain_top)`` pieces, ``plain_top`` the height the wall is

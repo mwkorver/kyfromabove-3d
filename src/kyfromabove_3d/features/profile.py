@@ -557,6 +557,66 @@ def crown_bands(bands: List[FaceBand], reference_offset_m: Optional[float] = Non
     return n
 
 
+def roof_behind_bands(bands: List[FaceBand], max_back_fill: float = 0.5, max_step_m: float = 2.0,
+                      top_z: Optional[float] = None,
+                      top_of: Optional[Callable[[FaceBand], Optional[float]]] = None) -> int:
+    """An "open" band whose deeper surface lies flat -- at one or two
+    heights, not up through the band (``back_fill`` under ``max_back_fill``)
+    -- is the wall in front of a flat roof, not a colonnade: the band the
+    roof falls in holds the wall at the edge and the roof running inward
+    from it. It is drawn as wall at its front. 9947f2b0's roof at 14 m sits
+    in its 10-15 m band on every face; read as a loggia, the wall was drawn
+    5-8 m inboard for those 5 m, under a wall band above, and where the
+    roof's returns outnumbered the wall's (the mode at the back) the crown
+    rule found no front and the wall stopped at 10 m.
+
+    The front is the band's own mode where that is the front surface, else
+    the offset of the wall band touching it (below first, then above); either
+    way within ``max_step_m`` of that wall and of the footprint's edge. With
+    no wall drawn above, the band stops at ``top_z`` and at its own front
+    returns' top (``top_of``), as a crown does. An open band with a wall
+    behind its piers (back_fill high) is left open. In place; returns how
+    many bands were made wall."""
+    order = sorted(range(len(bands)), key=lambda i: bands[i].z_lo)
+    n = 0
+    for k, i in enumerate(order):
+        b = bands[i]
+        if b.status != "open" or b.back_fill is None or b.back_fill >= max_back_fill:
+            continue
+        below = bands[order[k - 1]] if k > 0 else None
+        above = bands[order[k + 1]] if k + 1 < len(order) else None
+        # the wall beside it must be one the LiDAR saw: a band copied from the
+        # face opposite is no anchor -- on 2870eeb0's never-seen 86 m face the
+        # crown made wall off a mirrored band stood a 10 m strip at its top and
+        # took the face off the prism path (490 m2 open below it)
+        touching = [x for x in (below, above)
+                    if x is not None and x.status in ("observed", "extended", "bridged")
+                    and x.offset_m is not None and abs(x.offset_m) <= max_step_m
+                    and min(abs(x.z_hi - b.z_lo), abs(x.z_lo - b.z_hi)) <= 0.05]
+        if not touching:
+            continue
+        anchor = touching[0]
+        front_is_mode = (b.offset_m is not None and b.back_offset_m is not None
+                         and b.offset_m - b.back_offset_m > 0.5
+                         and abs(b.offset_m - anchor.offset_m) <= max_step_m and abs(b.offset_m) <= max_step_m)
+        front = float(b.offset_m) if front_is_mode else float(anchor.offset_m)
+        wall_above = any(x.status in WALL_STATUSES and x.status not in ("edge", "matched") and x.offset_m is not None
+                         and x.z_lo >= b.z_hi - 1e-6 for x in bands)
+        z_hi = b.z_hi
+        if not wall_above:
+            if top_z is not None:
+                z_hi = min(z_hi, top_z)
+            own = top_of(FaceBand(b.z_lo, b.z_hi, front, b.n_returns, 0.0, 0.0, 0.0, "observed")) if top_of else None
+            if own is not None:
+                z_hi = min(z_hi, own)
+            if z_hi - b.z_lo < 0.3:
+                continue
+        bands[i] = FaceBand(b.z_lo, z_hi, front, b.n_returns, 0.0, anchor.along_lo, anchor.along_hi, "bridged",
+                            segments=[], clip_lo=b.clip_lo, clip_hi=b.clip_hi)
+        n += 1
+    return n
+
+
 def carry_extents_down(bands: List[FaceBand], max_offset_step_m: float = 1.0) -> int:
     """A wall stands on the wall below it. Where a band's returns stop short
     of the band directly above it at nearly the same offset -- a neighbour

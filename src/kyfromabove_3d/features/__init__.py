@@ -41,7 +41,7 @@ from .anchors import (  # noqa: F401
 from .profile import (  # noqa: F401
     _band_segments, band_extent, carry_extents_down, clip_profiles_by_neighbours, crown_bands,
     extrude_profile, face_profile, FaceBand, fill_under_roof_edge, find_overhangs,
-    mirror_colour_from_twin, mirror_hidden_bands, opposite_face, profile_keeps, WALL_STATUSES,
+    mirror_colour_from_twin, mirror_hidden_bands, opposite_face, profile_keeps, roof_behind_bands, WALL_STATUSES,
 )
 from .levels import (  # noqa: F401
     _along_edge, _mask_to_ring, _straight_upper_ring, building_levels, LEVEL_FACE_STRIDE,

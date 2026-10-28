@@ -1273,3 +1273,40 @@ def test_lidar_solid_under_an_overhang_starts_at_its_underside():
     assert not ((P1[:, 2] < 35.0) & in_cell & (P1[:, 0] > 2.01)).any()
     exposed = (np.abs(P1[:, 0] - 2.0) < 1e-6) & (P1[:, 1] > 1.0) & (P1[:, 1] < 2.0) & (P1[:, 2] < 35.0)
     assert exposed.sum() > 0 and not ((np.abs(P0[:, 0] - 2.0) < 1e-6) & (P0[:, 2] < 35.0)).any()
+
+
+def test_an_open_band_with_a_flat_roof_behind_is_wall_at_its_front():
+    """9947f2b0: the roof at 14 m falls in the 10-15 m band of every face, so
+    the band holds the wall at the edge and the roof running inward. With a
+    wall band above it, it had been drawn 7 m inboard as a colonnade; where
+    the roof's returns were the mode the crown rule found no front. A real
+    recess (its back surface rising up the band) is left open, as is one
+    whose wall stands well inside the edge."""
+    from kyfromabove_3d.features import FaceBand, roof_behind_bands
+
+    def band(z, off, status="observed", back=None, fill=None, top=5.0):
+        return FaceBand(z, z + top, off, 500, 0.1, 2.0, 35.0, status, back_offset_m=back, back_fill=fill)
+
+    east = [band(0, 0.08), band(5, 0.09), band(10, 0.25, "open", -7.25, 0.1), band(15, 0.03, top=3.59)]
+    assert roof_behind_bands(east) == 1
+    assert (east[2].status, east[2].offset_m, east[2].z_hi) == ("bridged", 0.25, 15)
+    north = [band(0, -0.03, "extended"), band(5, -0.34), band(10, -7.75, "open", -7.75, 0.2),
+             band(15, None, "unknown", top=3.59)]
+    assert roof_behind_bands(north, top_z=18.59, top_of=lambda b: 14.6) == 1
+    assert (north[2].offset_m, north[2].z_hi) == (-0.34, 14.6)            # the wall below's line, to its own top
+    loggia = [band(0, 0.0), band(5, 0.0, "open", -4.0, 0.9), band(10, 0.0)]
+    assert roof_behind_bands(loggia) == 0 and loggia[1].status == "open"
+    setback = [band(40, -5.0), band(45, -6.0, "open", -9.0, 0.1), band(50, -5.0)]
+    assert roof_behind_bands(setback) == 0                                  # the wall is 5 m inboard: not the edge's
+    alone = [band(10, -7.0, "open", -7.0, 0.1)]
+    assert roof_behind_bands(alone) == 0                                    # no wall beside it to continue
+
+
+def test_an_open_band_over_a_wall_copied_from_the_face_opposite_stays_open():
+    """2870eeb0's face 4 was never seen; its 15-20 m band was mirrored from
+    the face opposite. The open band above it is not made wall off that."""
+    from kyfromabove_3d.features import FaceBand, roof_behind_bands
+
+    bands = [FaceBand(15, 20, -0.57, 500, 0.1, 3.9, 82.3, "mirrored"),
+             FaceBand(20, 24.6, -6.0, 500, 0.1, 3.9, 82.3, "open", back_offset_m=-6.0, back_fill=0.1)]
+    assert roof_behind_bands(bands) == 0 and bands[1].status == "open"

@@ -134,6 +134,9 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--band-local-rise", type=float, default=D.band_local_rise,
                     help="an observed band's returns climb this share of it in the median 2 m strip along the face; "
                          "0 tests the whole face's span only (before)")
+    ap.add_argument("--roof-behind-fill", type=float, default=D.roof_behind_fill,
+                    help="an open band whose deeper surface fills less than this share of its height is a flat roof "
+                         "behind the wall, drawn as wall at its front; 0 leaves every open band open (before)")
     ap.add_argument("--out", type=Path, default=None)
     return ap
 
@@ -151,7 +154,8 @@ def settings_from_args(args):
         prism_min_ratio=args.prism_min_ratio, outline="lidar" if args.lidar_outline else "overture",
         match_walls=args.match_walls, profile_band_m=args.profile_band_m,
         extrude_max_rms_m=args.extrude_max_rms_m, extrude_max_normal_deg=args.extrude_max_normal_deg,
-        neighbour_spill_m=args.neighbour_spill_m, band_local_rise=args.band_local_rise)
+        neighbour_spill_m=args.neighbour_spill_m, band_local_rise=args.band_local_rise,
+        roof_behind_fill=args.roof_behind_fill)
 
 
 def main(argv=None) -> int:
@@ -548,7 +552,7 @@ def main(argv=None) -> int:
 
     # Pass 2a': a wall stands on the wall below it -- where a neighbour
     # hid part of a band from the scanner, it runs as far as the band above.
-    from kyfromabove_3d.features import carry_extents_down, crown_bands
+    from kyfromabove_3d.features import carry_extents_down, crown_bands, roof_behind_bands
     for f, bands in sorted(profiles.items()):
         pl_f = next((pl for pl in nominal_planes if pl.face == f), None)
         top_z = float(pl_f.z_hi) if pl_f is not None else None
@@ -562,6 +566,9 @@ def main(argv=None) -> int:
                  & (profile_xyz[:, 2] >= b.z_lo) & (profile_xyz[:, 2] <= b.z_hi + 1.0))
             return float(np.percentile(profile_xyz[m, 2], 98)) if m.sum() >= 10 else None
 
+        if not is_arc[f] and CS.roof_behind_fill > 0 and (n_roof := roof_behind_bands(
+                bands, CS.roof_behind_fill, top_z=top_z, top_of=crown_top)):
+            print(f"    face {f}: {n_roof} open band(s) with a flat roof behind drawn as wall, at their front")
         if not is_arc[f] and (n_crown := crown_bands(bands, 0.0 if f in verified_planes else None, top_z=top_z,
                                                      top_of=crown_top)):
             print(f"    face {f}: {n_crown} open band(s) at the top drawn as the wall's crown, at their front")

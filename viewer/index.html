@@ -224,8 +224,10 @@
         row("product", feature.getProperty("product")) +
         row("LiDAR", [feature.getProperty("lidar_phase"), feature.getProperty("lidar_date")].filter(Boolean).join(", ")) +
         row("photos", [feature.getProperty("oblique_collection"), feature.getProperty("oblique_date")].filter(Boolean).join(", ")) +
-        row("apart", (() => { const g = feature.getProperty("gap_months");
-                               return typeof g === "number" && !isNaN(g) ? `${g.toFixed(0)} months` : undefined; })()) +
+        row("apart", (() => { const g = feature.getProperty("gap_months");     // below 0: the LiDAR is the newer
+                               if (typeof g !== "number" || isNaN(g)) return undefined;
+                               const n = Math.round(Math.abs(g));
+                               return `${n} month${n === 1 ? "" : "s"}` + (g < 0 && n ? " (LiDAR after the photos)" : ""); })()) +
         "</table>";
       box.style.display = "block";
       showPhotos(feature);

@@ -2,20 +2,12 @@
   "name": "kyfromabove-vcmap-test",
   "private": true,
   "type": "module",
-  "description": "VC Map with a KyFromAbove oblique collection read straight from the source COGs",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build"
-  },
   "dependencies": {
-    "@vcmap-cesium/engine": "^11.0.5",
-    "@vcmap/core": "^6.3.13",
-    "@vcmap/ui": "^6.3.13",
-    "ol": "^10.11.0",
-    "vue": "~3.4.38",
-    "vuetify": "~3.7.14"
-  },
-  "devDependencies": {
-    "vite": "^6.4.5"
+    "@vcmap-cesium/engine": "^26.0.1",
+    "@vcmap/core": "^7.0.0-rc.3",
+    "@vcmap/ui": "^7.0.0-rc.2",
+    "ol": "^10.10.0",
+    "vue": "^3.5.40",
+    "vuetify": "^4.2.1"
   }
 }

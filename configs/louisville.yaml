@@ -2,7 +2,7 @@
 #
 # The urban counterpart to the Grayson pilot, chosen from data by
 # scripts/find_urban_candidates.py rather than by hand. Every number below was
-# measured; see docs/URBAN_AOI.md for how and why.
+# measured; see docs/history/URBAN_AOI.md for how and why.
 #
 # What makes it a different test from building_001:
 #
@@ -79,7 +79,7 @@ qa:
   reference_frame: "Color_7021_46999"
   # A tower is mostly facade, and the horizontal-only anchor pass finds almost
   # nothing on it -- 24 anchors, all on the crown, so the residuals describe the
-  # building's neighbours. See docs/WHAT_THE_QA_MEASURES.md.
+  # building's neighbours. See docs/history/WHAT_THE_QA_MEASURES.md.
   include_facade_anchors: true
   min_view_ray_separation_deg: 30.0
   min_crop_coverage: 0.75

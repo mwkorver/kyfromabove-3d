@@ -17,9 +17,9 @@ measure jobs      (EC2 Spot, one job per tile)    scripts/queue_run.py measure
   pieces/<gers>/ ... piece.json last              LiDAR clip, frames, class, outline, levels
                                    │
 build jobs        (EC2 Spot, 8-16 buildings)      scripts/queue_run.py build
-  buildings/<gers>/: 5 objects, building.json last   meshes, check, audit
+  buildings/<gers>/: 6 objects, building.json last   meshes, check, audit
                                    │
-step 4, publish   (a Spot machine, or a laptop)   scripts/publish_step.py
+step 4, publish   (EC2 Spot, or a laptop)         scripts/queue_run.py publish, tree
   kentucky/, tiles/*/3dtiles/, terrain/, viewer/ ──> CloudFront ──> the viewer
 ```
 
@@ -227,7 +227,7 @@ One building per processor is best. The EC2 figures include:
 **The answer: EC2 Spot is about 8 times cheaper than Lambda for the
 statewide run (about $1,600 against $12,600).** It also removes the memory
 ceiling: 32 GB is shared by 16 buildings. Running it needs:
-- **A quota increase.** The account allows 32 Spot processors, which is 2
+- **A quota increase.** The account then allowed 32 Spot processors, which is 2
   machines and about 110 days for Kentucky. At 1,000 processors (62
   machines) it takes about 3.5 days.
 - **A way to hand out the work.** AWS Batch on Spot with this image, or
@@ -255,7 +255,7 @@ cd deploy && npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@exampl
 
 The limits are $20 a month for the project and $5 for the viewer unless
 `budget_usd` and `viewer_usd` say otherwise; raise the first before a
-statewide run (about $450 for the building step). The viewer's budget counts
+statewide run (about $390, "Measured on the queue" below). The viewer's budget counts
 CloudFront only: the bucket requests it causes stay under the project's tag.
 
 A budget reads the bill, which lags by hours. `ViewerAlarmStack` watches the
@@ -297,8 +297,9 @@ overwrites it:
 
 ```
 buildings/<gers>/
-  3dtiles_mesh.zip       the measured product: tileset.json, building.glb, textures/*.png
-  3dtiles_complete.zip   the completed product: the same
+  3dtiles_mesh.zip       the measured product (2): tileset.json, building.glb, textures/*.ktx2
+  3dtiles_complete.zip   the completed product (3): the same
+  3dtiles_neural.zip     the borrowed-fill product (4): the same
   review.zip             the audit and its picture, the texture check, classification,
                          wall planes and profiles, the mirror and coverage reports,
                          the tinted copy, the fill test's data, the build log
@@ -306,18 +307,18 @@ buildings/<gers>/
   building.json          its fingerprint, what it was built from, each file's size; written last
 ```
 
-Why these five and not one or twenty:
+Why these six and not one or twenty:
 
 - **Every upload is charged** (half a cent per 1,000), and most of a
-  building's files are a few KB. About 20 uploads a building became 5;
-  statewide, S3 requests go from about $262 to $81.
+  building's files are a few KB. About 20 uploads a building became 5 (6
+  since product 4); statewide, S3 requests went from about $262 to $81.
 - **Step 4 reads only the mesh products**, so each is its own zip: publishing
   the measured view downloads one small zip a building, not the review files.
 - **`building.json` stays separate and last**: a rerun reads it to skip a
   building whose fingerprint has not changed.
 - **`levels.json` stays separate**: it is small, and a neighbor's levels are
   the known fix for a tower drawn as its whole outline (see "What the
-  building step costs" below), which would read them one building at a time.
+  building step costs" above), which would read them one building at a time.
 - **The zips are deterministic** (`archive.zip_bytes`: sorted members, one
   fixed timestamp), so the same files always give the same bytes.
 
@@ -395,7 +396,7 @@ settings, neighbors or code changed, and skips the rest.
 | `src/kyfromabove_3d/queue_worker.py` | a Spot machine's loop over the queue (heartbeat, retries, the Spot notice) |
 | `src/kyfromabove_3d/building.py` | a piece fetched, the neighbors, the LiDAR around a batch, a building packed and published |
 | `scripts/stage0_index.py` | footprints by tile, to a folder or `s3://` |
-| `scripts/queue_run.py` | a run's jobs sent (`measure`, `build`), its progress (`status`), its failures again (`retry-failed`) |
+| `scripts/queue_run.py` | a run's jobs sent (`tile`, `measure`, `build`, `publish`, `tree`), its progress (`status`), its failures again (`retry-failed`), or the same jobs on the laptop with no queue (`local`) |
 | `scripts/queue_worker.py` | the worker a Spot machine starts |
 | `deploy/building_cost.py`, `deploy/ec2_cost.py`, `deploy/cost_model.py` | what a run costs, from measurements |
 | `deploy/` | the CDK app (`stack.py`), the image (`Dockerfile`, ARM, Python 3.12) |
@@ -412,13 +413,17 @@ export QUEUE_URL=$(aws cloudformation describe-stacks --stack-name kyfromabove-3
 python scripts/queue_run.py tile --run r2 --tiles N076E228 N076E229 N077E228 N077E229
 python scripts/queue_run.py measure --run r2 --tiles N076E228 N076E229 N077E228 N077E229
 python scripts/queue_run.py build --run r2 --tiles N076E228 N076E229 N077E228 N077E229
+python scripts/queue_run.py publish --run r2 --tiles N076E228 N076E229 N077E228 N077E229
+python scripts/queue_run.py tree --run r2
 python scripts/queue_run.py status --run r2
 ```
 
 The machines start when the jobs arrive and stop when the queue has been
 empty a while. Send each kind once `status` shows the one before done: a
 building is measured against the records of the tiles around its own, and
-built against its neighbors' measured levels.
+built against its neighbors' measured levels; `publish` writes each tile's
+3D Tiles, and `tree` the statewide tree and the terrain over every
+published tile.
 
 The tile job runs `pieces.run_tile_step`, as `scripts/tile_step.py` does on
 this machine.
@@ -442,6 +447,32 @@ older than 7 days is gone. The cost is the old versions' storage for their
 week: a rerun that rewrites everything holds about one extra copy of what it
 rewrote, for 7 days.
 
+## Measured on the queue (October 2026)
+
+Two runs of every step on the queue, start to finish, with nothing run on
+the laptop but the sending:
+
+- **trial1** (October 18): 34 tiles from the Louisville suburbs to
+  Shelbyville, 26,709 buildings, all built and published, about $5.50. A
+  build took 11.8 s a building, a measure 0.7 s.
+- **cities1** (October 22): Covington and Newport, and Lexington; 24 tiles,
+  41,674 buildings, products 1 to 4, no failures. 3 hours 15 minutes from the
+  first job sent to the last tile published, 13.8 hours of c7g.4xlarge Spot
+  machines. It cost about $5.86: $3.82 of machines, $1.75 of S3 uploads
+  (348,000 objects, 8.4 a building) and a little else; 22 GB stored.
+
+At cities1's rate, 14 cents per 1,000 buildings, all of Kentucky's 2.79
+million buildings come to **about $390, and about 5 days on 8 machines**.
+Almost every building gets the full treatment: the four oblique collections
+together cover 99.6% of the state, not only its cities
+(`scripts/plot_oblique_coverage.py`):
+
+![where the oblique photos were flown](figures/oblique_coverage.png)
+
+Since cities1 the walls are painted from whole photos (PRODUCTS.md), which
+takes a tower's mesh step 5-30% longer and a house's no longer; the
+estimate does not include that.
+
 ## What has been checked
 
 - **Parity with the downtown run** (4 tiles, 392 pieces, 6 minutes on the
@@ -451,19 +482,22 @@ rewrote, for 7 days.
   outlines moved by centimeters because the split is now measured in the
   tile's frame, and one building without its own ground, whose fallback is
   now the tile's median ground (13 cm different).
-- **The Lambda image, locally.** Built for ARM (1.85 GB), run under the
-  Lambda runtime emulator against a moto server standing in for S3,
-  EventBridge, SQS and DynamoDB: the smallest downtown tile made 37 pieces
-  in 59 s; exactly 37 events reached the queue, all markers; `record_piece`
-  in the same image wrote 37 rows; the same tile again wrote nothing and
-  raised no event.
+- **The image against the laptop.** The same jobs run in the image on the
+  laptop (Docker) reproduce the cloud's buildings exactly. The Mac's own
+  builds differ in the last digits (Python 3.11 and Accelerate against 3.12
+  and OpenBLAS), which can tip a threshold: 28 of 94 downtown buildings
+  matched the Mac exactly, and the hole area over all of them differed by
+  0.7%.
 - **Tests** (plain `pytest`, no AWS): the stores agree (folder and mocked
   S3); tile ownership and halo; the marker written last and an unchanged
-  piece skipped; the whole chain on mocked AWS with the
-  stack's own rule pattern; the synthesized stack (the rule, the queues and
-  their dead-letter queues, the Lambdas' size and architecture, the table).
+  piece skipped; the synthesized stacks (the queue and its dead-letter
+  queue, the Spot group, the viewer and its gate, the budgets and the
+  viewer's alarms).
 
-## What it costs
+## What stage 1 cost on Lambda (September 2026)
+
+*Superseded: steps 1 and 2 now run on the queue, and the measured cost of
+every step is in "Measured on the queue" above.*
 
 Stage 1 (steps 1 and 2) on Lambda, priced by `deploy/cost_model.py` from
 measured inputs: 2.79 million Overture
@@ -491,10 +525,13 @@ past Lambda's 15 minutes; they are split into chunks of about 800 buildings.
 
 ## Not yet
 
-- **A statewide run.** The pilot (below) ran every step for four areas. All
-  of Kentucky needs a larger Spot quota (the account allows 32 Spot
-  processors) and a way to hand out work that does not depend on a laptop:
-  AWS Batch on Spot, or machines taking batches from a queue.
+- **A statewide run.** The queue runs every step without the laptop, and
+  the account now allows 128 Spot processors (8 machines of 16). Two things
+  found on cities1 come first: the `tree` job took 625 s for 302 tiles,
+  which statewide would be about a day, past a job's time limit, so it has
+  to be split; and `publish` waits on S3 reads with its processors idle.
+  After an idle spell the queue's scale-up alarm waits about 8 minutes for
+  SQS's counts to return.
 - **The frame index as a stage 0 file**: each tile reads the 1 GB remote
   frames index by bounding box (range requests); a per-tile extract in the
   bucket would take that off every tile.
@@ -577,10 +614,11 @@ The 40-building sample, 16 at a time: 298 s with the code as it was, 170 s
 with the coordinate converter and the shared occlusion maps, 94 s with
 uncompressed crops as well. One statewide run on EC2 Spot was then about $612
 at that day's Spot price ($0.2541 an hour), about 22 hours on 1,000
-processors; the account allows 32 Spot processors today. Of that, $262 was S3
+processors; the account allowed 32 Spot processors then. Of that, $262 was S3
 requests: about 20 uploads a building. Storing each building as five objects
 (see "What a building leaves behind") brings the same run to about $430
-(`deploy/ec2_cost.py`: computing $345, disks $4, S3 requests $81), rounded up to about $450 as the working figure. The three Spot runs cost about $0.16 in all.
+(`deploy/ec2_cost.py`: computing $345, disks $4, S3 requests $81), rounded up to about $450 as the working figure until the queue runs measured
+about $390 ("Measured on the queue"). The three Spot runs cost about $0.16 in all.
 
 ## The pilot: four areas in a browser (September 2026)
 
@@ -617,7 +655,7 @@ Season 1 photos, 15 months apart; Hazard and Somerset pair Phase 2
 - A CloudFront Function can ask for a user name and password (basic auth) on
   every path. The password is a random string in the git-ignored
   `deploy/viewer_password.txt`, switched on with
-  `npx cdk deploy kyfromabove-3d-viewer -c viewer_password=on`. It was on
+  `npx aws-cdk deploy kyfromabove-3d-viewer -c viewer_password=on`. It was on
   until October 27, 2026; the site has been public since, watched by the
   viewer's budget and traffic alarms ("Watching the spend").
 - The page (`viewer/index.html`, CesiumJS with OpenStreetMap's map tiles)
@@ -658,8 +696,8 @@ its function are inside the free tier. The ledger is
 
 1. **Every building failed in its first second.** The runner did not pass
    `--raw /opt/data/raw`, where the image keeps the LiDAR tile grids, so no
-   building could find its LiDAR. `building_step.py` now stops at once when
-   the grid is missing, instead of failing 9,252 times.
+   building could find its LiDAR. `building_step.py` was changed to stop at
+   once when the grid is missing, instead of failing 9,252 times.
 2. **All 16 workers hung about 35 minutes in.** Each was asleep in
    `getaddrinfo`, the C library's host-name lookup, waiting on a lock that
    no living thread held (stacks in [`docs/data/pilot_deadlock_stacks.txt`](data/pilot_deadlock_stacks.txt)).
@@ -747,7 +785,7 @@ about 23 MB gzipped (the KTX2 textures are already compressed; the
 geometry halves). Storing the meshes' points, texture coordinates and
 directions as whole numbers too, as the boxes now are, is the next step.
 
-### Four views of the same buildings
+### Five views of the same buildings
 
 The viewer's buttons show what each stage adds, on every building:
 
@@ -763,6 +801,10 @@ The viewer's buttons show what each stage adds, on every building:
    saw the wall.
 4. **Completed** (product 3): unseen parts filled from the building's own
    photos.
+5. **Borrowed fill** (product 4): unseen parts filled from the
+   best-matching seen patches on the building's own walls.
+
+Products 3 and 4 also come as tinted copies that show what was filled.
 
 Every view stands on the LiDAR ground, so all four sit on the same terrain.
 Clicking a building says where its height came from; in the Overture view

@@ -1,5 +1,10 @@
 # What the reprojection QA actually measures
 
+*From the project's first phase (September 2026), kept as it was written.
+The checks it describes are still in the tree
+([CAMERAS_AND_ORTHOS.md](../CAMERAS_AND_ORTHOS.md)); the meshes are checked
+by the texture check and the audit ([AUDIT.md](../AUDIT.md)).*
+
 Phase 1's headline numbers — within-group residual, cross-direction residual,
 3D discrepancy — are all computed on **planar anchors** selected from the LiDAR.
 Which surfaces become anchors therefore decides what those numbers describe, and

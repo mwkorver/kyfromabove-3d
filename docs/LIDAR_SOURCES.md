@@ -35,9 +35,13 @@ another phase is newer.
 |---|---|---|---|
 | Phase 1 | 46,103 | **plain `.laz`** — no COPC | EPSG:3857 |
 | Phase 2 | 46,167 | **all COPC** — 45,269 `.copc.laz` + 898 `.copz.laz` | **none set** |
-| Phase 3 | 6,847 | **all COPC** — `.copc.laz` | EPSG:3857 |
+| Phase 3 | 8,664 | **all COPC** — `.copc.laz` | EPSG:3857 |
 
-Two traps live in that table.
+The Phase 3 row is KyFromAbove's tile list of 2026-09-15; the rest of this
+document was measured on the list of 2025-12-14, when Phase 3 held 6,847
+tiles. Both lists are kept in `data/raw/old_grids/`.
+
+Three traps live in that table.
 
 **`.copz.laz`.** 898 Phase 2 tiles use this spelling instead of `.copc.laz`.
 Same format. Detecting COPC by matching `.copc.` alone misses 898 tiles and
@@ -64,6 +68,12 @@ error**. `LidarTileIndex.GRID_CRS` assumes EPSG:3857 and calls `set_crs` when
 the field is missing. This cost real debugging time; it fails silently and looks
 exactly like "no LiDAR here".
 
+**The 2026-09-15 Phase 3 list has every outline at infinity.** The tile
+names and URLs are right; the shapes are not numbers. Intersected with an
+area, it returns nothing, again with no error. `LidarTileIndex` now refuses
+a grid with non-finite shapes, and `scripts/repair_tile_grid.py` rebuilds
+them from the Phase 2 tile of the same name, or from the name itself.
+
 ## 3. Coverage
 
 ```
@@ -72,8 +82,11 @@ phase1 only:      9    phase2 only:     57    shared: 46,094
 ```
 
 **Phase 3 is a re-flight, not new ground.** 6,846 of its 6,847 tiles already
-exist in Phase 2; it adds exactly one tile of coverage statewide (`N052E324`).
-It covers eastern Kentucky, roughly lon −85.49…−81.96, lat 37.16…39.13.
+existed in Phase 2; it added exactly one tile of coverage statewide
+(`N052E324`). It covered eastern Kentucky, roughly lon −85.49…−81.96, lat
+37.16…39.13. On the list of 2026-09-15 it has grown to 8,664 tiles reaching
+west to lon −89.19, still almost all re-flights: 8,657 share a name with a
+Phase 2 tile.
 
 Phase 2 is effectively statewide and is COPC throughout. That is the headline.
 
@@ -139,6 +152,14 @@ or segmentation on the imagery. That is not a preference — it is the only rout
 
 ## 6. Phase preference order
 
+**The pipeline no longer uses this order.** Since September 2026 each tile
+takes the LiDAR phase flown closest in time to its oblique photos
+(`sources_choice.choose`; a tie goes to the newer LiDAR, and a tile with no
+photos takes the newest LiDAR), so a building's shape and its colors come
+from nearly the same day. The choice is recorded on every building. The
+order below is what `LidarTileIndex` falls back to when no such choice is
+made, as in the diagnostic scripts.
+
 `LidarTileIndex.PHASE_PREFERENCE = ("phase2", "phase3", "phase1")`
 
 First match wins: the resolver returns tiles from the first phase that covers the
@@ -189,4 +210,5 @@ Things worth re-checking as Phase 3 continues:
 
 - whether Phase 3 ever exceeds Phase 2 on density in later deliveries
 - whether any phase begins publishing class 6
-- whether Phase 3 coverage grows beyond the current eastern footprint
+- how far Phase 3 has spread (it reached western Kentucky by 2026-09-15),
+  and whether its density there differs

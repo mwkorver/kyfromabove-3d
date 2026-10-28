@@ -130,7 +130,7 @@ one building carries enough wall to justify its own imagery pass.
 **832 candidates (23%) fall in Louisville**, and the three tiles holding the most
 — `N077E228`, `N076E228`, `N077E229` — are all downtown. That is the
 `2024_Season1` collection, measured at **11 days** between LiDAR and imagery
-against 334 days elsewhere (`docs/` temporal alignment survey). The facade work
+against 334 days elsewhere (`scripts/survey_temporal_alignment.py`). The facade work
 and the temporal alignment point at the same ground.
 
 ### What the facade list cannot see
@@ -179,6 +179,8 @@ python scripts/plot_survey_zones.py
 ```
 
 The Overture release is pinned in the fetch script and matches the one
-`measure_case_complexity.py` uses. Footprints are revised between releases and
+`measure_case_complexity.py` uses. The numbers here were measured on
+`2026-08-19.0`; both scripts now pin `2026-10-21.0`, so a fresh run may not
+give them exactly. Footprints are revised between releases and
 the footprint clip is the dominant error term, so the release is part of the
 measurement.

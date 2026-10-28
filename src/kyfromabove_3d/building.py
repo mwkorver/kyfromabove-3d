@@ -5,7 +5,7 @@ A piece (``pieces/<gers>/``, written by the measure job) holds everything
 about a building that comes from the LiDAR and the frame indexes, without
 pixels. The queue run's build job (``kyfromabove_3d.cloud_jobs``) builds it
 by the one pipeline (``kyfromabove_3d.pipeline``) and publishes the results
-to ``buildings/<gers>/`` (:data:`BUILDINGS_PREFIX`) as five objects
+to ``buildings/<gers>/`` (:data:`BUILDINGS_PREFIX`) as a few objects
 (:func:`pack_building`: a zip per mesh product, ``review.zip``,
 ``levels.json``) and ``building.json`` last, which holds the fingerprint a
 later run skips by.

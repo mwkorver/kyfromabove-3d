@@ -1,7 +1,9 @@
-# Three products from KyFromAbove
+# Four products from KyFromAbove
 
-Each is built only from KyFromAbove data — the Phase 2 LiDAR and the 2024
-Season 1 oblique and nadir frames — on Overture's building footprints, and
+Each is built only from KyFromAbove data — for each LiDAR tile, the LiDAR
+phase and the oblique collection flown closest together in time
+(`sources_choice.py`; downtown Louisville pairs Phase 2 LiDAR with the 2024
+Season 1 oblique and nadir frames) — on Overture's building footprints, and
 each says what it is: measured, or invented.
 
 | | Product | Geometry | Color | Where |
@@ -12,15 +14,20 @@ each says what it is: measured, or invented.
 | 4 | Borrowed-fill 3D Tiles | product 2's, unchanged | unseen texels filled from the best-matching seen patches across the building's walls | `outputs/downtown_neural/` |
 
 On `/compare` (and the static viewer in `viewers/s3_compare`) each pane has
-a product row — `1 · footprints`, `2 · measured`, `3 · completed`, and
-`3 · invented shown`, which tints every invented texel magenta.
+a product row — `1 · footprints`, `2 · measured`, `3 · completed`,
+`3 · invented shown`, which tints every invented texel magenta,
+`4 · borrowed fill` and `4 · borrowed shown`, which tints every borrowed
+texel violet.
 
 ## 1 · Footprints at LiDAR heights
 
 Overture's building outlines, each with its height measured from the LiDAR:
 the 99th percentile of the returns more than 1.5 m inside its outline (a
 tall neighbor's wall spills over the edge), above the median of the ground
-returns within 15 m. An outline that holds two or three buildings side by
+returns within 15 m. Trees are left out first. The LiDAR carries no tree
+label, so the pipeline marks trees itself: rough returns, mostly from
+pulses split into several echoes, at most 40 m above the ground
+(`lidar.label_trees`). Before that, a tree over a house was its roof. An outline that holds two or three buildings side by
 side — roofs at different heights meeting on straight lines — is split
 into parts `<gers>-a`, `-b`, `-c` (tallest first) with `parent_gers`. Built
 by `scripts/overture_boxes.py lidar-heights`, `split` and `build`; the
@@ -106,8 +113,9 @@ over the parapet (746 such bands on 214 buildings had each stood a wall
 panel 3–7 m inboard on the roof).
 
 The color is **measured only**. A texel takes its color from a frame that
-saw it — the most face-on frame, through its camera model, not hidden by
-anything the LiDAR or the neighbors' footprints put in front of it.
+saw it, through its camera model, not hidden by anything the LiDAR or the
+neighbors' footprints put in front of it; which frame is in "How walls are
+colored" below.
 
 On a wall, a seen texel counts only where at least half of the meter
 around it was seen too: a scattered speck is not trusted. From solidly
@@ -243,8 +251,7 @@ Over all of downtown — 16,759 hidden rectangles on 342 buildings:
 A first test on the sixteen buildings of the curved-wall work (1,658
 rectangles) agreed everywhere but on prism faces, where 34 rectangles put
 the rhythm below plain; on 165 it is above, and the policy follows the
-larger test. The downtown tileset built on 23 September used patch only on
-prism faces; the next run applies the rhythm there too.
+larger test: rhythm, then patch, on prism faces too.
 
 The twin copy fails worst: the face opposite is lit by the sun from the
 other side and its windows do not line up with this face's. The rhythm is
@@ -254,6 +261,31 @@ little on roofs, which are mostly plain surfaces anyway.
 Across downtown the completed product cuts the plain texels from a median
 of 16% of each building to 4%; the median building has 11% of its texels
 invented, the 90th percentile 23%.
+
+## 4 · Borrowed-fill 3D Tiles
+
+Product 2, triangle for triangle, with its plain texels filled a second
+way: each unseen patch of wall takes the seen patches, anywhere on the
+building's own walls, whose surroundings look most like the hole's
+surroundings (`src/kyfromabove_3d/neural_fill.py`, `build_mesh.py
+--neural`). For each hole:
+
+- the seen ring of wall around it is compared, as a pattern of light and
+  dark, with every place on the same wall and, when nothing there matches
+  well, on the building's other walls;
+- the three best matches are brought to the hole's own brightness and
+  averaged, a better match counting for more.
+
+Like product 3 it learns only from the same building's own frames. The name
+`neural` (in `3dtiles_neural/`) is left from a first version that blended
+the matches with a small network trained on each building; on held-out
+walls the plain weighted average scored better (pattern agreement 0.56
+against 0.43 on 51 buildings), so the network was dropped. It is cheap: a
+house takes about 0.07 s, a building over 2,000 m² under a second.
+
+Every borrowed texel is marked in the texture's record of where its color
+came from, and `4 · borrowed shown` tints it. How product 4 compares with
+product 3 on the same hidden rectangles is not written up yet.
 
 ## Related work considered
 

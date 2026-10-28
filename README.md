@@ -76,8 +76,9 @@ CloudFront serves the result to two public pages: the
   boxes, on the 98 tiles around downtown Louisville.
 - **AWS cost so far: about $47** (August to October 2026, tax included):
   $16 of early trials on Lambda, $15 of storage, $12 of Spot machines.
-- **All of Kentucky** (2.79 million buildings) is estimated at about $450 for
-  the building step, the expensive one. It has not been run.
+- **All of Kentucky** (2.79 million buildings) is estimated at about $390
+  and five days on eight Spot machines, from the last run's measured cost.
+  It has not been run.
 
 ## Limits
 
@@ -192,11 +193,8 @@ It fails, naming the building and what got worse
 | [`docs/LIDAR_SOURCES.md`](docs/LIDAR_SOURCES.md) | KyFromAbove's LiDAR phases, their density and dates |
 | [`docs/SURVEY_ZONES.md`](docs/SURVEY_ZONES.md) | Which buildings have roofs and walls worth more detail, statewide |
 | [`docs/CASE_COMPLEXITY.md`](docs/CASE_COMPLEXITY.md) | Three Louisville towers measured on one scale |
-| [`docs/ROOF_GEOMETRY.md`](docs/ROOF_GEOMETRY.md) | Finding roofs, including a domed crown |
-| [`docs/URBAN_AOI.md`](docs/URBAN_AOI.md) | Where the oblique photos are, and how the first tower was chosen |
-| [`docs/WHAT_THE_QA_MEASURES.md`](docs/WHAT_THE_QA_MEASURES.md) | What the camera checks measure, and where they were fooled |
 | [`docs/CAMERAS_AND_ORTHOS.md`](docs/CAMERAS_AND_ORTHOS.md) | Checking KyFromAbove's camera models and orthophotos |
-| [`docs/history/`](docs/history/) | The first phase's report |
+| [`docs/history/`](docs/history/) | The first phase's reports: camera checks, the first tower, finding a roof |
 
 ## Layout
 

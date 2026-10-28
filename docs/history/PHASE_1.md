@@ -218,7 +218,7 @@ lot, road and treeline, and the flat surround matches *better* than the building
 does — 1.6 px beyond 40 m against 11.7 px in the 20–30 m band at the roof's own
 perimeter, where a planar patch straddles roof, parapet and wall. The
 unrestricted median is therefore flattered by asphalt. See
-[`docs/WHAT_THE_QA_MEASURES.md`](../WHAT_THE_QA_MEASURES.md).
+[`WHAT_THE_QA_MEASURES.md`](WHAT_THE_QA_MEASURES.md).
 
 ### Triangulation vs LiDAR
 

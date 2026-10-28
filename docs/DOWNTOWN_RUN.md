@@ -1,5 +1,13 @@
 # Downtown Louisville, every footprint: the batch run
 
+*A log of the downtown work, September to early October 2026, kept as it
+was found. Since then every building, the landmarks included, goes through
+the one pipeline, on the laptop or on the queue ([CLOUD.md](CLOUD.md));
+walls are painted whole from one photo per section, and there is a fourth
+product ([PRODUCTS.md](PRODUCTS.md)); trees are taken out of the LiDAR by
+the pipeline's own rule. For what a building or the state costs now, see
+CLOUD.md, "Measured on the queue".*
+
 Three buildings were made by hand — a config each, a preparation with its
 QA, a colorize, a mesh. The other 375 Overture footprints in the 1.2 km
 downtown box were run by `scripts/run_downtown.py` from LiDAR, obliques and
@@ -443,8 +451,8 @@ Three smaller repairs from the same review:
 
 ## Checking a mesh against the frames it was not textured from
 
-The pipeline is one pass. Every texel takes its color from the single
-frame that faces it most squarely, and the building's other frames — about
+The pipeline was one pass. Every texel took its color from the single
+frame that faced it most squarely, and the building's other frames — about
 nineteen per building, from five heads and several flight lines — go
 unused. The texture check (`scripts/check_building.py`,
 `kyfromabove_3d/texture_check.py`) puts them to work. It reads the finished
@@ -582,6 +590,7 @@ python scripts/plot_texture_check.py --dirs outputs/downtown/buildings/<gers> ..
 
 ## Three products: measured, measured, and invented
 
+(A fourth, the borrowed fill, came in October: [PRODUCTS.md](PRODUCTS.md).)
 The run now makes three products, each labeled for what it is
 ([PRODUCTS.md](PRODUCTS.md)): Overture footprints at their LiDAR heights
 (product 1); the measured 3D Tiles, color only where a frame saw the
@@ -599,60 +608,18 @@ back on every building of product 2.
 
 ## From downtown to the state: how long, and where
 
-![how long all of Kentucky takes on the MacBook and on AWS](figures/statewide_runtime.png)
-
-**What one building costs, measured.** The first downtown run spent 22 s
-of worker time on the median building: 2 s reading the LiDAR clip, 15 s
-cutting about 18 crops out of the aerial frames on S3, 5 s on the mesh
-and the rest on the colorize. The re-run, which had to cut the crops
-again, took 56 s. Downtown is the hard case (18 frames at 1,150 px,
-6,900 m² blocks, 70 m towers); a house is one story on 150 m² and needs
-a quarter of that. The figure uses **25 s of one core per building** as
-the average over a mix, on the conservative side.
-
-**How many buildings.** Overture holds about 5.4 million footprints in
-Kentucky, 3.7 million of them under 200 m² (houses, garages, sheds). The
-obliques — the only thing that colors a wall — were flown over the
-cities: Louisville, Lexington, Northern Kentucky, Frankfort, Paducah,
-Owensboro, Bowling Green and a few more, roughly **600,000 buildings**.
-Everywhere else the pipeline still runs on LiDAR and nadir (shape, roof,
-plain walls), so there are two scopes: walls textured, and everything.
-
-| | cities with obliques (600k) | all of Kentucky (5.4M) |
-| :--- | ---: | ---: |
-| **MacBook, 4 workers** | ~43 days, continuous | ~13 months |
-| **AWS, 256 vCPU** (16 × c6i.4xlarge) | ~16 hours | ~6 days |
-| **AWS, 2,000 vCPU** (Batch / Fargate Spot) | ~2 hours | ~19 hours |
-
-**Why the MacBook loses beyond the arithmetic.** It is the home line, not
-the CPU: each building pulls about 25 MB of frame windows and LiDAR from
-S3 in Oregon, which at 1,200 buildings an hour is a steady 70 Mbit/s for
-six weeks, and one S3 hiccup a night means babysitting a resumable run.
-**Why AWS wins beyond the arithmetic.** The data already lives in S3
-`us-west-2` (the `kyfromabove` bucket, the Overture parquet), so running
-there means no egress, a gigabit per worker, and range reads that scale
-to thousands of workers at once. The pipeline is one building per process
-and the runner already writes per-building state, so a Batch job array
-over the footprint list is a direct port.
-
-**Cost, all of Kentucky:** 5.4M × 25 core-seconds ≈ 37,500 core-hours.
-On Spot (~$0.015 per vCPU-hour) that is about **$560**; on-demand about
-$1,500. Add a few hundred dollars for the one-off caches (frame indexes
-per collection, occluder clouds per LiDAR tile — the same per-area caches
-downtown used, done per 5,000-ft tile). Under $1,000 for the state,
-repeatable for each new flight.
-
-**What would need doing first** (days of work, none of it research):
-batch by LiDAR tile rather than by building, so a tile's COPC read and
-occluder cloud serve its hundreds of houses; a worker that takes a
-footprint record from a queue and writes `state.json` and the glb to S3;
-the merged tileset as a real quadtree rather than one 150 m level, since
-five million children will not fit one JSON; and the two open quality
-items below (curved facades; Overture footprints that span two
-buildings), because at state scale nobody looks at individual buildings
-afterwards. And before any of it: one 5,000-ft tile of Louisville suburbs
-end to end on the MacBook, to measure the house case instead of
-extrapolating from downtown.
+This section first held an estimate made from the downtown run alone: 25 s
+of one core per building, 5.4 million Overture footprints, oblique photos
+over the cities only (about 600,000 buildings), and about $560 on Spot. All
+three inputs have since been measured again. The cloud pipeline's own count
+is 2.79 million Overture buildings on the LiDAR tiles; the four oblique
+collections cover
+99.6% of the state, not only its cities; and two runs on the queue put the
+whole state at about $390 and five days on eight machines. The figures and
+how they were measured are in [CLOUD.md](CLOUD.md), "Measured on the
+queue". The things this section said would be needed first (batching by
+LiDAR tile, a queue of workers writing to S3, a quadtree of tiles, curved
+walls, split footprints) are all done.
 
 ## Output sizes: what to keep, and in what form
 

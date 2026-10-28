@@ -44,21 +44,22 @@ the colorize (`colorize_building.py`) already computed:
    underside of an overhang that a 2.5-D surface has filled in), and kept
    otherwise as LiDAR-shaped wall, one color per triangle from whichever
    aerial frame faces it.
-4. **Textures, from the aerial frames only.** Walls are rasterized from an
-   aerial-only colored cloud — `colorized_aerial.laz` (`.ply` in older runs), the colorize run
-   with no photograph cameras, which `build_mesh.py` makes for itself and
-   checks (it refuses a cloud with a single photo-colored point) — at
-   0.15 m per pixel: a point counts for a face where it lies on one of that
-   face's band rectangles, so the texture carries the obliques' color and,
-   where a face was mirrored, the face opposite's. The point view
-   (`colorized.ply`) may still carry admitted photographs; the mesh never
-   does. The roof is sampled
-   straight from the aerial frames through each camera model, with the
-   LiDAR depth test against the building's own returns; the nadir frame
-   (the `Color` head) wins wherever it sees the roof because it is the most
-   face-on. A gap between returns takes the nearest color; a stretch of
-   wall nothing saw, more than 1.5 m from any real color, takes the face's
-   median so it reads as plain wall rather than as smear.
+4. **Textures, from the aerial frames only**, at 0.15 m per pixel. Each
+   flat section of a wall is painted whole from the one frame that sees it
+   best, and what that frame cannot see from the next
+   (`mesh/paint.py`; [PRODUCTS.md](PRODUCTS.md), "How walls are colored").
+   Curved walls, and sections no frame sees, are rasterized from an
+   aerial-only colored cloud — `colorized_aerial.laz` (`.ply` in older
+   runs), the colorize run with no photograph cameras, which `build_mesh.py`
+   makes for itself and checks (it refuses a cloud with a single
+   photo-colored point). The point view (`colorized.ply`) may still carry
+   admitted photographs; the mesh never does. The roof is sampled straight
+   from the aerial frames through each camera model; the nadir frame (the
+   `Color` head) wins wherever it sees the roof because it is the most
+   face-on. What blocks a frame's view, for walls and roof alike, is a depth
+   map of every LiDAR return within 250 m, trees included, with each
+   neighbor standing as a solid prism. A stretch of wall nothing saw reads
+   plain: the median color of its own floor.
 
 The glTF is unlit (`KHR_materials_unlit`): the imagery already carries the
 sun, and a second lighting pass in the viewer darkened every face the
@@ -202,9 +203,11 @@ things, all now in the code:
 
 * **They floated 34 m.** A rebuild had run without the GEOID grid, and
   PROJ quietly dropped the vertical shift, handing back the NAVD88 height
-  as if it were ellipsoidal. `to_ecef` now asks for the best transform
-  only (`only_best=True`) and stops with a clear message when the grid is
-  missing, and the downtown merge refuses any building placed more than
+  as if it were ellipsoidal. `to_ecef` now takes PROJ's best transform
+  only when PROJ says it is available (`TransformerGroup.best_available`;
+  asking for `only_best=True`, the first fix, did not catch every case:
+  DOWNTOWN_RUN.md) and stops, naming the missing grids, when it is not;
+  and the downtown merge refuses any building placed more than
   20 m from the frame's height — which immediately caught the arena, whose
   batch build had hit the same silent fallback during a transient fetch.
 * **One tile out of twelve was enough to unverify a face.** Dropping 185
@@ -222,30 +225,25 @@ things, all now in the code:
 * **The crowns are no longer hairy.** A nan-aware 3×3 median over the roof
   height field, and a steep cell must drop 2 m before it counts as wall:
   400 West Market's lattice dome is a smooth cap, PNC's mechanical floor a
-  clean box. The landmarks are also textured at 0.10 m per pixel, which
-  their 2,400–2,900 px crops support.
+  clean box. The landmarks were then textured at 0.10 m per pixel; since
+  October 2026 they are built like every other building, at 0.15 m.
 
 ![Humana from Main Street after](figures/landmarks_humana_main_after.jpg)
 ![400 West Market after](figures/landmarks_400wm_after.jpg)
 
-The downtown buildings were built before the roof smoothing and the
-verification change; a `run_downtown.py run --force-step colorize mesh`
-(about 100 minutes) brings them up to the same state.
+Every downtown building has been rebuilt with these rules since.
 
 ## What it does not do yet
 
 * **A dome, a curved bay, a sloped roof** are height-field cells, not
   fitted surfaces. The profile already marks sloped bands; a surface fitted
   to the returns there is the next step.
-* **An open ground floor** — Humana's colonnade — is a hole. The profile
-  knows it is open; drawing the columns needs the returns inside the band,
-  which are there.
-* **Textures are one image per face.** A 60 m by 150 m face at 0.15 m is a
-  400 by 1,000 pixel image; the obliques could give three times that.
-* **One tile per building.** A city needs the buildings gathered into a
-  quadtree of tiles with a coarse level (the footprint prism) for distant
-  views. That is the same batch as the point export, per building, then a
-  merge.
+* **An open ground floor** — Humana's colonnade — is drawn as its back
+  wall, with nothing in front. Drawing the columns needs the returns inside
+  the band, which are there.
+* **Textures are coarser than the photos.** Walls are textured at 0.15 m a
+  pixel; the best oblique sees a typical wall at about 0.10 m
+  ([WALL_VISIBILITY.md](WALL_VISIBILITY.md)).
 
 Build one with:
 

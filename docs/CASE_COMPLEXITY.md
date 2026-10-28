@@ -85,7 +85,8 @@ warehouse roof sits well below both at 6%. That comparison is doing real work.
 So the height effect is real, but it lives almost entirely in the wall returns,
 and it scales with how much wall the scanner catches: 0% of the pilot's returns,
 15% of PNC Tower's, 39% of 400 West Market's. **The fix is to judge the roof and
-ignore the walls**, which this measure does not currently do.
+ignore the walls**, which the statewide survey now does
+([SURVEY_ZONES.md](SURVEY_ZONES.md)).
 
 ### PNC Tower is less simple than its shape suggests
 
@@ -164,7 +165,9 @@ are OSM-sourced and land within a meter of the LiDAR's vertical span.
 python scripts/measure_case_complexity.py
 ```
 
-Footprints are fetched from Overture release `2026-08-19.0`, pinned in the
-script, and cached to `configs/case_footprints.json` with their GERS ids.
-Overture revises footprints between releases and the clip is the dominant error
-term, so the release is part of the measurement, not an implementation detail.
+The numbers above were measured on Overture release `2026-08-19.0`. The
+script now pins `2026-10-21.0` (`OVERTURE_RELEASE`), so a fresh run fetches
+that release's footprints and may not give the same numbers; the footprints
+are cached to `configs/case_footprints.json` with their GERS ids. Overture
+revises footprints between releases and the clip is the dominant error term,
+so the release is part of the measurement, not an implementation detail.

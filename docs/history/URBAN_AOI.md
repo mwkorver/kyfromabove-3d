@@ -1,5 +1,12 @@
 # building_002: a tower instead of a warehouse
 
+*From the project's first phase (September 2026), kept as it was written,
+with two corrections. Section 1 is wrong: the four oblique collections
+together cover 99.6% of Kentucky, not only the cities
+([the map](../figures/oblique_coverage.png), from each collection's own
+outline). And section 7, "Nothing has been fetched or run", was written
+before the run in section 6 and never updated.*
+
 Everything here was measured by `scripts/find_urban_candidates.py`, which reads
 the Phase 2 COPC cloud and the oblique frame index **without downloading
 either**.

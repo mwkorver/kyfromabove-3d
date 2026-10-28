@@ -1,5 +1,11 @@
 # Finding a roof, and describing it honestly
 
+*From the project's first phase (September 2026), kept as it was written.
+The roof finding here served the camera checks on single buildings. The
+pipeline now starts from each building's Overture footprint and reads its
+roof from the LiDAR inside it ([BUILDING_MESH.md](../BUILDING_MESH.md)),
+which settles the "still open" question at the end.*
+
 The roof drives three things: the bounding volume, the crop sizing that follows
 from it, and the check features used to validate reprojection. Get the roof
 wrong and everything downstream is confidently wrong, because none of these
@@ -21,7 +27,7 @@ one flat rectangular roof, and every shortcut is correct for that case.
 
 `extract_roof_points` isolates roofs geometrically — the KyFromAbove point
 cloud publishes no ASPRS class 6, so there is nothing to select on (see
-[`LIDAR_SOURCES.md`](LIDAR_SOURCES.md) §5). Three of its parameters can each
+[`LIDAR_SOURCES.md`](../LIDAR_SOURCES.md) §5). Three of its parameters can each
 discard the building you want, without saying so:
 
 | parameter | default | what it silently excludes |

@@ -43,3 +43,5 @@ viewers/vcmap/node_modules/
 viewers/vcmap/dist/
 # local backups of outputs (148 MB of builds and weights)
 backups/
+# eval_fill.py writes its raw numbers beside the plot; only the plot is kept
+docs/figures/fill_holdout.json

@@ -79,10 +79,10 @@
     {
       "name": "downtownLouisville",
       "type": "Viewpoint",
-      "groundPosition": [-85.7544, 38.2535, 106],
-      "distance": 1200,
+      "groundPosition": [-85.7573, 38.2552, 160],
+      "distance": 900,
       "heading": 15,
-      "pitch": -40,
+      "pitch": -35,
       "roll": 0,
       "animate": false,
       "properties": { "title": "Downtown Louisville" }

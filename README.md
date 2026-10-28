@@ -84,11 +84,12 @@ Every step has run end to end in AWS:
   in the account, tax included): about $16 of early trials on Lambda before
   the move to EC2 Spot machines, $11 of Spot machines, $14 of storage.
 
-![Downtown Louisville looking south, as published: the arena in the middle, the towers with red roofs in front](docs/figures/louisville_looking_south.jpg)
+![Downtown Louisville looking south in the VC Map page: the map switch (3D and obliques) at the top, the credits along the bottom](docs/figures/louisville_looking_south.jpg)
 
 *Downtown Louisville looking south, as published and seen in the VC Map
 page: the Measured view, every wall and roof shaped from the LiDAR and
-colored from KyFromAbove's aerial photos.*
+colored from KyFromAbove's aerial photos. The buttons at the top left switch
+between the 3D map (Cesium) and KyFromAbove's oblique photos (OpenLayers).*
 
 What the first pilot (four areas, September 2026) showed:
 

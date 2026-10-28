@@ -9,8 +9,8 @@
     "proj4": "+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"
   },
   "maps": [
-    { "type": "OpenlayersMap", "name": "OpenlayersMap" },
-    { "type": "CesiumMap", "name": "CesiumMap", "maximumScreenSpaceError": 2, "fogEnabled": false, "preloadAncestors": true },
+    { "type": "OpenlayersMap", "name": "OpenlayersMap", "properties": {"attributions": {"provider": "KyFromAbove", "url": "https://registry.opendata.aws/kyfromabove/"}} },
+    { "type": "CesiumMap", "name": "CesiumMap", "maximumScreenSpaceError": 2, "fogEnabled": false, "preloadAncestors": true, "properties": {"attributions": {"provider": "KyFromAbove", "url": "https://registry.opendata.aws/kyfromabove/"}} },
     {
       "type": "ObliqueMap",
       "name": "ObliqueMap",
@@ -18,7 +18,7 @@
       "obliqueImageNameTemplate": "KyFromAbove photo: {0}",
       "maintainViewpointOnCollectionChange": true,
       "switchThreshold": 0.5,
-      "fallbackToCurrentMap": true
+      "fallbackToCurrentMap": true, "properties": {"attributions": {"provider": "KyFromAbove", "url": "https://registry.opendata.aws/kyfromabove/"}}
     }
   ],
   "layers": [
@@ -54,7 +54,7 @@
       "activeOnStartup": true,
       "properties": {
         "title": "USGS NAIP imagery, close up",
-        "attributions": { "provider": "USGS The National Map: NAIP", "url": "https://www.usgs.gov/programs/national-geospatial-program/national-map" }
+        "attributions": { "provider": "USDA NAIP", "url": "https://registry.opendata.aws/naip/" }
       }
     },
     {
@@ -72,7 +72,7 @@
       "screenSpaceError": 2,
       "exclusiveGroups": ["product"],
       "tilesetOptions": { "enableDebugWireframe": true },
-      "properties": { "title": "Downtown, measured (product 2)" }
+      "properties": { "title": "Downtown, measured (product 2)", "attributions": { "provider": "Overture Maps Foundation", "url": "https://overturemaps.org/" } }
     }
   ],
   "viewpoints": [

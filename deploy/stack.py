@@ -185,6 +185,8 @@ class QueueRunStack(Stack):
 #: (pieces, building outputs, audits, logs) stays private even to CloudFront.
 SERVED_PREFIXES = ("viewer/*", "kentucky/*", "tiles/*/3dtiles/*", "terrain/*")
 VIEWER_USER = "kentucky"
+#: How long the viewer's access log is kept.
+LOG_DAYS = 30
 
 
 def viewer_function_code(password: str | None) -> str:
@@ -231,6 +233,14 @@ class ViewerStack(Stack):
         from aws_cdk import aws_iam as iam
 
         bucket = s3.Bucket.from_bucket_name(self, "Data", bucket_name)
+        # CloudFront's access log, one line a request, in a bucket of its own,
+        # each file deleted after LOG_DAYS. CloudFront writes these logs with
+        # ACLs, so this bucket keeps them on (the data bucket has them off).
+        logs = s3.Bucket(self, "Logs", bucket_name=f"{bucket_name}-viewer-logs",
+                         object_ownership=s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
+                         block_public_access=s3.BlockPublicAccess.BLOCK_ALL, enforce_ssl=True,
+                         encryption=s3.BucketEncryption.S3_MANAGED,
+                         lifecycle_rules=[s3.LifecycleRule(expiration=Duration.days(LOG_DAYS))])
         fn = cf.Function(self, "Gate", function_name="kyfromabove-3d-viewer-gate",
                          runtime=cf.FunctionRuntime.JS_2_0,
                          code=cf.FunctionCode.from_inline(viewer_function_code(password)),
@@ -242,6 +252,7 @@ class ViewerStack(Stack):
                                enable_accept_encoding_gzip=True, enable_accept_encoding_brotli=True)
         dist = cf.Distribution(
             self, "Viewer", comment="kyfromabove-3d demo viewer", price_class=cf.PriceClass.PRICE_CLASS_100,
+            enable_logging=True, log_bucket=logs, log_file_prefix="cloudfront/",
             default_behavior=cf.BehaviorOptions(
                 origin=origin, viewer_protocol_policy=cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 cache_policy=cf.CachePolicy.CACHING_OPTIMIZED, compress=True, function_associations=gate),
@@ -267,23 +278,26 @@ class ViewerStack(Stack):
 #: Every stack is tagged with this (deploy/app.py), and the budget counts
 #: only what carries it. AWS adds "user:" to tags people set.
 PROJECT_TAG = ("project", "kyfromabove-3d")
+#: The viewer's stacks carry this too, so the site's own cost has a budget
+#: of its own (the bucket's requests stay under the project's tag only).
+VIEWER_TAG = ("component", "viewer")
 
 
 class BudgetStack(Stack):
-    """A monthly AWS Budget on what carries the project's tag: an email at 80%
-    of ``limit_usd`` actually spent, and another when the month is forecast
-    to pass it. It warns; it does not stop anything.
+    """Two monthly AWS Budgets: the project (what carries ``PROJECT_TAG``,
+    ``limit_usd``) and the viewer alone (``VIEWER_TAG``, ``viewer_usd``).
+    Each emails at 80% of its limit actually spent, and again when the month
+    is forecast to pass it. They warn; they do not stop anything.
 
     Two things it cannot do for itself, once per account: the bucket was made
-    by hand, so it needs the tag added to it (its storage and requests are a
-    large share of the bill), and the tag must be switched on as a cost
-    allocation tag in Billing before a budget can filter on it."""
+    by hand, so it needs the project's tag added to it (its storage and
+    requests are a large share of the bill), and the tags must be switched on
+    as cost allocation tags in Billing before a budget can filter on them."""
 
-    def __init__(self, scope: Construct, cid: str, *, email: str, limit_usd: float = 20.0, **kw):
+    def __init__(self, scope: Construct, cid: str, *, email: str, limit_usd: float = 20.0,
+                 viewer_usd: float = 5.0, **kw):
         super().__init__(scope, cid, **kw)
         from aws_cdk import aws_budgets as budgets
-
-        key, value = PROJECT_TAG
 
         def alert(kind: str, percent: float):
             return budgets.CfnBudget.NotificationWithSubscribersProperty(
@@ -292,8 +306,40 @@ class BudgetStack(Stack):
                     threshold_type="PERCENTAGE"),
                 subscribers=[budgets.CfnBudget.SubscriberProperty(subscription_type="EMAIL", address=email)])
 
-        budgets.CfnBudget(self, "Monthly", budget=budgets.CfnBudget.BudgetDataProperty(
-            budget_name="kyfromabove-3d-monthly", budget_type="COST", time_unit="MONTHLY",
-            budget_limit=budgets.CfnBudget.SpendProperty(amount=limit_usd, unit="USD"),
-            cost_filters={"TagKeyValue": [f"user:{key}${value}"]}),
-            notifications_with_subscribers=[alert("ACTUAL", 80), alert("FORECASTED", 100)])
+        for rid, name, (key, value), usd in (("Monthly", "kyfromabove-3d-monthly", PROJECT_TAG, limit_usd),
+                                             ("Viewer", "kyfromabove-3d-viewer-monthly", VIEWER_TAG, viewer_usd)):
+            budgets.CfnBudget(self, rid, budget=budgets.CfnBudget.BudgetDataProperty(
+                budget_name=name, budget_type="COST", time_unit="MONTHLY",
+                budget_limit=budgets.CfnBudget.SpendProperty(amount=usd, unit="USD"),
+                cost_filters={"TagKeyValue": [f"user:{key}${value}"]}),
+                notifications_with_subscribers=[alert("ACTUAL", 80), alert("FORECASTED", 100)])
+
+
+class ViewerAlarmStack(Stack):
+    """An email within the hour when the viewer's traffic jumps: more than
+    ``gb_per_hour`` sent, or more than ``requests_per_hour`` requests, in one
+    hour. A budget reads the bill, which lags by hours; these read
+    CloudFront's own counts, which it publishes only in us-east-1, so this
+    stack goes there. It warns; it does not stop anything."""
+
+    def __init__(self, scope: Construct, cid: str, *, distribution_id: str, email: str,
+                 gb_per_hour: float = 20, requests_per_hour: int = 1_000_000, **kw):
+        super().__init__(scope, cid, **kw)
+        from aws_cdk import aws_cloudwatch as cw
+        from aws_cdk import aws_cloudwatch_actions as cw_actions
+        from aws_cdk import aws_sns as sns
+        from aws_cdk import aws_sns_subscriptions as subs
+
+        topic = sns.Topic(self, "Alarms", topic_name="kyfromabove-3d-viewer-alarms")
+        topic.add_subscription(subs.EmailSubscription(email))
+        for rid, metric, limit, what in (("Bytes", "BytesDownloaded", gb_per_hour * 1e9, f"{gb_per_hour:g} GB"),
+                                         ("Requests", "Requests", requests_per_hour, f"{requests_per_hour:,} requests")):
+            alarm = cw.Alarm(self, rid, alarm_name=f"kyfromabove-3d-viewer-{metric}",
+                             alarm_description=f"The viewer sent more than {what} in an hour",
+                             metric=cw.Metric(namespace="AWS/CloudFront", metric_name=metric, statistic="Sum",
+                                              period=Duration.hours(1),
+                                              dimensions_map={"DistributionId": distribution_id, "Region": "Global"}),
+                             threshold=limit, evaluation_periods=1,
+                             comparison_operator=cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+                             treat_missing_data=cw.TreatMissingData.NOT_BREACHING)
+            alarm.add_alarm_action(cw_actions.SnsAction(topic))

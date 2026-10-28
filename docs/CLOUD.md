@@ -243,18 +243,33 @@ calibration.
 
 Every stack, and what it makes (the Lambdas, the Spot machines and their
 disks, the CloudFront distribution), carries the tag `project=kyfromabove-3d`,
-so the bill can be split by it. `BudgetStack` adds a monthly AWS Budget on
-that tag: an email when 80% of the limit is actually spent, and another when
-the month is forecast to pass it. It warns; it stops nothing, so the Spot
-runner's own cap stays. It is deployed only when an address is given:
+so the bill can be split by it; the viewer's stacks also carry
+`component=viewer`. `BudgetStack` adds two monthly AWS Budgets, one on each
+tag: an email when 80% of the limit is actually spent, and another when the
+month is forecast to pass it. They warn; they stop nothing, so the Spot
+runner's own cap stays. They are deployed only when an address is given:
 
 ```bash
-cd deploy && npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@example.com -c budget_usd=20
+cd deploy && npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@example.com -c budget_usd=20 -c viewer_usd=5
 ```
 
-The limit is $20 a month unless `budget_usd` says otherwise; raise it before
-a statewide run (about $450 for the building step). Two steps the stacks
-cannot do, once per account:
+The limits are $20 a month for the project and $5 for the viewer unless
+`budget_usd` and `viewer_usd` say otherwise; raise the first before a
+statewide run (about $450 for the building step). The viewer's budget counts
+CloudFront only: the bucket requests it causes stay under the project's tag.
+
+A budget reads the bill, which lags by hours. `ViewerAlarmStack` watches the
+viewer's own traffic instead, and emails within the hour when it sends more
+than 20 GB or answers more than 1,000,000 requests in an hour (the whole
+published site is about 3 GB). CloudFront publishes those counts only in
+us-east-1, so the stack goes there, without needing a CDK bootstrap there.
+The email asks you to confirm the subscription once.
+
+```bash
+cd deploy && npx aws-cdk deploy kyfromabove-3d-viewer-alarms -c budget_email=you@example.com -c viewer_distribution=<distribution id>
+```
+
+Two steps the stacks cannot do, once per account:
 
 - **Tag the bucket.** It was made by hand, so no stack tags it, and its
   storage and requests are a large share of the bill. This replaces any tags
@@ -264,12 +279,12 @@ cannot do, once per account:
   aws s3api put-bucket-tagging --bucket kyfromabove-3d --tagging 'TagSet=[{Key=project,Value=kyfromabove-3d}]'
   ```
 
-- **Switch the tag on for billing.** A budget can filter only on a cost
-  allocation tag. The tag appears in Billing up to a day after something
+- **Switch the tags on for billing.** A budget can filter only on a cost
+  allocation tag. A tag appears in Billing up to a day after something
   first carries it; then:
 
   ```bash
-  aws ce update-cost-allocation-tags-status --cost-allocation-tags-status TagKey=project,Status=Active
+  aws ce update-cost-allocation-tags-status --cost-allocation-tags-status TagKey=project,Status=Active TagKey=component,Status=Active
   ```
 
   Costs count from that moment, not before.
@@ -612,6 +627,10 @@ Season 1 photos, 15 months apart; Hazard and Somerset pair Phase 2
   minutes. The old files stay behind: `deploy/s3_orphans.py` lists what the
   live trees no longer reach (after the box republish: 574 files, 1.46 GB)
   and deletes exactly that list with `--delete`.
+- CloudFront logs every request (time, address, file, bytes, status) to a
+  bucket of its own, `<bucket>-viewer-logs` under `cloudfront/`, made by the
+  viewer stack; each log file is deleted after 30 days. The data bucket's own
+  S3 access logging is off: its log lines would be mostly the runs' writes.
 
 ### What it cost
 

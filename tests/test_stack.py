@@ -50,8 +50,17 @@ def test_the_viewer_stack_leaves_the_bucket_policy_and_prints_the_read_statement
 
     t = assertions.Template.from_stack(ViewerStack(cdk.App(), "Viewer", password="pw"))
     t.resource_count_is("AWS::CloudFront::Distribution", 1)
-    t.resource_count_is("AWS::S3::Bucket", 0)                                    # the bucket is imported
-    t.resource_count_is("AWS::S3::BucketPolicy", 0)                              # its own policy stays as it is
+    # the data bucket is imported and its own policy stays as it is; the one
+    # bucket made here holds the access log, kept 30 days
+    t.resource_count_is("AWS::S3::Bucket", 1)
+    t.has_resource_properties("AWS::S3::Bucket", assertions.Match.object_like({
+        "BucketName": "kyfromabove-3d-viewer-logs",
+        "LifecycleConfiguration": {"Rules": [assertions.Match.object_like({"ExpirationInDays": 30})]}}))
+    t.has_resource_properties("AWS::CloudFront::Distribution", {"DistributionConfig": assertions.Match.object_like({
+        "Logging": assertions.Match.object_like({"Prefix": "cloudfront/"})})})
+    logs = next(iter(t.find_resources("AWS::S3::Bucket")))
+    for p in t.find_resources("AWS::S3::BucketPolicy").values():                 # none on the data bucket
+        assert p["Properties"]["Bucket"] == {"Ref": logs}
     out = t.find_outputs("BucketPolicyStatement")
     text = json.dumps(next(iter(out.values()))["Value"])
     assert "ViewerReadsServedPrefixes" in text and "s3:GetObject" in text and "cloudfront.amazonaws.com" in text
@@ -73,20 +82,36 @@ def test_the_viewer_policy_adds_its_statement_and_keeps_the_rest():
     assert again["Statement"] == [https, dict(read, Resource=["newer"])]
 
 
-def test_the_budget_counts_the_project_tag_and_warns_before_and_at_the_limit():
+def test_the_budgets_count_the_project_and_viewer_tags_and_warn_before_and_at_the_limit():
     from stack import BudgetStack
 
-    t = assertions.Template.from_stack(BudgetStack(cdk.App(), "Budget", email="someone@example.com", limit_usd=700))
-    t.resource_count_is("AWS::Budgets::Budget", 1)
-    t.has_resource_properties("AWS::Budgets::Budget", {
-        "Budget": assertions.Match.object_like({
-            "BudgetType": "COST", "TimeUnit": "MONTHLY", "BudgetLimit": {"Amount": 700, "Unit": "USD"},
-            "CostFilters": {"TagKeyValue": ["user:project$kyfromabove-3d"]}}),
-        "NotificationsWithSubscribers": [
-            {"Notification": assertions.Match.object_like({"NotificationType": "ACTUAL", "Threshold": 80}),
-             "Subscribers": [{"SubscriptionType": "EMAIL", "Address": "someone@example.com"}]},
-            {"Notification": assertions.Match.object_like({"NotificationType": "FORECASTED", "Threshold": 100}),
-             "Subscribers": [{"SubscriptionType": "EMAIL", "Address": "someone@example.com"}]}]})
+    t = assertions.Template.from_stack(BudgetStack(cdk.App(), "Budget", email="someone@example.com", limit_usd=700,
+                                                   viewer_usd=5))
+    t.resource_count_is("AWS::Budgets::Budget", 2)
+    for usd, tag in ((700, "user:project$kyfromabove-3d"), (5, "user:component$viewer")):
+        t.has_resource_properties("AWS::Budgets::Budget", {
+            "Budget": assertions.Match.object_like({
+                "BudgetType": "COST", "TimeUnit": "MONTHLY", "BudgetLimit": {"Amount": usd, "Unit": "USD"},
+                "CostFilters": {"TagKeyValue": [tag]}}),
+            "NotificationsWithSubscribers": [
+                {"Notification": assertions.Match.object_like({"NotificationType": "ACTUAL", "Threshold": 80}),
+                 "Subscribers": [{"SubscriptionType": "EMAIL", "Address": "someone@example.com"}]},
+                {"Notification": assertions.Match.object_like({"NotificationType": "FORECASTED", "Threshold": 100}),
+                 "Subscribers": [{"SubscriptionType": "EMAIL", "Address": "someone@example.com"}]}]})
+
+
+def test_the_viewer_alarms_watch_its_hourly_bytes_and_requests_and_email():
+    from stack import ViewerAlarmStack
+
+    t = assertions.Template.from_stack(ViewerAlarmStack(cdk.App(), "Alarms", distribution_id="E123",
+                                                        email="someone@example.com", gb_per_hour=20))
+    t.has_resource_properties("AWS::SNS::Subscription", {"Protocol": "email", "Endpoint": "someone@example.com"})
+    t.resource_count_is("AWS::CloudWatch::Alarm", 2)
+    for metric, limit in (("BytesDownloaded", 20e9), ("Requests", 1_000_000)):
+        t.has_resource_properties("AWS::CloudWatch::Alarm", assertions.Match.object_like({
+            "Namespace": "AWS/CloudFront", "MetricName": metric, "Statistic": "Sum", "Period": 3600,
+            "Threshold": limit, "Dimensions": assertions.Match.array_with([{"Name": "DistributionId", "Value": "E123"}]),
+            "AlarmActions": assertions.Match.any_value()}))
 
 
 def test_the_project_tag_reaches_the_spot_machines_and_their_disks(tmp_path_factory):

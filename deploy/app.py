@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import aws_cdk as cdk                                                     # noqa: E402
 
-from stack import PROJECT_TAG, BudgetStack, QueueRunStack, ViewerStack  # noqa: E402
+from stack import PROJECT_TAG, VIEWER_TAG, BudgetStack, QueueRunStack, ViewerAlarmStack, ViewerStack  # noqa: E402
 
 app = cdk.App()
 env = cdk.Environment(account=os.environ.get("CDK_DEFAULT_ACCOUNT"), region="us-west-2")
@@ -26,14 +26,27 @@ if app.node.try_get_context("queue_run"):
 # the demo viewer: CloudFront over the served prefixes; the password (a
 # git-ignored file) only with -c viewer_password=on
 _pw = Path(__file__).with_name("viewer_password.txt")
-ViewerStack(app, "kyfromabove-3d-viewer", env=env, bucket_name=bucket,
-            password=_pw.read_text().strip() if app.node.try_get_context("viewer_password") == "on" and _pw.exists()
-            else None)
-# a monthly budget on the project's tag, only when an address is given:
-# npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@example.com [-c budget_usd=700]
-if app.node.try_get_context("budget_email"):
-    BudgetStack(app, "kyfromabove-3d-budget", env=env, email=app.node.try_get_context("budget_email"),
-                limit_usd=float(app.node.try_get_context("budget_usd") or 20))
+viewer = ViewerStack(app, "kyfromabove-3d-viewer", env=env, bucket_name=bucket,
+                     password=_pw.read_text().strip()
+                     if app.node.try_get_context("viewer_password") == "on" and _pw.exists() else None)
+cdk.Tags.of(viewer).add(*VIEWER_TAG)
+# monthly budgets on the project's tag and the viewer's, only when an address is given:
+# npx aws-cdk deploy kyfromabove-3d-budget -c budget_email=you@example.com [-c budget_usd=700] [-c viewer_usd=5]
+email = app.node.try_get_context("budget_email")
+if email:
+    BudgetStack(app, "kyfromabove-3d-budget", env=env, email=email,
+                limit_usd=float(app.node.try_get_context("budget_usd") or 20),
+                viewer_usd=float(app.node.try_get_context("viewer_usd") or 5))
+# the viewer's hourly traffic alarms, in us-east-1 where CloudFront's counts are, given the
+# distribution (the viewer stack's ViewerUrl output names its domain; the id is in the console):
+# npx aws-cdk deploy kyfromabove-3d-viewer-alarms -c budget_email=you@example.com -c viewer_distribution=E123...
+if email and app.node.try_get_context("viewer_distribution"):
+    alarms = ViewerAlarmStack(app, "kyfromabove-3d-viewer-alarms",
+                              env=cdk.Environment(account=env.account, region="us-east-1"),
+                              # no files to upload, so us-east-1 needs no CDK bootstrap
+                              synthesizer=cdk.LegacyStackSynthesizer(),
+                              distribution_id=app.node.try_get_context("viewer_distribution"), email=email)
+    cdk.Tags.of(alarms).add(*VIEWER_TAG)
 # every stack, and what it makes, carries the project's tag (Billing can then
 # split the bill by it, and the budget counts it)
 cdk.Tags.of(app).add(*PROJECT_TAG)

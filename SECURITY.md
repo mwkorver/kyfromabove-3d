@@ -14,7 +14,9 @@ cost real money on your account:
   budget stack as well (`docs/CLOUD.md`, "Watching the spend"); it emails,
   it does not stop anything.
 - **A deployed CloudFront viewer is public** unless you switch the password on
-  (`-c viewer_password=on`). Every request to a public viewer is billed to you.
+  (`-c viewer_password=on`). Every request to a public viewer is billed to you;
+  the viewer's budget and its hourly traffic alarm (`docs/CLOUD.md`, "Watching
+  the spend") email you, they do not stop traffic.
 - **The viewer password is a demo gate, not authentication.** It is HTTP basic
   auth in a CloudFront Function, with one shared password, meant to keep a demo
   out of casual view and nothing more.

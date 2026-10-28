@@ -61,9 +61,11 @@ testing. The code is the same in both.
 | 3 · build | Fits walls and roofs to the LiDAR, colors them from the photos, checks the result | EC2 Spot machines, 8 to 16 nearby buildings a job |
 | 4 · publish | Writes 3D Tiles, the statewide tree, the terrain and the viewers | a Spot machine or a laptop |
 
-CloudFront serves the result, behind a password, to two pages: a CesiumJS
-viewer ([`viewer/`](viewer/)) and a VC Map page ([`viewers/vcmap/`](viewers/vcmap/))
-that also shows the oblique photos. Setup, costs and what went wrong are in
+CloudFront serves the result to two public pages: the
+[VC Map page](https://d2egs1bbelo373.cloudfront.net/viewer/vcmap/index.html)
+([`viewers/vcmap/`](viewers/vcmap/)), which also shows the oblique photos, and a
+[CesiumJS viewer](https://d2egs1bbelo373.cloudfront.net/viewer/index.html)
+([`viewer/`](viewer/)). Setup, costs and what went wrong are in
 [`docs/CLOUD.md`](docs/CLOUD.md).
 
 ## Where it stands (October 2026)
@@ -79,9 +81,8 @@ that also shows the oblique photos. Setup, costs and what went wrong are in
 
 ## Limits
 
-- A prototype, run for the areas above only.
-- The live viewers are behind a password. To see the result, run the
-  [one-tile example](#one-tile-on-a-laptop) below.
+- A prototype, run for the areas above only. The live pages may be taken
+  down without notice.
 - Built and tested on one Mac and one AWS account; never tried on Windows.
 
 ## Why the LiDAR gives the shape and the photos only the color

@@ -192,7 +192,9 @@ LOG_DAYS = 30
 def viewer_function_code(password: str | None) -> str:
     """The CloudFront Function on every request: the password (HTTP basic
     auth, user ``kentucky``) when one is given, then only the served paths;
-    ``/`` goes to the viewer."""
+    ``/`` goes to the viewer. A folder address under ``viewer/`` serves its
+    ``index.html`` (``/viewer/vcmap`` first goes to ``/viewer/vcmap/`` so the
+    page's relative links resolve)."""
     import base64
 
     check = ""
@@ -212,6 +214,12 @@ def viewer_function_code(password: str | None) -> str:
   }}
   if (!/^\\/(viewer|kentucky|terrain)\\//.test(uri) && !/^\\/tiles\\/[^\\/]+\\/3dtiles\\//.test(uri)) {{
     return {{statusCode: 403, statusDescription: "Forbidden"}};
+  }}
+  if (/^\\/viewer\\/[^.]*[^\\/.]$/.test(uri)) {{
+    return {{statusCode: 302, statusDescription: "Found", headers: {{location: {{value: uri + "/"}}}}}};
+  }}
+  if (/^\\/viewer\\/.*\\/$/.test(uri)) {{
+    req.uri = uri + "index.html";
   }}
   return req;
 }}"""

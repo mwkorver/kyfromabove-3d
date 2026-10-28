@@ -594,7 +594,8 @@ Before running Kentucky, a pilot of every stage end to end, under a $10 cap:
   buildings, so the zoomed-out view and the flight into the meshed areas
   have real content.
 - **Terrain** under all of it (3,003 heightmap files, 25 MB), the statewide
-  tree, and the viewer page, served by CloudFront behind a password.
+  tree, and the viewer page, served by CloudFront (behind a password until
+  October 27, 2026, public since).
 
 Which data each tile uses is the pair of LiDAR phase and oblique collection
 **closest together in time** (`sources_choice.py`), recorded on every
@@ -613,10 +614,12 @@ Season 1 photos, 15 months apart; Hazard and Somerset pair Phase 2
   `tiles/*/3dtiles/` and `terrain/` (`deploy/viewer_policy.py` adds that
   statement and keeps the bucket's HTTPS-only rule). Audits, logs, pieces
   and the per-building files are not reachable (403).
-- A CloudFront Function asks for a user name and password (basic auth) on
+- A CloudFront Function can ask for a user name and password (basic auth) on
   every path. The password is a random string in the git-ignored
   `deploy/viewer_password.txt`, switched on with
-  `npx cdk deploy kyfromabove-3d-viewer -c viewer_password=on`.
+  `npx cdk deploy kyfromabove-3d-viewer -c viewer_password=on`. It was on
+  until October 27, 2026; the site has been public since, watched by the
+  viewer's budget and traffic alarms ("Watching the spend").
 - The page (`viewer/index.html`, CesiumJS with OpenStreetMap's map tiles)
   can be opened as `https://kentucky:<password>@<host>/viewer/index.html`: it
   reloads itself at the same address without the password, because browsers

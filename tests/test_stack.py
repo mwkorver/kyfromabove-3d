@@ -37,6 +37,11 @@ def test_the_viewer_gate_serves_only_the_served_paths_and_asks_for_the_password(
     assert _run_gate(open_code, "/pieces/g1/frames.json")["statusCode"] == 403
     assert _run_gate(open_code, "/tiles/N076E229/buildings.json")["statusCode"] == 403   # not under 3dtiles/
     assert _run_gate(open_code, "/")["statusCode"] == 302
+    assert _run_gate(open_code, "/viewer/vcmap/")["uri"] == "/viewer/vcmap/index.html"   # folder address
+    moved = _run_gate(open_code, "/viewer/vcmap")
+    assert moved["statusCode"] == 302 and moved["headers"]["location"]["value"] == "/viewer/vcmap/"
+    assert _run_gate(open_code, "/viewer/vcmap/assets/ui.js")["uri"] == "/viewer/vcmap/assets/ui.js"
+    assert _run_gate(open_code, "/buildings/")["statusCode"] == 403
     locked = viewer_function_code("s3cret-pw")
     assert _run_gate(locked, "/viewer/index.html")["statusCode"] == 401
     assert _run_gate(locked, "/viewer/index.html", "Basic " + base64.b64encode(b"kentucky:wrong").decode())["statusCode"] == 401

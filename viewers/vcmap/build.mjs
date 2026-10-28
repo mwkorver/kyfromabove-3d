@@ -22,7 +22,7 @@ cpSync(resolve(here, 'node_modules/geotiff/dist-browser/geotiff.js'), resolve(di
 // show any tile it could not make in a line at the bottom of the page; our
 // page scripts are named by their contents so a browser never runs a stale copy
 const index = resolve(dist, 'index.html');
-const scripts = ['oblique-fill.js', 'wireframe.js'].map((name) => {
+const scripts = ['oblique-fill.js', 'wireframe.js', 'map-buttons.js'].map((name) => {
   const version = createHash('sha1').update(readFileSync(resolve(dist, name))).digest('hex').slice(0, 10);
   return `    <script src="./${name}?v=${version}"></script>`;
 }).join('\n');

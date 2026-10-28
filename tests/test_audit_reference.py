@@ -34,15 +34,35 @@ def _hole_m2(h: dict, face: str, z_lo: float, z_hi: float) -> float:
                 if str(r["face"]) == face and r.get("z_hi", 0) > z_lo and r.get("z_lo", 1e9) < z_hi] or [0.0])
 
 
+def _facing(b: Path, azimuth: float, within: float = 30.0) -> list[str]:
+    """The faces above the ground level whose outward side points within
+    ``within`` degrees of ``azimuth`` (0 north, 90 east). The audit numbers
+    faces from the building's outline as it is now, so a wall is found by the
+    way it faces, not by a number that a change to the outline moves."""
+    from kyfromabove_3d.features import LEVEL_FACE_STRIDE
+    from kyfromabove_3d.stages.audit_building import level_edges, lidar_model
+    out = []
+    for e in level_edges(lidar_model(b)["levels"]):
+        n = getattr(e, "normal", None)
+        if n is None or e.face < LEVEL_FACE_STRIDE:
+            continue
+        az = np.degrees(np.arctan2(n[0], n[1])) % 360
+        if abs((az - azimuth + 180) % 360 - 180) <= within:
+            out.append(str(e.face))
+    return out
+
+
 def test_the_omni_as_it_was_has_both_holes_and_as_it_is_has_neither():
     from kyfromabove_3d.stages.audit_building import audit
     _need(OMNI / "3dtiles_mesh" / "building.glb")
     before = audit(OMNI, glb=KNOWN / "omni_before_mesh.glb")["holes"]
-    assert _hole_m2(before, "1012", 47, 72) >= 1000                       # the west tower wall's staircase
-    assert max(_hole_m2(before, f, 20, 55) for f in ("1001", "1002")) >= 1000   # the south wing's wall
     now = audit(OMNI)["holes"]
-    assert _hole_m2(now, "1012", 47, 72) < 50
-    assert max(_hole_m2(now, f, 20, 55) for f in ("1001", "1002")) < 200
+    # the west tower wall's staircase, and the south wing's wall: the face
+    # holed worst before must have no such hole now
+    for azimuth, z_lo, z_hi, gone in ((270, 47, 72, 50), (180, 20, 55, 200)):
+        face = max(_facing(OMNI, azimuth), key=lambda f: _hole_m2(before, f, z_lo, z_hi))
+        assert _hole_m2(before, face, z_lo, z_hi) >= 1000
+        assert _hole_m2(now, face, z_lo, z_hi) < gone
 
 
 def test_the_old_gap_rule_left_lines_on_the_seelbach():

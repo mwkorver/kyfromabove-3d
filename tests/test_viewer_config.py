@@ -22,8 +22,10 @@ def test_the_viewer_config_has_its_views_its_start_and_places_in_kentucky(tmp_pa
     assert set(cfg["tilesets"]) == set(publish_step.PRODUCTS) and cfg["start"] == start
     names = [p["name"] for p in cfg["places"]]
     assert "Downtown Louisville" in names and "Lexington" in names and len(set(names)) == len(names)
+    assert cfg["start_place"] == "Downtown Louisville"            # opens close enough for the meshes
     for p in cfg["places"]:
         assert -89.6 < p["lon"] < -81.9 and 36.4 < p["lat"] < 39.2                 # Kentucky
         assert math.isfinite(p["ground_m"]) and 0 < p["ground_m"] < 1300
     page = store.get_bytes("viewer/index.html").decode("utf-8")
     assert 'id="places"' in page and "flyToBoundingSphere" in page
+    assert "photos.json" in page and "geotiff@" in page              # a clicked building's photos

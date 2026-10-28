@@ -317,6 +317,41 @@ def test_the_built_buildings_come_from_one_listing(tmp_path):
     assert P.load_building(st, "g3", "measured", v, available=got) is None    # asks nothing of the store
 
 
+def _frame(name, head, cam_xy, date="2024-03-20"):
+    eo = {"CameraID": head, "X": cam_xy[0], "Y": cam_xy[1], "FlightDate_frame": f"{date} 00:00:00"}
+    return {"frame_id": f"KY_C/{name}", "direction": head, "eo": repr(eo),
+            "url": f"https://kyfromabove.s3.amazonaws.com/imagery/obliques/Phase3/KY_C/{name}.tif",
+            "window_px": {"u_min": 10.4, "v_min": 20.6, "u_max": 110.2, "v_max": 220.9}}
+
+
+def test_a_building_photos_name_their_cog_window_and_the_way_the_camera_looked():
+    bases = []
+    got = P.building_photos([_frame("Bwd_1", "Bwd", (1000.0, 6000.0)),       # north of the building: looks south
+                             _frame("Right_2", "Right", (-4000.0, 1000.0)),   # west of it: looks east
+                             _frame("Color_3", "Color", (1000.0, 1000.0))],   # straight down
+                            (1000.0, 1000.0), bases)
+    assert bases == ["https://kyfromabove.s3.amazonaws.com/imagery/obliques/Phase3/KY_C/"]
+    assert [(p["f"], p["h"], p["a"]) for p in got] == [("Bwd_1.tif", "Bwd", 180), ("Right_2.tif", "Right", 90),
+                                                        ("Color_3.tif", "Color", None)]
+    assert got[0]["w"] == [10, 20, 111, 221] and got[0]["d"] == "2024-03-20" and got[0]["b"] == 0
+
+
+def test_a_tile_photos_come_from_the_pieces_zipped_or_loose(tmp_path):
+    from kyfromabove_3d.archive import zip_bytes
+    from kyfromabove_3d.store import LocalStore
+
+    st = LocalStore(tmp_path)
+    coords = json.dumps({"origin_source_xyz": [1000.0, 1000.0, 450.0]}).encode()
+    st.put_bytes("pieces/g1/piece.zip", zip_bytes({"frames.json": json.dumps([_frame("Bwd_1", "Bwd", (1000.0, 6000.0))]).encode(),
+                                                   "coordinates.json": coords, "lidar_local.laz": bytes(5000)}))
+    st.put_json("pieces/g2/frames.json", [_frame("Fwd_2", "Fwd", (1000.0, -4000.0))])      # stored the old way
+    st.put_bytes("pieces/g2/coordinates.json", coords)
+    st.put_bytes("pieces/g3/piece.zip", zip_bytes({"coordinates.json": coords}))             # no frames: left out
+    got = P.tile_photos(st, ["g2", "g1", "g3", "g4"])                                       # g4: no piece at all
+    assert list(got["buildings"]) == ["g1", "g2"]
+    assert got["buildings"]["g1"][0]["a"] == 180 and got["buildings"]["g2"][0]["a"] == 0
+
+
 def test_a_building_comes_back_from_its_zip_with_its_texture_pages(tmp_path):
     """What the building step stores (building.pack_building) is what step 4
     reads: the glb, its placement and its lossless pages, per product, and

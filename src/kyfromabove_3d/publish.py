@@ -807,7 +807,86 @@ def publish_tile(tile: str, store, grid, product: str = "measured", tiles_prefix
     out_store.put_json(f"{base}/tileset.json", tileset)
     log(f"{tile} {product}: {meshed} meshed, {boxed} as boxes, {missing} without a height; "
         f"{len(children)} area file(s), {sum(area_bytes) / 1e6:.1f} MB")
-    return summary
+    return {**summary, "meshed_ids": [m["record"]["id"] for m in members if "parts" in m]}
+
+
+# ------------------------------------------------------------ the photos
+
+#: The tile's photo list for the viewers, beside its products
+#: (``tiles/<t>/3dtiles/photos.json``): for each building with a mesh, the
+#: oblique photos the measure step found seeing it.
+PHOTOS_FILE = "photos.json"
+
+
+def building_photos(frames: Sequence[dict], origin_xy: Sequence[float], bases: List[str]) -> List[dict]:
+    """A building's photos as the viewer reads them, from its piece's
+    ``frames.json``: the photo (``b``, an index into ``bases``, the folder
+    its COG is in, and ``f``, its name there), the camera head (``h``), the
+    way the camera looked at the building (``a``, degrees from north;
+    None for the straight-down "Color" head), the day it was flown (``d``),
+    and the building's window on the photo in full-size pixels (``w``:
+    u0, v0, u1, v1). The look is from the camera's position to the
+    building's origin, both in Kentucky Single Zone feet (a degree or so
+    from true north, which a viewer choosing the nearest photo can ignore)."""
+    import ast
+
+    out = []
+    for fr in frames:
+        url, win = fr.get("url"), fr.get("window_px")
+        if not url or not win:
+            continue
+        folder, _, name = url.rpartition("/")
+        if folder + "/" not in bases:
+            bases.append(folder + "/")
+        eo = fr.get("eo") or {}
+        if isinstance(eo, str):
+            eo = ast.literal_eval(eo)                  # the measure step kept the record's repr
+        head = fr.get("direction") or eo.get("CameraID")
+        az = None
+        if head != "Color" and eo.get("X") is not None:
+            az = round(float(np.degrees(np.arctan2(origin_xy[0] - float(eo["X"]), origin_xy[1] - float(eo["Y"])))) % 360)
+        out.append({"b": bases.index(folder + "/"), "f": name, "h": head, "a": az,
+                    "d": str(eo.get("FlightDate_frame") or eo.get("FlightDate") or "")[:10] or None,
+                    "w": [int(win["u_min"]), int(win["v_min"]), int(np.ceil(win["u_max"])), int(np.ceil(win["v_max"]))]})
+    return out
+
+
+def tile_photos(store, ids: Sequence[str], pieces_prefix: str = "pieces", workers: int = 16) -> dict:
+    """The photo list of a tile's buildings with meshes (``ids``), from
+    each piece's ``frames.json`` and ``coordinates.json``: read out of
+    ``piece.zip`` with a few ranged requests (the piece's LiDAR, most of
+    its megabyte, stays unread), or as loose files from a piece stored the
+    old way. A building whose piece has no frames is left out."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    from .archive import read_zip_members
+    from .building import PIECE_ZIP
+
+    want = ("frames.json", "coordinates.json")
+
+    def read(gers):
+        try:
+            got = read_zip_members(store, f"{pieces_prefix}/{gers}/{PIECE_ZIP}", want)
+        except FileNotFoundError:
+            got = {}
+            for n in want:
+                try:
+                    got[n] = store.get_bytes(f"{pieces_prefix}/{gers}/{n}")
+                except FileNotFoundError:
+                    pass
+        if len(got) < len(want):
+            return gers, None
+        return gers, (json.loads(got["frames.json"]), json.loads(got["coordinates.json"])["origin_source_xyz"][:2])
+
+    bases: List[str] = []
+    buildings = {}
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        for gers, rec in ex.map(read, list(ids)):
+            if rec is not None:
+                photos = building_photos(rec[0], rec[1], bases)
+                if photos:
+                    buildings[gers] = photos
+    return {"version": 1, "bases": bases, "buildings": dict(sorted(buildings.items()))}
 
 
 # ------------------------------------------------------------ the tree

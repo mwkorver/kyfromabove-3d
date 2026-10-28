@@ -46,17 +46,21 @@ PLACES = json.loads((CONFIG_DIR / "places.json").read_text())["places"]
 
 def one_tile(tile: str, inputs: str, store: str, raw: str, products, available=None,
              buildings_prefix: str | None = None) -> list:
-    """Step 4 for one tile, in a worker process."""
+    """Step 4 for one tile, in a worker process; then the photo list of its
+    buildings with meshes (:func:`photos`)."""
     from kyfromabove_3d.pieces import phase2_grid
     from kyfromabove_3d.publish import publish_tile
     from kyfromabove_3d.store import store_from
 
     grid = phase2_grid(Path(raw))
     src, out = store_from(inputs), store_from(store)
-    res = []
+    res, meshed = [], set()
     for p in products:
-        res.append(publish_tile(tile, src, grid, p, buildings_prefix=buildings_prefix, out_store=out,
-                                log=lambda m: None, available=available))
+        s = publish_tile(tile, src, grid, p, buildings_prefix=buildings_prefix, out_store=out,
+                         log=lambda m: None, available=available)
+        meshed.update(s.pop("meshed_ids", ()))
+        res.append(s)
+    photos(tile, src, out, meshed)
     if inputs != store:                         # the tree reads each tile's records from the output store
         out.put_json(f"tiles/{tile}/buildings.json", src.read_json(f"tiles/{tile}/buildings.json"))
     return res
@@ -109,11 +113,26 @@ def terrain(tiles, src, out, grid, max_level: int, log=print) -> dict:
                                  lambda p, data: out.put_bytes(f"terrain/{p}", data), max_level=max_level, log=log)
 
 
+def photos(tile: str, src, out, meshed) -> int:
+    """The tile's photo list (``tiles/<t>/3dtiles/photos.json``), which the
+    viewer shows beside a clicked building, for the buildings with a mesh
+    (:func:`kyfromabove_3d.publish.tile_photos`). Returns how many it lists."""
+    from kyfromabove_3d.publish import PHOTOS_FILE, tile_photos
+
+    if not meshed:
+        return 0
+    rec = tile_photos(src, sorted(meshed))
+    out.put_bytes(f"tiles/{tile}/3dtiles/{PHOTOS_FILE}", json.dumps(rec, separators=(",", ":")).encode("utf-8"),
+                  "application/json", content_encoding="gzip")
+    return len(rec["buildings"])
+
+
 def viewer(out, start: dict) -> None:
     out.put_bytes("viewer/index.html", (ROOT / "viewer" / "index.html").read_bytes(), "text/html; charset=utf-8")
     cfg = {"tilesets": {p: f"/kentucky/{p}/tileset.json" for p in PRODUCTS}, "titles": TITLES,
            "default": DEFAULT_VIEW,
-           "terrain": {"type": "heightmap", "url": "/terrain/"}, "start": start, "places": PLACES}
+           "terrain": {"type": "heightmap", "url": "/terrain/"}, "start": start, "places": PLACES,
+           "start_place": PLACES[0]["name"]}                      # opens on the first place, close enough for meshes
     out.put_json("viewer/config.json", cfg)
 
 
@@ -131,6 +150,8 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--products", nargs="+", default=list(PRODUCTS))
     ap.add_argument("--no-tiles", action="store_true", help="skip step 4 (tree, terrain, viewer only)")
+    ap.add_argument("--photos-only", action="store_true",
+                    help="only the tiles' photo lists (photos.json), for tiles already published")
     ap.add_argument("--tree", action="store_true")
     ap.add_argument("--terrain", action="store_true")
     ap.add_argument("--terrain-max-level", type=int, default=15)
@@ -145,7 +166,16 @@ def main() -> int:
     src, out = store_from(args.inputs), store_from(store)
     grid = phase2_grid(args.raw)
     t0 = time.time()
-    if tiles and not args.no_tiles:
+    if tiles and args.photos_only:
+        from kyfromabove_3d.building import BUILDINGS_PREFIX as bprefix
+        from kyfromabove_3d.publish import built_buildings
+
+        available = built_buildings(src, bprefix)
+        for i, t in enumerate(tiles, 1):
+            ids = [r["id"] for r in src.read_json(f"tiles/{t}/buildings.json")["buildings"] if r["id"] in available]
+            print(f"[{i}/{len(tiles)}] {t}: photos for {photos(t, src, out, ids):,} of {len(ids):,} meshed building(s)",
+                  flush=True)
+    elif tiles and not args.no_tiles:
         from kyfromabove_3d.building import BUILDINGS_PREFIX as bprefix
         from kyfromabove_3d.publish import built_buildings
 

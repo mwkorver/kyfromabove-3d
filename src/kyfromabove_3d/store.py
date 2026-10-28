@@ -35,6 +35,15 @@ class Store:
     def get_bytes(self, key: str) -> bytes:
         raise NotImplementedError
 
+    def get_range(self, key: str, start: int, stop: int) -> bytes:
+        """Bytes ``start`` to ``stop`` (exclusive) of the stored object, as
+        stored: a few KB out of a large zip without reading the rest."""
+        return self.get_bytes(key)[start:stop]
+
+    def size(self, key: str) -> int:
+        """The stored object's length in bytes."""
+        return len(self.get_bytes(key))
+
     def exists(self, key: str) -> bool:
         raise NotImplementedError
 
@@ -92,6 +101,14 @@ class LocalStore(Store):
 
     def get_bytes(self, key: str) -> bytes:
         return self._path(key).read_bytes()
+
+    def get_range(self, key: str, start: int, stop: int) -> bytes:
+        with self._path(key).open("rb") as f:
+            f.seek(start)
+            return f.read(max(0, stop - start))
+
+    def size(self, key: str) -> int:
+        return self._path(key).stat().st_size
 
     def exists(self, key: str) -> bool:
         return self._path(key).is_file()
@@ -175,6 +192,26 @@ class S3Store(Store):
 
             data = gzip.decompress(data)
         return data
+
+    def get_range(self, key: str, start: int, stop: int) -> bytes:
+        """A ranged read; refused on an object kept gzipped, whose stored
+        bytes are not the file's."""
+        if stop <= start:
+            return b""
+        r = self.s3.get_object(Bucket=self.bucket, Key=self._key(key), Range=f"bytes={start}-{stop - 1}")
+        if r.get("ContentEncoding") == "gzip":
+            raise ValueError(f"{key} is stored gzipped: read it whole")
+        return r["Body"].read()
+
+    def size(self, key: str) -> int:
+        from botocore.exceptions import ClientError
+
+        try:
+            return int(self.s3.head_object(Bucket=self.bucket, Key=self._key(key))["ContentLength"])
+        except ClientError as e:
+            if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
+                raise FileNotFoundError(key) from e
+            raise
 
     def exists(self, key: str) -> bool:
         from botocore.exceptions import ClientError

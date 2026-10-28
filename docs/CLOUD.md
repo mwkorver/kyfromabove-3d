@@ -755,6 +755,17 @@ Season 1 photos, 15 months apart; Hazard and Somerset pair Phase 2
   reloads itself at the same address without the password, because browsers
   refuse `fetch` from a page whose address carries one. Safari does not
   accept a password in the address at all.
+- Clicking a building with a mesh shows the oblique photos that see it,
+  nearest to the view's direction first. The publish step writes each tile's
+  list beside its products (`tiles/<t>/3dtiles/photos.json`): for each
+  building, every photo the measure step found seeing it, the building's
+  window on that photo, the camera head and the way it looked. It reads
+  these out of each building's `piece.zip` with ranged requests, leaving the
+  LiDAR inside unread (`publish.tile_photos`); `publish_step.py
+  --photos-only` writes just the lists for tiles already published. The page
+  cuts each picture from KyFromAbove's own photo (a COG, read with range
+  requests from the matching overview, geotiff.js); none is copied into our
+  bucket.
 - Files are named by a hash of their contents, so a changed file gets a new
   name and needs no cache clearing; `tileset.json` files are cached for 5
   minutes. The old files stay behind: `deploy/s3_orphans.py` lists what the

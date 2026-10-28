@@ -40,7 +40,8 @@ The same buildings, five ways. The viewers switch between them in place:
 The VC Map page also has the Completed and Borrowed fill views with the
 filled-in parts tinted, so you can see what was invented. Nothing comes from
 outside the building's own KyFromAbove data: no internet photos, no generic
-textures. In the CesiumJS viewer, clicking a building shows which LiDAR and
+textures. In the CesiumJS viewer, clicking a building shows the oblique
+photos that see it, cut from KyFromAbove's originals, and which LiDAR and
 photos it was made from, how many months apart they were taken, and where its
 height came from. More in [`docs/PRODUCTS.md`](docs/PRODUCTS.md).
 

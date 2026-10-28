@@ -7,6 +7,7 @@
   <script>window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/";</script>
   <script src="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Cesium.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Widgets/widgets.css">
+  <script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
   <style>
     html, body, #cesium { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #000; }
     .panel { position: absolute; z-index: 5; font: 13px system-ui, sans-serif; color: #fff;
@@ -22,9 +23,25 @@
     #places button { font: 12px system-ui, sans-serif; margin: 4px 4px 0 0; padding: 2px 7px; border-radius: 4px;
                      border: 1px solid #666; background: #1b1b1b; color: #ddd; cursor: pointer; }
     #places button:hover { border-color: #2a78d6; }
-    #pick { bottom: 28px; left: 10px; display: none; max-width: 360px; }
+    #pick { bottom: 28px; left: 10px; display: none; max-width: min(420px, calc(100vw - 44px)); }
     #pick table { border-collapse: collapse; }
     #pick td { padding: 1px 8px 1px 0; vertical-align: top; }
+    #photos { margin-top: 6px; font-size: 12px; }
+    #strip { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 2px; }
+    #strip figure { margin: 0; flex: none; width: 104px; cursor: pointer; }
+    #strip .thumb { width: 104px; height: 128px; background: #222; border-radius: 3px; border: 1px solid #444;
+                    display: flex; align-items: center; justify-content: center; overflow: hidden; color: #888; }
+    #strip .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    #strip figure:hover .thumb { border-color: #2a78d6; }
+    #strip figcaption { color: #bbb; font-size: 11px; margin-top: 2px; white-space: nowrap; overflow: hidden;
+                        text-overflow: ellipsis; }
+    #photo { inset: 12px; display: none; z-index: 7; padding: 10px; flex-direction: column; background: rgba(0,0,0,.88); }
+    #photo .bar { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+    #photo button { font: 13px system-ui, sans-serif; padding: 2px 10px; border-radius: 4px; border: 1px solid #888;
+                    background: #222; color: #ddd; cursor: pointer; }
+    #photo .img { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; color: #888; }
+    #photo .img img { max-width: 100%; max-height: 100%; }
+    @media (max-width: 560px) { #pick { bottom: 44px; } }       /* above the credit's two lines */
     #key { display: none; margin-top: 6px; font-size: 12px; }
     #key i { display: inline-block; width: 10px; height: 10px; margin: 0 4px 0 8px; border-radius: 2px; vertical-align: -1px; }
     #key i:first-child { margin-left: 0; }
@@ -41,7 +58,9 @@
     <div id="key" class="muted">height from: <i style="background:rgb(190,190,185)"></i>Overture
       <i style="background:rgb(150,165,190)"></i>floors × 3.5 m <i style="background:rgb(225,150,80)"></i>none, 6 m guessed</div>
     <span class="muted">drag to orbit · right drag to pan · scroll to zoom · click a building</span></div>
-  <div id="pick" class="panel"></div>
+  <div id="pick" class="panel"><div id="facts"></div><div id="photos"></div></div>
+  <div id="photo" class="panel"><div class="bar"><span id="photo-caption"></span>
+    <button id="photo-close" title="close (Esc)">close</button></div><div class="img" id="photo-img"></div></div>
   <div id="credit" class="panel">imagery © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
     contributors · buildings from KyFromAbove LiDAR and oblique imagery, Overture footprints</div>
   <script>
@@ -69,9 +88,124 @@
       }));
     }
 
+    // ---------------------------------------------------------------- photos
+    // A clicked building's oblique photos, cut from KyFromAbove's own COGs in
+    // the browser (range requests, the matching overview): the tile's list
+    // (tiles/<t>/3dtiles/photos.json, publish.tile_photos) names each photo,
+    // the building's window on it and the way the camera looked.
+    const lists = new Map();                      // tile -> Promise<photo list | null>
+    const cogs = new Map();                       // COG url -> Promise<GeoTIFF>, the most recent last
+    const MAX_COGS = 60;
+    const COMPASS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    let clicked = 0;                              // the latest click; an older one's crops are dropped
+
+    function photoList(tile) {
+      if (!lists.has(tile)) {
+        lists.set(tile, fetch(`/tiles/${tile}/3dtiles/photos.json`).then((r) => r.ok ? r.json() : null).catch(() => null));
+      }
+      return lists.get(tile);
+    }
+
+    function cog(url) {
+      let p = cogs.get(url);
+      if (p) { cogs.delete(url); cogs.set(url, p); return p; }
+      p = GeoTIFF.fromUrl(url).catch((e) => { cogs.delete(url); throw e; });
+      cogs.set(url, p);
+      if (cogs.size > MAX_COGS) cogs.delete(cogs.keys().next().value);
+      return p;
+    }
+
+    // the building's window, a tenth wider each side, from the smallest
+    // overview that still gives about ``px`` pixels across
+    async function crop(url, w, px) {
+      const tiff = await cog(url);
+      const full = await tiff.getImage(0);
+      const W = full.getWidth(), H = full.getHeight();
+      const mx = 0.1 * (w[2] - w[0]), my = 0.1 * (w[3] - w[1]);
+      const x0 = Math.max(0, w[0] - mx), y0 = Math.max(0, w[1] - my);
+      const x1 = Math.min(W, w[2] + mx), y1 = Math.min(H, w[3] + my);
+      let img = full;
+      for (let i = (await tiff.getImageCount()) - 1; i > 0; i--) {
+        const o = await tiff.getImage(i);
+        if (o.getWidth() < W && (x1 - x0) * o.getWidth() / W >= px * 0.8) { img = o; break; }
+      }
+      const s = img.getWidth() / W;
+      const win = [Math.floor(x0 * s), Math.floor(y0 * s), Math.ceil(x1 * s), Math.ceil(y1 * s)];
+      const rgb = await img.readRGB({ window: win, interleave: true });
+      const cw = win[2] - win[0], ch = win[3] - win[1];
+      const cv = document.createElement("canvas");
+      cv.width = cw; cv.height = ch;
+      const g = cv.getContext("2d"), data = g.createImageData(cw, ch);
+      for (let i = 0, j = 0; i < cw * ch; i++, j += 3) {
+        data.data[4 * i] = rgb[j]; data.data[4 * i + 1] = rgb[j + 1]; data.data[4 * i + 2] = rgb[j + 2]; data.data[4 * i + 3] = 255;
+      }
+      g.putImageData(data, 0, 0);
+      return cv.toDataURL("image/jpeg", 0.88);
+    }
+
+    function caption(p, long) {
+      const way = p.a === null ? "from above" : `looking ${COMPASS[Math.round(p.a / 45) % 8]}`;
+      return long ? `${way} · ${p.h} camera` + (p.d ? ` · flown ${p.d}` : "") : way;
+    }
+
+    function openPhoto(p, url) {
+      const box = document.getElementById("photo"), at = document.getElementById("photo-img");
+      document.getElementById("photo-caption").textContent =
+        `${caption(p, true)} · ${p.f.replace(/\.tif$/, "")} · KyFromAbove oblique photo`;
+      at.textContent = "loading…";
+      box.style.display = "flex";
+      crop(url, p.w, 1600).then((src) => { at.innerHTML = ""; const i = new Image(); i.src = src; at.appendChild(i); })
+        .catch((e) => { at.textContent = "could not read the photo: " + e.message; });
+    }
+    document.getElementById("photo-close").onclick = () => { document.getElementById("photo").style.display = "none"; };
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") document.getElementById("photo").style.display = "none";
+    });
+
+    async function showPhotos(feature) {
+      const out = document.getElementById("photos");
+      const n = ++clicked;
+      const gers = feature.getProperty("gers");
+      const m = (feature.content && feature.content.url || "").match(/\/tiles\/(N\d+E\d+)\/3dtiles\//);
+      if (!gers || !m) { out.innerHTML = '<span class="muted">zoom in closer to see this building\'s photos</span>'; return; }
+      out.innerHTML = '<span class="muted">photos: loading…</span>';
+      const list = await photoList(m[1]);
+      if (n !== clicked) return;
+      const mine = list && list.buildings[gers];
+      if (!mine || !mine.length) { out.innerHTML = '<span class="muted">no oblique photos listed for this building</span>'; return; }
+      // the photo looking the way the camera does first, the straight-down ones last
+      const look = (Cesium.Math.toDegrees(viewer.camera.heading) + 360) % 360;
+      const off = (p) => p.a === null ? 1000 : Math.abs(((p.a - look) % 360 + 540) % 360 - 180);
+      const sorted = [...mine].sort((a, b) => off(a) - off(b));
+      out.innerHTML = `<span class="muted">${sorted.length} oblique photo(s), the nearest to your view first · click one to enlarge</span>`;
+      const strip = document.createElement("div");
+      strip.id = "strip";
+      out.appendChild(strip);
+      for (const p of sorted) {
+        const url = list.bases[p.b] + p.f;
+        const fig = document.createElement("figure");
+        fig.innerHTML = `<div class="thumb">…</div><figcaption>${caption(p)}</figcaption>`;
+        fig.onclick = () => openPhoto(p, url);
+        strip.appendChild(fig);
+      }
+      // one at a time: a COG's header and a few tiles each
+      for (const [i, p] of sorted.entries()) {
+        if (n !== clicked) return;
+        const thumb = strip.children[i].firstChild;
+        try {
+          const src = await crop(list.bases[p.b] + p.f, p.w, 224);
+          if (n !== clicked) return;
+          thumb.innerHTML = `<img src="${src}" alt="">`;
+        } catch (e) {
+          thumb.textContent = "unreadable";
+          console.warn(p.f, e);
+        }
+      }
+    }
+
     function showPick(feature) {
       const box = document.getElementById("pick");
-      if (!feature || !(feature instanceof Cesium.Cesium3DTileFeature)) { box.style.display = "none"; return; }
+      if (!feature || !(feature instanceof Cesium.Cesium3DTileFeature)) { box.style.display = "none"; clicked++; return; }
       const row = (k, v) => (v === undefined || v === null || v === "" || (typeof v === "number" && isNaN(v)))
         ? "" : `<tr><td class="muted">${k}</td><td>${v}</td></tr>`;
       const h = feature.getProperty("height_m");
@@ -79,7 +213,7 @@
       const from = { lidar: "LiDAR", height: "Overture", floors: "Overture floors × 3.5 m",
                      default: "a 6 m guess (Overture has none)" }[feature.getProperty("height_from") || "lidar"];
       const oh = feature.getProperty("overture_height_m"), lh = feature.getProperty("lidar_height_m");
-      box.innerHTML = "<table>" +
+      document.getElementById("facts").innerHTML = "<table>" +
         row("name", feature.getProperty("name")) +
         row("GERS id", feature.getProperty("gers")) +
         row("height", num(h) ? `${h.toFixed(1)} m (${from})` : undefined) +
@@ -94,6 +228,7 @@
                                return typeof g === "number" && !isNaN(g) ? `${g.toFixed(0)} months` : undefined; })()) +
         "</table>";
       box.style.display = "block";
+      showPhotos(feature);
     }
 
     (async () => {
@@ -154,7 +289,8 @@
         }
         const s = cfg.start || {};
         const lon = parseFloat(params.get("lon") || s.lon), lat = parseFloat(params.get("lat") || s.lat);
-        const place = places.find((p) => p.name === params.get("place"));
+        // a place asked for, else the config's opening place unless a position is
+        const place = places.find((p) => p.name === (params.get("place") || (params.has("lon") ? null : cfg.start_place)));
         if (place) {
           flyTo(place, 0);
         } else if (!isNaN(lon) && !isNaN(lat)) {

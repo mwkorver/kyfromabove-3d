@@ -27,6 +27,25 @@ def _exercise(store, tmp_path):
         store.get_bytes("pieces/a/nothing.json")
     assert store.list_dirs("pieces/") == ["a", "b"] and store.list_dirs("tiles/") == ["t"]   # one level down
     assert store.list_dirs("nothing/") == []
+    # a few bytes out of a stored object, and its length, without reading it whole
+    store.put_bytes("pieces/c/piece.zip", bytes(range(200)))
+    assert store.size("pieces/c/piece.zip") == 200
+    assert store.get_range("pieces/c/piece.zip", 10, 14) == bytes([10, 11, 12, 13])
+    assert store.get_range("pieces/c/piece.zip", 190, 400) == bytes(range(190, 200))
+
+
+def test_a_zip_is_read_member_by_member_with_ranged_reads(tmp_path):
+    from kyfromabove_3d.archive import read_zip_members, zip_bytes
+
+    st = LocalStore(tmp_path)
+    big = bytes(range(256)) * 4000                                 # a megabyte at the end, as a piece's LiDAR is
+    st.put_bytes("p/piece.zip", zip_bytes({"frames.json": b"[1, 2]", "lidar_local.laz": big}))
+    reads = []
+    real = st.get_range
+    st.get_range = lambda k, a, b: reads.append(b - a) or real(k, a, b)
+    got = read_zip_members(st, "p/piece.zip", ("frames.json", "missing.json"))
+    assert got == {"frames.json": b"[1, 2]"}
+    assert sum(reads) < len(big) // 4                              # the LiDAR stayed unread
 
 
 def test_a_local_store(tmp_path):

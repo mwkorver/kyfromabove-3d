@@ -42,3 +42,48 @@ def read_zip(store, key: str) -> zipfile.ZipFile:
     """The zip at ``key`` in ``store``, read with one request; its members
     come back with ``.read(name)`` and ``.namelist()``."""
     return zipfile.ZipFile(io.BytesIO(store.get_bytes(key)))
+
+
+class _Ranged(io.RawIOBase):
+    """A stored object as a seekable file, read in ``block``-sized ranges as
+    they are touched: a zip's directory at its end and a few small members
+    at its start cost two reads, not the whole archive."""
+
+    def __init__(self, store, key: str, block: int = 64 * 1024):
+        self.store, self.key, self.block = store, key, block
+        self.length = store.size(key)
+        self.pos = 0
+        self.blocks: dict = {}
+
+    def seekable(self) -> bool:
+        return True
+
+    def readable(self) -> bool:
+        return True
+
+    def tell(self) -> int:
+        return self.pos
+
+    def seek(self, offset: int, whence: int = 0) -> int:
+        self.pos = {0: offset, 1: self.pos + offset, 2: self.length + offset}[whence]
+        return self.pos
+
+    def readinto(self, b) -> int:
+        n = min(len(b), max(0, self.length - self.pos))
+        out = bytearray()
+        while len(out) < n:
+            i, at = divmod(self.pos + len(out), self.block)
+            if i not in self.blocks:
+                self.blocks[i] = self.store.get_range(self.key, i * self.block, min(self.length, (i + 1) * self.block))
+            out += self.blocks[i][at:at + n - len(out)]
+        b[:n] = out
+        self.pos += n
+        return n
+
+
+def read_zip_members(store, key: str, names) -> dict:
+    """``{name: bytes}`` for those of ``names`` the zip at ``key`` holds,
+    read with ranged requests (:class:`_Ranged`) instead of the whole zip."""
+    with zipfile.ZipFile(io.BufferedReader(_Ranged(store, key))) as z:
+        have = set(z.namelist())
+        return {n: z.read(n) for n in names if n in have}

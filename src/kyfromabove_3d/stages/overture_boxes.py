@@ -159,9 +159,10 @@ def height_source(r: dict) -> str:
 
 
 def extrude(ring_m: np.ndarray, z0: float, h: float):
-    """Triangles of a prism: walls as quads, the top by Delaunay clipped to
-    the polygon."""
-    from shapely import delaunay_triangles
+    """Triangles of a prism: walls as quads, the top by a Delaunay that keeps
+    the outline's edges (a plain one, clipped, dropped whole triangles across
+    a notch: UPS Worldport's roof lost 9,120 m2 of 456,025)."""
+    from shapely import constrained_delaunay_triangles
     from shapely.geometry import Polygon
 
     poly = Polygon(ring_m)
@@ -179,9 +180,7 @@ def extrude(ring_m: np.ndarray, z0: float, h: float):
         P += [[a[0], a[1], z0], [b[0], b[1], z0], [b[0], b[1], z0 + h], [a[0], a[1], z0 + h]]
         N += [n.tolist()] * 4
         I += [k, k + 1, k + 2, k, k + 2, k + 3]
-    for tri in delaunay_triangles(poly).geoms:
-        if not poly.contains(tri.representative_point()):
-            continue
+    for tri in constrained_delaunay_triangles(Polygon(v)).geoms:
         c = np.array(tri.exterior.coords)[:3]
         d1, d2 = c[1] - c[0], c[2] - c[0]
         if d1[0] * d2[1] - d1[1] * d2[0] < 0:

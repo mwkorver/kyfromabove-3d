@@ -140,6 +140,22 @@ def test_roof_heightfield_and_mesh_keep_flat_cells_and_split_steep_ones():
     assert np.all(np.abs(cen[:, 0] - 10.0) < 1.5)
 
 
+def test_box_roof_covers_its_outline_exactly_with_long_slanted_arms():
+    from shapely.ops import unary_union
+    from kyfromabove_3d.stages.overture_boxes import extrude
+    # arms off a spine, few corners (a sort hub): a plain Delaunay's triangles
+    # cross the notches, roofing the gaps between the arms or dropping roof
+    ring = np.array([(0, 0), (400, -60), (404, -40), (60, 10), (70, 60), (400, 0), (404, 20),
+                     (70, 80), (80, 140), (0, 150)], dtype=float)
+    P, N, I = extrude(ring, 5.0, 12.0)
+    tris = I.reshape(-1, 3)
+    top = tris[np.all(N[tris][:, :, 2] > 0.5, axis=1)]
+    roof = unary_union([Polygon(P[t][:, :2]) for t in top])
+    outline = Polygon(ring)
+    assert np.allclose(P[top][:, :, 2], 17.0)
+    assert abs(roof.area - outline.area) < 1e-6 and roof.symmetric_difference(outline).area < 1e-6
+
+
 def test_outside_modelled_wall_flags_cells_between_the_wall_and_the_edge():
     plane = _plane()
     profiles = {0: [_band(40, 80, -20.0)]}                    # the tower stands 20 m back at 40-80 m

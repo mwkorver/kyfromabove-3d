@@ -541,14 +541,15 @@ VEGETATION = (3, 4, 5)
 TREE_CLASS = 5
 #: the tree rule's version: a building's clip cut before it is cut again
 #: (prepare_piece's clip.json)
-TREE_RULE = 3
+TREE_RULE = 4
 
 
 def label_trees(xyz_m: np.ndarray, cls: np.ndarray, number_of_returns: np.ndarray, smooth_m: float = 0.08,
                 k: int = 12, max_gap_m: float = 2.0, vote: float = 0.3, split_share: float = 0.6,
                 max_tree_m: float = 40.0, rejoin_m: float = 0.15, k_rejoin: int = 5, patch_link_m: float = 1.5,
                 min_patch: int = 40, patch_split_share: float = 0.5, edge_m: float = 2.0, edge_up_m: float = 1.0,
-                chunk: int = 500_000) -> np.ndarray:
+                edge_k: int = 64, level_k: int = 12, level_min: int = 4, level_m: float = 0.15, level_run: int = 20,
+                level_near_m: float = 3.0, level_up_m: float = 2.0, chunk: int = 500_000) -> np.ndarray:
     """``cls`` with the unclassified returns (1) that are bare branches
     relabeled trees (:data:`TREE_CLASS`); ``xyz_m`` in meters,
     ``number_of_returns`` each return's pulse's echo count.
@@ -650,13 +651,57 @@ def label_trees(xyz_m: np.ndarray, cls: np.ndarray, number_of_returns: np.ndarra
     # it: a return with kept smooth returns within ``edge_m`` across, and no
     # more than ``edge_up_m`` above the highest of them, rejoins (once, not
     # chained: a crown's lowest tips just over a roof come back, adding at
-    # most that to a house's top, never the crown).
-    cand, kept = np.flatnonzero(is_tree), np.flatnonzero(~is_tree & smooth)     # surfaces, not a crown's leftovers
+    # most that to a house's top, never the crown). The highest of up to
+    # ``edge_k``, not of the 8 nearest: under an overhang or a setback the 8
+    # nearest are the lower roof beneath, and Homewood Suites' parapet was
+    # called a tree against a roof a storey down. Only a surface a pulse
+    # ended on counts (one echo): reaching that far, a crown's few smooth
+    # leftovers stood in for a roof and gave its branches back (St. Matthews'
+    # a3689dbe, a 3.3 m shed, measured 13.7 m).
+    surface = ~is_tree & smooth & ~split
+
+    def surface_top(kept, xy, reach):
+        """The highest of up to ``edge_k`` ``kept`` returns within ``reach``
+        across of each of ``xy`` (-inf where none), in pieces: ``edge_k``
+        neighbors of a wooded tile's millions of candidates at once is
+        gigabytes."""
+        ktree, top = cKDTree(P[kept, :2]), np.empty(len(xy))
+        for s in range(0, len(xy), chunk // 8):
+            d, ii = ktree.query(xy[s:s + chunk // 8], k=edge_k, distance_upper_bound=reach, workers=-1)
+            top[s:s + chunk // 8] = np.where(np.isfinite(d), P[kept[np.minimum(ii, len(kept) - 1)], 2], -np.inf).max(axis=1)
+        return top
+
+    cand, kept = np.flatnonzero(is_tree), np.flatnonzero(surface)
     if len(cand) and len(kept) >= 8:
-        d, ii = cKDTree(P[kept, :2]).query(P[cand, :2], k=8, distance_upper_bound=edge_m, workers=-1)
-        near = np.isfinite(d)
-        top = np.where(near, P[kept[np.minimum(ii, len(kept) - 1)], 2], -np.inf).max(axis=1)
-        is_tree[cand[near.any(axis=1) & (P[cand, 2] <= top + edge_up_m)]] = False
+        is_tree[cand[P[cand, 2] <= surface_top(kept, P[cand, :2], edge_m) + edge_up_m]] = False
+    # A parapet or wall cap 1 to 2 m over its roof is still higher than the
+    # edge step allows, and in the sparser Phase 3 survey (Newport, about 3.3
+    # returns a square meter) its pulses split on the cap and the roof behind:
+    # Homewood Suites' walls came out short of it (holes 19 -> 106 m2). A cap
+    # is level, a crown is not: a return whose ``level_k`` nearest fellow
+    # candidates within ``patch_link_m`` (``level_min`` or more) spread less
+    # than ``level_m`` in height, in a level run of at least ``level_run``
+    # (linked within ``patch_link_m``: 4 m or so of parapet), with a surface
+    # as above within ``level_near_m`` across and no more than ``level_up_m``
+    # under it, rejoins. A crown's lowest twigs can lie level over a roof, a
+    # handful at a time: without the run, 22 St. Matthews sheds and houses
+    # rose 1 to 2 m; allowing 4.5 m raised one 2.5 m.
+    cand, kept = np.flatnonzero(is_tree), np.flatnonzero(surface)      # not chained to what the edge step gave back
+    if len(cand) >= level_min and len(kept) >= 8:
+        from scipy.sparse import coo_matrix
+        from scipy.sparse.csgraph import connected_components
+        C = P[cand]
+        d, ii = cKDTree(C).query(C, k=level_k, distance_upper_bound=patch_link_m, workers=-1)
+        ok = np.isfinite(d)
+        z = np.where(ok, C[np.where(ok, ii, 0), 2], np.nan)
+        li = np.flatnonzero((ok.sum(axis=1) >= level_min) & (np.nanstd(z, axis=1) < level_m))
+        if len(li):
+            pairs = cKDTree(C[li]).query_pairs(patch_link_m, output_type="ndarray")
+            _, lab = connected_components(coo_matrix((np.ones(len(pairs)), (pairs[:, 0], pairs[:, 1])),
+                                                     shape=(len(li), len(li))), directed=False)
+            li = li[np.bincount(lab)[lab] >= level_run]
+        if len(li):
+            is_tree[cand[li[C[li, 2] <= surface_top(kept, C[li, :2], level_near_m) + level_up_m]]] = False
     cls[u[is_tree]] = TREE_CLASS
     return cls
 

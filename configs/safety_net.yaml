@@ -129,3 +129,16 @@ buildings:
 - id: d2786314-4fb3-4da6-8f81-621873d40c08
   why: landmark, built on its own until refactor step 2c (its mesh dated from September)
   name: Humana Building
+# Built as the cloud builds them (measure, then build) from a frozen copy of
+# the Newport store: outputs/refactor/seed_newport, Newport's and Covington's
+# tile files and their neighbors' pieces from the bucket.
+- id: 88a05021-d9fc-4de5-ada7-fee1da8f55ef
+  why: 'tree rule: its parapet called a tree (holes 19 -> 106 m2), Phase 3 survey (2026-10-29)'
+  name: Homewood Suites, Newport
+  tile: N015E300
+  seed: outputs/refactor/seed_newport
+- id: 46f51b35-28b5-4e25-a796-58d468c2e30d
+  why: 'tree rule: a level ridge over a see-through roof called a tree (holes 12.5 -> 172 m2) (2026-10-29)'
+  name: BB Riverboats barge, Newport
+  tile: N015E300
+  seed: outputs/refactor/seed_newport

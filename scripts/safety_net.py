@@ -3,7 +3,11 @@
 what each produced, so a refactoring step can be shown to change nothing.
 
 The set is ``configs/safety_net.yaml``: the reference set, one or two of every
-class, and buildings fixed by hand. ``record`` rebuilds them the whole way --
+class, and buildings fixed by hand. Downtown Louisville's are built as the
+laptop builds them (run_downtown.py); an entry with a ``tile`` and a ``seed``
+(a store folder holding the tile's inputs, tile files and neighbors' pieces)
+is measured and built as the cloud does (cloud_jobs measure and build) in a
+store cut fresh from the seed, then unpacked to be recorded the same way. ``record`` rebuilds them the whole way --
 the frames cut again, the colourise, the mesh and the completed product, the
 texture check and the audit -- and writes, per building, a checksum of each
 output that defines the products (the two meshes, the levels, the wall planes
@@ -40,6 +44,9 @@ sys.path.insert(0, str(SCRIPTS))
 CONFIG = ROOT / "configs" / "safety_net.yaml"
 BUILDINGS = ROOT / "outputs" / "downtown" / "buildings"
 RECORDS = ROOT / "outputs" / "refactor"
+#: the store the entries with a tile are measured and built in, and where they are unpacked to be recorded
+STORE = RECORDS / "store"
+STORED = RECORDS / "stored"
 MESHES = ("3dtiles_mesh/building.glb", "3dtiles_complete/building.glb", "3dtiles_complete/building_tint.glb")
 #: outputs whose content is compared, with keys that hold a run's own timings or paths left out
 REPORTS = ("levels.json", "wall_planes.json", "wall_profiles.json", "mirror_report.json", "classification.json",
@@ -54,7 +61,7 @@ def load_set(path: Path = CONFIG) -> list[dict]:
 
 
 def building_dir(b: dict) -> Path:
-    return BUILDINGS / b["id"]
+    return STORED / b["id"] if b.get("tile") else BUILDINGS / b["id"]
 
 
 def _strip(o):
@@ -104,11 +111,50 @@ def record_one(b: dict) -> dict:
 def build(blist: list[dict], workers: int) -> int:
     """The whole chain for every building in the list, as the laptop builds it today."""
     rc = 0
-    ids = [b["id"] for b in blist]
-    cmd = [sys.executable, str(SCRIPTS / "run_downtown.py"), "run", "--only", *ids,
-           "--force-step", "prepare", "colorize", "mesh", "--complete", "--workers", str(workers)]
-    r = subprocess.run(cmd, cwd=str(ROOT))
-    return rc or r.returncode
+    ids = [b["id"] for b in blist if not b.get("tile")]
+    if ids:
+        cmd = [sys.executable, str(SCRIPTS / "run_downtown.py"), "run", "--only", *ids,
+               "--force-step", "prepare", "colorize", "mesh", "--complete", "--workers", str(workers)]
+        rc = subprocess.run(cmd, cwd=str(ROOT)).returncode
+    stored = [b for b in blist if b.get("tile")]
+    if stored:
+        r = subprocess.run([sys.executable, str(Path(__file__).resolve()), "build-stored",
+                            *[f"{b['seed']}:{b['tile']}:{b['id']}" for b in stored]], cwd=str(ROOT))
+        rc = rc or r.returncode
+    return rc
+
+
+def build_stored(entries: list[str]) -> int:
+    """Each ``seed:tile:gers`` measured and built as the cloud does, in a store
+    cut fresh from its seed (no piece of its own, so measuring cuts it again),
+    and unpacked to ``STORED/<gers>``."""
+    import os
+    import shutil
+    import zipfile
+    os.environ["STORE"] = str(STORE)
+    os.environ.setdefault("RAW_DIR", str(ROOT / "data" / "raw"))
+    from kyfromabove_3d.cloud_jobs import build_job, measure_job
+    rc = 0
+    for e in entries:
+        seed, tile, g = e.split(":")
+        seed = ROOT / seed
+        shutil.rmtree(STORE, ignore_errors=True)
+        for sub in ("inputs", "tiles", "pieces"):
+            shutil.copytree(seed / sub, STORE / sub, ignore=shutil.ignore_patterns(g))
+        print(g[:8], "measure", measure_job({"kind": "measure", "run": "safety_net", "tile": tile, "gers": [g]}),
+              "build", r := build_job({"kind": "build", "run": "safety_net", "tile": tile, "gers": [g]}), flush=True)
+        rc = rc or int(r.get("built", 0) != 1)
+        out = STORED / g
+        shutil.rmtree(out, ignore_errors=True)
+        out.mkdir(parents=True)
+        src = STORE / "buildings" / g
+        if (src / "levels.json").exists():
+            shutil.copy(src / "levels.json", out / "levels.json")
+        for z, sub in (("3dtiles_mesh.zip", "3dtiles_mesh"), ("3dtiles_complete.zip", "3dtiles_complete"),
+                       ("review.zip", "")):
+            if (src / z).exists():
+                zipfile.ZipFile(src / z).extractall(out / sub)
+    return rc
 
 
 def all_downtown(blist: list[dict]) -> list[dict]:
@@ -188,7 +234,11 @@ def main() -> int:
     c = sub.add_parser("check")
     c.add_argument("a")
     c.add_argument("b")
+    s = sub.add_parser("build-stored", help="(build's own step) seed:tile:gers entries, built as the cloud does")
+    s.add_argument("entries", nargs="+")
     a = ap.parse_args()
+    if a.cmd == "build-stored":
+        return build_stored(a.entries)
     return cmd_record(a) if a.cmd == "record" else cmd_check(a)
 
 

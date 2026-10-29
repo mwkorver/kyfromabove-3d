@@ -284,7 +284,13 @@ against 0.43 on 51 buildings), so the network was dropped. It is cheap: a
 house takes about 0.07 s, a building over 2,000 m² under a second.
 
 Every borrowed texel is marked in the texture's record of where its color
-came from, and `4 · borrowed shown` tints it. How product 4 compares with
+came from, and `4 · borrowed shown` tints it.
+
+Downtown Louisville was built before product 4 existed. Its 2,361 meshes
+were given it on October 28, 2026 by `scripts/backfill_neural.py`, which
+runs the same fill (`scripts/build_neural.py`) on each building's stored
+product 2 and product 3 texels and stores the result as a build with
+`--neural` would; products 2 and 3 were left as they were. How product 4 compares with
 product 3 on the same hidden rectangles is not written up yet.
 
 ## Related work considered

@@ -35,7 +35,7 @@ The same buildings, five ways. The viewers switch between them in place:
 | **LiDAR heights** (product 1) | footprint raised to the LiDAR's height | plain gray |
 | **Measured** (product 2) | walls and roof from the LiDAR | from the photos, only where a photo saw the surface |
 | **Completed** (product 3) | as Measured | the unseen parts filled in from the same building's photos |
-| **Borrowed fill** (product 4) | as Measured | the unseen parts filled with patches copied from the building's seen walls; Covington, Newport and Lexington only |
+| **Borrowed fill** (product 4) | as Measured | the unseen parts filled with patches copied from the building's seen walls |
 
 The VC Map page also has the Completed and Borrowed fill views with the
 filled-in parts tinted, so you can see what was invented. Nothing comes from

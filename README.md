@@ -200,6 +200,7 @@ It fails, naming the building and what got worse
 | [`docs/SURVEY_ZONES.md`](docs/SURVEY_ZONES.md) | Which buildings have roofs and walls worth more detail, statewide |
 | [`docs/CASE_COMPLEXITY.md`](docs/CASE_COMPLEXITY.md) | Three Louisville towers measured on one scale |
 | [`docs/CAMERAS_AND_ORTHOS.md`](docs/CAMERAS_AND_ORTHOS.md) | Checking KyFromAbove's camera models and orthophotos |
+| [`docs/FUTURE_COLLECTION.md`](docs/FUTURE_COLLECTION.md) | What the data's limits for 3D buildings suggest about future LiDAR and photo flights |
 | [`docs/history/`](docs/history/) | The first phase's reports: camera checks, the first tower, finding a roof |
 
 ## Layout
@@ -241,6 +242,9 @@ publish oblique photos openly, and fewer publish the camera positions that
 make them measurable. Kentucky publishes both, with statewide LiDAR, free. In
 2024 it became the
 [first state to complete statewide oblique aerial coverage](https://www.kentucky.gov/Pages/Activity-stream.aspx?n=FinanceandAdministrationCabinet&prId=266).
+Using the data at this scale also shows where it falls short for 3D
+buildings; [`docs/FUTURE_COLLECTION.md`](docs/FUTURE_COLLECTION.md) collects
+those findings, in case they help plan future flights.
 Errors here are ours, not KyFromAbove's.
 
 ## Built with

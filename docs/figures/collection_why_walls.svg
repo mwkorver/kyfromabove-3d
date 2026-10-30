@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 440" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <rect width="820" height="440" fill="#ffffff"/>
+  <line x1="40" y1="380" x2="780" y2="380" stroke="#555" stroke-width="1.5"/>
+  <text x="44" y="400" fill="#555">ground</text>
+
+  <rect x="120" y="180" width="140" height="200" fill="#e9ecef" stroke="#495057"/>
+  <rect x="300" y="300" width="80" height="80" fill="#e9ecef" stroke="#495057"/>
+  <rect x="520" y="230" width="120" height="150" fill="#e9ecef" stroke="#495057"/>
+
+  <circle cx="330" cy="40" r="9" fill="#457b9d"/>
+  <text x="346" y="36" fill="#1d3557">LiDAR, flown from above</text>
+  <g stroke="#457b9d" stroke-width="0.8" opacity="0.6">
+    <line x1="330" y1="40" x2="140" y2="180"/><line x1="330" y1="40" x2="190" y2="180"/>
+    <line x1="330" y1="40" x2="240" y2="180"/><line x1="330" y1="40" x2="320" y2="300"/>
+    <line x1="330" y1="40" x2="360" y2="300"/><line x1="330" y1="40" x2="540" y2="230"/>
+    <line x1="330" y1="40" x2="580" y2="230"/><line x1="330" y1="40" x2="620" y2="230"/>
+    <line x1="330" y1="40" x2="260" y2="230"/>
+  </g>
+  <g fill="#1d3557">
+    <circle cx="130" cy="180" r="3"/><circle cx="140" cy="180" r="3"/><circle cx="165" cy="180" r="3"/>
+    <circle cx="190" cy="180" r="3"/><circle cx="215" cy="180" r="3"/><circle cx="240" cy="180" r="3"/>
+    <circle cx="252" cy="180" r="3"/><circle cx="310" cy="300" r="3"/><circle cx="320" cy="300" r="3"/>
+    <circle cx="340" cy="300" r="3"/><circle cx="360" cy="300" r="3"/><circle cx="372" cy="300" r="3"/>
+    <circle cx="530" cy="230" r="3"/><circle cx="540" cy="230" r="3"/><circle cx="560" cy="230" r="3"/>
+    <circle cx="580" cy="230" r="3"/><circle cx="600" cy="230" r="3"/><circle cx="620" cy="230" r="3"/>
+    <circle cx="632" cy="230" r="3"/><circle cx="260" cy="230" r="3"/>
+  </g>
+  <text x="120" y="160" fill="#1d3557">many points on roofs</text>
+  <text x="268" y="214" fill="#1d3557">few on walls</text>
+
+  <circle cx="760" cy="60" r="9" fill="#e76f51"/>
+  <text x="640" y="36" fill="#9c3d22">oblique camera, about 45°</text>
+  <g stroke="#2a9d8f" stroke-width="1.6">
+    <line x1="760" y1="60" x2="640" y2="250"/><line x1="760" y1="60" x2="640" y2="300"/>
+    <line x1="760" y1="60" x2="640" y2="350"/>
+  </g>
+  <line x1="640" y1="236" x2="640" y2="380" stroke="#2a9d8f" stroke-width="5"/>
+  <text x="560" y="404" fill="#1f6f66">wall in plain view:</text>
+  <text x="560" y="420" fill="#1f6f66">the photo sees it</text>
+
+  <line x1="760" y1="60" x2="346" y2="300" stroke="#c0392b" stroke-width="1.6"/>
+  <line x1="346" y1="300" x2="260" y2="350" stroke="#c0392b" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <line x1="260" y1="320" x2="260" y2="380" stroke="#c0392b" stroke-width="5"/>
+  <text x="190" y="404" fill="#a52a1f">low wall between close neighbors:</text>
+  <text x="190" y="420" fill="#a52a1f">the photo's view is blocked next door</text>
+</svg>

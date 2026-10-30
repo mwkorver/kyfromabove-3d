@@ -72,12 +72,17 @@ CloudFront serves the result to two public pages: the
 
 ## Where it stands (October 2026)
 
-- **170,456 buildings published** on 119 LiDAR tiles, with terrain under them.
-- **37,383 of them are textured meshes**, in downtown Louisville (4 tiles),
-  downtown Covington and Newport (8) and downtown Lexington (9). The rest are
-  boxes, on the 98 tiles around downtown Louisville.
-- **AWS cost so far: about $47** (August to October 2026, tax included):
-  $16 of early trials on Lambda, $15 of storage, $12 of Spot machines.
+- **168,716 buildings published with roof heights from the LiDAR** on 119
+  LiDAR tiles, with terrain under them.
+- **39,271 of them are also textured meshes** (measured, completed and
+  borrowed fill), on 27 tiles: downtown Louisville (4), the airport and UPS
+  Worldport south of it (6), downtown Covington and Newport (8) and downtown
+  Lexington (9). The rest are LiDAR-height boxes, on the 92 tiles around
+  Louisville.
+- **AWS cost so far: about $53** (August to October 2026, tax included):
+  $16 of early trials on Lambda, $15 of S3 requests (writing and reading
+  files; storing them cost under $1), $12 of Spot machines, and about $6 for
+  the October 29 release run, not yet billed.
 - **All of Kentucky** (2.79 million buildings) is estimated at about $440
   ($290-590) and five days on eight Spot machines, tile by tile from the two
   queue runs' measured jobs. A quarter of its buildings have LiDAR and

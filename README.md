@@ -9,7 +9,7 @@
 > watched. It has been run for parts of Kentucky (Louisville, Covington and
 > Newport, Lexington), not the whole state.
 
-**Kentucky's buildings in 3D, from the state's own open data.** Each
+**Kentucky's buildings in 3D, buildt from the state's own open data.** Each
 building's shape comes from KyFromAbove's LiDAR, its color from KyFromAbove's
 oblique aerial photos, and its outline from Overture's building footprints.
 The result is published as 3D Tiles and viewed in a web browser.
@@ -236,7 +236,7 @@ The code is MIT; see [LICENSE](LICENSE). The data has its own terms:
   contributors in the CesiumJS viewer; USGS The National Map and USDA NAIP
   imagery (public domain) in the VC Map page.
 
-KyFromAbove is credited even though it needs no credit, because few states
+KyFromAbove is credited even though it requires no credit, because few states
 publish oblique photos openly, and fewer publish the camera positions that
 make them measurable. Kentucky publishes both, with statewide LiDAR, free. In
 2024 it became the
